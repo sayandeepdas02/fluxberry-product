@@ -105,4 +105,71 @@ describe('AI interview flow (integration, mock Bolna)', () => {
       .send({ id: 'unknown-exec' });
     expect(goodHook.status).toBe(200); // unknown execution is ignored gracefully
   });
+
+  it('refuses to let a second candidate claim another candidate\'s execution id for the same job', async () => {
+    const token = await tokenFor('ivrec2@test.com', 'IV Rec 2');
+    const onboard = await request(app)
+      .post('/api/v1/workspaces/onboarding')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ name: 'IV Rec 2', company: 'Talkco2' });
+    const workspaceId = onboard.body.data.id as string;
+    const slug = onboard.body.data.slug as string;
+    const ws = (r: request.Test) => r.set('Authorization', `Bearer ${token}`).set('X-Workspace-Id', workspaceId);
+
+    const job = await ws(request(app).post('/api/v1/jobs').send({ title: 'Engineer 2' }) as any);
+    const jobId = job.body.data.id as string;
+    const jobSlug = job.body.data.slug as string;
+    await ws(request(app).post(`/api/v1/jobs/${jobId}/publish`) as any);
+    await ws(
+      request(app).put(`/api/v1/jobs/${jobId}/interview-config`).send({
+        objective: 'Screen backend depth',
+        introduction: 'Hi {candidate_name}',
+        questions: [{ id: 'q1', text: 'Tell me about yourself', followUpAllowed: false }],
+        durationMinutes: 6,
+        tone: 'professional',
+        language: 'en',
+        status: 'ACTIVE',
+      }) as any,
+    );
+
+    // Two candidates apply to the same job -> same providerAgentId on both interviews.
+    for (const email of ['candA@test.com', 'candB@test.com']) {
+      await request(app)
+        .post(`/api/v1/public/jobs/${slug}/${jobSlug}/apply`)
+        .field('name', email)
+        .field('email', email)
+        .field('answers', '[]')
+        .attach('resume', PDF, { filename: 'resume.pdf', contentType: 'application/pdf' });
+    }
+    const apps = await ApplicationModel.find({ workspaceId }).lean();
+    expect(apps.length).toBe(2);
+
+    const tokens: string[] = [];
+    for (const a of apps) {
+      const sent = await ws(
+        request(app).post(`/api/v1/applications/${a._id}/interview`).send({ expiresInHours: 168 }) as any,
+      );
+      expect(sent.status).toBe(201);
+      const iv = await InterviewModel.findOne({ applicationId: a._id });
+      tokens.push(iv!.secureToken as string);
+      await request(app).post(`/api/v1/public/interviews/${iv!.secureToken}/session`);
+    }
+
+    const [tokenA, tokenB] = tokens;
+    const sharedExecId = 'shared-exec-id-123';
+
+    const completeA = await request(app)
+      .post(`/api/v1/public/interviews/${tokenA}/complete`)
+      .send({ executionId: sharedExecId });
+    expect(completeA.body.data.status).toBe('IN_PROGRESS');
+
+    // Candidate B tries to claim candidate A's execution id for their own interview.
+    const completeB = await request(app)
+      .post(`/api/v1/public/interviews/${tokenB}/complete`)
+      .send({ executionId: sharedExecId });
+    expect(completeB.status).toBe(409);
+
+    const ivB = await InterviewModel.findOne({ secureToken: tokenB });
+    expect(ivB!.providerExecutionId).not.toBe(sharedExecId);
+  });
 });
