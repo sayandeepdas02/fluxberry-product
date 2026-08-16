@@ -1,0 +1,33 @@
+import { Schema, model, models, type InferSchemaType, type Model } from 'mongoose';
+import { QUESTION_TYPES, DIFFICULTIES } from '@fluxberry/shared';
+
+const optionSchema = new Schema(
+  { id: { type: String, required: true }, text: { type: String, required: true } },
+  { _id: false },
+);
+
+const questionSchema = new Schema(
+  {
+    workspaceId: { type: Schema.Types.ObjectId, ref: 'Workspace', required: true },
+    type: { type: String, enum: QUESTION_TYPES, default: 'MCQ' },
+    questionText: { type: String, required: true },
+    options: { type: [optionSchema], default: [] },
+    correctAnswer: { type: Schema.Types.Mixed, default: null }, // option id or [ids]
+    difficulty: { type: String, enum: DIFFICULTIES, default: 'MEDIUM' },
+    category: { type: String, required: true },
+    skills: { type: [String], default: [] },
+    tags: { type: [String], default: [] },
+    explanation: { type: String, default: null },
+    archived: { type: Boolean, default: false },
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+  },
+  { timestamps: true, collection: 'questions' },
+);
+
+questionSchema.index({ workspaceId: 1, archived: 1 });
+questionSchema.index({ workspaceId: 1, category: 1 });
+questionSchema.index({ workspaceId: 1, difficulty: 1 });
+
+export type QuestionDoc = InferSchemaType<typeof questionSchema>;
+export const QuestionModel =
+  (models.Question as Model<QuestionDoc>) || model<QuestionDoc>('Question', questionSchema);

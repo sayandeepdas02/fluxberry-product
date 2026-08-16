@@ -1,0 +1,32 @@
+{
+  "name": "fluxberry",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Fluxberry — a simple, AI-native applicant tracking system",
+  "workspaces": [
+    "shared",
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "postinstall": "npm run build --workspace @fluxberry/shared",
+    "dev": "concurrently -n shared,api,worker,web -c gray,blue,magenta,green \"npm:dev:shared\" \"npm:dev:api\" \"npm:dev:worker\" \"npm:dev:web\"",
+    "dev:shared": "npm run dev --workspace @fluxberry/shared",
+    "dev:api": "npm run dev --workspace @fluxberry/backend",
+    "dev:worker": "npm run dev:worker --workspace @fluxberry/backend",
+    "dev:web": "npm run dev --workspace @fluxberry/frontend",
+    "build": "npm run build --workspace @fluxberry/shared && npm run build --workspace @fluxberry/backend && npm run build --workspace @fluxberry/frontend",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test --workspace @fluxberry/backend",
+    "test:e2e": "npm run test:e2e --workspace @fluxberry/frontend",
+    "db:seed": "npm run seed --workspace @fluxberry/backend",
+    "db:migrate": "npm run migrate --workspace @fluxberry/backend"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

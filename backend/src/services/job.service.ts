@@ -1,0 +1,195 @@
+import type {
+  CreateJobInput,
+  UpdateJobInput,
+  GenerateJdInput,
+  GenerateJdResult,
+  JobDto,
+  JobListQuery,
+  JobStatus,
+} from '@fluxberry/shared';
+import { jobRepository } from '../repositories/job.repository';
+import { toJobDto } from '../serializers/job.serializer';
+import { uniqueSlug } from '../utils/slug';
+import { notFound, badRequest } from '../utils/errors';
+import { auditService } from './audit.service';
+import { eventBus } from '../events/event-bus';
+import { getAIProvider } from '../integrations';
+import { candidateService } from './candidate.service';
+import { logger } from '../utils/logger';
+
+export const jobService = {
+  async create(workspaceId: string, userId: string, input: CreateJobInput): Promise<JobDto> {
+    const slug = await uniqueSlug(input.title, (s) => jobRepository.slugExists(workspaceId, s));
+    const job = await jobRepository.create({
+      workspaceId: workspaceId as any,
+      title: input.title,
+      slug,
+      description: input.description ?? '',
+      status: 'DRAFT',
+      employmentType: input.employmentType,
+      workMode: input.workMode,
+      location: input.location ?? null,
+      openings: input.openings,
+      salary: input.salary ?? undefined,
+      experience: input.experience ?? undefined,
+      skills: input.skills ?? [],
+      structuredRequirements: input.structuredRequirements ?? null,
+      rawGenerationPrompt: input.rawGenerationPrompt ?? null,
+      generatedDescription: input.rawGenerationPrompt ? input.description ?? null : null,
+      aiMeta: input.aiMeta
+        ? { ...input.aiMeta, generatedAt: new Date() }
+        : undefined,
+      createdBy: userId as any,
+    });
+
+    await auditService.log({
+      workspaceId,
+      userId,
+      action: 'job.created',
+      resourceType: 'job',
+      resourceId: String(job._id),
+      metadata: { title: job.title },
+    });
+    await eventBus.publish({
+      workspaceId,
+      type: 'job.created',
+      entityType: 'job',
+      entityId: job._id,
+      actorId: userId,
+      actorLabel: 'user',
+      payload: { title: job.title },
+    });
+
+    return toJobDto(job.toObject());
+  },
+
+  async list(workspaceId: string, query: JobListQuery): Promise<JobDto[]> {
+    const jobs = await jobRepository.list(workspaceId, { status: query.status, search: query.search });
+    const counts = await candidateService.funnelCountsByJob(workspaceId);
+    return jobs.map((j) => toJobDto(j, counts[String(j._id)]));
+  },
+
+  async get(workspaceId: string, id: string): Promise<JobDto> {
+    const job = await jobRepository.findInWorkspace(workspaceId, id);
+    if (!job) throw notFound('Job not found');
+    const counts = await candidateService.funnelCountsForJob(workspaceId, id);
+    return toJobDto(job.toObject(), counts);
+  },
+
+  async update(
+    workspaceId: string,
+    userId: string,
+    id: string,
+    input: UpdateJobInput,
+  ): Promise<JobDto> {
+    const job = await jobRepository.findInWorkspace(workspaceId, id);
+    if (!job) throw notFound('Job not found');
+
+    const patch: Record<string, unknown> = {};
+    const assignable: (keyof UpdateJobInput)[] = [
+      'title', 'employmentType', 'workMode', 'location', 'openings',
+      'salary', 'experience', 'skills', 'description', 'structuredRequirements',
+    ];
+    for (const key of assignable) if (input[key] !== undefined) patch[key] = input[key];
+    if (input.rawGenerationPrompt !== undefined) {
+      patch.rawGenerationPrompt = input.rawGenerationPrompt;
+      patch.generatedDescription = input.description ?? job.description;
+    }
+    if (input.aiMeta) patch.aiMeta = { ...input.aiMeta, generatedAt: new Date() };
+    // Slug intentionally preserved across title changes (spec §20).
+
+    const updated = await jobRepository.update(id, patch);
+    await auditService.log({
+      workspaceId,
+      userId,
+      action: 'job.updated',
+      resourceType: 'job',
+      resourceId: id,
+    });
+    return toJobDto(updated!.toObject());
+  },
+
+  async publish(workspaceId: string, userId: string, id: string): Promise<JobDto> {
+    const job = await jobRepository.findInWorkspace(workspaceId, id);
+    if (!job) throw notFound('Job not found');
+    const patch: Record<string, unknown> = { status: 'PUBLISHED' };
+    if (!job.publishedAt) patch.publishedAt = new Date();
+    const updated = await jobRepository.update(id, patch);
+    await auditService.log({
+      workspaceId,
+      userId,
+      action: 'job.published',
+      resourceType: 'job',
+      resourceId: id,
+    });
+    await eventBus.publish({
+      workspaceId,
+      type: 'job.published',
+      entityType: 'job',
+      entityId: id,
+      actorId: userId,
+      actorLabel: 'user',
+      payload: { slug: job.slug },
+    });
+    return toJobDto(updated!.toObject());
+  },
+
+  async setStatus(
+    workspaceId: string,
+    userId: string,
+    id: string,
+    status: JobStatus,
+  ): Promise<JobDto> {
+    if (status === 'PUBLISHED') return this.publish(workspaceId, userId, id);
+    const job = await jobRepository.findInWorkspace(workspaceId, id);
+    if (!job) throw notFound('Job not found');
+
+    const patch: Record<string, unknown> = { status };
+    if (status === 'CLOSED') patch.closedAt = new Date();
+    const updated = await jobRepository.update(id, patch);
+
+    await auditService.log({
+      workspaceId,
+      userId,
+      action: status === 'CLOSED' ? 'job.closed' : 'job.status_changed',
+      resourceType: 'job',
+      resourceId: id,
+      metadata: { status },
+    });
+    if (status === 'CLOSED') {
+      await eventBus.publish({
+        workspaceId,
+        type: 'job.closed',
+        entityType: 'job',
+        entityId: id,
+        actorId: userId,
+        actorLabel: 'user',
+      });
+    }
+    return toJobDto(updated!.toObject());
+  },
+
+  /** Synchronous AI job-description generation (user waits with a loading state). */
+  async generateDescription(input: GenerateJdInput): Promise<GenerateJdResult> {
+    if (!input.title?.trim()) throw badRequest('A job title is required');
+    const ai = getAIProvider();
+    const result = await ai.generateJobDescription({
+      title: input.title,
+      userPrompt: input.userPrompt,
+      employmentType: input.employmentType,
+      workMode: input.workMode,
+      location: input.location,
+      salary: input.salary,
+      experience: input.experience,
+      skills: input.skills,
+    });
+    logger.info({ provider: result.meta.provider, model: result.meta.model }, 'JD generated');
+    return {
+      description: result.description,
+      structuredRequirements: result.structuredRequirements,
+      provider: result.meta.provider,
+      model: result.meta.model,
+      promptVersion: result.meta.promptVersion,
+    };
+  },
+};

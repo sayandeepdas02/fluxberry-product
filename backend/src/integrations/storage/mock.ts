@@ -1,0 +1,82 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import crypto from 'node:crypto';
+import { Router } from 'express';
+import type { FileRef } from '@fluxberry/shared';
+import type { StorageProvider, UploadInput } from './types';
+import { config } from '../../config/env';
+import { notFound, forbidden } from '../../utils/errors';
+
+const ROOT = path.resolve(process.cwd(), '.storage');
+const SIGN_SECRET = config.auth.testTokenSecret + ':storage';
+
+function sign(key: string, exp: number): string {
+  return crypto.createHmac('sha256', SIGN_SECRET).update(`${key}:${exp}`).digest('base64url');
+}
+
+/** Local-filesystem storage used when no S3/R2 keys are configured. */
+export class MockStorageProvider implements StorageProvider {
+  readonly name = 'mock';
+
+  async upload(input: UploadInput): Promise<FileRef> {
+    const full = path.join(ROOT, input.key);
+    await fs.promises.mkdir(path.dirname(full), { recursive: true });
+    await fs.promises.writeFile(full, input.body);
+    return {
+      storageKey: input.key,
+      fileName: input.fileName,
+      fileSize: input.body.length,
+      mimeType: input.contentType,
+    };
+  }
+
+  async createDownloadUrl(
+    ref: Pick<FileRef, 'storageKey' | 'fileName' | 'mimeType'>,
+    ttlSec = 300,
+  ): Promise<string> {
+    const exp = Date.now() + ttlSec * 1000;
+    const sig = sign(ref.storageKey, exp);
+    const qs = new URLSearchParams({ key: ref.storageKey, exp: String(exp), sig });
+    return `${config.publicApiUrl}/files/mock?${qs.toString()}`;
+  }
+
+  async download(key: string): Promise<Buffer> {
+    const full = path.join(ROOT, key);
+    if (!full.startsWith(ROOT + path.sep)) throw notFound('Invalid key');
+    return fs.promises.readFile(full);
+  }
+
+  async delete(key: string): Promise<void> {
+    const full = path.join(ROOT, key);
+    await fs.promises.rm(full, { force: true });
+  }
+}
+
+/**
+ * Serves mock-stored files behind the same signed-URL contract as S3. Mounted
+ * unconditionally; only serves files with a valid, unexpired signature.
+ */
+export const mockStorageRouter = Router();
+mockStorageRouter.get('/files/mock', (req, res, next) => {
+  try {
+    const key = String(req.query.key ?? '');
+    const exp = Number(req.query.exp ?? 0);
+    const sig = String(req.query.sig ?? '');
+    if (!key || !exp || !sig) throw notFound('File not found');
+    if (Date.now() > exp) throw forbidden('Link expired');
+    const expected = sign(key, exp);
+    const sigBuf = Buffer.from(sig);
+    const expBuf = Buffer.from(expected);
+    if (sigBuf.length !== expBuf.length || !crypto.timingSafeEqual(sigBuf, expBuf)) {
+      throw forbidden('Invalid signature');
+    }
+    // Prevent path traversal.
+    const full = path.join(ROOT, key);
+    if (!full.startsWith(ROOT + path.sep)) throw forbidden('Invalid key');
+    if (!fs.existsSync(full)) throw notFound('File not found');
+    res.setHeader('Content-Disposition', `inline; filename="${path.basename(key)}"`);
+    fs.createReadStream(full).pipe(res);
+  } catch (err) {
+    next(err);
+  }
+});
