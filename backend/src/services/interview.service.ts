@@ -210,6 +210,15 @@ export const interviewService = {
     const job = await jobRepository.findById(String(iv.jobId));
     const exec = await getInterviewProviderByName(iv.provider).getExecution(iv.providerExecutionId);
 
+    if (iv.providerAgentId && exec.agentId && exec.agentId !== iv.providerAgentId) {
+      logger.warn(
+        { interviewId: String(iv._id), expectedAgentId: iv.providerAgentId, actualAgentId: exec.agentId },
+        'execution id does not belong to this interview agent — refusing to evaluate',
+      );
+      await InterviewModel.findByIdAndUpdate(iv._id, { status: 'FAILED', error: 'Execution ownership mismatch' });
+      return;
+    }
+
     if (exec.status === 'FAILED') {
       await InterviewModel.findByIdAndUpdate(iv._id, { status: 'FAILED', error: 'Call failed' });
       return;

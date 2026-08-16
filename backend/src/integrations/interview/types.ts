@@ -31,6 +31,8 @@ export interface InterviewExecution {
   durationSec?: number | null;
   recordingUrl?: string | null;
   meta?: Record<string, unknown> | null;
+  /** Agent that ran this call, per the provider. Null when the provider can't attest to it (e.g. mock). */
+  agentId?: string | null;
 }
 
 /**

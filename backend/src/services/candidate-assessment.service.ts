@@ -111,6 +111,17 @@ export const candidateAssessmentService = {
     const answers = mergeAnswers(ca.answers ?? [], input.answers);
 
     if (assessment.type === 'CODING') {
+      const questionIds = assessment.questions.map((q: any) => String(q.questionId));
+      const docs = await questionRepository.findByIds(String(ca.workspaceId), questionIds);
+      const specById = new Map(docs.map((d) => [String((d as any)._id), (d as any).coding]));
+      for (const a of answers) {
+        if (a.code == null || a.languageId == null) continue;
+        const spec = specById.get(a.questionId);
+        if (spec?.languageIds?.length && !spec.languageIds.includes(a.languageId)) {
+          throw badRequest('Unsupported language for one or more questions');
+        }
+      }
+
       // Async path: persist code + hand to Judge0 grader.
       await candidateAssessmentRepository.update(String(ca._id), { status: 'GRADING', answers });
       await eventBus.publish({

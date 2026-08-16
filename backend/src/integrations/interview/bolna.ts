@@ -117,6 +117,7 @@ export class BolnaProvider implements InterviewProvider {
       durationSec: j.conversation_duration ?? null,
       recordingUrl: j.telephony_data?.recording_url ?? null,
       meta: { totalCost: j.total_cost ?? null, answeredByVoicemail: j.answered_by_voice_mail ?? null },
+      agentId: j.agent_id ?? null,
     };
   }
 }
