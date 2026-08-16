@@ -1,10 +1,43 @@
 import { Schema, model, models, type InferSchemaType, type Model } from 'mongoose';
 import { CANDIDATE_ASSESSMENT_STATUSES } from '@fluxberry/shared';
 
+/** Per-test-case outcome recorded after Judge0 grades a coding submission. */
+const codingCaseResultSchema = new Schema(
+  {
+    status: { type: String, default: 'PENDING' },
+    passed: { type: Boolean, default: false },
+    timeMs: { type: Number, default: null },
+    memoryKb: { type: Number, default: null },
+    hidden: { type: Boolean, default: false },
+  },
+  { _id: false },
+);
+
+/** Aggregate execution result for one coding question (set by the grader). */
+const codingExecutionSchema = new Schema(
+  {
+    status: { type: String, default: 'PENDING' },
+    stdout: { type: String, default: null },
+    stderr: { type: String, default: null },
+    compileOutput: { type: String, default: null },
+    timeMs: { type: Number, default: null },
+    memoryKb: { type: Number, default: null },
+    passed: { type: Number, default: 0 },
+    total: { type: Number, default: 0 },
+    perTestCase: { type: [codingCaseResultSchema], default: [] },
+  },
+  { _id: false },
+);
+
 const answerSchema = new Schema(
   {
     questionId: { type: String, required: true },
-    answer: { type: Schema.Types.Mixed, default: null }, // option id or [ids]
+    answer: { type: Schema.Types.Mixed, default: null }, // MCQ: option id or [ids]
+    // CODING submission + grading state:
+    code: { type: String, default: null },
+    languageId: { type: Number, default: null },
+    judge0Tokens: { type: [String], default: [] },
+    execution: { type: codingExecutionSchema, default: null },
   },
   { _id: false },
 );

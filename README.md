@@ -17,11 +17,12 @@ Workspace → Job → Application → Candidate → Screening → Assessment →
 - **Async pipeline** — resume parsing → structured profile → **transparent AI screening** (deterministic sub-scores + AI reasoning) with an explanation
 - **Candidates** — table + kanban board, profile with score/timeline, one stage-transition service
 - **Assessments** — question bank (seeded), MCQ builder, secure candidate links, server-authoritative timer, server-side scoring, email invites
+- **Coding assessments** — Judge0-backed: coding-question editor (languages, visible/hidden test cases, limits), in-browser code runner, async test-case grading with per-case results, wired into the workflow engine (behind `FEATURE_CODING_ASSESSMENT`)
 - **Workflow engine** — per-job, durable & resumable: AI screen → condition → send assessment → wait → move stage → email
 - **Analytics** — funnel, location/salary distribution, sources, time-to-hire
 - **Careers page** — a public, per-company page at `/{slug}/careers` (unique claimable URL) with toggleable About/Links/Team sections and an auto-updating open-roles list you can also embed on your own site
 
-Coding assessments (Judge0) and AI voice interviews are scaffolded behind feature flags.
+AI voice interviews are scaffolded behind a feature flag.
 
 ## Architecture
 

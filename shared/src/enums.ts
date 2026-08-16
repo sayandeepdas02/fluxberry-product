@@ -93,6 +93,9 @@ export type AssessmentStatus = (typeof ASSESSMENT_STATUSES)[number];
 export const CANDIDATE_ASSESSMENT_STATUSES = [
   'INVITED',
   'STARTED',
+  // Coding assessments submit asynchronously: the candidate has submitted and
+  // we are waiting on Judge0 to finish grading before a final score exists.
+  'GRADING',
   'COMPLETED',
   'EXPIRED',
   'CANCELLED',

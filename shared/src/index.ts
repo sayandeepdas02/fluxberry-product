@@ -2,6 +2,7 @@ export * from './enums';
 export * from './common';
 export * from './scoring';
 export * from './feature-flags';
+export * from './coding';
 
 // Domain contract schemas (added per slice)
 export * from './schemas/auth';

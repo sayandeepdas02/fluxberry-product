@@ -53,6 +53,9 @@ export function useApplicationAssessments(applicationId: string) {
     queryKey: ['app-assessments', currentWorkspace.id, applicationId],
     queryFn: () => api.get<CandidateAssessmentDto[]>(`/api/v1/applications/${applicationId}/assessments`),
     enabled: Boolean(applicationId),
+    // Poll while a coding submission is still grading so the score appears live.
+    refetchInterval: (query) =>
+      (query.state.data ?? []).some((ca) => ca.status === 'GRADING') ? 3000 : false,
   });
 }
 

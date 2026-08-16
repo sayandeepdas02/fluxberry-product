@@ -1,7 +1,12 @@
 import { asyncHandler, ok, created } from '../utils/http';
 import { applicationService } from '../services/application.service';
 import { candidateAssessmentService } from '../services/candidate-assessment.service';
-import { publicApplicationSchema, autosaveAnswerSchema, submitAssessmentSchema } from '@fluxberry/shared';
+import {
+  publicApplicationSchema,
+  autosaveAnswerSchema,
+  submitAssessmentSchema,
+  runCodeSchema,
+} from '@fluxberry/shared';
 
 export const publicController = {
   getJob: asyncHandler(async (req, res) => {
@@ -46,5 +51,9 @@ export const publicController = {
   submitAssessment: asyncHandler(async (req, res) => {
     const body = submitAssessmentSchema.parse(req.body);
     ok(res, await candidateAssessmentService.submit(req.params.token, body));
+  }),
+  runCode: asyncHandler(async (req, res) => {
+    const body = runCodeSchema.parse(req.body);
+    ok(res, await candidateAssessmentService.run(req.params.token, body));
   }),
 };

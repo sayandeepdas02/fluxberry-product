@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { ListChecks, Code2, ChevronRight } from 'lucide-react';
 import { useQuestions } from '@/hooks/use-questions';
+import { useFeature } from '@/hooks/use-features';
 import { Card } from '@/components/ui/card';
 
 function useTypeCount(type: 'MCQ' | 'CODING') {
@@ -13,6 +14,7 @@ function useTypeCount(type: 'MCQ' | 'CODING') {
 export default function QuestionBankPage() {
   const mcqCount = useTypeCount('MCQ');
   const dsaCount = useTypeCount('CODING');
+  const codingEnabled = useFeature('CODING_ASSESSMENT');
 
   return (
     <div className="space-y-6">
@@ -29,13 +31,15 @@ export default function QuestionBankPage() {
           description="Multiple-choice questions"
           count={mcqCount}
         />
-        <BankCard
-          href="/app/questions/dsa"
-          icon={<Code2 className="size-5" />}
-          title="DSA"
-          description="Coding · data structures & algorithms"
-          count={dsaCount}
-        />
+        {codingEnabled && (
+          <BankCard
+            href="/app/questions/dsa"
+            icon={<Code2 className="size-5" />}
+            title="DSA"
+            description="Coding · data structures & algorithms"
+            count={dsaCount}
+          />
+        )}
       </div>
     </div>
   );

@@ -1,26 +1,37 @@
 import crypto from 'node:crypto';
-import type { CodeExecutionProvider, CodeSubmission, ExecutionResult } from './types';
+import type { BatchSubmitInput, CaseExecutionResult, CodeExecutionProvider } from './types';
 
-/** Deterministic mock: "accepts" any non-empty submission. */
+/**
+ * Deterministic mock grader (no keys needed). It "runs" each test case by
+ * echoing the submitted source's trimmed presence: a non-empty submission is
+ * ACCEPTED for every case, an empty one ERRORs. Results are resolved
+ * immediately (done=true) so the async grading flow still exercises end-to-end.
+ */
 export class MockCodeExecutionProvider implements CodeExecutionProvider {
   readonly name = 'mock';
-  private store = new Map<string, ExecutionResult>();
+  private store = new Map<string, CaseExecutionResult>();
 
-  async submit(input: CodeSubmission): Promise<{ token: string }> {
-    const token = `mock_${crypto.randomBytes(6).toString('hex')}`;
-    const total = input.testCases?.length ?? 1;
+  async submitBatch(input: BatchSubmitInput): Promise<{ tokens: string[] }> {
     const ok = input.source.trim().length > 0;
-    this.store.set(token, {
-      status: ok ? 'ACCEPTED' : 'ERROR',
-      stdout: ok ? 'ok' : '',
-      passed: ok ? total : 0,
-      total,
-      timeMs: 12,
+    const tokens = input.testCases.map((tc) => {
+      const token = `mock_${crypto.randomBytes(6).toString('hex')}`;
+      this.store.set(token, {
+        status: ok ? 'ACCEPTED' : 'ERROR',
+        done: true,
+        stdout: ok ? (tc.expected ?? '') : '',
+        stderr: ok ? null : 'empty submission',
+        compileOutput: null,
+        timeMs: 12,
+        memoryKb: 2048,
+      });
+      return token;
     });
-    return { token };
+    return { tokens };
   }
 
-  async getResult(token: string): Promise<ExecutionResult> {
-    return this.store.get(token) ?? { status: 'PENDING' };
+  async getBatch(tokens: string[]): Promise<CaseExecutionResult[]> {
+    return tokens.map(
+      (t) => this.store.get(t) ?? { status: 'PENDING', done: false },
+    );
   }
 }

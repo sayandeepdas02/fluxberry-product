@@ -32,6 +32,7 @@ import { Field } from '@/components/ui/field';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { StageBadge } from '@/components/candidates/stage-badge';
+import { Badge } from '@/components/ui/badge';
 import { ScreeningCard } from '@/components/candidates/screening-card';
 import { Timeline } from '@/components/candidates/timeline';
 import { toast } from '@/components/ui/sonner';
@@ -199,19 +200,31 @@ export default function CandidateProfilePage() {
             <Card>
               <CardHeader><CardTitle>Assessments</CardTitle></CardHeader>
               <CardContent className="space-y-3">
-                {assessments.data!.map((ca) => (
-                  <div key={ca.id} className="flex items-center justify-between text-sm">
-                    <div className="min-w-0">
-                      <div className="truncate font-medium">{ca.assessmentName}</div>
-                      <div className="text-xs capitalize text-muted-foreground">{ca.status.toLowerCase()}</div>
+                {assessments.data!.map((ca) => {
+                  const cases = ca.codingResults?.reduce(
+                    (acc, r) => ({ passed: acc.passed + r.passed, total: acc.total + r.total }),
+                    { passed: 0, total: 0 },
+                  );
+                  return (
+                    <div key={ca.id} className="flex items-center justify-between text-sm">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="truncate font-medium">{ca.assessmentName}</span>
+                          {ca.type === 'CODING' && <Badge variant="outline">Coding</Badge>}
+                        </div>
+                        <div className="text-xs capitalize text-muted-foreground">
+                          {ca.status === 'GRADING' ? 'grading…' : ca.status.toLowerCase()}
+                          {cases && cases.total > 0 && ca.status === 'COMPLETED' ? ` · ${cases.passed}/${cases.total} cases` : ''}
+                        </div>
+                      </div>
+                      {ca.status === 'COMPLETED' ? (
+                        <span className="font-semibold tabular-nums">{ca.score}%</span>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
                     </div>
-                    {ca.status === 'COMPLETED' ? (
-                      <span className="font-semibold tabular-nums">{ca.score}%</span>
-                    ) : (
-                      <span className="text-xs text-muted-foreground">—</span>
-                    )}
-                  </div>
-                ))}
+                  );
+                })}
               </CardContent>
             </Card>
           )}

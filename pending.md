@@ -2,10 +2,13 @@
 
 Features intentionally not built in the current version. Grouped by area, with where the scaffolding lives so they can be finished quickly.
 
+## Shipped
+
+- **Coding assessments (Judge0)** — flag `FEATURE_CODING_ASSESSMENT`. ✅ Implemented.
+  Recruiters author coding questions (languages + visible/hidden test cases + limits) and build CODING assessments; candidates write and run code in the browser; submissions grade asynchronously via Judge0 (batch submit → poll worker) with per-test-case results, and the `CODING_ASSESSMENT` workflow node is wired (send-and-wait). Judge0 host is configurable (`JUDGE0_AUTH_MODE`: self-hosted / RapidAPI / Bearer); runs on a realistic mock with zero keys.
+
 ## Feature-flagged (interfaces + adapters exist, UI not wired)
 
-- **Coding assessments (Judge0)** — flag `FEATURE_CODING_ASSESSMENT`.
-  Backend: `CodeExecutionProvider` + `Judge0Provider` + `MockCodeExecutionProvider` (`backend/src/integrations/coding`). Question bank already supports a `CODING` type. Missing: coding-question editor, a candidate code editor UI, a submission service, and result display.
 - **AI voice interviews** — flag `FEATURE_AI_INTERVIEW`.
   Backend: `InterviewProvider` + `MockInterviewProvider` (`backend/src/integrations/interview`), `evaluateInterview` on the AI provider, `interviews` domain events. Missing: `interviews` model/service, the `/interview/:token` candidate experience (audio/video capture, transcript), and evaluation storage/UI.
 - **Advanced analytics** — flag `FEATURE_ADVANCED_ANALYTICS`.

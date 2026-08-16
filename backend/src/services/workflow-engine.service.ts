@@ -184,9 +184,48 @@ export const workflowEngine = {
             index++;
             break;
           }
-          case 'CODING_ASSESSMENT':
+          case 'CODING_ASSESSMENT': {
+            // Send-and-wait, mirroring SEND_ASSESSMENT: dispatch the coding test
+            // once, pause, and resume when Judge0 grading completes.
+            if (!ctx.codingSent) {
+              if (cfg.assessmentId) {
+                await assessmentService.send(
+                  workspaceId,
+                  applicationId,
+                  { assessmentId: cfg.assessmentId, expiresInHours: 168 },
+                  actor,
+                );
+              }
+              ctx.codingSent = true;
+              await recordStep(node, 'COMPLETED', { sent: true });
+              ctx.index = index;
+              await persist({ status: 'WAITING', currentNodeId: node.id, context: ctx });
+              return; // resumes when the coding assessment is graded
+            }
+            const codingDone = cfg.assessmentId
+              ? await CandidateAssessmentModel.findOne({
+                  applicationId,
+                  assessmentId: cfg.assessmentId,
+                  status: 'COMPLETED',
+                })
+                  .sort({ completedAt: -1 })
+                  .select('score')
+                  .lean()
+              : null;
+            if (codingDone) {
+              ctx.assessment_score = codingDone.score ?? null;
+              ctx.codingSent = false;
+              await recordStep(node, 'COMPLETED', { score: codingDone.score ?? null });
+              index++;
+            } else {
+              ctx.index = index;
+              await persist({ status: 'WAITING', currentNodeId: node.id, context: ctx });
+              return;
+            }
+            break;
+          }
           case 'AI_INTERVIEW': {
-            await recordStep(node, 'SKIPPED'); // feature-flagged, not wired in V1
+            await recordStep(node, 'SKIPPED'); // wired in the Bolna slice (PR B)
             index++;
             break;
           }
