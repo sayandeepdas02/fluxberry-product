@@ -1,0 +1,71 @@
+'use client';
+
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import type {
+  AssessmentDto,
+  CreateAssessmentInput,
+  UpdateAssessmentInput,
+  CandidateAssessmentDto,
+  SendAssessmentInput,
+} from '@fluxberry/shared';
+import { api } from '@/lib/api-client';
+import { useWorkspace } from '@/components/providers/workspace-provider';
+
+export function useAssessments() {
+  const { currentWorkspace } = useWorkspace();
+  return useQuery({
+    queryKey: ['assessments', currentWorkspace.id],
+    queryFn: () => api.get<AssessmentDto[]>('/api/v1/assessments'),
+  });
+}
+
+export function useAssessment(id: string) {
+  const { currentWorkspace } = useWorkspace();
+  return useQuery({
+    queryKey: ['assessment', currentWorkspace.id, id],
+    queryFn: () => api.get<AssessmentDto>(`/api/v1/assessments/${id}`),
+    enabled: Boolean(id),
+  });
+}
+
+export function useCreateAssessment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: CreateAssessmentInput) => api.post<AssessmentDto>('/api/v1/assessments', input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['assessments'] }),
+  });
+}
+
+export function useUpdateAssessment(id: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: UpdateAssessmentInput) => api.patch<AssessmentDto>(`/api/v1/assessments/${id}`, input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['assessments'] });
+      queryClient.invalidateQueries({ queryKey: ['assessment'] });
+    },
+  });
+}
+
+export function useApplicationAssessments(applicationId: string) {
+  const { currentWorkspace } = useWorkspace();
+  return useQuery({
+    queryKey: ['app-assessments', currentWorkspace.id, applicationId],
+    queryFn: () => api.get<CandidateAssessmentDto[]>(`/api/v1/applications/${applicationId}/assessments`),
+    enabled: Boolean(applicationId),
+  });
+}
+
+export function useSendAssessment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (v: { applicationId: string; input: SendAssessmentInput }) =>
+      api.post<CandidateAssessmentDto>(`/api/v1/applications/${v.applicationId}/assessments`, v.input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['app-assessments'] });
+      queryClient.invalidateQueries({ queryKey: ['candidate'] });
+      queryClient.invalidateQueries({ queryKey: ['timeline'] });
+      queryClient.invalidateQueries({ queryKey: ['candidates'] });
+    },
+  });
+}
