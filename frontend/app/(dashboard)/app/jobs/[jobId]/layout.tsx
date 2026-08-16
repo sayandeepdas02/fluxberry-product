@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useParams, usePathname, useRouter } from 'next/navigation';
 import { ArrowLeft, Link2, MoreHorizontal } from 'lucide-react';
 import { useJob, usePublishJob, useSetJobStatus } from '@/hooks/use-jobs';
+import { useFeature } from '@/hooks/use-features';
 import { useWorkspace } from '@/components/providers/workspace-provider';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -28,6 +29,7 @@ export default function JobDetailLayout({ children }: { children: React.ReactNod
   const { data: job, isLoading } = useJob(jobId);
   const publishJob = usePublishJob();
   const setStatus = useSetJobStatus();
+  const aiInterview = useFeature('AI_INTERVIEW');
 
   const base = `/app/jobs/${jobId}`;
   const tabs = [
@@ -35,6 +37,7 @@ export default function JobDetailLayout({ children }: { children: React.ReactNod
     { href: `${base}/candidates`, label: 'Candidates' },
     { href: `${base}/form`, label: 'Application form' },
     { href: `${base}/assessments`, label: 'Assessments' },
+    ...(aiInterview ? [{ href: `${base}/interview`, label: 'AI Interview' }] : []),
     { href: `${base}/workflow`, label: 'Workflow' },
     { href: `${base}/settings`, label: 'Settings' },
   ];

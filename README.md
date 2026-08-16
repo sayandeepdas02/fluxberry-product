@@ -17,11 +17,13 @@ Workspace → Job → Application → Candidate → Screening → Assessment →
 - **Async pipeline** — resume parsing → structured profile → **transparent AI screening** (deterministic sub-scores + AI reasoning) with an explanation
 - **Candidates** — table + kanban board, profile with score/timeline, one stage-transition service
 - **Assessments** — question bank (seeded), MCQ builder, secure candidate links, server-authoritative timer, server-side scoring, email invites
-- **Workflow engine** — per-job, durable & resumable: AI screen → condition → send assessment → wait → move stage → email
+- **Coding assessments** — Judge0-backed: coding-question editor (languages, visible/hidden test cases, limits), in-browser code runner, async test-case grading with per-case results, wired into the workflow engine (behind `FEATURE_CODING_ASSESSMENT`)
+- **AI voice interviews** — Bolna-backed: per-job AI interviewer config (objective + ordered questions + duration + tone), link-based browser voice interview, transcript capture + AI evaluation, wired into the workflow engine with an `interview_score` condition (behind `FEATURE_AI_INTERVIEW`)
+- **Workflow engine** — per-job, durable & resumable: AI screen → condition → send assessment → coding test → AI interview → wait → move stage → email
 - **Analytics** — funnel, location/salary distribution, sources, time-to-hire
 - **Careers page** — a public, per-company page at `/{slug}/careers` (unique claimable URL) with toggleable About/Links/Team sections and an auto-updating open-roles list you can also embed on your own site
 
-Coding assessments (Judge0) and AI voice interviews are scaffolded behind feature flags.
+Both external features run on realistic mocks with zero keys; set provider keys to go live. The Bolna browser voice SDK (`@bolna/web-call`) is beta/request-access — the candidate page has a documented seam for it.
 
 ## Architecture
 

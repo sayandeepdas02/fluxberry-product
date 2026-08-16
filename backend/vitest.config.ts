@@ -8,5 +8,8 @@ export default defineConfig({
     testTimeout: 20000,
     hookTimeout: 40000,
     pool: 'forks',
+    // Integration tests share one local MongoDB; run test files sequentially so
+    // they don't contend on connections / index builds under parallel load.
+    fileParallelism: false,
   },
 });

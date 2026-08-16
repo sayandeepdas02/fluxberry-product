@@ -93,6 +93,9 @@ export type AssessmentStatus = (typeof ASSESSMENT_STATUSES)[number];
 export const CANDIDATE_ASSESSMENT_STATUSES = [
   'INVITED',
   'STARTED',
+  // Coding assessments submit asynchronously: the candidate has submitted and
+  // we are waiting on Judge0 to finish grading before a final score exists.
+  'GRADING',
   'COMPLETED',
   'EXPIRED',
   'CANCELLED',
@@ -102,7 +105,15 @@ export type CandidateAssessmentStatus = (typeof CANDIDATE_ASSESSMENT_STATUSES)[n
 export const INTERVIEW_TYPES = ['AI_VOICE', 'AI_VIDEO'] as const;
 export type InterviewType = (typeof INTERVIEW_TYPES)[number];
 
-export const INTERVIEW_STATUSES = ['SCHEDULED', 'STARTED', 'COMPLETED', 'CANCELLED'] as const;
+export const INTERVIEW_STATUSES = [
+  'INVITED', // link sent, candidate hasn't joined
+  'STARTED', // candidate opened the interview
+  'IN_PROGRESS', // voice call is live
+  'COMPLETED', // call finished, transcript captured/evaluated
+  'EXPIRED', // link lapsed before completion
+  'FAILED', // provider/call error
+  'CANCELLED',
+] as const;
 export type InterviewStatus = (typeof INTERVIEW_STATUSES)[number];
 
 /** Generic async processing status used by resume parsing & screening. */
@@ -154,6 +165,7 @@ export type ConditionOperator = (typeof CONDITION_OPERATORS)[number];
 export const CONDITION_FIELDS = [
   'screening_score',
   'assessment_score',
+  'interview_score',
   'years_experience',
   'expected_salary',
   'location',

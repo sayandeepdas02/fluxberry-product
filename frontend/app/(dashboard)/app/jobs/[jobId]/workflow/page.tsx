@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { Plus, ArrowUp, ArrowDown, Trash2, ArrowDownIcon, Sparkles, GitBranch, ClipboardCheck, Clock, MoveRight, Mail } from 'lucide-react';
+import { Plus, ArrowUp, ArrowDown, Trash2, ArrowDownIcon, Sparkles, GitBranch, ClipboardCheck, Clock, MoveRight, Mail, Code2, Mic } from 'lucide-react';
 import {
   CONDITION_FIELDS,
   CONDITION_OPERATORS,
@@ -15,6 +15,7 @@ import {
 } from '@fluxberry/shared';
 import { useWorkflow, useSaveWorkflow } from '@/hooks/use-workflow';
 import { useAssessments } from '@/hooks/use-assessments';
+import { useFeature } from '@/hooks/use-features';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -32,6 +33,8 @@ const NODE_META: Record<string, { label: string; icon: React.ReactNode }> = {
   AI_SCREEN: { label: 'AI screening', icon: <Sparkles className="size-4" /> },
   CONDITION: { label: 'Condition', icon: <GitBranch className="size-4" /> },
   SEND_ASSESSMENT: { label: 'Send assessment', icon: <ClipboardCheck className="size-4" /> },
+  CODING_ASSESSMENT: { label: 'Send coding test', icon: <Code2 className="size-4" /> },
+  AI_INTERVIEW: { label: 'AI voice interview', icon: <Mic className="size-4" /> },
   WAIT: { label: 'Wait', icon: <Clock className="size-4" /> },
   MOVE_STAGE: { label: 'Move to stage', icon: <MoveRight className="size-4" /> },
   SEND_EMAIL: { label: 'Send email', icon: <Mail className="size-4" /> },
@@ -41,6 +44,7 @@ const ADDABLE: WorkflowNodeType[] = ['AI_SCREEN', 'CONDITION', 'SEND_ASSESSMENT'
 const FIELD_LABELS: Record<ConditionField, string> = {
   screening_score: 'Screening score',
   assessment_score: 'Assessment score',
+  interview_score: 'Interview score',
   years_experience: 'Years of experience',
   expected_salary: 'Expected salary',
   location: 'Location',
@@ -55,6 +59,18 @@ export default function WorkflowBuilderPage() {
   const { data: workflow, isLoading } = useWorkflow(jobId);
   const save = useSaveWorkflow(jobId);
   const { data: assessments } = useAssessments();
+  const codingEnabled = useFeature('CODING_ASSESSMENT');
+  const aiInterviewEnabled = useFeature('AI_INTERVIEW');
+  const addable: WorkflowNodeType[] = [
+    'AI_SCREEN',
+    'CONDITION',
+    'SEND_ASSESSMENT',
+    ...(codingEnabled ? (['CODING_ASSESSMENT'] as const) : []),
+    ...(aiInterviewEnabled ? (['AI_INTERVIEW'] as const) : []),
+    'WAIT',
+    'MOVE_STAGE',
+    'SEND_EMAIL',
+  ];
 
   const [nodes, setNodes] = useState<WorkflowNodeDto[] | null>(null);
   const [active, setActive] = useState(false);
@@ -76,6 +92,8 @@ export default function WorkflowBuilderPage() {
       case 'AI_SCREEN': return 'Score the candidate with AI';
       case 'CONDITION': return c.condition ? `${FIELD_LABELS[c.condition.field as ConditionField]} ${OP_LABELS[c.condition.op as ConditionOperator]} ${c.condition.value}` : 'No condition set';
       case 'SEND_ASSESSMENT': return `Send "${assessmentName(c.assessmentId)}"`;
+      case 'CODING_ASSESSMENT': return `Send coding test "${assessmentName(c.assessmentId)}"`;
+      case 'AI_INTERVIEW': return 'Conduct an AI voice interview';
       case 'WAIT': return `Wait ${c.durationHours ?? 0} hours`;
       case 'MOVE_STAGE': return `Move to ${STAGE_LABELS[c.stage as ApplicationStage] ?? c.stage}`;
       case 'SEND_EMAIL': return c.subject ? `Email: ${c.subject}` : 'Send an email';
@@ -146,7 +164,8 @@ export default function WorkflowBuilderPage() {
       <AddStepDialog
         open={addOpen}
         onOpenChange={setAddOpen}
-        assessments={(assessments ?? []).filter((a) => a.status === 'PUBLISHED')}
+        addable={addable}
+        assessments={(assessments ?? []).filter((a) => a.status === 'PUBLISHED').map((a) => ({ id: a.id, name: a.name, type: a.type }))}
         onAdd={(node) => setNodes([...nodes, node])}
       />
     </div>
@@ -183,10 +202,11 @@ function StepCard({ meta, summary, onUp, onDown, onRemove, first, last }: {
   );
 }
 
-function AddStepDialog({ open, onOpenChange, onAdd, assessments }: {
+function AddStepDialog({ open, onOpenChange, onAdd, assessments, addable }: {
   open: boolean; onOpenChange: (o: boolean) => void;
   onAdd: (n: WorkflowNodeDto) => void;
-  assessments: { id: string; name: string }[];
+  assessments: { id: string; name: string; type: string }[];
+  addable: WorkflowNodeType[];
 }) {
   const [type, setType] = useState<WorkflowNodeType>('AI_SCREEN');
   const [field, setField] = useState<ConditionField>('screening_score');
@@ -198,20 +218,26 @@ function AddStepDialog({ open, onOpenChange, onAdd, assessments }: {
   const [subject, setSubject] = useState('');
   const [body, setBody] = useState('');
 
+  const isAssessmentStep = type === 'SEND_ASSESSMENT' || type === 'CODING_ASSESSMENT';
+  // Send-assessment picks MCQ assessments; coding-test picks CODING ones.
+  const eligibleAssessments = assessments.filter((a) =>
+    type === 'CODING_ASSESSMENT' ? a.type === 'CODING' : a.type !== 'CODING',
+  );
+
   const add = () => {
     let config: Record<string, unknown> = {};
     if (type === 'CONDITION') config = { condition: { field, op, value: /^\d+$/.test(value) ? Number(value) : value } };
-    else if (type === 'SEND_ASSESSMENT') config = { assessmentId };
+    else if (type === 'SEND_ASSESSMENT' || type === 'CODING_ASSESSMENT') config = { assessmentId };
     else if (type === 'WAIT') config = { durationHours: Number(hours) || 0 };
     else if (type === 'MOVE_STAGE') config = { stage };
     else if (type === 'SEND_EMAIL') config = { template: 'custom', subject, body };
     onAdd({ id: uid(), type, config, position: { x: 0, y: 0 } });
     onOpenChange(false);
     setType('AI_SCREEN');
+    setAssessmentId('');
   };
 
-  const valid =
-    type !== 'SEND_ASSESSMENT' || Boolean(assessmentId);
+  const valid = !isAssessmentStep || Boolean(assessmentId);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -219,9 +245,9 @@ function AddStepDialog({ open, onOpenChange, onAdd, assessments }: {
         <DialogHeader><DialogTitle>Add step</DialogTitle></DialogHeader>
         <div className="space-y-4">
           <Field label="Step type">
-            <Select value={type} onValueChange={(v) => setType(v as WorkflowNodeType)}>
+            <Select value={type} onValueChange={(v) => { setType(v as WorkflowNodeType); setAssessmentId(''); }}>
               <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>{ADDABLE.map((t) => <SelectItem key={t} value={t}>{NODE_META[t].label}</SelectItem>)}</SelectContent>
+              <SelectContent>{addable.map((t) => <SelectItem key={t} value={t}>{NODE_META[t].label}</SelectItem>)}</SelectContent>
             </Select>
           </Field>
 
@@ -238,12 +264,12 @@ function AddStepDialog({ open, onOpenChange, onAdd, assessments }: {
               <Input value={value} onChange={(e) => setValue(e.target.value)} />
             </div>
           )}
-          {type === 'SEND_ASSESSMENT' && (
-            <Field label="Assessment">
+          {isAssessmentStep && (
+            <Field label={type === 'CODING_ASSESSMENT' ? 'Coding assessment' : 'Assessment'}>
               <Select value={assessmentId} onValueChange={setAssessmentId}>
                 <SelectTrigger><SelectValue placeholder="Choose a published assessment" /></SelectTrigger>
                 <SelectContent>
-                  {assessments.length === 0 ? <div className="px-2 py-2 text-sm text-muted-foreground">No published assessments</div> : assessments.map((a) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
+                  {eligibleAssessments.length === 0 ? <div className="px-2 py-2 text-sm text-muted-foreground">No published {type === 'CODING_ASSESSMENT' ? 'coding ' : ''}assessments</div> : eligibleAssessments.map((a) => <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>)}
                 </SelectContent>
               </Select>
             </Field>
@@ -264,6 +290,11 @@ function AddStepDialog({ open, onOpenChange, onAdd, assessments }: {
               <Field label="Subject"><Input value={subject} onChange={(e) => setSubject(e.target.value)} /></Field>
               <Field label="Body"><Textarea rows={3} value={body} onChange={(e) => setBody(e.target.value)} /></Field>
             </>
+          )}
+          {type === 'AI_INTERVIEW' && (
+            <p className="text-sm text-muted-foreground">
+              Uses this job&apos;s AI Interview configuration (objective + questions). Set it up on the <span className="font-medium">AI Interview</span> tab.
+            </p>
           )}
         </div>
         <DialogFooter>

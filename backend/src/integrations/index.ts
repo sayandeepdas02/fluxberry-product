@@ -7,7 +7,7 @@ export { getAIProvider, __resetAIProvider } from './ai';
 export { getEmailProvider, __resetEmailProvider, emailTemplates, mockOutbox } from './email';
 export { getStorageProvider, __resetStorageProvider, mockStorageRouter } from './storage';
 export { getCodeExecutionProvider, __resetCodeExecutionProvider } from './coding';
-export { getInterviewProvider, __resetInterviewProvider } from './interview';
+export { getInterviewProvider, getInterviewProviderByName, __resetInterviewProvider } from './interview';
 
 export type { AIProvider } from './ai/types';
 export type { EmailProvider } from './email/types';

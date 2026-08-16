@@ -123,20 +123,22 @@ export const assessmentService = {
       await stageService.moveToStage(workspaceId, applicationId, 'ASSESSMENT', actor);
     }
 
-    return toCandidateAssessmentDto(ca.toObject(), assessment.name);
+    return toCandidateAssessmentDto(ca.toObject(), { name: assessment.name, type: assessment.type });
   },
 
   async listForApplication(workspaceId: string, applicationId: string): Promise<CandidateAssessmentDto[]> {
     const list = await candidateAssessmentRepository.listByApplication(applicationId);
     const filtered = list.filter((c) => String(c.workspaceId) === workspaceId);
-    const nameById = new Map<string, string>();
+    const metaById = new Map<string, { name: string; type: any }>();
     for (const ca of filtered) {
       const id = String(ca.assessmentId);
-      if (!nameById.has(id)) {
+      if (!metaById.has(id)) {
         const a = await assessmentRepository.findInWorkspace(workspaceId, id);
-        nameById.set(id, a?.name ?? 'Assessment');
+        metaById.set(id, { name: a?.name ?? 'Assessment', type: a?.type ?? 'MCQ' });
       }
     }
-    return filtered.map((ca) => toCandidateAssessmentDto(ca, nameById.get(String(ca.assessmentId)) ?? 'Assessment'));
+    return filtered.map((ca) =>
+      toCandidateAssessmentDto(ca, metaById.get(String(ca.assessmentId)) ?? { name: 'Assessment', type: 'MCQ' }),
+    );
   },
 };

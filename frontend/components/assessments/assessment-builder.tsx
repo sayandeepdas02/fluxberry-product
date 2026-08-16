@@ -3,9 +3,10 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Check } from 'lucide-react';
-import type { AssessmentDto } from '@fluxberry/shared';
+import type { AssessmentDto, AssessmentType } from '@fluxberry/shared';
 import { useQuestions } from '@/hooks/use-questions';
 import { useCreateAssessment, useUpdateAssessment } from '@/hooks/use-assessments';
+import { useFeature } from '@/hooks/use-features';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -21,7 +22,10 @@ export function AssessmentBuilder({ initial }: { initial?: AssessmentDto | null 
   const router = useRouter();
   const create = useCreateAssessment();
   const update = useUpdateAssessment(initial?.id ?? '');
-  const { data: bank, isLoading } = useQuestions({ type: 'MCQ', limit: 100 });
+  const codingEnabled = useFeature('CODING_ASSESSMENT');
+
+  const [type, setType] = useState<AssessmentType>(initial?.type ?? 'MCQ');
+  const { data: bank, isLoading } = useQuestions({ type: type === 'CODING' ? 'CODING' : 'MCQ', limit: 100 });
 
   const [name, setName] = useState(initial?.name ?? '');
   const [description, setDescription] = useState(initial?.description ?? '');
@@ -31,10 +35,16 @@ export function AssessmentBuilder({ initial }: { initial?: AssessmentDto | null 
   const toggle = (id: string) =>
     setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
 
+  // Switching type changes the eligible question bank, so reset the selection.
+  const changeType = (t: AssessmentType) => {
+    setType(t);
+    setSelected([]);
+  };
+
   const save = async (publish: boolean) => {
     if (!name.trim()) return;
     const questions = selected.map((questionId, i) => ({ questionId, points: 1, sortOrder: i }));
-    const payload = { type: 'MCQ' as const, name: name.trim(), description: description || undefined, durationMinutes: Number(duration) || 30, questions };
+    const payload = { type, name: name.trim(), description: description || undefined, durationMinutes: Number(duration) || 30, questions };
     try {
       if (initial) {
         await update.mutateAsync({ ...payload, status: publish ? 'PUBLISHED' : undefined });
@@ -61,8 +71,27 @@ export function AssessmentBuilder({ initial }: { initial?: AssessmentDto | null 
 
       <Card>
         <CardContent className="space-y-4 pt-5">
+          {!initial && codingEnabled && (
+            <Field label="Type">
+              <div className="flex gap-2">
+                {(['MCQ', 'CODING'] as const).map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => changeType(t)}
+                    className={cn(
+                      'rounded-md border px-3 py-1.5 text-sm transition-colors',
+                      type === t ? 'border-primary bg-primary/10 text-primary' : 'border-border hover:bg-accent',
+                    )}
+                  >
+                    {t === 'MCQ' ? 'Multiple choice' : 'Coding'}
+                  </button>
+                ))}
+              </div>
+            </Field>
+          )}
           <div className="grid grid-cols-2 gap-4">
-            <Field label="Name"><Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Backend Fundamentals" /></Field>
+            <Field label="Name"><Input value={name} onChange={(e) => setName(e.target.value)} placeholder={type === 'CODING' ? 'Backend Coding Challenge' : 'Backend Fundamentals'} /></Field>
             <Field label="Duration (minutes)"><Input type="number" value={duration} onChange={(e) => setDuration(e.target.value)} /></Field>
           </div>
           <Field label="Description (optional)"><Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2} /></Field>

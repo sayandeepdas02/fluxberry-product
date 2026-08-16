@@ -1,33 +1,47 @@
 import crypto from 'node:crypto';
-import type { InterviewProvider, InterviewSession, Transcript } from './types';
+import type {
+  InterviewAgentConfig,
+  InterviewExecution,
+  InterviewProvider,
+  WebCallSession,
+} from './types';
 
+/**
+ * Deterministic mock interview provider (no keys needed). It fabricates an agent
+ * id, hands the scripted questions to the simulated call UI, and returns a
+ * plausible transcript so the evaluate → score pipeline runs end-to-end.
+ */
 export class MockInterviewProvider implements InterviewProvider {
   readonly name = 'mock';
-  private sessions = new Map<string, InterviewSession>();
 
-  async createSession(input: { jobTitle: string; candidateName: string }): Promise<InterviewSession> {
-    const id = `mock_${crypto.randomBytes(6).toString('hex')}`;
-    const session: InterviewSession = { id, status: 'CREATED', joinUrl: `about:blank#${id}` };
-    this.sessions.set(id, session);
-    return session;
+  async syncAgent(_cfg: InterviewAgentConfig): Promise<{ agentId: string }> {
+    return { agentId: `mock_agent_${crypto.randomBytes(4).toString('hex')}` };
   }
 
-  async getSession(id: string): Promise<InterviewSession> {
-    return this.sessions.get(id) ?? { id, status: 'ENDED' };
+  async mintWebCallSession(input: {
+    agentId: string | null;
+    userData: Record<string, unknown>;
+    questions: string[];
+  }): Promise<WebCallSession> {
+    return { provider: 'mock', agentId: input.agentId, questions: input.questions };
   }
 
-  async endSession(id: string): Promise<void> {
-    const s = this.sessions.get(id);
-    if (s) s.status = 'ENDED';
-  }
-
-  async getTranscript(id: string): Promise<Transcript> {
+  async getExecution(_executionId: string): Promise<InterviewExecution> {
+    const transcript = [
+      'AI: Hi, thanks for joining. Can you introduce yourself?',
+      'Candidate: Sure — I am a backend engineer with five years building high-throughput APIs.',
+      'AI: Tell me about your most impactful project.',
+      'Candidate: I led a payments service handling millions of daily transactions with strong reliability.',
+      'AI: How do you approach debugging a production incident?',
+      'Candidate: I stabilize first, gather metrics and logs, form a hypothesis, then fix and add regression tests.',
+      'AI: Great, thank you. That concludes our interview.',
+    ].join('\n');
     return {
-      text: 'AI: Tell me about a system you built.\nCandidate: I built a high-throughput API...',
-      segments: [
-        { speaker: 'ai', text: 'Tell me about a system you built.', tsMs: 0 },
-        { speaker: 'candidate', text: 'I built a high-throughput API handling millions of requests.', tsMs: 3000 },
-      ],
+      status: 'COMPLETED',
+      transcript,
+      durationSec: 320,
+      recordingUrl: null,
+      meta: { mock: true },
     };
   }
 }

@@ -1,7 +1,13 @@
 import { asyncHandler, ok, created } from '../utils/http';
 import { applicationService } from '../services/application.service';
 import { candidateAssessmentService } from '../services/candidate-assessment.service';
-import { publicApplicationSchema, autosaveAnswerSchema, submitAssessmentSchema } from '@fluxberry/shared';
+import { interviewService } from '../services/interview.service';
+import {
+  publicApplicationSchema,
+  autosaveAnswerSchema,
+  submitAssessmentSchema,
+  runCodeSchema,
+} from '@fluxberry/shared';
 
 export const publicController = {
   getJob: asyncHandler(async (req, res) => {
@@ -46,5 +52,27 @@ export const publicController = {
   submitAssessment: asyncHandler(async (req, res) => {
     const body = submitAssessmentSchema.parse(req.body);
     ok(res, await candidateAssessmentService.submit(req.params.token, body));
+  }),
+  runCode: asyncHandler(async (req, res) => {
+    const body = runCodeSchema.parse(req.body);
+    ok(res, await candidateAssessmentService.run(req.params.token, body));
+  }),
+
+  // ---- Candidate AI interview (public, token-gated) ----
+  getInterview: asyncHandler(async (req, res) => {
+    ok(res, await interviewService.getByToken(req.params.token));
+  }),
+  interviewSession: asyncHandler(async (req, res) => {
+    ok(res, await interviewService.mintSession(req.params.token));
+  }),
+  completeInterview: asyncHandler(async (req, res) => {
+    const executionId = typeof req.body?.executionId === 'string' ? req.body.executionId : undefined;
+    ok(res, await interviewService.reportCompletion(req.params.token, executionId));
+  }),
+
+  // ---- Bolna webhook (secret-in-URL; Bolna does not sign) ----
+  bolnaWebhook: asyncHandler(async (req, res) => {
+    await interviewService.handleWebhook(req.params.secret, req.body);
+    ok(res, { received: true });
   }),
 };

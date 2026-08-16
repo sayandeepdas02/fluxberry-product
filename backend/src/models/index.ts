@@ -19,4 +19,6 @@ export { AssessmentModel } from './assessment.model';
 export { CandidateAssessmentModel } from './candidate-assessment.model';
 export { WorkflowModel, WorkflowRunModel, WorkflowStepModel } from './workflow.model';
 export { CareersPageModel } from './careers-page.model';
-// Later: Interview, JobAnalytics (precomputed) ...
+export { AiInterviewConfigModel } from './ai-interview-config.model';
+export { InterviewModel } from './interview.model';
+// Later: JobAnalytics (precomputed) ...

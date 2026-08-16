@@ -5,3 +5,4 @@ process.env.AUTH_ALLOW_TEST_TOKENS = 'true';
 process.env.AUTH_TEST_TOKEN_SECRET = 'test-secret';
 process.env.MONGODB_URI = 'mongodb://127.0.0.1:27017/fluxberry_test';
 process.env.CORS_ORIGINS = 'http://localhost:3000';
+process.env.BOLNA_WEBHOOK_SECRET = 'test-webhook-secret';

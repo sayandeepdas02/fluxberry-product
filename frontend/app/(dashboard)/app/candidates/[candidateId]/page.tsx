@@ -22,7 +22,10 @@ import {
 } from '@/hooks/use-candidates';
 import { useApplicationForm } from '@/hooks/use-form';
 import { useApplicationAssessments } from '@/hooks/use-assessments';
+import { useApplicationInterviews, useSendInterview } from '@/hooks/use-interview';
+import { useFeature } from '@/hooks/use-features';
 import { SendAssessmentDialog } from '@/components/candidates/send-assessment-dialog';
+import { InterviewCard } from '@/components/candidates/interview-card';
 import { WorkflowRunCard } from '@/components/candidates/workflow-run-card';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -32,6 +35,7 @@ import { Field } from '@/components/ui/field';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { StageBadge } from '@/components/candidates/stage-badge';
+import { Badge } from '@/components/ui/badge';
 import { ScreeningCard } from '@/components/candidates/screening-card';
 import { Timeline } from '@/components/candidates/timeline';
 import { toast } from '@/components/ui/sonner';
@@ -58,6 +62,9 @@ export default function CandidateProfilePage() {
   const timeline = useApplicationTimeline(activeApp?.id ?? '');
   const form = useApplicationForm(activeApp?.jobId ?? '');
   const assessments = useApplicationAssessments(activeApp?.id ?? '');
+  const interviews = useApplicationInterviews(activeApp?.id ?? '');
+  const sendInterview = useSendInterview();
+  const aiInterviewEnabled = useFeature('AI_INTERVIEW');
   const shortlist = useShortlist();
   const reject = useReject();
   const moveStage = useMoveStage();
@@ -182,6 +189,26 @@ export default function CandidateProfilePage() {
               <Button className="w-full" onClick={() => setSendOpen(true)} disabled={!activeApp}>
                 Send assessment
               </Button>
+              {aiInterviewEnabled && (
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  disabled={!activeApp || sendInterview.isPending}
+                  loading={sendInterview.isPending}
+                  onClick={() =>
+                    activeApp &&
+                    sendInterview.mutate(
+                      { applicationId: activeApp.id, input: { expiresInHours: 168 } },
+                      {
+                        onSuccess: () => toast.success('AI interview sent'),
+                        onError: (e) => toast.error(e instanceof Error ? e.message : 'Could not send'),
+                      },
+                    )
+                  }
+                >
+                  Send AI interview
+                </Button>
+              )}
               <Field label="Move to stage">
                 <Select value={activeApp?.stage} onValueChange={(v) => doMove(v as ApplicationStage)} disabled={!activeApp}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
@@ -199,22 +226,36 @@ export default function CandidateProfilePage() {
             <Card>
               <CardHeader><CardTitle>Assessments</CardTitle></CardHeader>
               <CardContent className="space-y-3">
-                {assessments.data!.map((ca) => (
-                  <div key={ca.id} className="flex items-center justify-between text-sm">
-                    <div className="min-w-0">
-                      <div className="truncate font-medium">{ca.assessmentName}</div>
-                      <div className="text-xs capitalize text-muted-foreground">{ca.status.toLowerCase()}</div>
+                {assessments.data!.map((ca) => {
+                  const cases = ca.codingResults?.reduce(
+                    (acc, r) => ({ passed: acc.passed + r.passed, total: acc.total + r.total }),
+                    { passed: 0, total: 0 },
+                  );
+                  return (
+                    <div key={ca.id} className="flex items-center justify-between text-sm">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="truncate font-medium">{ca.assessmentName}</span>
+                          {ca.type === 'CODING' && <Badge variant="outline">Coding</Badge>}
+                        </div>
+                        <div className="text-xs capitalize text-muted-foreground">
+                          {ca.status === 'GRADING' ? 'grading…' : ca.status.toLowerCase()}
+                          {cases && cases.total > 0 && ca.status === 'COMPLETED' ? ` · ${cases.passed}/${cases.total} cases` : ''}
+                        </div>
+                      </div>
+                      {ca.status === 'COMPLETED' ? (
+                        <span className="font-semibold tabular-nums">{ca.score}%</span>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
                     </div>
-                    {ca.status === 'COMPLETED' ? (
-                      <span className="font-semibold tabular-nums">{ca.score}%</span>
-                    ) : (
-                      <span className="text-xs text-muted-foreground">—</span>
-                    )}
-                  </div>
-                ))}
+                  );
+                })}
               </CardContent>
             </Card>
           )}
+
+          {(interviews.data?.length ?? 0) > 0 && <InterviewCard interviews={interviews.data!} />}
 
           {activeApp && <WorkflowRunCard applicationId={activeApp.id} />}
 

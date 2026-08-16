@@ -32,3 +32,5 @@ export const publicApplyLimiter = make({ windowMs: 60_000, max: 10, message: 'To
 export const uploadLimiter = make({ windowMs: 60_000, max: 20 });
 export const aiLimiter = make({ windowMs: 60_000, max: 20, message: 'AI is busy, try again shortly' });
 export const assessmentLimiter = make({ windowMs: 60_000, max: 60 });
+// Candidate "Run code" hits Judge0 — keep it tighter to bound spend.
+export const codingRunLimiter = make({ windowMs: 60_000, max: 20, message: 'Slow down — too many runs' });

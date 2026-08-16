@@ -2,12 +2,15 @@
 
 Features intentionally not built in the current version. Grouped by area, with where the scaffolding lives so they can be finished quickly.
 
+## Shipped
+
+- **Coding assessments (Judge0)** — flag `FEATURE_CODING_ASSESSMENT`. ✅ Implemented.
+  Recruiters author coding questions (languages + visible/hidden test cases + limits) and build CODING assessments; candidates write and run code in the browser; submissions grade asynchronously via Judge0 (batch submit → poll worker) with per-test-case results, and the `CODING_ASSESSMENT` workflow node is wired (send-and-wait). Judge0 host is configurable (`JUDGE0_AUTH_MODE`: self-hosted / RapidAPI / Bearer); runs on a realistic mock with zero keys.
+- **AI voice interviews (Bolna)** — flag `FEATURE_AI_INTERVIEW`. ✅ Implemented.
+  Recruiters configure a per-job AI interviewer (objective + ordered questions + duration + tone); a Bolna agent is synced per job. Candidates take a browser voice interview from a link; the transcript is fetched and scored via the existing `evaluateInterview` AI contract, persisted on an `Interview` record, and the `AI_INTERVIEW` workflow node is wired (send-and-wait) with an `interview_score` condition field. Webhook is gated by a URL secret and re-fetches the execution by id (Bolna does not sign). Runs on a realistic simulated interview with zero keys. **Note:** the real browser WebRTC path uses Bolna's `@bolna/web-call` (beta / request-access); the candidate page has a documented seam where the SDK plugs in, and the session-mint URL is isolated in `BOLNA_WEBCALL_SESSION_URL` (a documented placeholder until confirmed).
+
 ## Feature-flagged (interfaces + adapters exist, UI not wired)
 
-- **Coding assessments (Judge0)** — flag `FEATURE_CODING_ASSESSMENT`.
-  Backend: `CodeExecutionProvider` + `Judge0Provider` + `MockCodeExecutionProvider` (`backend/src/integrations/coding`). Question bank already supports a `CODING` type. Missing: coding-question editor, a candidate code editor UI, a submission service, and result display.
-- **AI voice interviews** — flag `FEATURE_AI_INTERVIEW`.
-  Backend: `InterviewProvider` + `MockInterviewProvider` (`backend/src/integrations/interview`), `evaluateInterview` on the AI provider, `interviews` domain events. Missing: `interviews` model/service, the `/interview/:token` candidate experience (audio/video capture, transcript), and evaluation storage/UI.
 - **Advanced analytics** — flag `FEATURE_ADVANCED_ANALYTICS`.
   Current analytics use on-the-fly aggregation. Missing: precomputed `job_analytics` / `workspace_analytics` tables updated by an `AGGREGATE_ANALYTICS` worker.
 

@@ -62,9 +62,26 @@ const envSchema = z.object({
 
   JUDGE0_URL: z.string().optional().default(''),
   JUDGE0_API_KEY: z.string().optional().default(''),
+  /**
+   * How the Judge0 key is sent: 'token' → X-Auth-Token (self-hosted, default),
+   * 'rapidapi' → X-RapidAPI-Key + X-RapidAPI-Host, 'bearer' → Authorization: Bearer.
+   */
+  JUDGE0_AUTH_MODE: z.enum(['token', 'rapidapi', 'bearer']).default('token'),
+  /** Required only when JUDGE0_AUTH_MODE=rapidapi (the X-RapidAPI-Host value). */
+  JUDGE0_RAPIDAPI_HOST: z.string().optional().default(''),
 
   INTERVIEW_PROVIDER: z.string().default('mock'),
   INTERVIEW_PROVIDER_API_KEY: z.string().optional().default(''),
+  BOLNA_API_BASE: z.string().default('https://api.bolna.ai'),
+  /**
+   * Bolna's browser web-call session-mint endpoint. Documented as a PLACEHOLDER
+   * in the beta docs — confirm the exact path when web-call access is granted.
+   */
+  BOLNA_WEBCALL_SESSION_URL: z.string().optional().default(''),
+  /** Unguessable secret embedded in the Bolna webhook URL (Bolna does not sign). */
+  BOLNA_WEBHOOK_SECRET: z.string().optional().default(''),
+  BOLNA_LLM_MODEL: z.string().optional().default('gpt-4o-mini'),
+  BOLNA_VOICE_ID: z.string().optional().default(''),
 
   SENTRY_DSN: z.string().optional().default(''),
   POSTHOG_KEY: z.string().optional().default(''),
@@ -130,8 +147,21 @@ export const config = {
       secretKey: e.STORAGE_SECRET_KEY,
       publicUrl: e.STORAGE_PUBLIC_URL,
     },
-    judge0: { url: e.JUDGE0_URL, apiKey: e.JUDGE0_API_KEY },
-    interview: { provider: e.INTERVIEW_PROVIDER, apiKey: e.INTERVIEW_PROVIDER_API_KEY },
+    judge0: {
+      url: e.JUDGE0_URL,
+      apiKey: e.JUDGE0_API_KEY,
+      authMode: e.JUDGE0_AUTH_MODE,
+      rapidApiHost: e.JUDGE0_RAPIDAPI_HOST,
+    },
+    interview: {
+      provider: e.INTERVIEW_PROVIDER,
+      apiKey: e.INTERVIEW_PROVIDER_API_KEY,
+      apiBase: e.BOLNA_API_BASE,
+      webCallSessionUrl: e.BOLNA_WEBCALL_SESSION_URL,
+      webhookSecret: e.BOLNA_WEBHOOK_SECRET,
+      llmModel: e.BOLNA_LLM_MODEL,
+      voiceId: e.BOLNA_VOICE_ID,
+    },
   },
 
   observability: {
