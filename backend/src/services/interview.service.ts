@@ -6,11 +6,12 @@ import { applicationRepository } from '../repositories/application.repository';
 import { candidateRepository } from '../repositories/candidate.repository';
 import { jobRepository } from '../repositories/job.repository';
 import { workspaceRepository } from '../repositories/workspace.repository';
-import { getInterviewProvider, getAIProvider, emailTemplates } from '../integrations';
+import { getInterviewProvider, getInterviewProviderByName, getAIProvider, emailTemplates } from '../integrations';
 import { toInterviewDto } from '../serializers/interview.serializer';
 import { eventBus } from '../events/event-bus';
 import { jobQueue } from '../queue/job-queue';
 import { stageService } from './stage.service';
+import { configHash } from './interview-config.service';
 import { workflowEngine } from './workflow-engine.service';
 import { secureToken } from '../utils/ids';
 import { logger } from '../utils/logger';
@@ -42,6 +43,9 @@ export const interviewService = {
     const cfg = await AiInterviewConfigModel.findOne({ jobId: job._id });
     if (!cfg || (cfg.questions ?? []).length === 0) {
       throw badRequest('Configure the AI interview (add questions) before sending it');
+    }
+    if (!cfg.bolnaAgentId || cfg.agentSyncHash !== configHash(cfg)) {
+      throw badRequest('The interview agent is not ready — re-save the interview configuration and try again');
     }
 
     const token = secureToken(24);
@@ -143,7 +147,7 @@ export const interviewService = {
       });
     }
 
-    const session = await getInterviewProvider().mintWebCallSession({
+    const session = await getInterviewProviderByName(iv.provider).mintWebCallSession({
       agentId: iv.providerAgentId ?? null,
       userData: { candidate_name: candidate?.name ?? 'there', job_title: job?.title ?? 'the role' },
       questions: (cfg?.questions ?? []).map((q: any) => q.text),
@@ -159,6 +163,10 @@ export const interviewService = {
     const iv = await InterviewModel.findOne({ secureToken: token });
     if (!iv) throw notFound('Interview not found');
     if (iv.status === 'COMPLETED') return { status: 'COMPLETED' };
+    if (iv.status === 'IN_PROGRESS') return { status: 'IN_PROGRESS' };
+    if (iv.status !== 'STARTED') {
+      throw badRequest(`This interview cannot be completed from its current status (${iv.status})`);
+    }
 
     const execId = executionId || `mock_exec_${secureToken(6)}`;
     await InterviewModel.findByIdAndUpdate(iv._id, { status: 'IN_PROGRESS', providerExecutionId: execId });
@@ -200,7 +208,7 @@ export const interviewService = {
     if (!iv.providerExecutionId) return;
 
     const job = await jobRepository.findById(String(iv.jobId));
-    const exec = await getInterviewProvider().getExecution(iv.providerExecutionId);
+    const exec = await getInterviewProviderByName(iv.provider).getExecution(iv.providerExecutionId);
 
     if (exec.status === 'FAILED') {
       await InterviewModel.findByIdAndUpdate(iv._id, { status: 'FAILED', error: 'Call failed' });

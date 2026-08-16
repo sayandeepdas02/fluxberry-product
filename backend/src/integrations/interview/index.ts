@@ -23,6 +23,17 @@ export function getInterviewProvider(): InterviewProvider {
   return instance;
 }
 
+/**
+ * Resolve the provider by name recorded on an interview at invite time, rather
+ * than the (possibly since-changed) global config. Keeps session minting and
+ * evaluation on the same provider the invite was created for.
+ */
+export function getInterviewProviderByName(name: string): InterviewProvider {
+  if (config.providers.mockAll) return new MockInterviewProvider();
+  if (name === 'bolna') return new BolnaProvider();
+  return new MockInterviewProvider();
+}
+
 export function __resetInterviewProvider(): void {
   instance = null;
 }

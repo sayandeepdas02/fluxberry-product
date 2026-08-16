@@ -9,7 +9,7 @@ import { logger } from '../utils/logger';
 import { notFound } from '../utils/errors';
 
 /** Content hash so we only re-sync a provider agent when the config changes. */
-function configHash(c: any): string {
+export function configHash(c: any): string {
   return crypto
     .createHash('sha256')
     .update(JSON.stringify({

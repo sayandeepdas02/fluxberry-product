@@ -12,6 +12,7 @@ import { stageService } from './stage.service';
 import { jobQueue } from '../queue/job-queue';
 import { emailTemplates } from '../integrations';
 import { logger } from '../utils/logger';
+import { config } from '../config/env';
 import type { ApplicationStage } from '@fluxberry/shared';
 
 const MAX_STEPS_PER_RUN = 100;
@@ -245,6 +246,12 @@ export const workflowEngine = {
             break;
           }
           case 'AI_INTERVIEW': {
+            if (!config.features.AI_INTERVIEW) {
+              logger.warn({ applicationId }, 'AI_INTERVIEW step skipped — feature disabled');
+              await recordStep(node, 'COMPLETED', { skipped: true, reason: 'AI_INTERVIEW feature disabled' });
+              index++;
+              break;
+            }
             // Send-and-wait: dispatch the interview invite once, pause, and
             // resume when the transcript has been evaluated.
             if (!ctx.interviewSent) {

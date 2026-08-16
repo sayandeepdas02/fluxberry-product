@@ -3,6 +3,7 @@ import { ROLE_RANK, type Role } from '@fluxberry/shared';
 import { getTokenVerifier } from '../auth';
 import { authService } from '../services/auth.service';
 import { memberRepository } from '../repositories/member.repository';
+import { config } from '../config/env';
 import { unauthorized, forbidden, badRequest } from '../utils/errors';
 
 /** Verify the bearer token and mirror the identity into Mongo (spec §79 step 1). */
@@ -57,6 +58,16 @@ export function requireRole(min: Role): RequestHandler {
     if (!role) return next(forbidden());
     if (ROLE_RANK[role] < ROLE_RANK[min]) {
       return next(forbidden('You do not have permission for this action'));
+    }
+    next();
+  };
+}
+
+/** Guard: reject the request outright when a feature flag is off, instead of relying on frontend hiding. */
+export function requireFeature(flag: keyof typeof config.features): RequestHandler {
+  return (_req, _res, next) => {
+    if (!config.features[flag]) {
+      return next(forbidden(`The ${flag} feature is not enabled`));
     }
     next();
   };

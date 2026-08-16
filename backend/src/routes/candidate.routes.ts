@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authenticate, resolveWorkspace, requireWorkspace, requireRole } from '../middleware/auth';
+import { authenticate, resolveWorkspace, requireWorkspace, requireRole, requireFeature } from '../middleware/auth';
 import { validateBody, validateQuery } from '../middleware/validate';
 import { candidateController } from '../controllers/candidate.controller';
 import { applicationController } from '../controllers/application.controller';
@@ -41,6 +41,7 @@ candidateRouter.get('/applications/:applicationId/interviews', interviewControll
 candidateRouter.post(
   '/applications/:applicationId/interview',
   requireRole('recruiter'),
+  requireFeature('AI_INTERVIEW'),
   validateBody(sendInterviewSchema),
   interviewController.send,
 );

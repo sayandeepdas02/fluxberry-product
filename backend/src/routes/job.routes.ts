@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authenticate, resolveWorkspace, requireWorkspace, requireRole } from '../middleware/auth';
+import { authenticate, resolveWorkspace, requireWorkspace, requireRole, requireFeature } from '../middleware/auth';
 import { validateBody, validateQuery } from '../middleware/validate';
 import { aiLimiter } from '../middleware/rate-limit';
 import { jobController } from '../controllers/job.controller';
@@ -65,6 +65,7 @@ jobRouter.get('/jobs/:jobId/interview-config', interviewController.getConfig);
 jobRouter.put(
   '/jobs/:jobId/interview-config',
   requireRole('recruiter'),
+  requireFeature('AI_INTERVIEW'),
   validateBody(upsertInterviewConfigSchema),
   interviewController.updateConfig,
 );
