@@ -16,7 +16,7 @@ import { workflowEngine } from './workflow-engine.service';
 import { secureToken } from '../utils/ids';
 import { logger } from '../utils/logger';
 import { config } from '../config/env';
-import { badRequest, notFound, forbidden } from '../utils/errors';
+import { badRequest, notFound, forbidden, conflict } from '../utils/errors';
 
 const CONSENT_TEXT =
   'This interview is conducted by an AI voice agent and will be recorded and transcribed for evaluation. By starting, you consent to the recording.';
@@ -169,7 +169,21 @@ export const interviewService = {
     }
 
     const execId = executionId || `mock_exec_${secureToken(6)}`;
-    await InterviewModel.findByIdAndUpdate(iv._id, { status: 'IN_PROGRESS', providerExecutionId: execId });
+    if (executionId) {
+      // A provider agent is shared across every candidate interviewing for the
+      // same job, so agentId alone can't prove this execution belongs to `iv`.
+      // Claim exclusively here — first interview to report an execution id owns it.
+      const claimedBy = await InterviewModel.findOne({ providerExecutionId: execId, _id: { $ne: iv._id } }).select(
+        '_id',
+      );
+      if (claimedBy) throw conflict('This execution has already been reported for a different interview');
+    }
+    try {
+      await InterviewModel.findByIdAndUpdate(iv._id, { status: 'IN_PROGRESS', providerExecutionId: execId });
+    } catch (err: any) {
+      if (err?.code === 11000) throw conflict('This execution has already been reported for a different interview');
+      throw err;
+    }
     await jobQueue.enqueue(
       'PROCESS_INTERVIEW',
       { interviewId: String(iv._id) },

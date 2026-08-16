@@ -51,7 +51,12 @@ const interviewSchema = new Schema(
 
 interviewSchema.index({ applicationId: 1 });
 interviewSchema.index({ candidateId: 1 });
-interviewSchema.index({ providerExecutionId: 1 });
+// Unique (when set) so a provider execution can only ever be claimed by one
+// interview — closes the cross-candidate execution reuse gap for shared job agents.
+interviewSchema.index(
+  { providerExecutionId: 1 },
+  { unique: true, partialFilterExpression: { providerExecutionId: { $type: 'string' } } },
+);
 
 export type InterviewDoc = InferSchemaType<typeof interviewSchema>;
 export const InterviewModel =

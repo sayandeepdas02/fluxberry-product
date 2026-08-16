@@ -115,7 +115,10 @@ export const candidateAssessmentService = {
       const docs = await questionRepository.findByIds(String(ca.workspaceId), questionIds);
       const specById = new Map(docs.map((d) => [String((d as any)._id), (d as any).coding]));
       for (const a of answers) {
-        if (a.code == null || a.languageId == null) continue;
+        if (a.code == null) continue;
+        if (a.languageId == null) {
+          throw badRequest('A language must be selected for one or more questions');
+        }
         const spec = specById.get(a.questionId);
         if (spec?.languageIds?.length && !spec.languageIds.includes(a.languageId)) {
           throw badRequest('Unsupported language for one or more questions');
