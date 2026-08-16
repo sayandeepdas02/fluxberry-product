@@ -22,7 +22,10 @@ import {
 } from '@/hooks/use-candidates';
 import { useApplicationForm } from '@/hooks/use-form';
 import { useApplicationAssessments } from '@/hooks/use-assessments';
+import { useApplicationInterviews, useSendInterview } from '@/hooks/use-interview';
+import { useFeature } from '@/hooks/use-features';
 import { SendAssessmentDialog } from '@/components/candidates/send-assessment-dialog';
+import { InterviewCard } from '@/components/candidates/interview-card';
 import { WorkflowRunCard } from '@/components/candidates/workflow-run-card';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -59,6 +62,9 @@ export default function CandidateProfilePage() {
   const timeline = useApplicationTimeline(activeApp?.id ?? '');
   const form = useApplicationForm(activeApp?.jobId ?? '');
   const assessments = useApplicationAssessments(activeApp?.id ?? '');
+  const interviews = useApplicationInterviews(activeApp?.id ?? '');
+  const sendInterview = useSendInterview();
+  const aiInterviewEnabled = useFeature('AI_INTERVIEW');
   const shortlist = useShortlist();
   const reject = useReject();
   const moveStage = useMoveStage();
@@ -183,6 +189,26 @@ export default function CandidateProfilePage() {
               <Button className="w-full" onClick={() => setSendOpen(true)} disabled={!activeApp}>
                 Send assessment
               </Button>
+              {aiInterviewEnabled && (
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  disabled={!activeApp || sendInterview.isPending}
+                  loading={sendInterview.isPending}
+                  onClick={() =>
+                    activeApp &&
+                    sendInterview.mutate(
+                      { applicationId: activeApp.id, input: { expiresInHours: 168 } },
+                      {
+                        onSuccess: () => toast.success('AI interview sent'),
+                        onError: (e) => toast.error(e instanceof Error ? e.message : 'Could not send'),
+                      },
+                    )
+                  }
+                >
+                  Send AI interview
+                </Button>
+              )}
               <Field label="Move to stage">
                 <Select value={activeApp?.stage} onValueChange={(v) => doMove(v as ApplicationStage)} disabled={!activeApp}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
@@ -228,6 +254,8 @@ export default function CandidateProfilePage() {
               </CardContent>
             </Card>
           )}
+
+          {(interviews.data?.length ?? 0) > 0 && <InterviewCard interviews={interviews.data!} />}
 
           {activeApp && <WorkflowRunCard applicationId={activeApp.id} />}
 

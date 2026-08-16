@@ -13,6 +13,7 @@ export * from './schemas/application';
 export * from './schemas/candidate';
 export * from './schemas/question';
 export * from './schemas/assessment';
+export * from './schemas/interview';
 export * from './schemas/workflow';
 export * from './schemas/analytics';
 export * from './schemas/careers';

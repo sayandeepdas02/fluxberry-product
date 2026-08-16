@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { Plus, ArrowUp, ArrowDown, Trash2, ArrowDownIcon, Sparkles, GitBranch, ClipboardCheck, Clock, MoveRight, Mail, Code2 } from 'lucide-react';
+import { Plus, ArrowUp, ArrowDown, Trash2, ArrowDownIcon, Sparkles, GitBranch, ClipboardCheck, Clock, MoveRight, Mail, Code2, Mic } from 'lucide-react';
 import {
   CONDITION_FIELDS,
   CONDITION_OPERATORS,
@@ -34,6 +34,7 @@ const NODE_META: Record<string, { label: string; icon: React.ReactNode }> = {
   CONDITION: { label: 'Condition', icon: <GitBranch className="size-4" /> },
   SEND_ASSESSMENT: { label: 'Send assessment', icon: <ClipboardCheck className="size-4" /> },
   CODING_ASSESSMENT: { label: 'Send coding test', icon: <Code2 className="size-4" /> },
+  AI_INTERVIEW: { label: 'AI voice interview', icon: <Mic className="size-4" /> },
   WAIT: { label: 'Wait', icon: <Clock className="size-4" /> },
   MOVE_STAGE: { label: 'Move to stage', icon: <MoveRight className="size-4" /> },
   SEND_EMAIL: { label: 'Send email', icon: <Mail className="size-4" /> },
@@ -43,6 +44,7 @@ const ADDABLE: WorkflowNodeType[] = ['AI_SCREEN', 'CONDITION', 'SEND_ASSESSMENT'
 const FIELD_LABELS: Record<ConditionField, string> = {
   screening_score: 'Screening score',
   assessment_score: 'Assessment score',
+  interview_score: 'Interview score',
   years_experience: 'Years of experience',
   expected_salary: 'Expected salary',
   location: 'Location',
@@ -58,9 +60,17 @@ export default function WorkflowBuilderPage() {
   const save = useSaveWorkflow(jobId);
   const { data: assessments } = useAssessments();
   const codingEnabled = useFeature('CODING_ASSESSMENT');
-  const addable: WorkflowNodeType[] = codingEnabled
-    ? ['AI_SCREEN', 'CONDITION', 'SEND_ASSESSMENT', 'CODING_ASSESSMENT', 'WAIT', 'MOVE_STAGE', 'SEND_EMAIL']
-    : ADDABLE;
+  const aiInterviewEnabled = useFeature('AI_INTERVIEW');
+  const addable: WorkflowNodeType[] = [
+    'AI_SCREEN',
+    'CONDITION',
+    'SEND_ASSESSMENT',
+    ...(codingEnabled ? (['CODING_ASSESSMENT'] as const) : []),
+    ...(aiInterviewEnabled ? (['AI_INTERVIEW'] as const) : []),
+    'WAIT',
+    'MOVE_STAGE',
+    'SEND_EMAIL',
+  ];
 
   const [nodes, setNodes] = useState<WorkflowNodeDto[] | null>(null);
   const [active, setActive] = useState(false);
@@ -83,6 +93,7 @@ export default function WorkflowBuilderPage() {
       case 'CONDITION': return c.condition ? `${FIELD_LABELS[c.condition.field as ConditionField]} ${OP_LABELS[c.condition.op as ConditionOperator]} ${c.condition.value}` : 'No condition set';
       case 'SEND_ASSESSMENT': return `Send "${assessmentName(c.assessmentId)}"`;
       case 'CODING_ASSESSMENT': return `Send coding test "${assessmentName(c.assessmentId)}"`;
+      case 'AI_INTERVIEW': return 'Conduct an AI voice interview';
       case 'WAIT': return `Wait ${c.durationHours ?? 0} hours`;
       case 'MOVE_STAGE': return `Move to ${STAGE_LABELS[c.stage as ApplicationStage] ?? c.stage}`;
       case 'SEND_EMAIL': return c.subject ? `Email: ${c.subject}` : 'Send an email';
@@ -279,6 +290,11 @@ function AddStepDialog({ open, onOpenChange, onAdd, assessments, addable }: {
               <Field label="Subject"><Input value={subject} onChange={(e) => setSubject(e.target.value)} /></Field>
               <Field label="Body"><Textarea rows={3} value={body} onChange={(e) => setBody(e.target.value)} /></Field>
             </>
+          )}
+          {type === 'AI_INTERVIEW' && (
+            <p className="text-sm text-muted-foreground">
+              Uses this job&apos;s AI Interview configuration (objective + questions). Set it up on the <span className="font-medium">AI Interview</span> tab.
+            </p>
           )}
         </div>
         <DialogFooter>

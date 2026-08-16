@@ -5,7 +5,9 @@ import { applicationRepository } from '../repositories/application.repository';
 import { candidateRepository } from '../repositories/candidate.repository';
 import { jobRepository } from '../repositories/job.repository';
 import { CandidateAssessmentModel } from '../models/candidate-assessment.model';
+import { InterviewModel } from '../models/interview.model';
 import { assessmentService } from './assessment.service';
+import { interviewService } from './interview.service';
 import { stageService } from './stage.service';
 import { jobQueue } from '../queue/job-queue';
 import { emailTemplates } from '../integrations';
@@ -14,15 +16,29 @@ import type { ApplicationStage } from '@fluxberry/shared';
 
 const MAX_STEPS_PER_RUN = 100;
 
-async function buildContext(app: any, candidate: any, assessmentScore: number | null): Promise<WorkflowContext> {
+async function buildContext(
+  app: any,
+  candidate: any,
+  assessmentScore: number | null,
+  interviewScore: number | null,
+): Promise<WorkflowContext> {
   return {
     screening_score: app.screeningResult?.score ?? app.score ?? null,
     assessment_score: assessmentScore,
+    interview_score: interviewScore,
     years_experience: candidate?.parsedProfile?.yearsExperience ?? null,
     expected_salary: candidate?.expectedSalary ?? null,
     location: candidate?.location ?? null,
     stage: app.stage,
   };
+}
+
+async function latestInterviewScore(applicationId: string): Promise<number | null> {
+  const iv = await InterviewModel.findOne({ applicationId, status: 'COMPLETED' })
+    .sort({ completedAt: -1 })
+    .select('evaluation')
+    .lean();
+  return (iv?.evaluation as any)?.overallScore ?? null;
 }
 
 async function latestCompletedAssessmentScore(applicationId: string): Promise<number | null> {
@@ -76,7 +92,11 @@ export const workflowEngine = {
     const applicationId = String(run.applicationId);
 
     const assessmentScore = await latestCompletedAssessmentScore(applicationId);
-    const ctx: WorkflowContext = { ...(run.context as WorkflowContext), ...(await buildContext(app, candidate, assessmentScore)) };
+    const interviewScore = await latestInterviewScore(applicationId);
+    const ctx: WorkflowContext = {
+      ...(run.context as WorkflowContext),
+      ...(await buildContext(app, candidate, assessmentScore, interviewScore)),
+    };
     const nodes = wf.nodes;
     let index = (ctx.index as number) ?? 0;
 
@@ -225,8 +245,30 @@ export const workflowEngine = {
             break;
           }
           case 'AI_INTERVIEW': {
-            await recordStep(node, 'SKIPPED'); // wired in the Bolna slice (PR B)
-            index++;
+            // Send-and-wait: dispatch the interview invite once, pause, and
+            // resume when the transcript has been evaluated.
+            if (!ctx.interviewSent) {
+              await interviewService.send(workspaceId, applicationId, { expiresInHours: 168 }, actor);
+              ctx.interviewSent = true;
+              await recordStep(node, 'COMPLETED', { sent: true });
+              ctx.index = index;
+              await persist({ status: 'WAITING', currentNodeId: node.id, context: ctx });
+              return; // resumes when the interview is evaluated
+            }
+            const interviewDone = await InterviewModel.findOne({ applicationId, status: 'COMPLETED' })
+              .sort({ completedAt: -1 })
+              .select('evaluation')
+              .lean();
+            if (interviewDone) {
+              ctx.interview_score = (interviewDone.evaluation as any)?.overallScore ?? null;
+              ctx.interviewSent = false;
+              await recordStep(node, 'COMPLETED', { score: ctx.interview_score });
+              index++;
+            } else {
+              ctx.index = index;
+              await persist({ status: 'WAITING', currentNodeId: node.id, context: ctx });
+              return;
+            }
             break;
           }
           default: {

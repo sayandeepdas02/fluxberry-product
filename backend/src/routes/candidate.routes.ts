@@ -4,7 +4,8 @@ import { validateBody, validateQuery } from '../middleware/validate';
 import { candidateController } from '../controllers/candidate.controller';
 import { applicationController } from '../controllers/application.controller';
 import { workflowController } from '../controllers/workflow.controller';
-import { candidateListQuerySchema, stageChangeSchema, rejectApplicationSchema } from '@fluxberry/shared';
+import { interviewController } from '../controllers/interview.controller';
+import { candidateListQuerySchema, stageChangeSchema, rejectApplicationSchema, sendInterviewSchema } from '@fluxberry/shared';
 
 export const candidateRouter = Router();
 
@@ -33,4 +34,13 @@ candidateRouter.post(
   requireRole('recruiter'),
   validateBody(rejectApplicationSchema),
   applicationController.reject,
+);
+
+// AI interviews for an application.
+candidateRouter.get('/applications/:applicationId/interviews', interviewController.listForApplication);
+candidateRouter.post(
+  '/applications/:applicationId/interview',
+  requireRole('recruiter'),
+  validateBody(sendInterviewSchema),
+  interviewController.send,
 );

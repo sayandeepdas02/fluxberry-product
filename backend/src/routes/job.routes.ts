@@ -5,6 +5,7 @@ import { aiLimiter } from '../middleware/rate-limit';
 import { jobController } from '../controllers/job.controller';
 import { formController } from '../controllers/form.controller';
 import { workflowController } from '../controllers/workflow.controller';
+import { interviewController } from '../controllers/interview.controller';
 import {
   createJobSchema,
   updateJobSchema,
@@ -13,6 +14,7 @@ import {
   jobStatusSchema,
   upsertFormSchema,
   upsertWorkflowSchema,
+  upsertInterviewConfigSchema,
 } from '@fluxberry/shared';
 
 export const jobRouter = Router();
@@ -56,4 +58,13 @@ jobRouter.put(
   requireRole('recruiter'),
   validateBody(upsertWorkflowSchema),
   workflowController.save,
+);
+
+// AI interview configuration (one per job).
+jobRouter.get('/jobs/:jobId/interview-config', interviewController.getConfig);
+jobRouter.put(
+  '/jobs/:jobId/interview-config',
+  requireRole('recruiter'),
+  validateBody(upsertInterviewConfigSchema),
+  interviewController.updateConfig,
 );
