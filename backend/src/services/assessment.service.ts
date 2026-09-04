@@ -98,6 +98,31 @@ export const assessmentService = {
       { idempotencyKey: `assessment-invite:${ca._id}` },
     );
 
+    // Deferred reminder: fires 48h later but only if the candidate hasn't started yet.
+    const reminder = emailTemplates.assessmentReminder({
+      candidateName: candidate.name,
+      assessmentName: assessment.name,
+      link,
+    });
+    await jobQueue.enqueue(
+      'SEND_EMAIL',
+      {
+        to: candidate.email,
+        subject: reminder.subject,
+        html: reminder.html,
+        text: reminder.text,
+        conditionCheck: {
+          type: 'candidate_assessment_status',
+          candidateAssessmentId: String(ca._id),
+          allowedStatuses: ['INVITED'],
+        },
+      },
+      {
+        idempotencyKey: `assessment-reminder:${ca._id}`,
+        runAt: new Date(Date.now() + 48 * 60 * 60 * 1000),
+      },
+    );
+
     await eventBus.publish({
       workspaceId,
       type: 'assessment.sent',

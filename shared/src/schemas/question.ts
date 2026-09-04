@@ -62,6 +62,8 @@ export const createQuestionSchema = z
     correctAnswer: z
       .union([z.string(), z.array(z.string())])
       .optional(),
+    /** When true, candidates may select multiple options (checkbox UI). */
+    isMultiSelect: z.boolean().optional(),
     /** CODING questions carry their Judge0 spec here (languages, test cases, limits). */
     coding: codingSpecSchema.optional(),
     difficulty: z.enum(DIFFICULTIES).default('MEDIUM'),
@@ -144,6 +146,7 @@ export type QuestionDto = {
   questionText: string;
   options: QuestionOption[];
   correctAnswer?: string | string[] | null;
+  isMultiSelect?: boolean;
   coding?: CodingSpec | null;
   difficulty: Difficulty;
   category: string;
@@ -160,5 +163,7 @@ export type PublicQuestionDto = {
   type: QuestionType;
   questionText: string;
   options: QuestionOption[];
+  /** True when the question accepts multiple correct answers (checkboxes, not radio). */
+  isMultiSelect?: boolean;
   coding?: PublicCodingSpec | null;
 };

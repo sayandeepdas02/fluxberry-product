@@ -32,6 +32,7 @@ export function toQuestionDto(q: any): QuestionDto {
     questionText: q.questionText,
     options: (q.options ?? []).map((o: any) => ({ id: o.id, text: o.text })),
     correctAnswer: q.correctAnswer ?? null,
+    isMultiSelect: Boolean(q.isMultiSelect),
     coding: toCodingSpec(q.coding),
     difficulty: q.difficulty,
     category: q.category,
@@ -65,6 +66,7 @@ export function toPublicQuestionDto(q: any): PublicQuestionDto {
     type: q.type,
     questionText: q.questionText,
     options: (q.options ?? []).map((o: any) => ({ id: o.id, text: o.text })),
+    isMultiSelect: Boolean((q as any).isMultiSelect),
     coding,
   };
 }

@@ -1,11 +1,13 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { useParams } from 'next/navigation';
 import { CheckCircle2, Clock, Loader2, Play } from 'lucide-react';
 import {
   CODING_LANGUAGES,
   type PublicAssessmentDto,
+  type PublicQuestionDto,
   type RunCodeResult,
   type SubmitAssessmentResult,
 } from '@fluxberry/shared';
@@ -17,9 +19,16 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@
 import { publicConfig } from '@/lib/config';
 import { cn } from '@/lib/utils';
 
-type CodeAnswer = { code: string; languageId: number };
+// Monaco Editor loaded dynamically to avoid SSR bundle size issues.
+const MonacoEditor = dynamic(() => import('@monaco-editor/react'), { ssr: false, loading: () => <div className="h-[360px] animate-pulse rounded-md border border-border bg-muted" /> });
 
-const langLabel = (id: number) => CODING_LANGUAGES.find((l) => l.id === id)?.label ?? `Language ${id}`;
+type CodeAnswer = { code: string; languageId: number };
+// MCQ answers: single string for radio, string[] for multi-select checkboxes.
+type MCQAnswers = Record<string, string | string[]>;
+
+const langById = (id: number) => CODING_LANGUAGES.find((l) => l.id === id);
+const langLabel = (id: number) => langById(id)?.label ?? `Language ${id}`;
+const monacoLang = (id: number) => langById(id)?.monaco ?? 'plaintext';
 
 export default function AssessmentTakePage() {
   const { token } = useParams<{ token: string }>();
@@ -27,8 +36,8 @@ export default function AssessmentTakePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [answers, setAnswers] = useState<Record<string, string>>({}); // MCQ: option id
-  const [codeAnswers, setCodeAnswers] = useState<Record<string, CodeAnswer>>({}); // CODING
+  const [answers, setAnswers] = useState<MCQAnswers>({});
+  const [codeAnswers, setCodeAnswers] = useState<Record<string, CodeAnswer>>({});
   const [current, setCurrent] = useState(0);
   const [remaining, setRemaining] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -40,11 +49,12 @@ export default function AssessmentTakePage() {
   const applyData = useCallback((d: PublicAssessmentDto) => {
     setData(d);
     setRemaining(d.remainingSeconds ?? null);
-    setAnswers(
-      Object.fromEntries(
-        d.savedAnswers.filter((a) => a.answer != null).map((a) => [a.questionId, a.answer as string]),
-      ),
-    );
+    const hydratedAnswers: MCQAnswers = {};
+    for (const a of d.savedAnswers) {
+      if (a.answer == null) continue;
+      hydratedAnswers[a.questionId] = Array.isArray(a.answer) ? (a.answer as string[]) : (a.answer as string);
+    }
+    setAnswers(hydratedAnswers);
     const code: Record<string, CodeAnswer> = {};
     for (const q of d.questions) {
       if (q.type !== 'CODING' || !q.coding) continue;
@@ -93,7 +103,7 @@ export default function AssessmentTakePage() {
       );
       if (res.status === 'GRADING') {
         setData((d) => (d ? { ...d, status: 'GRADING' } : d));
-        submittedRef.current = false; // grading is server-side; nothing more to submit
+        submittedRef.current = false;
       } else {
         setDone(true);
       }
@@ -121,9 +131,18 @@ export default function AssessmentTakePage() {
     applyData(d);
   };
 
-  const choose = (questionId: string, answer: string) => {
-    setAnswers((a) => ({ ...a, [questionId]: answer }));
-    void api.post(`/api/v1/public/assessments/${token}/answer`, { questionId, answer }, { public: true }).catch(() => {});
+  const choose = (questionId: string, optionId: string, isMultiSelect: boolean) => {
+    let next: string | string[];
+    if (isMultiSelect) {
+      const current = (answers[questionId] as string[] | undefined) ?? [];
+      next = current.includes(optionId) ? current.filter((x) => x !== optionId) : [...current, optionId];
+    } else {
+      next = optionId;
+    }
+    setAnswers((a) => ({ ...a, [questionId]: next }));
+    void api
+      .post(`/api/v1/public/assessments/${token}/answer`, { questionId, answer: next }, { public: true })
+      .catch(() => {});
   };
 
   const saveCode = (questionId: string, ca: CodeAnswer) => {
@@ -212,6 +231,12 @@ function Timer({ remaining }: { remaining: number | null }) {
   );
 }
 
+function isAnswered(q: PublicQuestionDto, answers: MCQAnswers): boolean {
+  const a = answers[q.id];
+  if (a == null) return false;
+  return Array.isArray(a) ? a.length > 0 : a !== '';
+}
+
 function TestRunner({
   data,
   answers,
@@ -223,17 +248,20 @@ function TestRunner({
   remaining,
 }: {
   data: PublicAssessmentDto;
-  answers: Record<string, string>;
+  answers: MCQAnswers;
   current: number;
   setCurrent: (n: number) => void;
-  onChoose: (q: string, a: string) => void;
+  onChoose: (q: string, a: string, multi: boolean) => void;
   onSubmit: () => void;
   submitting: boolean;
   remaining: number | null;
 }) {
   const q = data.questions[current];
   const isLast = current === data.questions.length - 1;
-  const answeredCount = data.questions.filter((qq) => answers[qq.id]).length;
+  const answeredCount = data.questions.filter((qq) => isAnswered(qq, answers)).length;
+  const isMulti = Boolean(q.isMultiSelect);
+  const selected = answers[q.id];
+  const selectedSet = new Set(Array.isArray(selected) ? selected : selected ? [selected] : []);
 
   return (
     <div className="space-y-4">
@@ -245,19 +273,28 @@ function TestRunner({
       <Card>
         <CardContent className="space-y-5 py-6">
           <p className="text-base font-medium">{q.questionText}</p>
+          {isMulti && <p className="text-xs text-muted-foreground">Select all that apply.</p>}
           <div className="space-y-2">
-            {q.options.map((opt) => (
-              <label
-                key={opt.id}
-                className={cn(
-                  'flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 text-sm transition-colors',
-                  answers[q.id] === opt.id ? 'border-primary bg-primary/5' : 'border-border hover:bg-accent',
-                )}
-              >
-                <input type="radio" name={q.id} checked={answers[q.id] === opt.id} onChange={() => onChoose(q.id, opt.id)} />
-                {opt.text}
-              </label>
-            ))}
+            {q.options.map((opt) => {
+              const checked = selectedSet.has(opt.id);
+              return (
+                <label
+                  key={opt.id}
+                  className={cn(
+                    'flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 text-sm transition-colors',
+                    checked ? 'border-primary bg-primary/5' : 'border-border hover:bg-accent',
+                  )}
+                >
+                  <input
+                    type={isMulti ? 'checkbox' : 'radio'}
+                    name={q.id}
+                    checked={checked}
+                    onChange={() => onChoose(q.id, opt.id, isMulti)}
+                  />
+                  {opt.text}
+                </label>
+              );
+            })}
           </div>
         </CardContent>
       </Card>
@@ -372,15 +409,27 @@ function CodingRunner({
             </Button>
           </div>
 
-          <textarea
-            value={ca.code}
-            onChange={(e) => setCode(e.target.value)}
-            onBlur={() => saveCode(q.id, ca)}
-            spellCheck={false}
-            rows={14}
-            className="w-full resize-y rounded-md border border-border bg-background p-3 font-mono text-[13px] leading-relaxed outline-none focus:ring-1 focus:ring-ring"
-            placeholder="Write your solution here…"
-          />
+          <div className="overflow-hidden rounded-md border border-border">
+            <MonacoEditor
+              height="360px"
+              language={monacoLang(ca.languageId)}
+              value={ca.code}
+              onChange={(v) => { if (v !== undefined) setCode(v); }}
+              onMount={(editor) => {
+                editor.onDidBlurEditorWidget(() => saveCode(q.id, { code: editor.getValue(), languageId: ca.languageId }));
+              }}
+              theme="vs-dark"
+              options={{
+                fontSize: 14,
+                minimap: { enabled: false },
+                scrollBeyondLastLine: false,
+                wordWrap: 'on',
+                lineNumbers: 'on',
+                automaticLayout: true,
+                padding: { top: 12, bottom: 12 },
+              }}
+            />
+          </div>
 
           {runError && <p className="text-sm text-destructive">{runError}</p>}
           {runResult && (

@@ -10,7 +10,7 @@ export type FeatureFlag = (typeof FEATURE_FLAGS)[number];
 export type FeatureFlagState = Record<FeatureFlag, boolean>;
 
 export const DEFAULT_FEATURE_FLAGS: FeatureFlagState = {
-  CODING_ASSESSMENT: false,
+  CODING_ASSESSMENT: true,
   AI_INTERVIEW: false,
   WORKFLOW_AUTOMATION: true,
   ADVANCED_ANALYTICS: false,
