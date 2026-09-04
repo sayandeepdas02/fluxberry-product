@@ -14,6 +14,7 @@ import { jobQueue } from '../queue/job-queue';
 import { workflowEngine } from './workflow-engine.service';
 import { notFound, badRequest, conflict } from '../utils/errors';
 import { logger } from '../utils/logger';
+import { trackEvent } from '../integrations/posthog';
 
 interface ResumeFile {
   buffer: Buffer;
@@ -145,6 +146,7 @@ export const applicationService = {
       { idempotencyKey: `app-confirm:${application._id}` },
     );
 
+    trackEvent(String(candidate._id), 'candidate.applied', { workspaceId, jobId, applicationId: String(application._id) });
     logger.info({ applicationId: String(application._id), jobId }, 'application submitted');
     return { applicationId: String(application._id) };
   },

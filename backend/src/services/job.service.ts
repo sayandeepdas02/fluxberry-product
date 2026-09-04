@@ -19,6 +19,7 @@ import { logger } from '../utils/logger';
 import { JobModel } from '../models/job.model';
 import { ApplicationFormModel } from '../models/application-form.model';
 import { WorkflowModel } from '../models/workflow.model';
+import { trackEvent } from '../integrations/posthog';
 
 export const jobService = {
   async create(workspaceId: string, userId: string, input: CreateJobInput): Promise<JobDto> {
@@ -134,6 +135,7 @@ export const jobService = {
       actorLabel: 'user',
       payload: { slug: job.slug },
     });
+    trackEvent(userId, 'job.published', { workspaceId, jobId: id, title: job.title });
     return toJobDto(updated!.toObject());
   },
 

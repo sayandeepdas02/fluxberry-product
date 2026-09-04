@@ -21,6 +21,7 @@
     "@aws-sdk/client-s3": "^3.712.0",
     "@aws-sdk/s3-request-presigner": "^3.712.0",
     "@fluxberry/shared": "*",
+    "@sentry/node": "^10.73.0",
     "compression": "^1.7.5",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
@@ -35,6 +36,7 @@
     "pdf-parse": "^1.1.1",
     "pino": "^9.5.0",
     "pino-http": "^10.3.0",
+    "posthog-node": "^5.51.6",
     "resend": "^4.0.1",
     "zod": "^3.23.8"
   },

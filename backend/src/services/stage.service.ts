@@ -10,6 +10,8 @@ import { emailTemplates } from '../integrations';
 import { jobQueue } from '../queue/job-queue';
 import { notFound } from '../utils/errors';
 import { logger } from '../utils/logger';
+import { trackEvent } from '../integrations/posthog';
+import { notificationService } from './notification.service';
 import type { EventType } from '@fluxberry/shared';
 
 interface Actor {
@@ -116,6 +118,25 @@ export const stageService = {
       })();
     }
 
+    // Broadcast in-app notification to workspace members (fire-and-forget).
+    void (async () => {
+      try {
+        const [cand, job] = await Promise.all([
+          CandidateModel.findById(app.candidateId).select('name').lean(),
+          JobModel.findById(app.jobId).select('title').lean(),
+        ]);
+        if (!cand || !job) return;
+        const typeMap: Record<string, string> = { HIRED: 'candidate_hired', REJECTED: 'new_candidate' };
+        await notificationService.broadcast(workspaceId, {
+          type: typeMap[targetStage] ?? 'new_candidate',
+          title: targetStage === 'HIRED' ? `${cand.name} was hired for ${job.title}` : `${cand.name} moved to ${targetStage}`,
+          body: job.title,
+          entityType: 'application',
+          entityId: applicationId,
+        });
+      } catch {}
+    })();
+
     logger.debug({ applicationId, from, to: targetStage }, 'stage changed');
     return toApplicationDto(updated!.toObject());
   },
@@ -126,10 +147,12 @@ export const stageService = {
     });
   },
 
-  hire(workspaceId: string, applicationId: string, actor: Actor) {
-    return this.moveToStage(workspaceId, applicationId, 'HIRED', actor, {
+  async hire(workspaceId: string, applicationId: string, actor: Actor) {
+    const result = await this.moveToStage(workspaceId, applicationId, 'HIRED', actor, {
       eventType: 'candidate.hired',
     });
+    trackEvent(actor.userId, 'candidate.hired', { workspaceId, applicationId });
+    return result;
   },
 
   reject(

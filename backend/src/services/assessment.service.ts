@@ -19,6 +19,7 @@ import { eventBus } from '../events/event-bus';
 import { stageService } from './stage.service';
 import { auditService } from './audit.service';
 import { badRequest, notFound } from '../utils/errors';
+import { trackEvent } from '../integrations/posthog';
 
 export const assessmentService = {
   async create(workspaceId: string, userId: string, input: CreateAssessmentInput): Promise<AssessmentDto> {
@@ -148,6 +149,7 @@ export const assessmentService = {
       await stageService.moveToStage(workspaceId, applicationId, 'ASSESSMENT', actor);
     }
 
+    trackEvent(actor.userId, 'assessment.sent', { workspaceId, assessmentId: input.assessmentId, applicationId });
     return toCandidateAssessmentDto(ca.toObject(), { name: assessment.name, type: assessment.type });
   },
 

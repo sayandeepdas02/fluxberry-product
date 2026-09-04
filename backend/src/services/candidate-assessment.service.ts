@@ -15,6 +15,8 @@ import { eventBus } from '../events/event-bus';
 import { jobQueue } from '../queue/job-queue';
 import { workflowEngine } from './workflow-engine.service';
 import { badRequest, notFound } from '../utils/errors';
+import { trackEvent } from '../integrations/posthog';
+import { notificationService } from './notification.service';
 
 function isExpired(ca: any): boolean {
   return Boolean(ca.expiresAt && new Date(ca.expiresAt).getTime() < Date.now());
@@ -181,6 +183,14 @@ export const candidateAssessmentService = {
       payload: { score, assessmentName: assessment.name },
     });
 
+    trackEvent(String(ca.candidateId), 'assessment.completed', { workspaceId: String(ca.workspaceId), score });
+    void notificationService.broadcast(String(ca.workspaceId), {
+      type: 'assessment_completed',
+      title: `Assessment completed by candidate`,
+      body: `Score: ${score}/${100}`,
+      entityType: 'candidate_assessment',
+      entityId: String(ca._id),
+    }).catch(() => {});
     await workflowEngine.resumeForApplication(String(ca.applicationId));
     return { status: 'COMPLETED', score, maxScore: 100 };
   },
