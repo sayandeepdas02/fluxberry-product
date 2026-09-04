@@ -7,6 +7,7 @@ import type {
   UpdateAssessmentInput,
   CandidateAssessmentDto,
   SendAssessmentInput,
+  JobAssessmentRowDto,
 } from '@fluxberry/shared';
 import { api } from '@/lib/api-client';
 import { useWorkspace } from '@/components/providers/workspace-provider';
@@ -47,6 +48,25 @@ export function useUpdateAssessment(id: string) {
   });
 }
 
+export function usePublishAssessment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.post<AssessmentDto>(`/api/v1/assessments/${id}/publish`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['assessments'] });
+      queryClient.invalidateQueries({ queryKey: ['assessment'] });
+    },
+  });
+}
+
+export function useDeleteAssessment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.del(`/api/v1/assessments/${id}`),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['assessments'] }),
+  });
+}
+
 export function useApplicationAssessments(applicationId: string) {
   const { currentWorkspace } = useWorkspace();
   return useQuery({
@@ -56,6 +76,18 @@ export function useApplicationAssessments(applicationId: string) {
     // Poll while a coding submission is still grading so the score appears live.
     refetchInterval: (query) =>
       (query.state.data ?? []).some((ca) => ca.status === 'GRADING') ? 3000 : false,
+  });
+}
+
+export function useJobAssessments(jobId: string) {
+  const { currentWorkspace } = useWorkspace();
+  return useQuery({
+    queryKey: ['job-assessments', currentWorkspace.id, jobId],
+    queryFn: () => api.get<JobAssessmentRowDto[]>(`/api/v1/jobs/${jobId}/assessments`),
+    enabled: Boolean(jobId),
+    // Poll while a coding submission is still grading so the score appears live.
+    refetchInterval: (query) =>
+      (query.state.data ?? []).some((r) => r.status === 'GRADING') ? 3000 : false,
   });
 }
 

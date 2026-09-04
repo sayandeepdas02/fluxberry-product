@@ -51,10 +51,14 @@ export function useCandidateProfile(candidateId: string) {
     queryKey: ['candidate', currentWorkspace.id, candidateId],
     queryFn: () => api.get<CandidateProfileDto>(`/api/v1/candidates/${candidateId}`),
     enabled: Boolean(candidateId),
-    // Poll while screening is in progress so the score appears automatically.
+    // Poll while any application's screening is in progress so the score appears automatically,
+    // regardless of which application tab the recruiter currently has selected.
     refetchInterval: (query) => {
-      const status = query.state.data?.applications?.[0]?.screeningResult?.status;
-      return status === 'PENDING' || status === 'PROCESSING' ? 3000 : false;
+      const apps = query.state.data?.applications ?? [];
+      const anyPending = apps.some(
+        (a) => a.screeningResult?.status === 'PENDING' || a.screeningResult?.status === 'PROCESSING',
+      );
+      return anyPending ? 3000 : false;
     },
   });
 }

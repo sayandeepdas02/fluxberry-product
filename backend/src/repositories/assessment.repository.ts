@@ -6,6 +6,7 @@ export const assessmentRepository = {
   findInWorkspace: (workspaceId: string, id: string) => AssessmentModel.findOne({ _id: id, workspaceId }),
   update: (id: string, patch: Record<string, any>) =>
     AssessmentModel.findByIdAndUpdate(id, patch, { new: true }),
+  remove: (id: string) => AssessmentModel.findByIdAndDelete(id),
   list: (workspaceId: string) => AssessmentModel.find({ workspaceId }).sort({ createdAt: -1 }).lean(),
 };
 

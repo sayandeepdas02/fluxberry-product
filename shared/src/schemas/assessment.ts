@@ -152,6 +152,22 @@ export type CandidateAssessmentDto = {
   codingResults?: CodingQuestionResult[] | null;
 };
 
+/** One (candidate, assessment) pairing for a job's Assessments tab — assessment status across all candidates on a job. */
+export type JobAssessmentRowDto = {
+  applicationId: string;
+  candidateId: string;
+  candidateName: string;
+  candidateEmail: string;
+  assessmentId: string;
+  assessmentName: string;
+  assessmentType: AssessmentType;
+  status: CandidateAssessmentStatus;
+  score?: number | null;
+  maxScore?: number | null;
+  invitedAt?: string | null;
+  completedAt?: string | null;
+};
+
 /** A saved answer echoed back to the candidate to restore in-progress work. */
 export type SavedAnswer = {
   questionId: string;

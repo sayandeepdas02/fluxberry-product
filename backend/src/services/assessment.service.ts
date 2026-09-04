@@ -1,3 +1,4 @@
+import { Types } from 'mongoose';
 import type {
   CreateAssessmentInput,
   UpdateAssessmentInput,
@@ -5,10 +6,12 @@ import type {
   AssessmentStatus,
   AssessmentDto,
   CandidateAssessmentDto,
+  JobAssessmentRowDto,
 } from '@fluxberry/shared';
 import { assessmentRepository, candidateAssessmentRepository } from '../repositories/assessment.repository';
 import { applicationRepository } from '../repositories/application.repository';
 import { candidateRepository } from '../repositories/candidate.repository';
+import { ApplicationModel } from '../models/application.model';
 import { JobModel } from '../models/job.model';
 import { toAssessmentDto, toCandidateAssessmentDto } from '../serializers/assessment.serializer';
 import { secureToken } from '../utils/ids';
@@ -39,6 +42,26 @@ export const assessmentService = {
     if (!existing) throw notFound('Assessment not found');
     const a = await assessmentRepository.update(id, { status });
     return toAssessmentDto(a!.toObject());
+  },
+
+  /** Dedicated publish step (mirrors job publish): validates content, idempotent. */
+  async publish(workspaceId: string, id: string): Promise<AssessmentDto> {
+    const existing = await assessmentRepository.findInWorkspace(workspaceId, id);
+    if (!existing) throw notFound('Assessment not found');
+    if (existing.status === 'PUBLISHED') return toAssessmentDto(existing.toObject());
+    if (!existing.questions || existing.questions.length === 0) {
+      throw badRequest('Add at least one question before publishing');
+    }
+    const a = await assessmentRepository.update(id, { status: 'PUBLISHED' });
+    return toAssessmentDto(a!.toObject());
+  },
+
+  /** Only DRAFT assessments can be deleted — a PUBLISHED one may already have candidate assessments referencing it. */
+  async remove(workspaceId: string, id: string): Promise<void> {
+    const existing = await assessmentRepository.findInWorkspace(workspaceId, id);
+    if (!existing) throw notFound('Assessment not found');
+    if (existing.status !== 'DRAFT') throw badRequest('Only draft assessments can be deleted');
+    await assessmentRepository.remove(id);
   },
 
   async list(workspaceId: string): Promise<AssessmentDto[]> {
@@ -151,6 +174,36 @@ export const assessmentService = {
 
     trackEvent(actor.userId, 'assessment.sent', { workspaceId, assessmentId: input.assessmentId, applicationId });
     return toCandidateAssessmentDto(ca.toObject(), { name: assessment.name, type: assessment.type });
+  },
+
+  /** Flat per-candidate-per-assessment view for a job's Assessments tab. */
+  async listForJob(workspaceId: string, jobId: string): Promise<JobAssessmentRowDto[]> {
+    const wsId = new Types.ObjectId(workspaceId);
+    const jId = new Types.ObjectId(jobId);
+    const rows = await ApplicationModel.aggregate([
+      { $match: { workspaceId: wsId, jobId: jId } },
+      { $lookup: { from: 'candidate_assessments', localField: '_id', foreignField: 'applicationId', as: 'ca' } },
+      { $unwind: '$ca' },
+      { $lookup: { from: 'candidates', localField: 'candidateId', foreignField: '_id', as: 'candidate' } },
+      { $unwind: '$candidate' },
+      { $lookup: { from: 'assessments', localField: 'ca.assessmentId', foreignField: '_id', as: 'assessment' } },
+      { $unwind: '$assessment' },
+      { $sort: { 'ca.invitedAt': -1 } },
+    ]);
+    return rows.map((r: any) => ({
+      applicationId: String(r._id),
+      candidateId: String(r.candidate._id),
+      candidateName: r.candidate.name,
+      candidateEmail: r.candidate.email,
+      assessmentId: String(r.assessment._id),
+      assessmentName: r.assessment.name,
+      assessmentType: r.assessment.type,
+      status: r.ca.status,
+      score: r.ca.score ?? null,
+      maxScore: r.ca.maxScore ?? null,
+      invitedAt: r.ca.invitedAt ? new Date(r.ca.invitedAt).toISOString() : null,
+      completedAt: r.ca.completedAt ? new Date(r.ca.completedAt).toISOString() : null,
+    }));
   },
 
   async listForApplication(workspaceId: string, applicationId: string): Promise<CandidateAssessmentDto[]> {
