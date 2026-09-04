@@ -1,25 +1,31 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { useSession } from '@/hooks/use-session';
 import { WorkspaceProvider } from '@/components/providers/workspace-provider';
 import { Sidebar } from '@/components/layout/sidebar';
 import { PageSpinner } from '@/components/ui/spinner';
 import { CommandMenu } from '@/components/command-menu';
+import { api, setWorkspaceId } from '@/lib/api-client';
+import type { WorkspaceDto } from '@fluxberry/shared';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
+  const queryClient = useQueryClient();
   const { data: session, isLoading } = useSession();
 
   useEffect(() => {
-    if (isLoading) return;
-    if (!session) router.replace('/login');
-    else if (session.needsOnboarding) router.replace('/onboarding');
-  }, [isLoading, session, router]);
+    if (!session?.needsOnboarding) return;
+    api
+      .post<WorkspaceDto>('/api/v1/workspaces/onboarding', { name: 'My Workspace', company: 'My Company' })
+      .then((ws) => {
+        setWorkspaceId(ws.id);
+        queryClient.invalidateQueries({ queryKey: ['session'] });
+      })
+      .catch(() => {});
+  }, [session?.needsOnboarding, queryClient]);
 
-  if (isLoading) return <PageSpinner label="Loading…" />;
-  if (!session || session.needsOnboarding) return <PageSpinner />;
+  if (isLoading || !session || session.needsOnboarding) return <PageSpinner label="Loading…" />;
 
   return (
     <WorkspaceProvider session={session}>
