@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { authenticate, resolveWorkspace, requireWorkspace, requireRole } from '../middleware/auth';
 import { validateBody } from '../middleware/validate';
+import { logoUpload } from '../middleware/upload';
+import { uploadLimiter } from '../middleware/rate-limit';
 import { workspaceController } from '../controllers/workspace.controller';
 import {
   createWorkspaceSchema,
@@ -31,6 +33,17 @@ workspaceRouter.patch(
   requireRole('admin'),
   validateBody(updateWorkspaceSchema),
   workspaceController.update,
+);
+
+workspaceRouter.post(
+  '/workspaces/:workspaceId/logo',
+  authenticate,
+  resolveWorkspace,
+  requireWorkspace,
+  requireRole('admin'),
+  uploadLimiter,
+  logoUpload,
+  workspaceController.uploadLogo,
 );
 
 workspaceRouter.get(

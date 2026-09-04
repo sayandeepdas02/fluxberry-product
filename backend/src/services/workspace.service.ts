@@ -7,12 +7,15 @@ import type {
   WorkspaceDto,
   WorkspaceMemberDto,
 } from '@fluxberry/shared';
+import crypto from 'node:crypto';
 import { workspaceRepository } from '../repositories/workspace.repository';
 import { memberRepository } from '../repositories/member.repository';
 import { userRepository } from '../repositories/user.repository';
 import { toWorkspaceDto, toMemberDto } from '../serializers/workspace.serializer';
 import { uniqueSlug } from '../utils/slug';
 import { conflict, forbidden, notFound } from '../utils/errors';
+import { assertValidImage } from '../utils/file-validation';
+import { getStorageProvider } from '../integrations';
 import { auditService } from './audit.service';
 import { eventBus } from '../events/event-bus';
 
@@ -88,6 +91,26 @@ export const workspaceService = {
       resourceId: workspaceId,
       metadata: patch,
     });
+    return toWorkspaceDto(ws, role);
+  },
+
+  async uploadLogo(
+    workspaceId: string,
+    role: Role,
+    file: { buffer: Buffer; originalname: string; mimetype: string },
+  ): Promise<WorkspaceDto> {
+    const ext = assertValidImage(file.buffer);
+    const key = `logos/${workspaceId}/${crypto.randomBytes(8).toString('hex')}.${ext}`;
+    const storage = getStorageProvider();
+    const fileRef = await storage.upload({
+      key,
+      body: file.buffer,
+      contentType: file.mimetype,
+      fileName: file.originalname,
+    });
+    const logoUrl = storage.getPublicUrl(fileRef.storageKey);
+    const ws = await workspaceRepository.update(workspaceId, { logoUrl });
+    if (!ws) throw notFound('Workspace not found');
     return toWorkspaceDto(ws, role);
   },
 

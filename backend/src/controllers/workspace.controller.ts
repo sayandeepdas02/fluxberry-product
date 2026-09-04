@@ -1,4 +1,5 @@
 import { asyncHandler, ok, created, noContent } from '../utils/http';
+import { badRequest } from '../utils/errors';
 import { workspaceService } from '../services/workspace.service';
 import type {
   CreateWorkspaceInput,
@@ -36,6 +37,17 @@ export const workspaceController = {
       req.auth!.role!,
       req.body as UpdateWorkspaceInput,
     );
+    ok(res, ws);
+  }),
+
+  uploadLogo: asyncHandler(async (req, res) => {
+    const file = req.file;
+    if (!file) throw badRequest('No image uploaded');
+    const ws = await workspaceService.uploadLogo(req.auth!.workspaceId!, req.auth!.role!, {
+      buffer: file.buffer,
+      originalname: file.originalname,
+      mimetype: file.mimetype,
+    });
     ok(res, ws);
   }),
 
