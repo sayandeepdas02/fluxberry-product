@@ -1,13 +1,36 @@
 'use client';
 
 import { BarChart3 } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { useAnalytics } from '@/hooks/use-analytics';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MetricCard } from '@/components/ui/metric-card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import { STAGE_LABELS } from '@/lib/labels';
-import { cn } from '@/lib/utils';
+
+const CHART_COLOR = 'hsl(var(--primary))';
+
+function caseTitle(s: string): string {
+  return s.charAt(0) + s.slice(1).toLowerCase();
+}
+
+function SimpleBarChart({ items }: { items: { label: string; value: number }[] }) {
+  return (
+    <ResponsiveContainer width="100%" height={Math.max(120, items.length * 36)}>
+      <BarChart data={items} layout="vertical" margin={{ left: 8, right: 24, top: 4, bottom: 4 }}>
+        <XAxis type="number" hide />
+        <YAxis type="category" dataKey="label" width={96} tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
+        <Tooltip
+          cursor={{ fill: 'hsl(var(--muted))' }}
+          contentStyle={{ fontSize: 12, borderRadius: 6, border: '1px solid hsl(var(--border))' }}
+          formatter={(v: number) => [v, 'Count']}
+        />
+        <Bar dataKey="value" fill={CHART_COLOR} radius={[0, 4, 4, 0]} maxBarSize={20} />
+      </BarChart>
+    </ResponsiveContainer>
+  );
+}
 
 export default function AnalyticsPage() {
   const { data, isLoading } = useAnalytics();
@@ -42,7 +65,7 @@ export default function AnalyticsPage() {
           <Card>
             <CardHeader><CardTitle>Hiring funnel</CardTitle></CardHeader>
             <CardContent>
-              <BarList items={data.funnel.map((f) => ({ label: STAGE_LABELS[f.stage], value: f.count }))} />
+              <SimpleBarChart items={data.funnel.map((f) => ({ label: STAGE_LABELS[f.stage], value: f.count }))} />
             </CardContent>
           </Card>
 
@@ -51,7 +74,7 @@ export default function AnalyticsPage() {
               <CardHeader><CardTitle>Candidates by location</CardTitle></CardHeader>
               <CardContent>
                 {data.byLocation.length ? (
-                  <BarList items={data.byLocation.map((l) => ({ label: l.label, value: l.count }))} />
+                  <SimpleBarChart items={data.byLocation.map((l) => ({ label: l.label, value: l.count }))} />
                 ) : (
                   <p className="text-sm text-muted-foreground">No location data.</p>
                 )}
@@ -62,7 +85,7 @@ export default function AnalyticsPage() {
               <CardHeader><CardTitle>Expected salary</CardTitle></CardHeader>
               <CardContent>
                 {data.salaryDistribution.length ? (
-                  <BarList items={data.salaryDistribution.map((s) => ({ label: s.label, value: s.count }))} />
+                  <SimpleBarChart items={data.salaryDistribution.map((s) => ({ label: s.label, value: s.count }))} />
                 ) : (
                   <p className="text-sm text-muted-foreground">No salary data.</p>
                 )}
@@ -74,7 +97,7 @@ export default function AnalyticsPage() {
             <Card>
               <CardHeader><CardTitle>Sources</CardTitle></CardHeader>
               <CardContent>
-                <BarList items={data.sources.map((s) => ({ label: title(s.source), value: s.count }))} />
+                <SimpleBarChart items={data.sources.map((s) => ({ label: caseTitle(s.source), value: s.count }))} />
               </CardContent>
             </Card>
 
@@ -96,25 +119,4 @@ export default function AnalyticsPage() {
       )}
     </div>
   );
-}
-
-function BarList({ items }: { items: { label: string; value: number }[] }) {
-  const max = Math.max(1, ...items.map((i) => i.value));
-  return (
-    <div className="space-y-2.5">
-      {items.map((it) => (
-        <div key={it.label} className="flex items-center gap-3 text-sm">
-          <span className="w-28 shrink-0 truncate text-muted-foreground">{it.label}</span>
-          <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-muted">
-            <div className={cn('h-full rounded-full bg-primary')} style={{ width: `${(it.value / max) * 100}%` }} />
-          </div>
-          <span className="w-8 text-right tabular-nums">{it.value}</span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function title(s: string): string {
-  return s.charAt(0) + s.slice(1).toLowerCase();
 }

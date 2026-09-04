@@ -20,6 +20,7 @@ import { sendEmailHandler } from './send-email';
 import { runWorkflowHandler } from './run-workflow';
 import { gradeCodingHandler } from './grade-coding';
 import { evaluateInterviewHandler } from './evaluate-interview';
+import { aggregateAnalyticsHandler } from './aggregate-analytics';
 
 export const handlers: Partial<Record<JobQueueType, JobHandler>> = {
   PARSE_RESUME: parseResumeHandler,
@@ -28,5 +29,5 @@ export const handlers: Partial<Record<JobQueueType, JobHandler>> = {
   RUN_WORKFLOW: runWorkflowHandler,
   PROCESS_ASSESSMENT: gradeCodingHandler,
   PROCESS_INTERVIEW: evaluateInterviewHandler,
-  // AGGREGATE_ANALYTICS -> later slice
+  AGGREGATE_ANALYTICS: aggregateAnalyticsHandler,
 };

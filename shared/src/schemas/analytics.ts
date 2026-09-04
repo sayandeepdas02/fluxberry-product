@@ -19,3 +19,17 @@ export type AnalyticsDto = {
   timeToHireDays: number | null;
   sources: SourcePoint[];
 };
+
+export type JobAnalyticsDto = {
+  funnel: FunnelPoint[];
+  applicantsOverTime: Array<{ date: string; count: number }>;
+  topLocations: CountPoint[];
+  screeningScoreDistribution: CountPoint[];
+  assessments: {
+    totalSent: number;
+    completed: number;
+    avgScore: number | null;
+    completionRate: number | null;
+  };
+  sources: SourcePoint[];
+};

@@ -40,6 +40,7 @@ export default function JobDetailLayout({ children }: { children: React.ReactNod
     { href: `${base}/assessments`, label: 'Assessments' },
     ...(aiInterview ? [{ href: `${base}/interview`, label: 'AI Interview' }] : []),
     { href: `${base}/workflow`, label: 'Workflow' },
+    { href: `${base}/analytics`, label: 'Analytics' },
     { href: `${base}/settings`, label: 'Settings' },
   ];
 
