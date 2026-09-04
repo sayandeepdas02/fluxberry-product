@@ -92,6 +92,10 @@ export const candidateService = {
       { $unwind: '$candidate' },
       { $lookup: { from: 'jobs', localField: 'jobId', foreignField: '_id', as: 'job' } },
       { $unwind: '$job' },
+      ...(query.assessmentStatus ? [
+        { $lookup: { from: 'candidate_assessments', localField: '_id', foreignField: 'applicationId', as: '_ca' } },
+        { $match: { '_ca.status': query.assessmentStatus } },
+      ] : []),
       ...(Object.keys(postMatch).length ? [{ $match: postMatch }] : []),
       { $sort: { [sortField]: sortDir, _id: -1 } },
       {

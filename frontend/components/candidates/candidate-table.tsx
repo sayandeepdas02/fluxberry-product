@@ -13,16 +13,37 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 export function CandidateTable({
   items,
   showJob = true,
+  selectedIds,
+  onSelect,
+  onSelectAll,
 }: {
   items: CandidateListItemDto[];
   showJob?: boolean;
+  selectedIds?: Set<string>;
+  onSelect?: (applicationId: string) => void;
+  onSelectAll?: () => void;
 }) {
   const router = useRouter();
+  const selectable = Boolean(selectedIds && onSelect && onSelectAll);
+  const allSelected = selectable && selectedIds!.size === items.length && items.length > 0;
+  const someSelected = selectable && selectedIds!.size > 0 && selectedIds!.size < items.length;
+
   return (
     <Card>
       <Table>
         <TableHeader>
           <TableRow>
+            {selectable && (
+              <TableHead className="w-10">
+                <input
+                  type="checkbox"
+                  checked={allSelected}
+                  ref={(el) => { if (el) el.indeterminate = someSelected; }}
+                  onChange={onSelectAll}
+                  className="cursor-pointer"
+                />
+              </TableHead>
+            )}
             <TableHead>Candidate</TableHead>
             {showJob && <TableHead>Job</TableHead>}
             <TableHead className="w-20">Score</TableHead>
@@ -33,33 +54,52 @@ export function CandidateTable({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {items.map((c) => (
-            <TableRow
-              key={c.applicationId}
-              data-clickable="true"
-              onClick={() => router.push(`/app/candidates/${c.candidateId}`)}
-            >
-              <TableCell>
-                <div className="flex items-center gap-2.5">
-                  <Avatar className="h-7 w-7">
-                    <AvatarFallback className="text-[10px]">{initials(c.name)}</AvatarFallback>
-                  </Avatar>
-                  <div className="min-w-0">
-                    <div className="truncate font-medium text-foreground">{c.name}</div>
-                    <div className="truncate text-xs text-muted-foreground">{c.email}</div>
+          {items.map((c) => {
+            const isSelected = selectable && selectedIds!.has(c.applicationId);
+            return (
+              <TableRow
+                key={c.applicationId}
+                data-clickable="true"
+                data-selected={isSelected}
+                className={isSelected ? 'bg-accent/40' : undefined}
+                onClick={(e) => {
+                  const target = e.target as HTMLElement;
+                  if (target.closest('input[type="checkbox"]')) return;
+                  router.push(`/app/candidates/${c.candidateId}`);
+                }}
+              >
+                {selectable && (
+                  <TableCell onClick={(e) => e.stopPropagation()}>
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => onSelect!(c.applicationId)}
+                      className="cursor-pointer"
+                    />
+                  </TableCell>
+                )}
+                <TableCell>
+                  <div className="flex items-center gap-2.5">
+                    <Avatar className="h-7 w-7">
+                      <AvatarFallback className="text-[10px]">{initials(c.name)}</AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0">
+                      <div className="truncate font-medium text-foreground">{c.name}</div>
+                      <div className="truncate text-xs text-muted-foreground">{c.email}</div>
+                    </div>
                   </div>
-                </div>
-              </TableCell>
-              {showJob && <TableCell className="text-muted-foreground">{c.jobTitle}</TableCell>}
-              <TableCell><ScoreBadge score={c.score} /></TableCell>
-              <TableCell><StageBadge stage={c.stage} /></TableCell>
-              <TableCell className="text-muted-foreground">{c.location ?? '—'}</TableCell>
-              <TableCell className="text-muted-foreground">{formatSalary({ min: c.expectedSalary }) ?? '—'}</TableCell>
-              <TableCell className="text-xs text-muted-foreground">
-                {formatDistanceToNow(new Date(c.appliedAt), { addSuffix: true })}
-              </TableCell>
-            </TableRow>
-          ))}
+                </TableCell>
+                {showJob && <TableCell className="text-muted-foreground">{c.jobTitle}</TableCell>}
+                <TableCell><ScoreBadge score={c.score} /></TableCell>
+                <TableCell><StageBadge stage={c.stage} /></TableCell>
+                <TableCell className="text-muted-foreground">{c.location ?? '—'}</TableCell>
+                <TableCell className="text-muted-foreground">{formatSalary({ min: c.expectedSalary }) ?? '—'}</TableCell>
+                <TableCell className="text-xs text-muted-foreground">
+                  {formatDistanceToNow(new Date(c.appliedAt), { addSuffix: true })}
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </Card>

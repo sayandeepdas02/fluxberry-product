@@ -11,6 +11,8 @@ import type {
   RejectApplicationInput,
   ApplicationAnswersDto,
   CandidateDto,
+  BulkActionInput,
+  CandidateAssessmentStatus,
 } from '@fluxberry/shared';
 import { api } from '@/lib/api-client';
 import { useWorkspace } from '@/components/providers/workspace-provider';
@@ -18,6 +20,7 @@ import { useWorkspace } from '@/components/providers/workspace-provider';
 export interface CandidateFilters {
   jobId?: string;
   stage?: ApplicationStage;
+  assessmentStatus?: CandidateAssessmentStatus;
   minScore?: number;
   search?: string;
   page?: number;
@@ -106,6 +109,17 @@ export function useReject() {
 }
 export function useRescreen() {
   return useAppMutation<undefined>((id) => `/api/v1/applications/${id}/rescreen`);
+}
+
+export function useBulkAction() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: BulkActionInput) =>
+      api.post<{ succeeded: number; failed: number; skipped: number }>('/api/v1/applications/bulk-action', body),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['candidates'] });
+    },
+  });
 }
 
 export async function fetchResumeUrl(candidateId: string): Promise<string> {

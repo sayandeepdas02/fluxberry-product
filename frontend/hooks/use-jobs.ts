@@ -72,6 +72,14 @@ export function useSetJobStatus() {
   });
 }
 
+export function useCloneJob() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (jobId: string) => api.post<JobDto>(`/api/v1/jobs/${jobId}/clone`),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['jobs'] }),
+  });
+}
+
 export function generateJd(input: GenerateJdInput): Promise<GenerateJdResult> {
   return api.post<GenerateJdResult>('/api/v1/jobs/generate-description', input);
 }

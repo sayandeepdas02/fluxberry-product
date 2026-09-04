@@ -34,6 +34,7 @@ jobRouter.post(
 
 jobRouter.get('/jobs/:jobId', jobController.get);
 jobRouter.patch('/jobs/:jobId', requireRole('recruiter'), validateBody(updateJobSchema), jobController.update);
+jobRouter.post('/jobs/:jobId/clone', requireRole('recruiter'), jobController.clone);
 jobRouter.post('/jobs/:jobId/publish', requireRole('recruiter'), jobController.publish);
 jobRouter.post(
   '/jobs/:jobId/status',
