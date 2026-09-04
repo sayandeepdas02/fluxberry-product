@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { fetchPublicCareers } from '@/lib/public-api';
 import { CareersJobs } from '@/components/careers/careers-jobs';
+import { publicConfig } from '@/lib/config';
 import { initials } from '@/lib/utils';
 
 type Params = Promise<{ careersSlug: string }>;
@@ -85,7 +86,7 @@ export default async function PublicCareersPage({ params }: { params: Params }) 
         {data.jobs.enabled && (
           <section className="mt-12">
             <h2 className="text-section-title mb-3">{data.jobs.heading || 'Open roles'}</h2>
-            <CareersJobs jobs={data.openings} />
+            <CareersJobs jobs={data.openings} appUrl={publicConfig.appUrl} />
           </section>
         )}
       </div>

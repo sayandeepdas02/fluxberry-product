@@ -10,7 +10,7 @@ export type FormOption = z.infer<typeof formOptionSchema>;
 
 export const formQuestionSchema = z.object({
   id: z.string().min(1),
-  /** Present for the 7 built-in default fields (e.g. "email"); absent for custom questions. */
+  /** Present for the 8 built-in default fields (e.g. "email"); absent for custom questions. */
   key: z.string().optional(),
   type: z.enum(FORM_QUESTION_TYPES),
   label: z.string().trim().min(1).max(200),
@@ -38,7 +38,7 @@ export type ApplicationFormDto = {
   updatedAt: string;
 };
 
-/** The 7 default candidate fields, enabled by default (spec §18). */
+/** The 8 default candidate fields, enabled by default (spec §18). */
 export const DEFAULT_FORM_FIELDS: Array<{
   key: string;
   type: FormQuestionType;
@@ -52,4 +52,5 @@ export const DEFAULT_FORM_FIELDS: Array<{
   { key: 'currentLocation', type: 'SHORT_TEXT', label: 'Current location', required: false },
   { key: 'currentSalary', type: 'NUMBER', label: 'Current salary', required: false },
   { key: 'expectedSalary', type: 'NUMBER', label: 'Expected salary', required: false },
+  { key: 'linkedinUrl', type: 'SHORT_TEXT', label: 'LinkedIn', required: false },
 ];
