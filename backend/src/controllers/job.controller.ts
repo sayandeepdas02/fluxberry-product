@@ -53,4 +53,9 @@ export const jobController = {
     const result = await jobService.generateDescription(req.body as GenerateJdInput);
     ok(res, result);
   }),
+
+  clone: asyncHandler(async (req, res) => {
+    const job = await jobService.clone(req.auth!.workspaceId!, req.params.jobId, req.auth!.user.id);
+    created(res, job);
+  }),
 };

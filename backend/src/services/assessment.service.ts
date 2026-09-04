@@ -19,6 +19,7 @@ import { eventBus } from '../events/event-bus';
 import { stageService } from './stage.service';
 import { auditService } from './audit.service';
 import { badRequest, notFound } from '../utils/errors';
+import { trackEvent } from '../integrations/posthog';
 
 export const assessmentService = {
   async create(workspaceId: string, userId: string, input: CreateAssessmentInput): Promise<AssessmentDto> {
@@ -98,6 +99,31 @@ export const assessmentService = {
       { idempotencyKey: `assessment-invite:${ca._id}` },
     );
 
+    // Deferred reminder: fires 48h later but only if the candidate hasn't started yet.
+    const reminder = emailTemplates.assessmentReminder({
+      candidateName: candidate.name,
+      assessmentName: assessment.name,
+      link,
+    });
+    await jobQueue.enqueue(
+      'SEND_EMAIL',
+      {
+        to: candidate.email,
+        subject: reminder.subject,
+        html: reminder.html,
+        text: reminder.text,
+        conditionCheck: {
+          type: 'candidate_assessment_status',
+          candidateAssessmentId: String(ca._id),
+          allowedStatuses: ['INVITED'],
+        },
+      },
+      {
+        idempotencyKey: `assessment-reminder:${ca._id}`,
+        runAt: new Date(Date.now() + 48 * 60 * 60 * 1000),
+      },
+    );
+
     await eventBus.publish({
       workspaceId,
       type: 'assessment.sent',
@@ -123,6 +149,7 @@ export const assessmentService = {
       await stageService.moveToStage(workspaceId, applicationId, 'ASSESSMENT', actor);
     }
 
+    trackEvent(actor.userId, 'assessment.sent', { workspaceId, assessmentId: input.assessmentId, applicationId });
     return toCandidateAssessmentDto(ca.toObject(), { name: assessment.name, type: assessment.type });
   },
 

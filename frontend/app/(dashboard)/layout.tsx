@@ -6,6 +6,7 @@ import { useSession } from '@/hooks/use-session';
 import { WorkspaceProvider } from '@/components/providers/workspace-provider';
 import { Sidebar } from '@/components/layout/sidebar';
 import { PageSpinner } from '@/components/ui/spinner';
+import { CommandMenu } from '@/components/command-menu';
 import { api, setWorkspaceId } from '@/lib/api-client';
 import type { WorkspaceDto } from '@fluxberry/shared';
 
@@ -34,6 +35,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <main className="mx-auto max-w-6xl px-6 py-8">{children}</main>
         </div>
       </div>
+      <CommandMenu />
     </WorkspaceProvider>
   );
 }

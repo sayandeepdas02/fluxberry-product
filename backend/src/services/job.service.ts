@@ -16,6 +16,10 @@ import { eventBus } from '../events/event-bus';
 import { getAIProvider } from '../integrations';
 import { candidateService } from './candidate.service';
 import { logger } from '../utils/logger';
+import { JobModel } from '../models/job.model';
+import { ApplicationFormModel } from '../models/application-form.model';
+import { WorkflowModel } from '../models/workflow.model';
+import { trackEvent } from '../integrations/posthog';
 
 export const jobService = {
   async create(workspaceId: string, userId: string, input: CreateJobInput): Promise<JobDto> {
@@ -131,6 +135,7 @@ export const jobService = {
       actorLabel: 'user',
       payload: { slug: job.slug },
     });
+    trackEvent(userId, 'job.published', { workspaceId, jobId: id, title: job.title });
     return toJobDto(updated!.toObject());
   },
 
@@ -191,5 +196,74 @@ export const jobService = {
       model: result.meta.model,
       promptVersion: result.meta.promptVersion,
     };
+  },
+
+  async clone(workspaceId: string, jobId: string, userId: string): Promise<JobDto> {
+    const original = await JobModel.findOne({ _id: jobId, workspaceId }).lean();
+    if (!original) throw notFound('Job not found');
+
+    const newSlug = await uniqueSlug(`${original.title} copy`, (s) => jobRepository.slugExists(workspaceId, s));
+    const newJob = await JobModel.create({
+      workspaceId: original.workspaceId,
+      title: `${original.title} (Copy)`,
+      slug: newSlug,
+      description: original.description,
+      status: 'DRAFT',
+      employmentType: original.employmentType,
+      workMode: original.workMode,
+      location: original.location,
+      openings: original.openings,
+      salary: original.salary,
+      experience: original.experience,
+      skills: original.skills,
+      structuredRequirements: original.structuredRequirements,
+      rawGenerationPrompt: original.rawGenerationPrompt,
+      generatedDescription: original.generatedDescription,
+      createdBy: userId,
+    });
+
+    const updates: Record<string, unknown> = {};
+
+    if (original.applicationFormId) {
+      const form = await ApplicationFormModel.findById(original.applicationFormId).lean();
+      if (form) {
+        const cloned = await ApplicationFormModel.create({
+          workspaceId,
+          jobId: newJob._id,
+          questions: form.questions,
+        });
+        updates.applicationFormId = cloned._id;
+      }
+    }
+
+    if (original.workflowId) {
+      const wf = await WorkflowModel.findById(original.workflowId).lean();
+      if (wf) {
+        const cloned = await WorkflowModel.create({
+          workspaceId,
+          jobId: newJob._id,
+          nodes: wf.nodes,
+          edges: wf.edges,
+          status: 'DRAFT',
+        });
+        updates.workflowId = cloned._id;
+      }
+    }
+
+    if (Object.keys(updates).length) {
+      await JobModel.findByIdAndUpdate(newJob._id, updates);
+    }
+
+    await auditService.log({
+      workspaceId,
+      userId,
+      action: 'job.cloned',
+      resourceType: 'job',
+      resourceId: String(newJob._id),
+      metadata: { sourceJobId: jobId, title: newJob.title },
+    });
+
+    const fresh = await JobModel.findById(newJob._id).lean();
+    return toJobDto(fresh!);
   },
 };

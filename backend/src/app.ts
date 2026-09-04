@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/node';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -10,6 +11,14 @@ import { mockStorageRouter } from './integrations';
 import { apiRouter } from './routes';
 import { config } from './config/env';
 import { logger } from './utils/logger';
+
+if (config.observability?.sentryDsn && !config.isTest) {
+  Sentry.init({
+    dsn: config.observability.sentryDsn,
+    environment: config.nodeEnv,
+    tracesSampleRate: 0.1,
+  });
+}
 
 /** Builds the Express app (exported so tests can mount it without listening). */
 export function createApp() {
@@ -53,6 +62,9 @@ export function createApp() {
   app.use('/api/v1', apiRouter);
 
   app.use(notFoundHandler);
+  if (config.observability?.sentryDsn && !config.isTest) {
+    app.use(Sentry.expressErrorHandler());
+  }
   app.use(errorHandler);
   return app;
 }

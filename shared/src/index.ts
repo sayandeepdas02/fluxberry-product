@@ -17,3 +17,4 @@ export * from './schemas/interview';
 export * from './schemas/workflow';
 export * from './schemas/analytics';
 export * from './schemas/careers';
+export * from './schemas/bulk-action';

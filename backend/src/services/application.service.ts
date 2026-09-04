@@ -7,13 +7,14 @@ import { applicationRepository, answersRepository } from '../repositories/applic
 import { candidateService } from './candidate.service';
 import { formService } from './form.service';
 import { toPublicJobDto } from '../serializers/job.serializer';
-import { getStorageProvider } from '../integrations';
+import { getStorageProvider, emailTemplates } from '../integrations';
 import { assertValidResume } from '../utils/file-validation';
 import { eventBus } from '../events/event-bus';
 import { jobQueue } from '../queue/job-queue';
 import { workflowEngine } from './workflow-engine.service';
 import { notFound, badRequest, conflict } from '../utils/errors';
 import { logger } from '../utils/logger';
+import { trackEvent } from '../integrations/posthog';
 
 interface ResumeFile {
   buffer: Buffer;
@@ -133,6 +134,19 @@ export const applicationService = {
     // Kick off the job's workflow (if one is active).
     await workflowEngine.startRunForApplication(workspaceId, jobId, String(application._id));
 
+    // Send confirmation email to the candidate (fire-and-forget, never blocks apply response).
+    const confirmEmail = emailTemplates.applicationConfirmation({
+      candidateName: candidate.name,
+      jobTitle: job.title,
+      companyName: workspace.name,
+    });
+    await jobQueue.enqueue(
+      'SEND_EMAIL',
+      { to: candidate.email, subject: confirmEmail.subject, html: confirmEmail.html, text: confirmEmail.text },
+      { idempotencyKey: `app-confirm:${application._id}` },
+    );
+
+    trackEvent(String(candidate._id), 'candidate.applied', { workspaceId, jobId, applicationId: String(application._id) });
     logger.info({ applicationId: String(application._id), jobId }, 'application submitted');
     return { applicationId: String(application._id) };
   },

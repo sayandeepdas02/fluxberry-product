@@ -5,7 +5,7 @@ import { candidateController } from '../controllers/candidate.controller';
 import { applicationController } from '../controllers/application.controller';
 import { workflowController } from '../controllers/workflow.controller';
 import { interviewController } from '../controllers/interview.controller';
-import { candidateListQuerySchema, stageChangeSchema, rejectApplicationSchema, sendInterviewSchema } from '@fluxberry/shared';
+import { candidateListQuerySchema, stageChangeSchema, rejectApplicationSchema, sendInterviewSchema, bulkActionSchema } from '@fluxberry/shared';
 
 export const candidateRouter = Router();
 
@@ -15,6 +15,14 @@ candidateRouter.use(['/candidates', '/applications'], authenticate, resolveWorks
 candidateRouter.get('/candidates', validateQuery(candidateListQuerySchema), candidateController.list);
 candidateRouter.get('/candidates/:candidateId', candidateController.getProfile);
 candidateRouter.get('/candidates/:candidateId/resume-url', candidateController.getResumeUrl);
+
+// Bulk application actions (must be before /:applicationId routes to avoid param clash).
+candidateRouter.post(
+  '/applications/bulk-action',
+  requireRole('recruiter'),
+  validateBody(bulkActionSchema),
+  applicationController.bulkAction,
+);
 
 // Applications
 candidateRouter.get('/applications/:applicationId', applicationController.getDetail);

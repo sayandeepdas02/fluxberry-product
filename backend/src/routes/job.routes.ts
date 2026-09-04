@@ -3,6 +3,7 @@ import { authenticate, resolveWorkspace, requireWorkspace, requireRole, requireF
 import { validateBody, validateQuery } from '../middleware/validate';
 import { aiLimiter } from '../middleware/rate-limit';
 import { jobController } from '../controllers/job.controller';
+import { analyticsController } from '../controllers/analytics.controller';
 import { formController } from '../controllers/form.controller';
 import { workflowController } from '../controllers/workflow.controller';
 import { interviewController } from '../controllers/interview.controller';
@@ -34,6 +35,7 @@ jobRouter.post(
 
 jobRouter.get('/jobs/:jobId', jobController.get);
 jobRouter.patch('/jobs/:jobId', requireRole('recruiter'), validateBody(updateJobSchema), jobController.update);
+jobRouter.post('/jobs/:jobId/clone', requireRole('recruiter'), jobController.clone);
 jobRouter.post('/jobs/:jobId/publish', requireRole('recruiter'), jobController.publish);
 jobRouter.post(
   '/jobs/:jobId/status',
@@ -41,6 +43,9 @@ jobRouter.post(
   validateBody(jobStatusSchema),
   jobController.setStatus,
 );
+
+// Per-job analytics.
+jobRouter.get('/jobs/:jobId/analytics', analyticsController.getForJob);
 
 // Application form (one per job).
 jobRouter.get('/jobs/:jobId/form', formController.get);

@@ -10,6 +10,7 @@ import {
   type Difficulty,
   type QuestionType,
 } from '@fluxberry/shared';
+import { Switch } from '@/components/ui/switch';
 import { useCreateQuestion, useUpdateQuestion, useQuestionCategories } from '@/hooks/use-questions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -49,8 +50,15 @@ export function QuestionDialog({
   const [options, setOptions] = useState<{ id: string; text: string }[]>(
     question?.options?.length ? question.options : [{ id: uid(), text: '' }, { id: uid(), text: '' }],
   );
-  const [correctId, setCorrectId] = useState<string>(
-    typeof question?.correctAnswer === 'string' ? question.correctAnswer : question?.options?.[0]?.id ?? '',
+  const [isMultiSelect, setIsMultiSelect] = useState<boolean>(question?.isMultiSelect ?? false);
+  const [correctIds, setCorrectIds] = useState<string[]>(
+    Array.isArray(question?.correctAnswer)
+      ? question.correctAnswer
+      : question?.correctAnswer
+        ? [question.correctAnswer]
+        : question?.options?.[0]?.id
+          ? [question.options[0].id]
+          : [],
   );
   const [difficulty, setDifficulty] = useState<Difficulty>(question?.difficulty ?? 'MEDIUM');
   const [category, setCategory] = useState(question?.category ?? '');
@@ -74,14 +82,24 @@ export function QuestionDialog({
   const toggleLang = (id: number) =>
     setLanguageIds((ls) => (ls.includes(id) ? ls.filter((x) => x !== id) : [...ls, id]));
 
+  const toggleCorrectId = (id: string) => {
+    if (isMultiSelect) {
+      setCorrectIds((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
+    } else {
+      setCorrectIds([id]);
+    }
+  };
+
   const save = async () => {
     let input: CreateQuestionInput;
     if (isMcq) {
+      const correctAnswer = isMultiSelect ? correctIds : (correctIds[0] ?? '');
       input = {
         type: 'MCQ',
         questionText: text.trim(),
         options: options.filter((o) => o.text.trim()),
-        correctAnswer: correctId,
+        correctAnswer,
+        isMultiSelect,
         difficulty,
         category: category.trim() || 'General',
         skills,
@@ -123,7 +141,7 @@ export function QuestionDialog({
   };
 
   const valid = isMcq
-    ? text.trim() && options.filter((o) => o.text.trim()).length >= 2 && correctId && category.trim()
+    ? text.trim() && options.filter((o) => o.text.trim()).length >= 2 && correctIds.length > 0 && category.trim()
     : text.trim() && category.trim() && languageIds.length >= 1 && tests.length >= 1;
 
   return (
@@ -145,20 +163,34 @@ export function QuestionDialog({
           </Field>
 
           {isMcq && (
-            <Field label="Options" hint="Select the correct answer.">
-              <div className="space-y-2">
-                {options.map((opt, i) => (
-                  <div key={opt.id} className="flex items-center gap-2">
-                    <input type="radio" name="correct" checked={correctId === opt.id} onChange={() => setCorrectId(opt.id)} />
-                    <Input value={opt.text} onChange={(e) => setOptions((o) => o.map((x) => (x.id === opt.id ? { ...x, text: e.target.value } : x)))} placeholder={`Option ${i + 1}`} />
-                    {options.length > 2 && (
-                      <Button variant="ghost" size="icon" onClick={() => setOptions((o) => o.filter((x) => x.id !== opt.id))}><Trash2 className="size-4" /></Button>
-                    )}
-                  </div>
-                ))}
-                <Button variant="ghost" size="sm" onClick={() => setOptions((o) => [...o, { id: uid(), text: '' }])}><Plus className="size-4" /> Add option</Button>
+            <>
+              <div className="flex items-center justify-between rounded-lg border border-border px-4 py-3">
+                <div>
+                  <p className="text-sm font-medium">Multi-select</p>
+                  <p className="text-xs text-muted-foreground">Allow candidates to select more than one correct answer.</p>
+                </div>
+                <Switch checked={isMultiSelect} onCheckedChange={(v) => { setIsMultiSelect(v); if (!v) setCorrectIds(correctIds.slice(0, 1)); }} />
               </div>
-            </Field>
+              <Field label="Options" hint={isMultiSelect ? 'Check all correct answers.' : 'Select the correct answer.'}>
+                <div className="space-y-2">
+                  {options.map((opt, i) => (
+                    <div key={opt.id} className="flex items-center gap-2">
+                      <input
+                        type={isMultiSelect ? 'checkbox' : 'radio'}
+                        name="correct"
+                        checked={correctIds.includes(opt.id)}
+                        onChange={() => toggleCorrectId(opt.id)}
+                      />
+                      <Input value={opt.text} onChange={(e) => setOptions((o) => o.map((x) => (x.id === opt.id ? { ...x, text: e.target.value } : x)))} placeholder={`Option ${i + 1}`} />
+                      {options.length > 2 && (
+                        <Button variant="ghost" size="icon" onClick={() => setOptions((o) => o.filter((x) => x.id !== opt.id))}><Trash2 className="size-4" /></Button>
+                      )}
+                    </div>
+                  ))}
+                  <Button variant="ghost" size="sm" onClick={() => setOptions((o) => [...o, { id: uid(), text: '' }])}><Plus className="size-4" /> Add option</Button>
+                </div>
+              </Field>
+            </>
           )}
 
           {!isMcq && (

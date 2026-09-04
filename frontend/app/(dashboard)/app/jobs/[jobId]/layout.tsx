@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useParams, usePathname, useRouter } from 'next/navigation';
 import { ArrowLeft, Link2, MoreHorizontal } from 'lucide-react';
-import { useJob, usePublishJob, useSetJobStatus } from '@/hooks/use-jobs';
+import { useJob, usePublishJob, useSetJobStatus, useCloneJob } from '@/hooks/use-jobs';
 import { useFeature } from '@/hooks/use-features';
 import { useWorkspace } from '@/components/providers/workspace-provider';
 import { Button } from '@/components/ui/button';
@@ -29,6 +29,7 @@ export default function JobDetailLayout({ children }: { children: React.ReactNod
   const { data: job, isLoading } = useJob(jobId);
   const publishJob = usePublishJob();
   const setStatus = useSetJobStatus();
+  const cloneJob = useCloneJob();
   const aiInterview = useFeature('AI_INTERVIEW');
 
   const base = `/app/jobs/${jobId}`;
@@ -39,6 +40,7 @@ export default function JobDetailLayout({ children }: { children: React.ReactNod
     { href: `${base}/assessments`, label: 'Assessments' },
     ...(aiInterview ? [{ href: `${base}/interview`, label: 'AI Interview' }] : []),
     { href: `${base}/workflow`, label: 'Workflow' },
+    { href: `${base}/analytics`, label: 'Analytics' },
     { href: `${base}/settings`, label: 'Settings' },
   ];
 
@@ -96,6 +98,19 @@ export default function JobDetailLayout({ children }: { children: React.ReactNod
                 )}
                 <DropdownMenuItem onSelect={() => setStatus.mutate({ jobId: job.id, status: 'CLOSED' }, { onSuccess: () => toast.success('Job closed') } as any)}>
                   Close job
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={() =>
+                    cloneJob.mutate(job.id, {
+                      onSuccess: (cloned) => {
+                        toast.success('Job duplicated');
+                        router.push(`/app/jobs/${cloned.id}`);
+                      },
+                      onError: () => toast.error('Could not duplicate job'),
+                    })
+                  }
+                >
+                  Duplicate job
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

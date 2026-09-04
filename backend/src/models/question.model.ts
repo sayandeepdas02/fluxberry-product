@@ -46,6 +46,7 @@ const questionSchema = new Schema(
     skills: { type: [String], default: [] },
     tags: { type: [String], default: [] },
     explanation: { type: String, default: null },
+    isMultiSelect: { type: Boolean, default: false },
     archived: { type: Boolean, default: false },
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
   },

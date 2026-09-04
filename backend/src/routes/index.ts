@@ -7,6 +7,7 @@ import { candidateRouter } from './candidate.routes';
 import { questionRouter } from './question.routes';
 import { assessmentRouter } from './assessment.routes';
 import { analyticsRouter } from './analytics.routes';
+import { notificationRouter } from './notification.routes';
 import { careersRouter } from './careers.routes';
 import { publicRouter } from './public.routes';
 
@@ -25,6 +26,7 @@ apiRouter.use(candidateRouter);
 apiRouter.use(questionRouter);
 apiRouter.use(assessmentRouter);
 apiRouter.use(analyticsRouter);
+apiRouter.use(notificationRouter);
 apiRouter.use(careersRouter);
 apiRouter.use(publicRouter);
 
