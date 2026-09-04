@@ -7,6 +7,7 @@ import { analyticsController } from '../controllers/analytics.controller';
 import { formController } from '../controllers/form.controller';
 import { workflowController } from '../controllers/workflow.controller';
 import { interviewController } from '../controllers/interview.controller';
+import { assessmentController } from '../controllers/assessment.controller';
 import {
   createJobSchema,
   updateJobSchema,
@@ -46,6 +47,9 @@ jobRouter.post(
 
 // Per-job analytics.
 jobRouter.get('/jobs/:jobId/analytics', analyticsController.getForJob);
+
+// Per-job assessment status across all candidates.
+jobRouter.get('/jobs/:jobId/assessments', assessmentController.listForJob);
 
 // Application form (one per job).
 jobRouter.get('/jobs/:jobId/form', formController.get);

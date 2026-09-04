@@ -59,7 +59,10 @@ export function usePublishJob() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (jobId: string) => api.post<JobDto>(`/api/v1/jobs/${jobId}/publish`),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['jobs'] }),
+    onSuccess: (job) => {
+      queryClient.invalidateQueries({ queryKey: ['jobs'] });
+      queryClient.invalidateQueries({ queryKey: ['job', job.workspaceId, job.id] });
+    },
   });
 }
 
@@ -68,7 +71,10 @@ export function useSetJobStatus() {
   return useMutation({
     mutationFn: (v: { jobId: string; status: JobStatus }) =>
       api.post<JobDto>(`/api/v1/jobs/${v.jobId}/status`, { status: v.status }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['jobs'] }),
+    onSuccess: (job) => {
+      queryClient.invalidateQueries({ queryKey: ['jobs'] });
+      queryClient.invalidateQueries({ queryKey: ['job', job.workspaceId, job.id] });
+    },
   });
 }
 
@@ -76,7 +82,10 @@ export function useCloneJob() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (jobId: string) => api.post<JobDto>(`/api/v1/jobs/${jobId}/clone`),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['jobs'] }),
+    onSuccess: (job) => {
+      queryClient.invalidateQueries({ queryKey: ['jobs'] });
+      queryClient.invalidateQueries({ queryKey: ['job', job.workspaceId, job.id] });
+    },
   });
 }
 

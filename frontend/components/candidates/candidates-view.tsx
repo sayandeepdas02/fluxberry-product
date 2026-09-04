@@ -16,16 +16,7 @@ import { CandidateTable } from './candidate-table';
 import { CandidateBoard } from './candidate-board';
 import { toast } from '@/components/ui/sonner';
 import { cn } from '@/lib/utils';
-
-const STAGE_LABELS: Record<ApplicationStage, string> = {
-  APPLIED: 'Applied', SCREENING: 'Screening', ASSESSMENT: 'Assessment',
-  INTERVIEW: 'Interview', OFFER: 'Offer', HIRED: 'Hired', REJECTED: 'Rejected',
-};
-
-const ASSESSMENT_STATUS_LABELS: Record<CandidateAssessmentStatus, string> = {
-  INVITED: 'Invited', STARTED: 'Started', GRADING: 'Grading',
-  COMPLETED: 'Completed', EXPIRED: 'Expired', CANCELLED: 'Cancelled',
-};
+import { STAGE_LABELS, ASSESSMENT_STATUS_LABELS } from '@/lib/labels';
 
 export function CandidatesView({ jobId: fixedJobId }: { jobId?: string }) {
   const [view, setView] = useState<'table' | 'board'>('table');

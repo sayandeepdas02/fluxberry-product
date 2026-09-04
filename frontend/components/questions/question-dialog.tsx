@@ -1,15 +1,23 @@
 'use client';
 
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import { Plus, Trash2 } from 'lucide-react';
 import {
   DIFFICULTIES,
   CODING_LANGUAGES,
+  codingLanguageById,
   type QuestionDto,
   type CreateQuestionInput,
   type Difficulty,
   type QuestionType,
 } from '@fluxberry/shared';
+
+// Monaco Editor loaded dynamically to avoid SSR bundle size issues.
+const MonacoEditor = dynamic(() => import('@monaco-editor/react'), {
+  ssr: false,
+  loading: () => <div className="h-[240px] animate-pulse rounded-md border border-border bg-muted" />,
+});
 import { Switch } from '@/components/ui/switch';
 import { useCreateQuestion, useUpdateQuestion, useQuestionCategories } from '@/hooks/use-questions';
 import { Button } from '@/components/ui/button';
@@ -78,9 +86,26 @@ export function QuestionDialog({
   const [memMb, setMemMb] = useState<string>(
     question?.coding?.memoryLimit ? String(Math.round(question.coding.memoryLimit / 1024)) : '',
   );
+  const [starterCode, setStarterCode] = useState<{ languageId: number; code: string }[]>(
+    question?.coding?.starterCode ?? [],
+  );
+  const [activeLangId, setActiveLangId] = useState<number | null>(languageIds[0] ?? null);
 
-  const toggleLang = (id: number) =>
-    setLanguageIds((ls) => (ls.includes(id) ? ls.filter((x) => x !== id) : [...ls, id]));
+  const toggleLang = (id: number) => {
+    setLanguageIds((ls) => {
+      const next = ls.includes(id) ? ls.filter((x) => x !== id) : [...ls, id];
+      setStarterCode((sc) => sc.filter((s) => next.includes(s.languageId)));
+      setActiveLangId((cur) => (next.includes(cur ?? -1) ? cur : (next[0] ?? null)));
+      return next;
+    });
+  };
+
+  const setStarterFor = (langId: number, code: string) =>
+    setStarterCode((sc) => {
+      const existing = sc.find((s) => s.languageId === langId);
+      if (existing) return sc.map((s) => (s.languageId === langId ? { ...s, code } : s));
+      return [...sc, { languageId: langId, code }];
+    });
 
   const toggleCorrectId = (id: string) => {
     if (isMultiSelect) {
@@ -113,7 +138,7 @@ export function QuestionDialog({
         options: [],
         coding: {
           languageIds,
-          starterCode: [],
+          starterCode: starterCode.filter((s) => languageIds.includes(s.languageId)),
           testCases: tests.map((t) => ({
             input: t.input,
             expected: t.expected,
@@ -212,6 +237,39 @@ export function QuestionDialog({
                   ))}
                 </div>
               </Field>
+
+              {languageIds.length > 0 && (
+                <Field label="Starter code" hint="Pre-filled code shown to the candidate when they open this language.">
+                  <div className="space-y-2">
+                    <Select value={String(activeLangId ?? languageIds[0])} onValueChange={(v) => setActiveLangId(Number(v))}>
+                      <SelectTrigger className="w-56"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {languageIds.map((id) => (
+                          <SelectItem key={id} value={String(id)}>{codingLanguageById(id)?.label ?? `Language ${id}`}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <div className="overflow-hidden rounded-md border border-border">
+                      <MonacoEditor
+                        height="240px"
+                        language={codingLanguageById(activeLangId ?? languageIds[0])?.monaco ?? 'plaintext'}
+                        value={starterCode.find((s) => s.languageId === (activeLangId ?? languageIds[0]))?.code ?? ''}
+                        onChange={(v) => setStarterFor(activeLangId ?? languageIds[0], v ?? '')}
+                        theme="vs-dark"
+                        options={{
+                          fontSize: 13,
+                          minimap: { enabled: false },
+                          scrollBeyondLastLine: false,
+                          wordWrap: 'on',
+                          lineNumbers: 'on',
+                          automaticLayout: true,
+                          padding: { top: 10, bottom: 10 },
+                        }}
+                      />
+                    </div>
+                  </div>
+                </Field>
+              )}
 
               <Field label="Test cases" hint="Hidden cases grade the submission but are never shown to the candidate.">
                 <div className="space-y-3">

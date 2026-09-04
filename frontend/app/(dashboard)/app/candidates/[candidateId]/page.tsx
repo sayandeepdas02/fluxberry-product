@@ -34,6 +34,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Field } from '@/components/ui/field';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { StageBadge } from '@/components/candidates/stage-badge';
 import { Badge } from '@/components/ui/badge';
 import { ScreeningCard } from '@/components/candidates/screening-card';
@@ -56,8 +57,10 @@ export default function CandidateProfilePage() {
   const { data: profile, isLoading } = useCandidateProfile(candidateId);
   const [rejectOpen, setRejectOpen] = useState(false);
   const [sendOpen, setSendOpen] = useState(false);
+  const [selectedApplicationId, setSelectedApplicationId] = useState<string | undefined>(undefined);
 
-  const activeApp = profile?.applications[0];
+  const activeApp =
+    profile?.applications.find((a) => a.id === selectedApplicationId) ?? profile?.applications[0];
   const detail = useApplicationDetail(activeApp?.id ?? '');
   const timeline = useApplicationTimeline(activeApp?.id ?? '');
   const form = useApplicationForm(activeApp?.jobId ?? '');
@@ -99,6 +102,16 @@ export default function CandidateProfilePage() {
       <Link href="/app/candidates" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
         <ArrowLeft className="size-4" /> Candidates
       </Link>
+
+      {profile.applications.length > 1 && (
+        <Tabs value={activeApp?.id} onValueChange={setSelectedApplicationId}>
+          <TabsList>
+            {profile.applications.map((a) => (
+              <TabsTrigger key={a.id} value={a.id}>{a.jobTitle}</TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
+      )}
 
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex items-center gap-3">

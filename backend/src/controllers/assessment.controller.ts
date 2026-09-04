@@ -1,4 +1,4 @@
-import { asyncHandler, ok, created } from '../utils/http';
+import { asyncHandler, ok, created, noContent } from '../utils/http';
 import { assessmentService } from '../services/assessment.service';
 import type {
   CreateAssessmentInput,
@@ -28,6 +28,13 @@ export const assessmentController = {
   setStatus: asyncHandler(async (req, res) => {
     ok(res, await assessmentService.setStatus(req.auth!.workspaceId!, req.params.assessmentId, (req.body as { status: AssessmentStatus }).status));
   }),
+  publish: asyncHandler(async (req, res) => {
+    ok(res, await assessmentService.publish(req.auth!.workspaceId!, req.params.assessmentId));
+  }),
+  remove: asyncHandler(async (req, res) => {
+    await assessmentService.remove(req.auth!.workspaceId!, req.params.assessmentId);
+    noContent(res);
+  }),
 
   // Sending + candidate assessments live under an application.
   send: asyncHandler(async (req, res) => {
@@ -41,5 +48,8 @@ export const assessmentController = {
   }),
   listForApplication: asyncHandler(async (req, res) => {
     ok(res, await assessmentService.listForApplication(req.auth!.workspaceId!, req.params.applicationId));
+  }),
+  listForJob: asyncHandler(async (req, res) => {
+    ok(res, await assessmentService.listForJob(req.auth!.workspaceId!, req.params.jobId));
   }),
 };

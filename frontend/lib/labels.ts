@@ -5,6 +5,7 @@ import type {
   ApplicationStatus,
   Difficulty,
   FormQuestionType,
+  CandidateAssessmentStatus,
 } from '@fluxberry/shared';
 
 export const FORM_QUESTION_TYPE_LABELS: Record<FormQuestionType, string> = {
@@ -51,4 +52,13 @@ export const DIFFICULTY_LABELS: Record<Difficulty, string> = {
   EASY: 'Easy',
   MEDIUM: 'Medium',
   HARD: 'Hard',
+};
+
+export const ASSESSMENT_STATUS_LABELS: Record<CandidateAssessmentStatus, string> = {
+  INVITED: 'Invited',
+  STARTED: 'Started',
+  GRADING: 'Grading',
+  COMPLETED: 'Completed',
+  EXPIRED: 'Expired',
+  CANCELLED: 'Cancelled',
 };

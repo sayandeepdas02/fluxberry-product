@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft, Check } from 'lucide-react';
 import type { AssessmentDto, AssessmentType } from '@fluxberry/shared';
 import { useQuestions } from '@/hooks/use-questions';
-import { useCreateAssessment, useUpdateAssessment } from '@/hooks/use-assessments';
+import { useCreateAssessment, useUpdateAssessment, usePublishAssessment } from '@/hooks/use-assessments';
 import { useFeature } from '@/hooks/use-features';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,6 +22,7 @@ export function AssessmentBuilder({ initial }: { initial?: AssessmentDto | null 
   const router = useRouter();
   const create = useCreateAssessment();
   const update = useUpdateAssessment(initial?.id ?? '');
+  const publishAssessment = usePublishAssessment();
   const codingEnabled = useFeature('CODING_ASSESSMENT');
 
   const [type, setType] = useState<AssessmentType>(initial?.type ?? 'MCQ');
@@ -45,20 +46,29 @@ export function AssessmentBuilder({ initial }: { initial?: AssessmentDto | null 
     if (!name.trim()) return;
     const questions = selected.map((questionId, i) => ({ questionId, points: 1, sortOrder: i }));
     const payload = { type, name: name.trim(), description: description || undefined, durationMinutes: Number(duration) || 30, questions };
+    let assessment: AssessmentDto;
     try {
-      if (initial) {
-        await update.mutateAsync({ ...payload, status: publish ? 'PUBLISHED' : undefined });
-      } else {
-        const created = await create.mutateAsync(payload);
-        if (publish) {
-          const { api } = await import('@/lib/api-client');
-          await api.patch(`/api/v1/assessments/${created.id}`, { status: 'PUBLISHED' });
-        }
-      }
-      toast.success(publish ? 'Assessment published' : 'Assessment saved');
-      router.push('/app/assessments');
+      assessment = initial ? await update.mutateAsync(payload) : await create.mutateAsync(payload);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Could not save');
+      return;
+    }
+    if (!publish) {
+      toast.success('Assessment saved');
+      router.push('/app/assessments');
+      return;
+    }
+    try {
+      await publishAssessment.mutateAsync(assessment.id);
+      toast.success('Assessment published');
+      router.push('/app/assessments');
+    } catch (err) {
+      // The draft above already saved successfully — surface that explicitly and
+      // send the user back to it (not the list) so it isn't an invisible orphan.
+      toast.error(
+        `Assessment saved as a draft, but publishing failed: ${err instanceof Error ? err.message : 'unknown error'}. You can retry or delete it from the list.`,
+      );
+      router.push(`/app/assessments/${assessment.id}`);
     }
   };
 
@@ -138,7 +148,7 @@ export function AssessmentBuilder({ initial }: { initial?: AssessmentDto | null 
 
       <div className="flex justify-end gap-2">
         <Button variant="outline" onClick={() => save(false)} disabled={!name.trim()} loading={create.isPending || update.isPending}>Save draft</Button>
-        <Button onClick={() => save(true)} disabled={!name.trim() || selected.length === 0} loading={create.isPending || update.isPending}>Publish</Button>
+        <Button onClick={() => save(true)} disabled={!name.trim() || selected.length === 0} loading={create.isPending || update.isPending || publishAssessment.isPending}>Publish</Button>
       </div>
     </div>
   );
