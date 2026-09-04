@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import type { WorkspaceDto } from '@fluxberry/shared';
@@ -23,11 +23,14 @@ export default function OnboardingPage() {
   const [company, setCompany] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  useEffect(() => {
+    if (session && !session.needsOnboarding) {
+      router.replace('/app');
+    }
+  }, [session, router]);
+
   if (isLoading || !session) return <PageSpinner label="Loading…" />;
-  if (!session.needsOnboarding) {
-    router.replace('/app');
-    return <PageSpinner label="Loading…" />;
-  }
+  if (!session.needsOnboarding) return <PageSpinner label="Loading…" />;
 
   const submit = async () => {
     if (!name.trim() || !company.trim()) return;

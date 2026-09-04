@@ -58,6 +58,15 @@ export class S3StorageProvider implements StorageProvider {
     );
   }
 
+  getPublicUrl(key: string): string {
+    const s = config.providers.storage;
+    if (s.publicUrl) return `${s.publicUrl.replace(/\/+$/, '')}/${key}`;
+    // Fallback: path-style URL against the configured endpoint/bucket (works for
+    // publicly-readable buckets without a dedicated CDN domain configured).
+    const base = s.endpoint ? s.endpoint.replace(/\/+$/, '') : `https://${this.bucket}.s3.${s.region}.amazonaws.com`;
+    return s.endpoint ? `${base}/${this.bucket}/${key}` : `${base}/${key}`;
+  }
+
   async download(key: string): Promise<Buffer> {
     const res = await this.client.send(new GetObjectCommand({ Bucket: this.bucket, Key: key }));
     const bytes = await res.Body!.transformToByteArray();

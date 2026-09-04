@@ -16,6 +16,8 @@ export interface StorageProvider {
     ref: Pick<FileRef, 'storageKey' | 'fileName' | 'mimeType'>,
     ttlSec?: number,
   ): Promise<string>;
+  /** Permanent, unsigned URL for assets meant to be public (e.g. workspace logos). */
+  getPublicUrl(key: string): string;
   /** Fetch the raw bytes (used server-side by the resume parser). */
   download(key: string): Promise<Buffer>;
   delete(key: string): Promise<void>;

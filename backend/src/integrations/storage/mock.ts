@@ -40,6 +40,10 @@ export class MockStorageProvider implements StorageProvider {
     return `${config.publicApiUrl}/files/mock?${qs.toString()}`;
   }
 
+  getPublicUrl(key: string): string {
+    return `${config.publicApiUrl}/files/public/${key}`;
+  }
+
   async download(key: string): Promise<Buffer> {
     const full = path.join(ROOT, key);
     if (!full.startsWith(ROOT + path.sep)) throw notFound('Invalid key');
@@ -74,6 +78,19 @@ mockStorageRouter.get('/files/mock', (req, res, next) => {
     const full = path.join(ROOT, key);
     if (!full.startsWith(ROOT + path.sep)) throw forbidden('Invalid key');
     if (!fs.existsSync(full)) throw notFound('File not found');
+    res.setHeader('Content-Disposition', `inline; filename="${path.basename(key)}"`);
+    fs.createReadStream(full).pipe(res);
+  } catch (err) {
+    next(err);
+  }
+});
+
+/** Unsigned, permanent access for assets meant to be public (e.g. workspace logos). */
+mockStorageRouter.get('/files/public/*', (req, res, next) => {
+  try {
+    const key = String((req.params as unknown as string[])[0] ?? '');
+    const full = path.join(ROOT, key);
+    if (!full.startsWith(ROOT + path.sep) || !fs.existsSync(full)) throw notFound('File not found');
     res.setHeader('Content-Disposition', `inline; filename="${path.basename(key)}"`);
     fs.createReadStream(full).pipe(res);
   } catch (err) {

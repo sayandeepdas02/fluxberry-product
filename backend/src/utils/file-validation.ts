@@ -16,3 +16,18 @@ export function assertValidResume(buf: Buffer): 'pdf' | 'docx' | 'doc' {
   if (!type) throw unsupportedMediaType('That file does not look like a valid PDF, DOC, or DOCX');
   return type;
 }
+
+/** Detect an image file type from its magic bytes. */
+export function detectImageType(buf: Buffer): 'png' | 'jpeg' | 'webp' | null {
+  if (buf.length >= 8 && buf.subarray(0, 8).toString('hex') === '89504e470d0a1a0a') return 'png';
+  if (buf.length >= 3 && buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) return 'jpeg';
+  if (buf.length >= 12 && buf.subarray(0, 4).toString('latin1') === 'RIFF' && buf.subarray(8, 12).toString('latin1') === 'WEBP') return 'webp';
+  return null;
+}
+
+/** Throw unless the file's real content matches an allowed image type. */
+export function assertValidImage(buf: Buffer): 'png' | 'jpeg' | 'webp' {
+  const type = detectImageType(buf);
+  if (!type) throw unsupportedMediaType('That file does not look like a valid PNG, JPEG, or WEBP image');
+  return type;
+}
