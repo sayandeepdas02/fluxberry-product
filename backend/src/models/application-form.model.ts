@@ -9,7 +9,7 @@ const formOptionSchema = new Schema(
 const formQuestionSchema = new Schema(
   {
     id: { type: String, required: true },
-    key: { type: String, default: null }, // set for the 7 built-in default fields
+    key: { type: String, default: null }, // set for the 8 built-in default fields
     type: { type: String, enum: FORM_QUESTION_TYPES, required: true },
     label: { type: String, required: true },
     description: { type: String, default: null },

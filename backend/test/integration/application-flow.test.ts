@@ -79,6 +79,36 @@ describe('core application flow (integration)', () => {
     expect(list.body.data.items[0].name).toBe('Test Candidate');
   });
 
+  it('captures linkedinUrl from a public application', async () => {
+    const token = await tokenFor('recruiter-li@test.com', 'Rec Ruiter');
+    const onboard = await request(app)
+      .post('/api/v1/workspaces/onboarding')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ name: 'Rec Ruiter', company: 'LinkedTest' });
+    const workspaceId = onboard.body.data.id as string;
+    const slug = onboard.body.data.slug as string;
+    const ws = (r: request.Test) => r.set('Authorization', `Bearer ${token}`).set('X-Workspace-Id', workspaceId);
+
+    const created = await ws(request(app).post('/api/v1/jobs').send({ title: 'Frontend Engineer', skills: [{ name: 'React', required: true }] }) as any);
+    const jobId = created.body.data.id as string;
+    const jobSlug = created.body.data.slug as string;
+    await ws(request(app).post(`/api/v1/jobs/${jobId}/publish`) as any);
+
+    const applied = await request(app)
+      .post(`/api/v1/public/jobs/${slug}/${jobSlug}/apply`)
+      .field('name', 'LinkedIn Candidate')
+      .field('email', 'li-cand@test.com')
+      .field('linkedinUrl', 'https://linkedin.com/in/li-cand')
+      .field('answers', '[]')
+      .attach('resume', PDF, { filename: 'resume.pdf', contentType: 'application/pdf' });
+    expect(applied.status).toBe(201);
+
+    const list = await ws(request(app).get('/api/v1/candidates') as any);
+    const item = list.body.data.items.find((c: any) => c.email === 'li-cand@test.com');
+    const profile = await ws(request(app).get(`/api/v1/candidates/${item.candidateId}`) as any);
+    expect(profile.body.data.candidate.linkedinUrl).toBe('https://linkedin.com/in/li-cand');
+  });
+
   it('enforces RBAC — a viewer cannot create jobs', async () => {
     const ownerToken = await tokenFor('owner2@test.com', 'Owner Two');
     const onboard = await request(app)

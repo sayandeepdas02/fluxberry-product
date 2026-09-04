@@ -47,6 +47,7 @@ export function ApplyForm({
     if (values.currentLocation) fd.set('location', values.currentLocation);
     if (values.currentSalary) fd.set('currentSalary', values.currentSalary);
     if (values.expectedSalary) fd.set('expectedSalary', values.expectedSalary);
+    if (values.linkedinUrl) fd.set('linkedinUrl', values.linkedinUrl);
 
     const srcParam = new URLSearchParams(window.location.search).get('source')?.toUpperCase();
     const source: CandidateSource =
@@ -136,7 +137,7 @@ function DefaultField({
       </Field>
     );
   }
-  const type = q.type === 'NUMBER' ? 'number' : q.key === 'email' ? 'email' : 'text';
+  const type = q.type === 'NUMBER' ? 'number' : q.key === 'email' ? 'email' : q.key === 'linkedinUrl' ? 'url' : 'text';
   return (
     <Field label={q.label} required={q.required}>
       <Input type={type} value={value} onChange={(e) => onChange(e.target.value)} required={q.required} />
