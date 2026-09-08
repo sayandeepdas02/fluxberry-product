@@ -33,6 +33,10 @@ backend/   Node + Express + TS  (API + worker share one codebase)
 shared/    Zod schemas, enums, DTO types (imported by both)
 ```
 
+`frontend/` and `backend/` are the two deployable applications. `shared/` is an internal
+TypeScript library — built at install time (`npm run build --workspace @fluxberry/shared`) and
+consumed by both — not a third service; it never runs on its own.
+
 - **Database:** MongoDB + Mongoose
 - **Async jobs:** MongoDB-backed `jobs_queue` + a polling worker (atomic claim, retry/backoff, dead-letter). No Redis.
 - **Events:** MongoDB `events` collection behind an `EventBus`
@@ -99,15 +103,40 @@ npm run test                 # unit + integration
 npm run test:e2e             # Playwright (start `npm run dev` first)
 ```
 
-## Deployment (suggested, intentionally simple)
+## Deployment (fluxberry.in)
 
-- **Frontend →** Vercel
-- **API + Worker →** Railway / Render / Fly (two processes, one codebase: `npm run start` and `npm run start:worker`)
+- **Frontend + Backend API →** Vercel — one project, defined in [`vercel.json`](vercel.json)
+  using [Vercel Services](https://vercel.com/docs/services): the Next.js app and the Express API
+  deploy together on one domain, with `/api/backend/*` routed to the API and everything else to
+  the frontend.
+- **Worker →** Railway (or Render) — the async job worker (resume parsing, AI screening, email,
+  workflow engine) is a long-running process that polls MongoDB, which Vercel Functions
+  can't run. It deploys separately from the *same* `backend/` codebase using
+  [`railway.toml`](railway.toml) and the existing `npm run start:worker` script — no code changes,
+  just a second small deploy target.
 - **Database →** MongoDB Atlas
+- **Auth →** Supabase (JWT verified by `backend/src/auth/supabase-verifier.ts`)
 - **Storage →** Cloudflare R2 or S3
 - **Email →** Resend
 
-No Kubernetes, no microservices. See [`docs/local-development.md`](docs/local-development.md).
+No Kubernetes, no microservices split beyond the one unavoidable exception (the worker). See
+[`docs/local-development.md`](docs/local-development.md).
+
+### Deploying to production, step by step
+
+1. **MongoDB Atlas** — create a free (M0) cluster, copy the connection string into `MONGODB_URI`.
+2. **Supabase** — create a project, copy `SUPABASE_URL` / `SUPABASE_JWT_SECRET` (and the anon key
+   for the frontend).
+3. **Cloudflare R2** (or S3) — create a bucket, set up a public domain/CDN for it, copy the
+   endpoint + keys into `STORAGE_*`.
+4. **Resend** — verify your sending domain, copy `RESEND_API_KEY`.
+5. **Vercel** — import this repo. It auto-detects `vercel.json`. Set every env var from
+   [`.env.production.example`](.env.production.example) (backend vars and `NEXT_PUBLIC_*` vars both
+   go in the same Vercel project's Environment Variables). Point `fluxberry.in` at it.
+6. **Railway** — create a new project from the same repo (root directory: repo root). It picks up
+   `railway.toml` automatically. Set the same backend env vars as step 5 (`MONGODB_URI`,
+   `SUPABASE_JWT_SECRET`, `RESEND_API_KEY`, `STORAGE_*`, `AI_API_KEY`, etc. — the worker needs
+   everything the API needs, minus the `NEXT_PUBLIC_*`/`PORT`/`CORS_ORIGINS` ones).
 
 ## License
 

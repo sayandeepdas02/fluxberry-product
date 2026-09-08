@@ -38,3 +38,7 @@ npm-debug.log*
 
 # mongo local data (if run in-repo)
 .mongo-data/
+
+# vercel / railway local linking
+.vercel
+.railway

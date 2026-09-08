@@ -1,0 +1,7 @@
+[build]
+builder = "NIXPACKS"
+buildCommand = "npm install && npm run build --workspace @fluxberry/shared && npm run build --workspace @fluxberry/backend"
+
+[deploy]
+startCommand = "npm run start:worker --workspace @fluxberry/backend"
+restartPolicyType = "ON_FAILURE"
