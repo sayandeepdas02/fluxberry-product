@@ -7,6 +7,7 @@ import {
 } from 'recharts';
 import { useJobAnalytics, useFunnelBenchmark } from '@/hooks/use-analytics';
 import { useFeature } from '@/hooks/use-features';
+import { getPlanUpgradeFlag } from '@/lib/api-client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MetricCard } from '@/components/ui/metric-card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -110,21 +111,25 @@ export default function JobAnalyticsPage() {
 
 function FunnelBenchmarkCard({ jobId }: { jobId: string }) {
   const advancedAnalytics = useFeature('ADVANCED_ANALYTICS');
-  const { data, isLoading } = useFunnelBenchmark(jobId);
+  const { data, isLoading, error } = useFunnelBenchmark(jobId);
   if (!advancedAnalytics) return null;
+
+  const upgradeFlag = getPlanUpgradeFlag(error);
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Benchmark vs. workspace</CardTitle>
-        <p className="text-xs text-muted-foreground">Share of applicants currently sitting at each stage, this job vs. every job.</p>
+        <p className="text-xs text-muted-foreground">Share of applicants who reached each stage or further, this job vs. every job.</p>
       </CardHeader>
       <CardContent>
         {isLoading ? (
           <Skeleton className="h-40 w-full" />
-        ) : !data ? (
+        ) : upgradeFlag ? (
           <p className="text-sm text-muted-foreground">Not available on your plan.</p>
-        ) : (
+        ) : error ? (
+          <p className="text-sm text-muted-foreground">Could not load the benchmark — try again shortly.</p>
+        ) : !data ? null : (
           <ResponsiveContainer width="100%" height={Math.max(140, data.points.length * 40)}>
             <BarChart data={data.points.map((p) => ({ label: STAGE_LABELS[p.stage], job: p.jobRate, workspace: p.workspaceRate }))} layout="vertical" margin={{ left: 8, right: 24, top: 4, bottom: 4 }}>
               <XAxis type="number" hide />

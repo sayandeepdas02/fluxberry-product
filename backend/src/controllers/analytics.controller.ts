@@ -29,6 +29,6 @@ export const analyticsController = {
   }),
 
   getFunnelBenchmark: asyncHandler(async (req, res) => {
-    ok(res, await analyticsService.computeFunnelBenchmark(req.auth!.workspaceId!, req.params.jobId));
+    ok(res, await analyticsService.computeFunnelBenchmark(req.auth!.workspaceId!, req.params.jobId, req.auth!));
   }),
 };

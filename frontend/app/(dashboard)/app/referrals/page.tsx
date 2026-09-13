@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Gift, Copy } from 'lucide-react';
 import { ROLE_RANK } from '@fluxberry/shared';
 import type { ReferralDto } from '@fluxberry/shared';
@@ -127,18 +127,6 @@ function MyReferrals() {
 
 function RewardManagement() {
   const { data: referrals, isLoading } = useWorkspaceReferrals();
-  const updateReward = useUpdateReferralReward();
-  const [notes, setNotes] = useState<Record<string, string>>({});
-
-  const setReward = (r: ReferralDto, rewardStatus: 'NONE' | 'PENDING' | 'PAID') => {
-    updateReward.mutate(
-      { referralId: r.id, input: { rewardStatus, rewardNote: notes[r.id] ?? r.rewardNote ?? undefined } },
-      {
-        onSuccess: () => toast.success('Reward status updated'),
-        onError: (err) => toast.error(err instanceof Error ? err.message : 'Could not update reward status'),
-      },
-    );
-  };
 
   return (
     <Card>
@@ -167,39 +155,98 @@ function RewardManagement() {
             </TableHeader>
             <TableBody>
               {referrals.map((r) => (
-                <TableRow key={r.id}>
-                  <TableCell>
-                    <div className="font-medium">{r.referrerName}</div>
-                    <div className="text-xs text-muted-foreground">{r.referrerEmail}</div>
-                  </TableCell>
-                  <TableCell>{r.jobTitle}</TableCell>
-                  <TableCell>{r.applicationCount}</TableCell>
-                  <TableCell>{r.hiredCount}</TableCell>
-                  <TableCell>
-                    <Select value={r.rewardStatus} onValueChange={(v) => setReward(r, v as 'NONE' | 'PENDING' | 'PAID')}>
-                      <SelectTrigger className="h-8 w-32"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="NONE">None</SelectItem>
-                        <SelectItem value="PENDING">Pending</SelectItem>
-                        <SelectItem value="PAID">Paid</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </TableCell>
-                  <TableCell>
-                    <Input
-                      defaultValue={r.rewardNote ?? ''}
-                      placeholder="Optional note"
-                      className="h-8 w-40 text-xs"
-                      onChange={(e) => setNotes((s) => ({ ...s, [r.id]: e.target.value }))}
-                      onBlur={() => notes[r.id] !== undefined && setReward(r, r.rewardStatus as 'NONE' | 'PENDING' | 'PAID')}
-                    />
-                  </TableCell>
-                </TableRow>
+                <ReferralRewardRow key={r.id} referral={r} />
               ))}
             </TableBody>
           </Table>
         )}
       </CardContent>
     </Card>
+  );
+}
+
+type RewardStatus = 'NONE' | 'PENDING' | 'PAID';
+
+/**
+ * Status and note are edited independently (a dropdown, a text field) but
+ * always submitted together from local state — never a stale prop value.
+ * That's what actually prevents the race a naive onBlur-submits-old-status
+ * approach has: if the note is edited then the status changed quickly after,
+ * both requests carry the *current* pair, so whichever lands last still
+ * reflects the latest intent. Controls are also disabled while a save for
+ * this row is in flight, so two edits can't overlap into competing requests
+ * in the first place.
+ */
+function ReferralRewardRow({ referral }: { referral: ReferralDto }) {
+  const updateReward = useUpdateReferralReward();
+  const [status, setStatus] = useState<RewardStatus>(referral.rewardStatus as RewardStatus);
+  const [note, setNote] = useState(referral.rewardNote ?? '');
+  const [dirty, setDirty] = useState(false);
+
+  useEffect(() => {
+    if (!dirty) {
+      setStatus(referral.rewardStatus as RewardStatus);
+      setNote(referral.rewardNote ?? '');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [referral.rewardStatus, referral.rewardNote]);
+
+  const save = (nextStatus: RewardStatus, nextNote: string) => {
+    setDirty(true);
+    updateReward.mutate(
+      { referralId: referral.id, input: { rewardStatus: nextStatus, rewardNote: nextNote || undefined } },
+      {
+        onSuccess: () => {
+          setDirty(false);
+          toast.success('Reward status updated');
+        },
+        onError: (err) => {
+          setDirty(false);
+          toast.error(err instanceof Error ? err.message : 'Could not update reward status');
+        },
+      },
+    );
+  };
+
+  return (
+    <TableRow>
+      <TableCell>
+        <div className="font-medium">{referral.referrerName}</div>
+        <div className="text-xs text-muted-foreground">{referral.referrerEmail}</div>
+      </TableCell>
+      <TableCell>{referral.jobTitle}</TableCell>
+      <TableCell>{referral.applicationCount}</TableCell>
+      <TableCell>{referral.hiredCount}</TableCell>
+      <TableCell>
+        <Select
+          value={status}
+          disabled={updateReward.isPending}
+          onValueChange={(v) => {
+            const next = v as RewardStatus;
+            setStatus(next);
+            save(next, note);
+          }}
+        >
+          <SelectTrigger className="h-8 w-32"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="NONE">None</SelectItem>
+            <SelectItem value="PENDING">Pending</SelectItem>
+            <SelectItem value="PAID">Paid</SelectItem>
+          </SelectContent>
+        </Select>
+      </TableCell>
+      <TableCell>
+        <Input
+          value={note}
+          placeholder="Optional note"
+          className="h-8 w-40 text-xs"
+          disabled={updateReward.isPending}
+          onChange={(e) => setNote(e.target.value)}
+          onBlur={() => {
+            if (note !== (referral.rewardNote ?? '')) save(status, note);
+          }}
+        />
+      </TableCell>
+    </TableRow>
   );
 }

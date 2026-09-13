@@ -18,7 +18,9 @@ export function useCreateReferral() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (input: CreateReferralInput) => api.post<ReferralDto>('/api/v1/referrals', input),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['referrals', currentWorkspace.id, 'mine'] }),
+    // Invalidate the shared workspace prefix, not just 'mine' — an admin
+    // viewing the reward table on the same page needs the new link too.
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['referrals', currentWorkspace.id] }),
   });
 }
 
@@ -36,6 +38,8 @@ export function useUpdateReferralReward() {
   return useMutation({
     mutationFn: ({ referralId, input }: { referralId: string; input: UpdateReferralRewardInput }) =>
       api.patch<ReferralDto>(`/api/v1/workspaces/${currentWorkspace.id}/referrals/${referralId}/reward`, input),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['referrals', currentWorkspace.id, 'all'] }),
+    // Same shared-prefix invalidation — a member's own referral badge should
+    // reflect a reward status change too.
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['referrals', currentWorkspace.id] }),
   });
 }

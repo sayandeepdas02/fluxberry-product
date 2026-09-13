@@ -3,6 +3,7 @@ import request from 'supertest';
 import { createApp } from '../../src/app';
 import { connectDatabase, disconnectDatabase, mongoose } from '../../src/config/db';
 import { WorkspaceModel } from '../../src/models/workspace.model';
+import { ApplicationModel } from '../../src/models/application.model';
 
 const app = createApp();
 const PDF = Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n', 'latin1');
@@ -39,7 +40,11 @@ describe('advanced analytics tier (integration)', () => {
     await ws(request(app).post(`/api/v1/jobs/${jobId}/publish`) as any);
 
     const today = new Date().toISOString().slice(0, 10);
-    const qs = `aStart=${today}&aEnd=${today}&bStart=${today}&bEnd=${today}`;
+    const tomorrow = new Date(Date.now() + 86_400_000).toISOString().slice(0, 10);
+    // Disjoint ranges: the applicant below lands only in range A, so this
+    // actually exercises date filtering rather than passing on an
+    // implementation that ignores the query params entirely.
+    const qs = `aStart=${today}&aEnd=${today}&bStart=${tomorrow}&bEnd=${tomorrow}`;
 
     // FREE plan: blocked with the distinct upgrade-required code, not a generic 403.
     const blockedCohort = await ws(request(app).get(`/api/v1/analytics/advanced/cohort?${qs}`) as any);
@@ -58,7 +63,7 @@ describe('advanced analytics tier (integration)', () => {
     // Upgrade the workspace directly (billing flow is covered elsewhere).
     await WorkspaceModel.findByIdAndUpdate(workspaceId, { plan: 'PRO' });
 
-    // One applicant, submitted today, so it lands in both cohort ranges (aEnd == bStart == today).
+    // One applicant, submitted today — falls inside range A only.
     await request(app)
       .post(`/api/v1/public/jobs/${workspaceSlug}/${jobSlug}/apply`)
       .field('name', 'Advanced Candidate')
@@ -69,8 +74,8 @@ describe('advanced analytics tier (integration)', () => {
     const cohort = await ws(request(app).get(`/api/v1/analytics/advanced/cohort?${qs}`) as any);
     expect(cohort.status).toBe(200);
     expect(cohort.body.data.rangeA.metrics.totalApplicants).toBe(1);
-    expect(cohort.body.data.rangeB.metrics.totalApplicants).toBe(1);
-    expect(cohort.body.data.deltas.totalApplicants).toBe(0);
+    expect(cohort.body.data.rangeB.metrics.totalApplicants).toBe(0);
+    expect(cohort.body.data.deltas.totalApplicants).toBe(-1);
 
     const leaderboard = await ws(request(app).get('/api/v1/analytics/advanced/leaderboard') as any);
     expect(leaderboard.status).toBe(200);
@@ -81,8 +86,18 @@ describe('advanced analytics tier (integration)', () => {
 
     const benchmark = await ws(request(app).get(`/api/v1/jobs/${jobId}/analytics/benchmark`) as any);
     expect(benchmark.status).toBe(200);
-    const applied = benchmark.body.data.points.find((p: any) => p.stage === 'APPLIED');
-    expect(applied.jobRate).toBe(100);
-    expect(applied.workspaceRate).toBe(100);
+    const rateFor = (points: any[], stage: string) => points.find((p) => p.stage === stage);
+    expect(rateFor(benchmark.body.data.points, 'APPLIED').jobRate).toBe(100);
+    expect(rateFor(benchmark.body.data.points, 'APPLIED').workspaceRate).toBe(100);
+
+    // Cumulative reach: moving the applicant to OFFER means it should count
+    // toward every earlier stage's rate too, not just its exact current stage.
+    const application = await ApplicationModel.findOne({ workspaceId, jobId }).lean();
+    await ws(request(app).post(`/api/v1/applications/${application!._id}/stage`).send({ stage: 'OFFER' }) as any);
+    const benchmarkAfterMove = await ws(request(app).get(`/api/v1/jobs/${jobId}/analytics/benchmark`) as any);
+    for (const stage of ['APPLIED', 'SCREENING', 'ASSESSMENT', 'INTERVIEW', 'OFFER']) {
+      expect(rateFor(benchmarkAfterMove.body.data.points, stage).jobRate).toBe(100);
+    }
+    expect(rateFor(benchmarkAfterMove.body.data.points, 'HIRED').jobRate).toBe(0);
   });
 });

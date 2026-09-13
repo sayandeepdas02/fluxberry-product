@@ -142,10 +142,13 @@ function AdvancedAnalyticsSection() {
 
   const today = new Date();
   const thirtyAgo = new Date(today.getTime() - 30 * 86_400_000);
+  const twentyNineAgo = new Date(today.getTime() - 29 * 86_400_000);
   const sixtyAgo = new Date(today.getTime() - 60 * 86_400_000);
 
+  // Disjoint by default (days 60-30 vs. 29-0) — sharing a boundary day would
+  // double-count that day's applicants in both cohorts.
   const [rangeA, setRangeA] = useState<CohortRange>({ start: isoDateOnly(sixtyAgo), end: isoDateOnly(thirtyAgo) });
-  const [rangeB, setRangeB] = useState<CohortRange>({ start: isoDateOnly(thirtyAgo), end: isoDateOnly(today) });
+  const [rangeB, setRangeB] = useState<CohortRange>({ start: isoDateOnly(twentyNineAgo), end: isoDateOnly(today) });
   const [upgradeOpen, setUpgradeOpen] = useState(false);
 
   const cohort = useCohortComparison(rangeA, rangeB);
@@ -207,6 +210,7 @@ function AdvancedAnalyticsSection() {
                     a={cohort.data.rangeA.metrics.timeToHireDays ?? '—'}
                     b={cohort.data.rangeB.metrics.timeToHireDays ?? '—'}
                     delta={cohort.data.deltas.timeToHireDays}
+                    lowerIsBetter
                   />
                 </div>
               ) : null}
@@ -257,9 +261,22 @@ function AdvancedAnalyticsSection() {
   );
 }
 
-function DeltaMetric({ label, a, b, delta }: { label: string; a: number | string; b: number | string; delta: number | null }) {
-  const positive = delta != null && delta > 0;
-  const negative = delta != null && delta < 0;
+function DeltaMetric({
+  label,
+  a,
+  b,
+  delta,
+  lowerIsBetter = false,
+}: {
+  label: string;
+  a: number | string;
+  b: number | string;
+  delta: number | null;
+  /** For metrics like time-to-hire where a lower number is the improvement, not a higher one. */
+  lowerIsBetter?: boolean;
+}) {
+  const positive = delta != null && (lowerIsBetter ? delta < 0 : delta > 0);
+  const negative = delta != null && (lowerIsBetter ? delta > 0 : delta < 0);
   return (
     <div className="rounded-lg border border-border p-3">
       <div className="text-xs text-muted-foreground">{label}</div>

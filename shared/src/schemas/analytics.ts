@@ -37,12 +37,15 @@ export type JobAnalyticsDto = {
 
 // ---- Advanced analytics (Phase 3.3, behind requirePlanFeature('ADVANCED_ANALYTICS')) ----
 
-export const cohortComparisonQuerySchema = z.object({
-  aStart: z.coerce.date(),
-  aEnd: z.coerce.date(),
-  bStart: z.coerce.date(),
-  bEnd: z.coerce.date(),
-});
+export const cohortComparisonQuerySchema = z
+  .object({
+    aStart: z.coerce.date(),
+    aEnd: z.coerce.date(),
+    bStart: z.coerce.date(),
+    bEnd: z.coerce.date(),
+  })
+  .refine(({ aStart, aEnd }) => aStart <= aEnd, { path: ['aEnd'], message: 'aEnd must not be before aStart' })
+  .refine(({ bStart, bEnd }) => bStart <= bEnd, { path: ['bEnd'], message: 'bEnd must not be before bStart' });
 export type CohortComparisonQuery = z.infer<typeof cohortComparisonQuerySchema>;
 
 export type CohortMetrics = {

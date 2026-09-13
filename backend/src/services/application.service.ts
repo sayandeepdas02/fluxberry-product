@@ -99,6 +99,7 @@ export const applicationService = {
     // it, since Referral.applicationIds feeds reward eligibility (real money,
     // however manually disbursed in v1).
     const referralId = await referralService.resolveForAttribution(input.referralCode, jobId);
+    const effectiveSource = referralId ? 'REFERRAL' : input.source;
     let application;
     try {
       application = await applicationRepository.create({
@@ -107,7 +108,7 @@ export const applicationService = {
         candidateId: candidate._id,
         status: 'ACTIVE',
         stage: 'APPLIED',
-        source: referralId ? 'REFERRAL' : input.source,
+        source: effectiveSource,
         referralCode: referralId ? input.referralCode : null,
         appliedAt: new Date(),
       });
@@ -115,7 +116,17 @@ export const applicationService = {
       if (isDup(err)) throw conflict("You've already applied to this role");
       throw err;
     }
-    if (referralId) await referralService.recordApplication(referralId, String(application._id));
+    if (referralId) {
+      // Best-effort: the application itself is already committed, so a
+      // hiccup recording it against the referral (reward-tracking bookkeeping)
+      // must never fail the candidate's apply request or leave them unable to
+      // retry (a retry after a hard failure here would 409 as a duplicate).
+      try {
+        await referralService.recordApplication(referralId, String(application._id));
+      } catch (err) {
+        logger.error({ err, referralId, applicationId: String(application._id) }, 'failed to record referral application');
+      }
+    }
 
     // 4. Save answers.
     if (input.answers?.length) {
@@ -131,7 +142,7 @@ export const applicationService = {
       applicationId: application._id,
       candidateId: candidate._id,
       actorLabel: 'candidate',
-      payload: { jobId, source: input.source },
+      payload: { jobId, source: effectiveSource },
     });
     await jobQueue.enqueue(
       'PARSE_RESUME',
