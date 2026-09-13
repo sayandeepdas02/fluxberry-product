@@ -20,8 +20,12 @@ export function PublishConfirmationDialog({
   applyUrl: string;
 }) {
   const copy = async () => {
-    await navigator.clipboard.writeText(applyUrl);
-    toast.success('Application link copied');
+    try {
+      await navigator.clipboard.writeText(applyUrl);
+      toast.success('Application link copied');
+    } catch {
+      toast.error('Could not copy the application link');
+    }
   };
 
   return (

@@ -82,15 +82,20 @@ export function CandidateDetailPanel({
 
   const canShortlist = Boolean(activeApp) && activeApp!.stage !== 'SCREENING' && activeApp!.status === 'ACTIVE';
   const canReject = Boolean(activeApp) && activeApp!.status === 'ACTIVE';
+  // useHotkey only ignores keystrokes while focus is on a text input — a Radix
+  // Select trigger or dialog button doesn't count, so without this a keypress
+  // meant for an open dialog (e.g. typeahead in the reject-reason select) can
+  // still fire a panel-level shortcut behind it.
+  const dialogOpen = rejectOpen || sendOpen;
 
   useHotkey('s', () => {
     if (canShortlist) {
       shortlist.mutate({ applicationId: activeApp!.id }, { onSuccess: () => toast.success('Candidate shortlisted') });
     }
-  }, hotkeysEnabled && canShortlist);
-  useHotkey('a', () => { if (canReject) setRejectOpen(true); }, hotkeysEnabled && canReject);
-  useHotkey('ArrowLeft', () => onNavigate?.('prev'), hotkeysEnabled && hasPrev && Boolean(onNavigate));
-  useHotkey('ArrowRight', () => onNavigate?.('next'), hotkeysEnabled && hasNext && Boolean(onNavigate));
+  }, hotkeysEnabled && !dialogOpen && canShortlist);
+  useHotkey('a', () => { if (canReject) setRejectOpen(true); }, hotkeysEnabled && !dialogOpen && canReject);
+  useHotkey('ArrowLeft', () => onNavigate?.('prev'), hotkeysEnabled && !dialogOpen && hasPrev && Boolean(onNavigate));
+  useHotkey('ArrowRight', () => onNavigate?.('next'), hotkeysEnabled && !dialogOpen && hasNext && Boolean(onNavigate));
 
   if (isLoading || !profile) return <Skeleton className="h-96 w-full" />;
 

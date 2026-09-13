@@ -117,20 +117,23 @@ export default function NewJobPage() {
       if (!jobId) {
         if (creatingRef.current) return null;
         creatingRef.current = true;
-        const job = await createJob.mutateAsync(buildInput());
-        sessionStorage.setItem(DRAFT_ID_KEY, job.id);
-        loadedRef.current = true;
-        setJobId(job.id);
-        creatingRef.current = false;
-        setSaveState('saved');
-        return job.id;
+        try {
+          const job = await createJob.mutateAsync(buildInput());
+          sessionStorage.setItem(DRAFT_ID_KEY, job.id);
+          loadedRef.current = true;
+          setJobId(job.id);
+          setSaveState('saved');
+          return job.id;
+        } finally {
+          creatingRef.current = false;
+        }
       }
       await updateJob.mutateAsync(buildInput());
       setSaveState('saved');
       return jobId;
-    } catch {
+    } catch (err) {
       setSaveState('error');
-      return jobId;
+      throw err;
     }
   };
 
@@ -142,7 +145,10 @@ export default function NewJobPage() {
     // otherwise this would autosave the still-blank defaults over the real draft.
     if (jobId && !loadedRef.current) return;
     clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => { void flushSave(); }, 800);
+    // Autosave failures already set saveState('error') for the indicator near the
+    // title; nothing else to do in the background here, but the rejection must be
+    // caught or it surfaces as an unhandled promise rejection on every keystroke.
+    debounceRef.current = setTimeout(() => { flushSave().catch(() => {}); }, 800);
     return () => clearTimeout(debounceRef.current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -176,9 +182,13 @@ export default function NewJobPage() {
   };
 
   const saveAndExit = async () => {
-    await flushSave();
-    toast.success('Your changes are saved as a draft');
-    router.push('/app/jobs');
+    try {
+      await flushSave();
+      toast.success('Your changes are saved as a draft');
+      router.push('/app/jobs');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Could not save your changes');
+    }
   };
 
   const publish = async () => {

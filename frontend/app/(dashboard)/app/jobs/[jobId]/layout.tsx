@@ -92,6 +92,7 @@ export default function JobDetailLayout({ children }: { children: React.ReactNod
         if (isFirstPublish) setPublishConfirmOpen(true);
         else toast.success('Your job is live and accepting applications');
       },
+      onError: () => toast.error('Could not publish job'),
     });
   };
 
@@ -102,19 +103,28 @@ export default function JobDetailLayout({ children }: { children: React.ReactNod
           label: 'Pause',
           icon: <Pause className="size-4" />,
           hidden: job.status !== 'PUBLISHED',
-          onSelect: () => setStatus.mutate({ jobId: job.id, status: 'PAUSED' }, { onSuccess: () => toast.success('Job paused — no longer accepting applications') }),
+          onSelect: () => setStatus.mutate(
+            { jobId: job.id, status: 'PAUSED' },
+            { onSuccess: () => toast.success('Job paused — no longer accepting applications'), onError: () => toast.error('Could not pause job') },
+          ),
         },
         {
           label: 'Resume',
           icon: <Play className="size-4" />,
           hidden: job.status !== 'PAUSED',
-          onSelect: () => setStatus.mutate({ jobId: job.id, status: 'PUBLISHED' }, { onSuccess: () => toast.success('Job resumed and accepting applications again') }),
+          onSelect: () => setStatus.mutate(
+            { jobId: job.id, status: 'PUBLISHED' },
+            { onSuccess: () => toast.success('Job resumed and accepting applications again'), onError: () => toast.error('Could not resume job') },
+          ),
         },
         {
           label: 'Close job',
           icon: <XCircle className="size-4" />,
           hidden: job.status === 'CLOSED' || job.status === 'ARCHIVED',
-          onSelect: () => setStatus.mutate({ jobId: job.id, status: 'CLOSED' }, { onSuccess: () => toast.success('Job closed and no longer accepting applications') }),
+          onSelect: () => setStatus.mutate(
+            { jobId: job.id, status: 'CLOSED' },
+            { onSuccess: () => toast.success('Job closed and no longer accepting applications'), onError: () => toast.error('Could not close job') },
+          ),
         },
         {
           label: 'Duplicate job',
@@ -160,7 +170,11 @@ export default function JobDetailLayout({ children }: { children: React.ReactNod
         </div>
       )}
 
-      <PublishConfirmationDialog open={publishConfirmOpen} onOpenChange={setPublishConfirmOpen} applyUrl={applyUrl} />
+      <PublishConfirmationDialog
+        open={publishConfirmOpen && Boolean(job)}
+        onOpenChange={setPublishConfirmOpen}
+        applyUrl={applyUrl}
+      />
 
       <div className="flex items-center gap-1 overflow-x-auto border-b border-border">
         {tabs.map((t) => {

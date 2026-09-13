@@ -63,9 +63,12 @@ export function CandidatesView({ jobId: fixedJobId }: { jobId?: string }) {
 
   // Feeds the candidates-list modal's prev/next navigation (spec item 4.1) — a
   // no-op outside the global candidates route, since the context defaults to
-  // a harmless no-op there (e.g. a job-scoped candidates tab).
+  // a harmless no-op there (e.g. a job-scoped candidates tab). Deduplicated,
+  // since a candidate with multiple applications produces adjacent rows with
+  // the same candidateId — an unduplicated list would let the modal compute a
+  // "next" id equal to the current one, stalling navigation there.
   useEffect(() => {
-    setListIds(items.map((c) => c.candidateId));
+    setListIds(Array.from(new Set(items.map((c) => c.candidateId))));
   }, [items, setListIds]);
 
   // The cross-job "All candidates" view can't meaningfully merge differently

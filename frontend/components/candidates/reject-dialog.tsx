@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { REJECTION_REASONS, type RejectionReason } from '@fluxberry/shared';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -30,6 +30,18 @@ export function RejectDialog({
 }) {
   const [reason, setReason] = useState<RejectionReason>('OTHER');
   const [note, setNote] = useState('');
+
+  // This dialog stays mounted (reused across rows/candidates) rather than
+  // remounting per target, so its fields must be reset on each open —
+  // otherwise a cancelled or submitted rejection's reason/note leaks into
+  // the next candidate's rejection.
+  useEffect(() => {
+    if (open) {
+      setReason('OTHER');
+      setNote('');
+    }
+  }, [open]);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>

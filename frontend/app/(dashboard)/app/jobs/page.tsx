@@ -109,7 +109,10 @@ export default function JobsPage() {
                     label: 'Close job',
                     icon: <XCircle className="size-4" />,
                     hidden: job.status === 'CLOSED' || job.status === 'ARCHIVED',
-                    onSelect: () => setStatus.mutate({ jobId: job.id, status: 'CLOSED' }, { onSuccess: () => toast.success('Job closed and no longer accepting applications') }),
+                    onSelect: () => setStatus.mutate(
+                      { jobId: job.id, status: 'CLOSED' },
+                      { onSuccess: () => toast.success('Job closed and no longer accepting applications'), onError: () => toast.error('Could not close job') },
+                    ),
                   },
                   {
                     label: 'Archive',
@@ -117,7 +120,10 @@ export default function JobsPage() {
                     variant: 'destructive',
                     separated: true,
                     hidden: job.status === 'ARCHIVED',
-                    onSelect: () => setStatus.mutate({ jobId: job.id, status: 'ARCHIVED' }, { onSuccess: () => toast.success('Job archived') }),
+                    onSelect: () => setStatus.mutate(
+                      { jobId: job.id, status: 'ARCHIVED' },
+                      { onSuccess: () => toast.success('Job archived'), onError: () => toast.error('Could not archive job') },
+                    ),
                   },
                 ];
                 return (

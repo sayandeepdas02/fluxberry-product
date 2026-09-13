@@ -1,7 +1,6 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCandidateListIds } from '../../candidate-list-context';
 import { CandidateDetailPanel } from '@/components/candidates/candidate-detail-panel';
@@ -11,9 +10,16 @@ import { Sheet, SheetContent, SheetBody, SheetTitle, SheetDescription } from '@/
  * Intercepts navigation to `/app/candidates/[candidateId]` when it originates
  * from within `/app/candidates` (e.g. clicking a table row or board card) and
  * renders it as an overlay on top of the still-mounted list, with prev/next
- * chevrons fixed to the screen edges — spec item 4.1. A direct visit or
- * refresh bypasses this and hits the real page at
+ * chevrons pinned to the dialog card's own edges — spec item 4.1. A direct
+ * visit or refresh bypasses this and hits the real page at
  * `candidates/[candidateId]/page.tsx` instead.
+ *
+ * The chevrons render inside `SheetContent` (not a sibling portal) so they
+ * stay within Radix's focus trap and the dialog's accessibility tree — Tab
+ * and screen readers can reach them, not just a mouse. `SheetContent` is
+ * itself `position: fixed` with a transform, which makes it the containing
+ * block for `position: absolute` descendants, so the chevrons are positioned
+ * relative to the card rather than the viewport.
  */
 export default function CandidateModal() {
   const router = useRouter();
@@ -34,12 +40,7 @@ export default function CandidateModal() {
 
   return (
     <Sheet open onOpenChange={(open) => { if (!open) close(); }}>
-      <SheetContent
-        className="p-0"
-        onInteractOutside={(e) => {
-          if ((e.target as HTMLElement)?.closest?.('[data-candidate-nav]')) e.preventDefault();
-        }}
-      >
+      <SheetContent className="p-0">
         <SheetTitle className="sr-only">Candidate profile</SheetTitle>
         <SheetDescription className="sr-only">Candidate details, screening, and actions</SheetDescription>
         <SheetBody className="pt-10">
@@ -50,39 +51,28 @@ export default function CandidateModal() {
             hasNext={Boolean(nextId)}
           />
         </SheetBody>
-      </SheetContent>
 
-      {(prevId || nextId) && (
-        // Portaled alongside SheetContent/Overlay so it shares their stacking
-        // context. Radix's modal Dialog also sets `pointer-events: none` on
-        // <body> while open, re-enabling it only on its own Overlay/Content —
-        // pointer-events-auto opts these buttons back in, or clicks pass
-        // straight through to the overlay underneath despite the higher z-index.
-        <DialogPrimitive.Portal>
-          {prevId && (
-            <button
-              type="button"
-              data-candidate-nav
-              onClick={() => navigate('prev')}
-              aria-label="Previous candidate"
-              className="pointer-events-auto fixed left-4 top-1/2 z-[60] -translate-y-1/2 rounded-full border border-border bg-background p-2 text-foreground shadow-lg transition hover:bg-accent"
-            >
-              <ChevronLeft className="size-5" />
-            </button>
-          )}
-          {nextId && (
-            <button
-              type="button"
-              data-candidate-nav
-              onClick={() => navigate('next')}
-              aria-label="Next candidate"
-              className="pointer-events-auto fixed right-4 top-1/2 z-[60] -translate-y-1/2 rounded-full border border-border bg-background p-2 text-foreground shadow-lg transition hover:bg-accent"
-            >
-              <ChevronRight className="size-5" />
-            </button>
-          )}
-        </DialogPrimitive.Portal>
-      )}
+        {prevId && (
+          <button
+            type="button"
+            onClick={() => navigate('prev')}
+            aria-label="Previous candidate"
+            className="absolute left-2 top-1/2 z-10 -translate-y-1/2 rounded-full border border-border bg-background p-2 text-foreground shadow-lg transition hover:bg-accent"
+          >
+            <ChevronLeft className="size-5" />
+          </button>
+        )}
+        {nextId && (
+          <button
+            type="button"
+            onClick={() => navigate('next')}
+            aria-label="Next candidate"
+            className="absolute right-2 top-1/2 z-10 -translate-y-1/2 rounded-full border border-border bg-background p-2 text-foreground shadow-lg transition hover:bg-accent"
+          >
+            <ChevronRight className="size-5" />
+          </button>
+        )}
+      </SheetContent>
     </Sheet>
   );
 }
