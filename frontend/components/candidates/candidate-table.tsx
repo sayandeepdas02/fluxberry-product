@@ -2,23 +2,27 @@
 
 import { useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
-import type { CandidateListItemDto } from '@fluxberry/shared';
+import type { CandidateListItemDto, PipelineStage } from '@fluxberry/shared';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card } from '@/components/ui/card';
 import { ScoreBadge } from './score-badge';
 import { StageBadge } from './stage-badge';
+import { LabelChips } from './label-picker';
 import { formatSalary, initials } from '@/lib/utils';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 export function CandidateTable({
   items,
   showJob = true,
+  stages,
   selectedIds,
   onSelect,
   onSelectAll,
 }: {
   items: CandidateListItemDto[];
   showJob?: boolean;
+  /** The job's effective stage list, when scoped to one job — resolves custom stage labels. */
+  stages?: PipelineStage[];
   selectedIds?: Set<string>;
   onSelect?: (applicationId: string) => void;
   onSelectAll?: () => void;
@@ -48,6 +52,7 @@ export function CandidateTable({
             {showJob && <TableHead>Job</TableHead>}
             <TableHead className="w-20">Score</TableHead>
             <TableHead className="w-28">Stage</TableHead>
+            <TableHead>Labels</TableHead>
             <TableHead className="w-32">Location</TableHead>
             <TableHead className="w-32">Expected</TableHead>
             <TableHead className="w-28">Applied</TableHead>
@@ -91,7 +96,8 @@ export function CandidateTable({
                 </TableCell>
                 {showJob && <TableCell className="text-muted-foreground">{c.jobTitle}</TableCell>}
                 <TableCell><ScoreBadge score={c.score} /></TableCell>
-                <TableCell><StageBadge stage={c.stage} /></TableCell>
+                <TableCell><StageBadge stage={c.stage} stages={stages} /></TableCell>
+                <TableCell><LabelChips labels={c.labels} /></TableCell>
                 <TableCell className="text-muted-foreground">{c.location ?? '—'}</TableCell>
                 <TableCell className="text-muted-foreground">{formatSalary({ min: c.expectedSalary }) ?? '—'}</TableCell>
                 <TableCell className="text-xs text-muted-foreground">

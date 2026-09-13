@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { publicController } from '../controllers/public.controller';
 import { careersController } from '../controllers/careers.controller';
+import { messageController } from '../controllers/message.controller';
 import { resumeUpload } from '../middleware/upload';
 import { publicApplyLimiter, uploadLimiter, assessmentLimiter, codingRunLimiter } from '../middleware/rate-limit';
 
@@ -36,3 +37,8 @@ publicRouter.post('/public/interviews/:token/complete', assessmentLimiter, publi
 // Bolna call webhook — unauthenticated but gated by an unguessable URL secret.
 // (Bolna does not sign webhooks; we re-fetch the execution by id before trusting it.)
 publicRouter.post('/webhooks/bolna/:secret', publicController.bolnaWebhook);
+
+// Inbound candidate email replies — provider-agnostic, gated by an unguessable
+// URL secret. Whichever inbound email vendor is configured should be set up to
+// POST here with (or adapted to) { to, from, subject, text, messageId }.
+publicRouter.post('/webhooks/inbound-email/:secret', messageController.inboundWebhook);

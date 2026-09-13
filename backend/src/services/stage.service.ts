@@ -1,4 +1,5 @@
-import type { ApplicationStage, ApplicationDto, RejectionReason } from '@fluxberry/shared';
+import type { ApplicationDto, RejectionReason, PipelineStage } from '@fluxberry/shared';
+import { defaultPipelineStages } from '@fluxberry/shared';
 import { applicationRepository } from '../repositories/application.repository';
 import { CandidateModel } from '../models/candidate.model';
 import { JobModel } from '../models/job.model';
@@ -8,7 +9,7 @@ import { eventBus } from '../events/event-bus';
 import { auditService } from './audit.service';
 import { emailTemplates } from '../integrations';
 import { jobQueue } from '../queue/job-queue';
-import { notFound } from '../utils/errors';
+import { notFound, badRequest } from '../utils/errors';
 import { logger } from '../utils/logger';
 import { trackEvent } from '../integrations/posthog';
 import { notificationService } from './notification.service';
@@ -19,7 +20,8 @@ interface Actor {
   label?: string;
 }
 
-function statusForStage(stage: ApplicationStage): 'ACTIVE' | 'HIRED' | 'REJECTED' {
+/** A job's stage id — a custom stage it defined, or one of the 7 system defaults. */
+function statusForStage(stage: string): 'ACTIVE' | 'HIRED' | 'REJECTED' {
   if (stage === 'HIRED') return 'HIRED';
   if (stage === 'REJECTED') return 'REJECTED';
   return 'ACTIVE';
@@ -34,12 +36,18 @@ export const stageService = {
   async moveToStage(
     workspaceId: string,
     applicationId: string,
-    targetStage: ApplicationStage,
+    targetStage: string,
     actor: Actor,
     extra?: { reason?: RejectionReason; note?: string; eventType?: EventType },
   ): Promise<ApplicationDto> {
     const app = await applicationRepository.findInWorkspace(workspaceId, applicationId);
     if (!app) throw notFound('Application not found');
+
+    const job = await JobModel.findById(app.jobId).select('stages').lean();
+    const validStages = ((job?.stages as PipelineStage[] | null) ?? defaultPipelineStages());
+    if (!validStages.some((s) => s.id === targetStage)) {
+      throw badRequest(`"${targetStage}" is not a valid stage for this job`);
+    }
 
     const from = app.stage;
     const patch: Record<string, unknown> = {

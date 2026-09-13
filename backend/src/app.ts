@@ -9,6 +9,7 @@ import { errorHandler, notFoundHandler } from './middleware/error-handler';
 import { generalLimiter } from './middleware/rate-limit';
 import { mockStorageRouter } from './integrations';
 import { apiRouter } from './routes';
+import { billingController } from './controllers/billing.controller';
 import { config } from './config/env';
 import { logger } from './utils/logger';
 
@@ -48,6 +49,14 @@ export function createApp() {
       }),
     );
   }
+  // Billing webhook needs the raw body for signature verification — must be
+  // registered BEFORE the global express.json() parser consumes it.
+  app.post(
+    '/api/v1/webhooks/dodo',
+    express.raw({ type: 'application/json', limit: '1mb' }),
+    billingController.webhook,
+  );
+
   app.use(express.json({ limit: '1mb' }));
   app.use(express.urlencoded({ extended: true }));
   app.use(generalLimiter);

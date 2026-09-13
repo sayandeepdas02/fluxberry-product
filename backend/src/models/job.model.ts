@@ -24,6 +24,18 @@ const structuredRequirementsSchema = new Schema(
   { _id: false },
 );
 
+const pipelineStageSchema = new Schema(
+  {
+    id: { type: String, required: true },
+    label: { type: String, required: true },
+    color: { type: String, default: null },
+    sortOrder: { type: Number, default: 0 },
+    system: { type: Boolean, default: false },
+    terminal: { type: Boolean, default: false },
+  },
+  { _id: false },
+);
+
 const jobSchema = new Schema(
   {
     workspaceId: { type: Schema.Types.ObjectId, ref: 'Workspace', required: true },
@@ -46,6 +58,8 @@ const jobSchema = new Schema(
     },
     skills: { type: [jobSkillSchema], default: [] },
     structuredRequirements: { type: structuredRequirementsSchema, default: null },
+    /** null = use the 7 system default stages; set once a job customizes its pipeline. */
+    stages: { type: [pipelineStageSchema], default: null },
     applicationFormId: { type: Schema.Types.ObjectId, ref: 'ApplicationForm', default: null },
     workflowId: { type: Schema.Types.ObjectId, ref: 'Workflow', default: null },
     interviewConfigId: { type: Schema.Types.ObjectId, ref: 'AiInterviewConfig', default: null },

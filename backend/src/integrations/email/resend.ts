@@ -18,6 +18,7 @@ export class ResendEmailProvider implements EmailProvider {
       subject: input.subject,
       html: input.html,
       text: input.text,
+      ...(input.replyTo ? { replyTo: input.replyTo } : {}),
     });
     if (error) throw providerError(`Email send failed: ${error.message}`);
     return { id: data?.id ?? 'unknown', provider: 'resend' };

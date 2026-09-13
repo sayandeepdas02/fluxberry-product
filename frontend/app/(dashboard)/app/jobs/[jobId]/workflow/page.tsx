@@ -6,15 +6,15 @@ import { Plus, ArrowUp, ArrowDown, Trash2, ArrowDownIcon, Sparkles, GitBranch, C
 import {
   CONDITION_FIELDS,
   CONDITION_OPERATORS,
-  APPLICATION_STAGES,
   type WorkflowNodeDto,
   type WorkflowNodeType,
   type ConditionField,
   type ConditionOperator,
-  type ApplicationStage,
+  type PipelineStage,
 } from '@fluxberry/shared';
 import { useWorkflow, useSaveWorkflow } from '@/hooks/use-workflow';
 import { useAssessments } from '@/hooks/use-assessments';
+import { useJobStages } from '@/hooks/use-jobs';
 import { useFeature } from '@/hooks/use-features';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,7 +26,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { toast } from '@/components/ui/sonner';
-import { STAGE_LABELS } from '@/lib/labels';
+import { stageLabel } from '@/lib/labels';
 import { cn } from '@/lib/utils';
 
 const NODE_META: Record<string, { label: string; icon: React.ReactNode }> = {
@@ -59,6 +59,7 @@ export default function WorkflowBuilderPage() {
   const { data: workflow, isLoading } = useWorkflow(jobId);
   const save = useSaveWorkflow(jobId);
   const { data: assessments } = useAssessments();
+  const { data: jobStages } = useJobStages(jobId);
   const codingEnabled = useFeature('CODING_ASSESSMENT');
   const aiInterviewEnabled = useFeature('AI_INTERVIEW');
   const addable: WorkflowNodeType[] = [
@@ -95,7 +96,7 @@ export default function WorkflowBuilderPage() {
       case 'CODING_ASSESSMENT': return `Send coding test "${assessmentName(c.assessmentId)}"`;
       case 'AI_INTERVIEW': return 'Conduct an AI voice interview';
       case 'WAIT': return `Wait ${c.durationHours ?? 0} hours`;
-      case 'MOVE_STAGE': return `Move to ${STAGE_LABELS[c.stage as ApplicationStage] ?? c.stage}`;
+      case 'MOVE_STAGE': return `Move to ${stageLabel(jobStages, c.stage)}`;
       case 'SEND_EMAIL': return c.subject ? `Email: ${c.subject}` : 'Send an email';
       default: return '';
     }
@@ -166,6 +167,7 @@ export default function WorkflowBuilderPage() {
         onOpenChange={setAddOpen}
         addable={addable}
         assessments={(assessments ?? []).filter((a) => a.status === 'PUBLISHED').map((a) => ({ id: a.id, name: a.name, type: a.type }))}
+        stages={jobStages ?? []}
         onAdd={(node) => setNodes([...nodes, node])}
       />
     </div>
@@ -202,11 +204,12 @@ function StepCard({ meta, summary, onUp, onDown, onRemove, first, last }: {
   );
 }
 
-function AddStepDialog({ open, onOpenChange, onAdd, assessments, addable }: {
+function AddStepDialog({ open, onOpenChange, onAdd, assessments, addable, stages }: {
   open: boolean; onOpenChange: (o: boolean) => void;
   onAdd: (n: WorkflowNodeDto) => void;
   assessments: { id: string; name: string; type: string }[];
   addable: WorkflowNodeType[];
+  stages: PipelineStage[];
 }) {
   const [type, setType] = useState<WorkflowNodeType>('AI_SCREEN');
   const [field, setField] = useState<ConditionField>('screening_score');
@@ -214,7 +217,7 @@ function AddStepDialog({ open, onOpenChange, onAdd, assessments, addable }: {
   const [value, setValue] = useState('7');
   const [assessmentId, setAssessmentId] = useState('');
   const [hours, setHours] = useState('24');
-  const [stage, setStage] = useState<ApplicationStage>('INTERVIEW');
+  const [stage, setStage] = useState<string>('INTERVIEW');
   const [subject, setSubject] = useState('');
   const [body, setBody] = useState('');
 
@@ -279,9 +282,9 @@ function AddStepDialog({ open, onOpenChange, onAdd, assessments, addable }: {
           )}
           {type === 'MOVE_STAGE' && (
             <Field label="Stage">
-              <Select value={stage} onValueChange={(v) => setStage(v as ApplicationStage)}>
+              <Select value={stage} onValueChange={setStage}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{APPLICATION_STAGES.map((s) => <SelectItem key={s} value={s}>{STAGE_LABELS[s]}</SelectItem>)}</SelectContent>
+                <SelectContent>{stages.map((s) => <SelectItem key={s.id} value={s.id}>{s.label}</SelectItem>)}</SelectContent>
               </Select>
             </Field>
           )}

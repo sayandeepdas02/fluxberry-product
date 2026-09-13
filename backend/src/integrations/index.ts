@@ -8,9 +8,18 @@ export { getEmailProvider, __resetEmailProvider, emailTemplates, mockOutbox } fr
 export { getStorageProvider, __resetStorageProvider, mockStorageRouter } from './storage';
 export { getCodeExecutionProvider, __resetCodeExecutionProvider } from './coding';
 export { getInterviewProvider, getInterviewProviderByName, __resetInterviewProvider } from './interview';
+export {
+  getBillingProvider,
+  __resetBillingProvider,
+  mockSubscriptions,
+  mockCompleteCheckout,
+  mockCancelSubscription,
+  __resetMockBilling,
+} from './dodo';
 
 export type { AIProvider } from './ai/types';
 export type { EmailProvider } from './email/types';
 export type { StorageProvider, FileRef } from './storage/types';
 export type { CodeExecutionProvider } from './coding/types';
 export type { InterviewProvider } from './interview/types';
+export type { BillingProvider } from './dodo/types';

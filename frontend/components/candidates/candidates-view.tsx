@@ -3,10 +3,11 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Search, Users, LayoutGrid, Table as TableIcon, X } from 'lucide-react';
-import type { ApplicationStage, CandidateAssessmentStatus } from '@fluxberry/shared';
-import { APPLICATION_STAGES, CANDIDATE_ASSESSMENT_STATUSES } from '@fluxberry/shared';
+import type { CandidateAssessmentStatus, PipelineStage } from '@fluxberry/shared';
+import { CANDIDATE_ASSESSMENT_STATUSES, defaultPipelineStages } from '@fluxberry/shared';
 import { useCandidates, useMoveStage, useBulkAction } from '@/hooks/use-candidates';
-import { useJobs } from '@/hooks/use-jobs';
+import { useJobs, useJobStages } from '@/hooks/use-jobs';
+import { useLabels } from '@/hooks/use-labels';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -16,12 +17,13 @@ import { CandidateTable } from './candidate-table';
 import { CandidateBoard } from './candidate-board';
 import { toast } from '@/components/ui/sonner';
 import { cn } from '@/lib/utils';
-import { STAGE_LABELS, ASSESSMENT_STATUS_LABELS } from '@/lib/labels';
+import { ASSESSMENT_STATUS_LABELS } from '@/lib/labels';
 
 export function CandidatesView({ jobId: fixedJobId }: { jobId?: string }) {
   const [view, setView] = useState<'table' | 'board'>('table');
   const [jobId, setJobId] = useState<string | undefined>(fixedJobId);
-  const [stage, setStage] = useState<ApplicationStage | undefined>();
+  const [stage, setStage] = useState<string | undefined>();
+  const [labelId, setLabelId] = useState<string | undefined>();
   const [assessmentStatus, setAssessmentStatus] = useState<CandidateAssessmentStatus | undefined>();
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
@@ -33,12 +35,13 @@ export function CandidatesView({ jobId: fixedJobId }: { jobId?: string }) {
   }, [searchInput]);
 
   // Clear selection when filters change.
-  useEffect(() => { setSelectedIds(new Set()); }, [jobId, stage, assessmentStatus, search]);
+  useEffect(() => { setSelectedIds(new Set()); }, [jobId, stage, labelId, assessmentStatus, search]);
 
   const effectiveJobId = fixedJobId ?? jobId;
   const { data, isLoading } = useCandidates({
     jobId: effectiveJobId,
     stage,
+    labelId,
     assessmentStatus,
     search: search || undefined,
     limit: view === 'board' ? 100 : 50,
@@ -46,17 +49,24 @@ export function CandidatesView({ jobId: fixedJobId }: { jobId?: string }) {
     order: 'desc',
   });
   const jobsQuery = useJobs({ status: 'all' });
+  const { data: labels } = useLabels();
   const moveStage = useMoveStage();
   const bulkAction = useBulkAction();
 
-  const onMove = (applicationId: string, s: ApplicationStage) => {
+  // The cross-job "All candidates" view can't meaningfully merge differently
+  // named per-job stages, so it stays on the 7 system defaults; a job-scoped
+  // view (fixedJobId set) uses that job's real (possibly customized) stages.
+  const jobStagesQuery = useJobStages(fixedJobId ?? '');
+  const stages: PipelineStage[] = fixedJobId ? jobStagesQuery.data ?? [] : defaultPipelineStages();
+
+  const onMove = (applicationId: string, s: string) => {
     moveStage.mutate(
       { applicationId, body: { stage: s } },
       { onSuccess: () => toast.success('Candidate moved') },
     );
   };
 
-  const onBulkMove = (s: ApplicationStage) => {
+  const onBulkMove = (s: string) => {
     bulkAction.mutate(
       { action: 'move_stage', applicationIds: Array.from(selectedIds), stage: s },
       {
@@ -101,17 +111,30 @@ export function CandidatesView({ jobId: fixedJobId }: { jobId?: string }) {
             </SelectContent>
           </Select>
         )}
-        <Select value={stage ?? 'all'} onValueChange={(v) => setStage(v === 'all' ? undefined : v as ApplicationStage)}>
+        <Select value={stage ?? 'all'} onValueChange={(v) => setStage(v === 'all' ? undefined : v)}>
           <SelectTrigger className="h-9 w-36">
             <SelectValue placeholder="All stages" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All stages</SelectItem>
-            {APPLICATION_STAGES.map((s) => (
-              <SelectItem key={s} value={s}>{STAGE_LABELS[s]}</SelectItem>
+            {stages.map((s) => (
+              <SelectItem key={s.id} value={s.id}>{s.label}</SelectItem>
             ))}
           </SelectContent>
         </Select>
+        {(labels?.length ?? 0) > 0 && (
+          <Select value={labelId ?? 'all'} onValueChange={(v) => setLabelId(v === 'all' ? undefined : v)}>
+            <SelectTrigger className="h-9 w-36">
+              <SelectValue placeholder="All labels" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All labels</SelectItem>
+              {labels!.map((l) => (
+                <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
         <Select value={assessmentStatus ?? 'all'} onValueChange={(v) => setAssessmentStatus(v === 'all' ? undefined : v as CandidateAssessmentStatus)}>
           <SelectTrigger className="h-9 w-44">
             <SelectValue placeholder="Assessment status" />
@@ -157,6 +180,7 @@ export function CandidatesView({ jobId: fixedJobId }: { jobId?: string }) {
         <CandidateTable
           items={items}
           showJob={!fixedJobId}
+          stages={stages}
           selectedIds={selectedIds}
           onSelect={(id) => setSelectedIds((prev) => {
             const next = new Set(prev);
@@ -168,20 +192,20 @@ export function CandidatesView({ jobId: fixedJobId }: { jobId?: string }) {
           )}
         />
       ) : (
-        <CandidateBoard items={items} onMove={onMove} />
+        <CandidateBoard items={items} stages={stages} onMove={onMove} />
       )}
 
       {selectedIds.size > 0 && (
         <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2">
           <div className="flex items-center gap-2 rounded-xl border border-border bg-background px-4 py-2.5 shadow-lg">
             <span className="text-sm font-medium text-foreground mr-2">{selectedIds.size} selected</span>
-            <Select onValueChange={(v) => onBulkMove(v as ApplicationStage)}>
+            <Select onValueChange={(v) => onBulkMove(v)}>
               <SelectTrigger className="h-8 w-36 text-xs">
                 <SelectValue placeholder="Move to stage" />
               </SelectTrigger>
               <SelectContent>
-                {APPLICATION_STAGES.filter((s) => s !== 'REJECTED').map((s) => (
-                  <SelectItem key={s} value={s}>{STAGE_LABELS[s]}</SelectItem>
+                {stages.filter((s) => !s.terminal).map((s) => (
+                  <SelectItem key={s.id} value={s.id}>{s.label}</SelectItem>
                 ))}
               </SelectContent>
             </Select>

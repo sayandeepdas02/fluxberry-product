@@ -10,6 +10,8 @@ import { analyticsRouter } from './analytics.routes';
 import { notificationRouter } from './notification.routes';
 import { careersRouter } from './careers.routes';
 import { publicRouter } from './public.routes';
+import { billingRouter } from './billing.routes';
+import { labelRouter } from './label.routes';
 
 /**
  * Versioned API router (/api/v1). Sub-routers are mounted here per slice:
@@ -29,5 +31,7 @@ apiRouter.use(analyticsRouter);
 apiRouter.use(notificationRouter);
 apiRouter.use(careersRouter);
 apiRouter.use(publicRouter);
+apiRouter.use(billingRouter);
+apiRouter.use(labelRouter);
 
 // Workflow router is registered in Slice 7.

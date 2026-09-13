@@ -6,6 +6,7 @@ import type {
   GenerateJdInput,
   JobListQuery,
   JobStatusInput,
+  UpsertPipelineStagesInput,
 } from '@fluxberry/shared';
 
 export const jobController = {
@@ -57,5 +58,20 @@ export const jobController = {
   clone: asyncHandler(async (req, res) => {
     const job = await jobService.clone(req.auth!.workspaceId!, req.params.jobId, req.auth!.user.id);
     created(res, job);
+  }),
+
+  getStages: asyncHandler(async (req, res) => {
+    const stages = await jobService.getStages(req.auth!.workspaceId!, req.params.jobId);
+    ok(res, stages);
+  }),
+
+  updateStages: asyncHandler(async (req, res) => {
+    const stages = await jobService.updateStages(
+      req.auth!.workspaceId!,
+      req.auth!.user.id,
+      req.params.jobId,
+      (req.body as UpsertPipelineStagesInput).stages,
+    );
+    ok(res, stages);
   }),
 };

@@ -18,6 +18,15 @@ export const ROLE_RANK: Record<Role, number> = {
 export const WORKSPACE_PLANS = ['FREE', 'PRO'] as const;
 export type WorkspacePlan = (typeof WORKSPACE_PLANS)[number];
 
+export const BILLING_SUBSCRIPTION_STATUSES = [
+  'none',
+  'trialing',
+  'active',
+  'past_due',
+  'canceled',
+] as const;
+export type BillingSubscriptionStatus = (typeof BILLING_SUBSCRIPTION_STATUSES)[number];
+
 export const JOB_STATUSES = ['DRAFT', 'PUBLISHED', 'PAUSED', 'CLOSED', 'ARCHIVED'] as const;
 export type JobStatus = (typeof JOB_STATUSES)[number];
 
@@ -184,6 +193,7 @@ export const JOB_QUEUE_TYPES = [
   'PROCESS_ASSESSMENT',
   'PROCESS_INTERVIEW',
   'AGGREGATE_ANALYTICS',
+  'PROCESS_BILLING_WEBHOOK',
 ] as const;
 export type JobQueueType = (typeof JOB_QUEUE_TYPES)[number];
 

@@ -1,7 +1,6 @@
 import { Schema, model, models, type InferSchemaType, type Model } from 'mongoose';
 import {
   APPLICATION_STATUSES,
-  APPLICATION_STAGES,
   CANDIDATE_SOURCES,
   PROCESSING_STATUSES,
 } from '@fluxberry/shared';
@@ -30,10 +29,14 @@ const applicationSchema = new Schema(
     jobId: { type: Schema.Types.ObjectId, ref: 'Job', required: true },
     candidateId: { type: Schema.Types.ObjectId, ref: 'Candidate', required: true },
     status: { type: String, enum: APPLICATION_STATUSES, default: 'ACTIVE' },
-    stage: { type: String, enum: APPLICATION_STAGES, default: 'APPLIED' },
+    // No Mongoose enum: a job's stages can now be a custom, per-job list — see
+    // job.model.ts `stages`. Validity ("must be one of this application's
+    // job's current stage ids") is enforced in stage.service.ts, not here.
+    stage: { type: String, default: 'APPLIED' },
     source: { type: String, enum: CANDIDATE_SOURCES, default: 'DIRECT' },
     score: { type: Number, default: null },
     screeningResult: { type: screeningResultSchema, default: () => ({ status: 'PENDING' }) },
+    labelIds: { type: [Schema.Types.ObjectId], ref: 'Label', default: [] },
     rejection: {
       reason: { type: String, default: null },
       note: { type: String, default: null },
@@ -47,6 +50,7 @@ const applicationSchema = new Schema(
 applicationSchema.index({ jobId: 1, candidateId: 1 }, { unique: true });
 applicationSchema.index({ workspaceId: 1, jobId: 1 });
 applicationSchema.index({ workspaceId: 1, stage: 1 });
+applicationSchema.index({ workspaceId: 1, labelIds: 1 });
 applicationSchema.index({ workspaceId: 1, score: -1 });
 applicationSchema.index({ candidateId: 1 });
 

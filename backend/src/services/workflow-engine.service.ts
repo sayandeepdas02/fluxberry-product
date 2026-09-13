@@ -13,7 +13,8 @@ import { jobQueue } from '../queue/job-queue';
 import { emailTemplates } from '../integrations';
 import { logger } from '../utils/logger';
 import { config } from '../config/env';
-import type { ApplicationStage } from '@fluxberry/shared';
+import type { PipelineStage } from '@fluxberry/shared';
+import { defaultPipelineStages } from '@fluxberry/shared';
 
 const MAX_STEPS_PER_RUN = 100;
 
@@ -191,8 +192,23 @@ export const workflowEngine = {
             break;
           }
           case 'MOVE_STAGE': {
-            if (cfg.stage) await stageService.moveToStage(workspaceId, applicationId, cfg.stage as ApplicationStage, actor);
-            await recordStep(node, 'COMPLETED', { stage: cfg.stage });
+            // A job's stages can be edited after a workflow is authored — if the
+            // target stage id no longer exists, skip this node rather than
+            // failing the whole run (the top-level catch below would otherwise
+            // mark the entire run FAILED for what's really just a stale config).
+            if (cfg.stage) {
+              const currentStages = ((job?.stages as PipelineStage[] | null) ?? defaultPipelineStages());
+              const validStageIds = new Set(currentStages.map((s) => s.id));
+              if (validStageIds.has(cfg.stage)) {
+                await stageService.moveToStage(workspaceId, applicationId, cfg.stage, actor);
+                await recordStep(node, 'COMPLETED', { stage: cfg.stage });
+              } else {
+                logger.warn({ runId, jobId: String(job?._id ?? ''), stage: cfg.stage }, 'MOVE_STAGE target stage no longer exists — skipping');
+                await recordStep(node, 'SKIPPED', undefined, `Stage "${cfg.stage}" no longer exists on this job`);
+              }
+            } else {
+              await recordStep(node, 'COMPLETED', { stage: cfg.stage });
+            }
             index++;
             break;
           }

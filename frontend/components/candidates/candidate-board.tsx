@@ -11,28 +11,27 @@ import {
   type DragEndEvent,
 } from '@dnd-kit/core';
 import { formatDistanceToNow } from 'date-fns';
-import type { ApplicationStage, CandidateListItemDto } from '@fluxberry/shared';
-import { PIPELINE_STAGES } from '@fluxberry/shared';
+import type { CandidateListItemDto, PipelineStage } from '@fluxberry/shared';
 import { ScoreBadge } from './score-badge';
-import { STAGE_LABELS } from '@/lib/labels';
 import { cn } from '@/lib/utils';
-
-const COLUMNS: ApplicationStage[] = [...PIPELINE_STAGES, 'REJECTED'];
 
 export function CandidateBoard({
   items,
+  stages,
   onMove,
 }: {
   items: CandidateListItemDto[];
-  onMove: (applicationId: string, stage: ApplicationStage) => void;
+  /** Ordered column list — the job's custom stages, or the 7 system defaults. */
+  stages: PipelineStage[];
+  onMove: (applicationId: string, stage: string) => void;
 }) {
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
-  const byStage = (stage: ApplicationStage) => items.filter((i) => i.stage === stage);
+  const byStage = (stage: string) => items.filter((i) => i.stage === stage);
 
   const onDragEnd = (e: DragEndEvent) => {
-    const overStage = e.over?.id as ApplicationStage | undefined;
-    const fromStage = e.active.data.current?.stage as ApplicationStage | undefined;
+    const overStage = e.over?.id as string | undefined;
+    const fromStage = e.active.data.current?.stage as string | undefined;
     if (overStage && fromStage && overStage !== fromStage) {
       onMove(String(e.active.id), overStage);
     }
@@ -41,16 +40,16 @@ export function CandidateBoard({
   return (
     <DndContext sensors={sensors} onDragEnd={onDragEnd}>
       <div className="flex gap-3 overflow-x-auto pb-4">
-        {COLUMNS.map((stage) => (
-          <Column key={stage} stage={stage} items={byStage(stage)} />
+        {stages.map((stage) => (
+          <Column key={stage.id} stage={stage} items={byStage(stage.id)} />
         ))}
       </div>
     </DndContext>
   );
 }
 
-function Column({ stage, items }: { stage: ApplicationStage; items: CandidateListItemDto[] }) {
-  const { setNodeRef, isOver } = useDroppable({ id: stage });
+function Column({ stage, items }: { stage: PipelineStage; items: CandidateListItemDto[] }) {
+  const { setNodeRef, isOver } = useDroppable({ id: stage.id });
   return (
     <div
       ref={setNodeRef}
@@ -60,7 +59,10 @@ function Column({ stage, items }: { stage: ApplicationStage; items: CandidateLis
       )}
     >
       <div className="flex items-center justify-between px-1.5 py-1.5">
-        <span className="text-sm font-medium">{STAGE_LABELS[stage]}</span>
+        <span className="flex items-center gap-1.5 text-sm font-medium">
+          {stage.color && <span className="size-2 rounded-full" style={{ backgroundColor: stage.color }} />}
+          {stage.label}
+        </span>
         <span className="text-xs text-muted-foreground">{items.length}</span>
       </div>
       <div className="flex flex-col gap-2">

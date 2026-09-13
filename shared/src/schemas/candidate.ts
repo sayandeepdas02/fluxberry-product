@@ -1,13 +1,12 @@
 import { z } from 'zod';
 import {
-  APPLICATION_STAGES,
   CANDIDATE_SOURCES,
   CANDIDATE_ASSESSMENT_STATUSES,
 } from '../enums';
-import type { ApplicationStage } from '../enums';
 import { paginationQuerySchema } from '../common';
 import type { FileRef } from '../common';
 import type { ApplicationDto, ScreeningResultDto } from './application';
+import type { LabelDto } from './label';
 
 /** Loosely-typed structured resume profile (spec §27). */
 export type ParsedProfile = {
@@ -51,11 +50,12 @@ export type CandidateListItemDto = {
   jobId: string;
   jobTitle: string;
   score?: number | null;
-  stage: ApplicationStage;
+  stage: string;
   location?: string | null;
   expectedSalary?: number | null;
   appliedAt: string;
   screeningStatus?: string;
+  labels: LabelDto[];
 };
 
 /** Full candidate profile payload (candidate + all their applications). */
@@ -71,7 +71,8 @@ export type CandidateProfileDto = {
 
 export const candidateListQuerySchema = paginationQuerySchema.extend({
   jobId: z.string().optional(),
-  stage: z.enum(APPLICATION_STAGES).optional(),
+  stage: z.string().trim().min(1).max(40).optional(),
+  labelId: z.string().optional(),
   minScore: z.coerce.number().min(0).max(10).optional(),
   location: z.string().trim().optional(),
   maxExpectedSalary: z.coerce.number().int().nonnegative().optional(),

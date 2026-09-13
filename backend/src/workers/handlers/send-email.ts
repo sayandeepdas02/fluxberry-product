@@ -18,5 +18,6 @@ export const sendEmailHandler: JobHandler = async (payload) => {
     html: payload.html,
     text: payload.text,
     from: payload.from,
+    replyTo: payload.replyTo,
   });
 };

@@ -19,6 +19,19 @@ export class ApiError extends Error {
   }
 }
 
+/**
+ * A route gated by a plan the workspace doesn't have (see requirePlanFeature
+ * on the backend) fails with this distinct code instead of a generic 403 —
+ * catch it in a mutation's onError and show PlanUpgradeModal instead of a
+ * plain error toast.
+ */
+export function getPlanUpgradeFlag(err: unknown): string | undefined {
+  if (err instanceof ApiError && err.code === 'PLAN_UPGRADE_REQUIRED') {
+    return (err.details as { flag?: string } | undefined)?.flag;
+  }
+  return undefined;
+}
+
 /** Current access token: dev test-token (if set) else the Supabase session token. */
 export async function getAccessToken(): Promise<string | null> {
   if (typeof window !== 'undefined') {
