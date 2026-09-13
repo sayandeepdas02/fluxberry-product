@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { RecordMenu } from '@/components/ui/record-menu';
 import { toast } from '@/components/ui/sonner';
 import { DIFFICULTY_LABELS } from '@/lib/labels';
 
@@ -92,10 +93,17 @@ export default function QuestionBankTypePage() {
                   {q.skills.slice(0, 3).map((s) => <Badge key={s} variant="muted">{s}</Badge>)}
                 </div>
               </div>
-              <Button variant="ghost" size="icon" onClick={() => setEditing(q)}><Pencil className="size-4" /></Button>
-              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive" onClick={() => archive.mutate(q.id, { onSuccess: () => toast.success('Question archived') })}>
-                <Trash2 className="size-4" />
-              </Button>
+              <RecordMenu
+                actions={[
+                  { label: 'Edit', icon: <Pencil className="size-4" />, onSelect: () => setEditing(q) },
+                  {
+                    label: 'Archive',
+                    icon: <Trash2 className="size-4" />,
+                    variant: 'destructive',
+                    onSelect: () => archive.mutate(q.id, { onSuccess: () => toast.success('Question archived and removed from new assessments') }),
+                  },
+                ]}
+              />
             </div>
           ))}
         </Card>

@@ -1,8 +1,9 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useParams, usePathname, useRouter } from 'next/navigation';
-import { ArrowLeft, Briefcase, Link2, MoreHorizontal } from 'lucide-react';
+import { useParams, usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { ArrowLeft, Briefcase, Link2, Pause, Play, XCircle, Copy } from 'lucide-react';
 import { useJob, usePublishJob, useSetJobStatus, useCloneJob } from '@/hooks/use-jobs';
 import { useFeature } from '@/hooks/use-features';
 import { useWorkspace } from '@/components/providers/workspace-provider';
@@ -10,12 +11,8 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/ui/empty-state';
 import { JobStatusBadge } from '@/components/jobs/job-status-badge';
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from '@/components/ui/dropdown-menu';
+import { RecordMenu, type RecordMenuAction } from '@/components/ui/record-menu';
+import { PublishConfirmationDialog } from '@/components/jobs/publish-confirmation-dialog';
 import { toast } from '@/components/ui/sonner';
 import { publicConfig } from '@/lib/config';
 import { EMPLOYMENT_LABELS } from '@/lib/labels';
@@ -25,6 +22,7 @@ export default function JobDetailLayout({ children }: { children: React.ReactNod
   const params = useParams<{ jobId: string }>();
   const jobId = params.jobId;
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const router = useRouter();
   const { currentWorkspace } = useWorkspace();
   const { data: job, isLoading, isError } = useJob(jobId);
@@ -32,6 +30,18 @@ export default function JobDetailLayout({ children }: { children: React.ReactNod
   const setStatus = useSetJobStatus();
   const cloneJob = useCloneJob();
   const aiInterview = useFeature('AI_INTERVIEW');
+  const [publishConfirmOpen, setPublishConfirmOpen] = useState(false);
+
+  // The job-creation flow redirects here with ?published=1 after a first publish
+  // (spec item 4.3) — show the same confirmation moment the overflow menu's
+  // Publish action shows, then strip the param so a refresh doesn't reopen it.
+  useEffect(() => {
+    if (searchParams.get('published') === '1') {
+      setPublishConfirmOpen(true);
+      router.replace(pathname);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   // A job that's been deleted, or restricted to other members, 404s rather
   // than 403s (see requireJobAccess) — show one clean "not found" state here
@@ -66,12 +76,68 @@ export default function JobDetailLayout({ children }: { children: React.ReactNod
     { href: `${base}/settings`, label: 'Settings' },
   ];
 
+  const applyUrl = job ? `${publicConfig.appUrl}/apply/${currentWorkspace.slug}/${job.slug}` : '';
+
   const copyLink = async () => {
     if (!job) return;
-    const url = `${publicConfig.appUrl}/apply/${currentWorkspace.slug}/${job.slug}`;
-    await navigator.clipboard.writeText(url);
+    await navigator.clipboard.writeText(applyUrl);
     toast.success('Application link copied');
   };
+
+  const doPublish = () => {
+    if (!job) return;
+    const isFirstPublish = !job.publishedAt;
+    publishJob.mutate(job.id, {
+      onSuccess: () => {
+        if (isFirstPublish) setPublishConfirmOpen(true);
+        else toast.success('Your job is live and accepting applications');
+      },
+      onError: () => toast.error('Could not publish job'),
+    });
+  };
+
+  const menuActions: RecordMenuAction[] = job
+    ? [
+        { label: 'Publish', icon: <Play className="size-4" />, hidden: job.status === 'PUBLISHED', onSelect: doPublish },
+        {
+          label: 'Pause',
+          icon: <Pause className="size-4" />,
+          hidden: job.status !== 'PUBLISHED',
+          onSelect: () => setStatus.mutate(
+            { jobId: job.id, status: 'PAUSED' },
+            { onSuccess: () => toast.success('Job paused — no longer accepting applications'), onError: () => toast.error('Could not pause job') },
+          ),
+        },
+        {
+          label: 'Resume',
+          icon: <Play className="size-4" />,
+          hidden: job.status !== 'PAUSED',
+          onSelect: () => setStatus.mutate(
+            { jobId: job.id, status: 'PUBLISHED' },
+            { onSuccess: () => toast.success('Job resumed and accepting applications again'), onError: () => toast.error('Could not resume job') },
+          ),
+        },
+        {
+          label: 'Close job',
+          icon: <XCircle className="size-4" />,
+          hidden: job.status === 'CLOSED' || job.status === 'ARCHIVED',
+          onSelect: () => setStatus.mutate(
+            { jobId: job.id, status: 'CLOSED' },
+            { onSuccess: () => toast.success('Job closed and no longer accepting applications'), onError: () => toast.error('Could not close job') },
+          ),
+        },
+        {
+          label: 'Duplicate job',
+          icon: <Copy className="size-4" />,
+          separated: true,
+          onSelect: () =>
+            cloneJob.mutate(job.id, {
+              onSuccess: (cloned) => { toast.success('Job duplicated'); router.push(`/app/jobs/${cloned.id}`); },
+              onError: () => toast.error('Could not duplicate job'),
+            }),
+        },
+      ]
+    : [];
 
   return (
     <div className="space-y-6">
@@ -96,49 +162,19 @@ export default function JobDetailLayout({ children }: { children: React.ReactNod
             <Button variant="outline" onClick={copyLink}>
               <Link2 className="size-4" /> Copy application link
             </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon">
-                  <MoreHorizontal className="size-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {job.status !== 'PUBLISHED' && (
-                  <DropdownMenuItem onSelect={() => publishJob.mutate(job.id, { onSuccess: () => toast.success('Job published') })}>
-                    Publish
-                  </DropdownMenuItem>
-                )}
-                {job.status === 'PUBLISHED' && (
-                  <DropdownMenuItem onSelect={() => setStatus.mutate({ jobId: job.id, status: 'PAUSED' })}>
-                    Pause
-                  </DropdownMenuItem>
-                )}
-                {job.status === 'PAUSED' && (
-                  <DropdownMenuItem onSelect={() => setStatus.mutate({ jobId: job.id, status: 'PUBLISHED' })}>
-                    Resume
-                  </DropdownMenuItem>
-                )}
-                <DropdownMenuItem onSelect={() => setStatus.mutate({ jobId: job.id, status: 'CLOSED' }, { onSuccess: () => toast.success('Job closed') } as any)}>
-                  Close job
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onSelect={() =>
-                    cloneJob.mutate(job.id, {
-                      onSuccess: (cloned) => {
-                        toast.success('Job duplicated');
-                        router.push(`/app/jobs/${cloned.id}`);
-                      },
-                      onError: () => toast.error('Could not duplicate job'),
-                    })
-                  }
-                >
-                  Duplicate job
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <RecordMenu
+              actions={menuActions}
+              className="h-9 w-9 border border-input bg-background hover:bg-accent hover:text-accent-foreground"
+            />
           </div>
         </div>
       )}
+
+      <PublishConfirmationDialog
+        open={publishConfirmOpen && Boolean(job)}
+        onOpenChange={setPublishConfirmOpen}
+        applyUrl={applyUrl}
+      />
 
       <div className="flex items-center gap-1 overflow-x-auto border-b border-border">
         {tabs.map((t) => {

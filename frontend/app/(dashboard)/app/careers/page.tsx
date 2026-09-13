@@ -70,7 +70,7 @@ export default function CareersBuilderPage() {
         team: config.team,
         jobs: config.jobs,
       },
-      { onSuccess: () => toast.success('Careers page saved') },
+      { onSuccess: () => toast.success('Your careers page changes are saved') },
     );
   };
 
@@ -102,9 +102,12 @@ export default function CareersBuilderPage() {
               <a href={publicUrl} target="_blank" rel="noreferrer"><ExternalLink className="size-4" /> View live</a>
             </Button>
           )}
-          <label className="flex items-center gap-2 text-sm font-medium">
-            {config.published ? 'Published' : 'Draft'}
-            <Switch checked={config.published} onCheckedChange={togglePublish} disabled={!config.slug} />
+          <label className="flex flex-col items-end gap-1 text-sm font-medium">
+            <span className="flex items-center gap-2">
+              {config.published ? 'Published' : 'Draft'}
+              <Switch checked={config.published} onCheckedChange={togglePublish} disabled={!config.slug} />
+            </span>
+            <span className="text-xs font-normal text-muted-foreground">Visible to candidates at your public URL</span>
           </label>
         </div>
       </div>
@@ -210,9 +213,12 @@ function SectionCard({ title, enabled, onToggle, children }: { title: string; en
     <Card>
       <CardHeader className="flex-row items-center justify-between">
         <CardTitle>{title}</CardTitle>
-        <label className="flex items-center gap-2 text-xs text-muted-foreground">
-          {enabled ? 'Visible' : 'Hidden'}
-          <Switch checked={enabled} onCheckedChange={onToggle} />
+        <label className="flex flex-col items-end gap-1 text-xs text-muted-foreground">
+          <span className="flex items-center gap-2">
+            {enabled ? 'Visible' : 'Hidden'}
+            <Switch checked={enabled} onCheckedChange={onToggle} />
+          </span>
+          <span className="text-[11px]">Show this section on your public careers page</span>
         </label>
       </CardHeader>
       <CardContent className={cn(!enabled && 'opacity-50')}>{children}</CardContent>

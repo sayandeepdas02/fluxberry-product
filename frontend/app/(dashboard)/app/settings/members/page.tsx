@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Check, ShieldCheck, UserMinus } from 'lucide-react';
 import type { WorkspaceMemberDto, Role, InviteMemberInput } from '@fluxberry/shared';
 import { useWorkspace } from '@/components/providers/workspace-provider';
 import { api } from '@/lib/api-client';
@@ -13,10 +14,12 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { RecordMenu, type RecordMenuAction } from '@/components/ui/record-menu';
 import { toast } from '@/components/ui/sonner';
 import { initials } from '@/lib/utils';
 
 const ROLE_OPTIONS: Role[] = ['owner', 'admin', 'recruiter', 'viewer'];
+const capitalize = (s: string) => s[0].toUpperCase() + s.slice(1);
 
 export default function MembersSettingsPage() {
   const { currentWorkspace, user } = useWorkspace();
@@ -41,7 +44,7 @@ export default function MembersSettingsPage() {
     mutationFn: (id: string) => api.del(`/api/v1/workspaces/${wsId}/members/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['members', wsId] });
-      toast.success('Member removed');
+      toast.success('Member removed and their access revoked');
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : 'Could not remove'),
   });
@@ -78,33 +81,26 @@ export default function MembersSettingsPage() {
               <div className="truncate text-xs text-muted-foreground">{m.user.email}</div>
             </div>
             {canManage ? (
-              <Select
-                value={m.role}
-                onValueChange={(role) => updateRole.mutate({ id: m.id, role: role as Role })}
-              >
-                <SelectTrigger className="h-8 w-32 capitalize">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {ROLE_OPTIONS.map((r) => (
-                    <SelectItem key={r} value={r} className="capitalize">
-                      {r}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <RecordMenu
+                actions={[
+                  ...ROLE_OPTIONS.map<RecordMenuAction>((r) => ({
+                    label: r === m.role ? `${capitalize(r)} (current)` : `Make ${r}`,
+                    icon: r === m.role ? <Check className="size-4" /> : <ShieldCheck className="size-4" />,
+                    disabled: r === m.role,
+                    onSelect: () => updateRole.mutate({ id: m.id, role: r }),
+                  })),
+                  {
+                    label: 'Remove from workspace',
+                    icon: <UserMinus className="size-4" />,
+                    variant: 'destructive',
+                    separated: true,
+                    hidden: m.userId === user.id,
+                    onSelect: () => removeMember.mutate(m.id),
+                  },
+                ]}
+              />
             ) : (
               <span className="text-sm capitalize text-muted-foreground">{m.role}</span>
-            )}
-            {canManage && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => removeMember.mutate(m.id)}
-                className="text-muted-foreground hover:text-destructive"
-              >
-                Remove
-              </Button>
             )}
           </div>
         ))}
@@ -132,7 +128,7 @@ function InviteDialog({
     mutationFn: () => api.post(`/api/v1/workspaces/${workspaceId}/members`, { email, role }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['members', workspaceId] });
-      toast.success('Member invited');
+      toast.success('Member added — they now have access to this workspace');
       setEmail('');
       onOpenChange(false);
     },

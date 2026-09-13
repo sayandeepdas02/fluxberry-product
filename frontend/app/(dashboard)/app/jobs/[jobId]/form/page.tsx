@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { Plus, Trash2, ArrowUp, ArrowDown, GripVertical } from 'lucide-react';
+import { Plus, Trash2, ArrowUp, ArrowDown, GripVertical, Type, AlignLeft, Hash, List, ToggleLeft, Paperclip } from 'lucide-react';
 import {
   FORM_QUESTION_TYPES,
   type FormQuestion,
@@ -17,9 +17,18 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { toast } from '@/components/ui/sonner';
 import { FORM_QUESTION_TYPE_LABELS } from '@/lib/labels';
+import { cn } from '@/lib/utils';
+
+const FORM_QUESTION_TYPE_ICONS: Record<FormQuestionType, React.ReactNode> = {
+  SHORT_TEXT: <Type className="size-4" />,
+  LONG_TEXT: <AlignLeft className="size-4" />,
+  MULTIPLE_CHOICE: <List className="size-4" />,
+  YES_NO: <ToggleLeft className="size-4" />,
+  NUMBER: <Hash className="size-4" />,
+  FILE_UPLOAD: <Paperclip className="size-4" />,
+};
 
 function uid() {
   return Math.random().toString(36).slice(2, 10);
@@ -73,7 +82,7 @@ export default function JobFormBuilderPage() {
       const ordered = questions.map((q, i) => ({ ...q, sortOrder: i }));
       await updateForm.mutateAsync(ordered);
       setDirty(false);
-      toast.success('Application form saved');
+      toast.success('Your changes are saved and visible to new applicants');
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Could not save form');
     }
@@ -94,13 +103,19 @@ export default function JobFormBuilderPage() {
                   {FORM_QUESTION_TYPE_LABELS[q.type]}
                 </div>
               </div>
-              <label className="flex items-center gap-2 text-xs text-muted-foreground">
-                Required
-                <Switch checked={q.required} onCheckedChange={(v) => patch(q.id, { required: v })} disabled={!q.enabled} />
+              <label className="flex flex-col items-end gap-1 text-xs text-muted-foreground">
+                <span className="flex items-center gap-2">
+                  Required
+                  <Switch checked={q.required} onCheckedChange={(v) => patch(q.id, { required: v })} disabled={!q.enabled} />
+                </span>
+                <span className="text-[11px]">Applicants must answer before submitting</span>
               </label>
-              <label className="flex items-center gap-2 text-xs text-muted-foreground">
-                Enabled
-                <Switch checked={q.enabled} onCheckedChange={(v) => patch(q.id, { enabled: v })} />
+              <label className="flex flex-col items-end gap-1 text-xs text-muted-foreground">
+                <span className="flex items-center gap-2">
+                  Enabled
+                  <Switch checked={q.enabled} onCheckedChange={(v) => patch(q.id, { enabled: v })} />
+                </span>
+                <span className="text-[11px]">Show on the application form</span>
               </label>
             </div>
           ))}
@@ -211,23 +226,29 @@ function AddQuestionDialog({
           <Field label="Question">
             <Input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="What's your expected salary?" autoFocus />
           </Field>
-          <div className="grid grid-cols-2 gap-4">
-            <Field label="Type">
-              <Select value={type} onValueChange={(v) => setType(v as FormQuestionType)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {FORM_QUESTION_TYPES.filter((t) => t !== 'FILE_UPLOAD').map((t) => (
-                    <SelectItem key={t} value={t}>{FORM_QUESTION_TYPE_LABELS[t]}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
-            <Field label="Required">
-              <div className="flex h-9 items-center">
-                <Switch checked={required} onCheckedChange={setRequired} />
-              </div>
-            </Field>
-          </div>
+          <Field label="Type">
+            <div className="grid grid-cols-2 gap-2">
+              {FORM_QUESTION_TYPES.filter((t) => t !== 'FILE_UPLOAD').map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => setType(t)}
+                  className={cn(
+                    'flex items-center gap-2 rounded-lg border px-3 py-2 text-left text-sm font-medium transition-colors',
+                    type === t ? 'border-primary bg-primary/5 text-foreground' : 'border-border text-muted-foreground hover:text-foreground',
+                  )}
+                >
+                  {FORM_QUESTION_TYPE_ICONS[t]}
+                  <span className="truncate">{FORM_QUESTION_TYPE_LABELS[t]}</span>
+                </button>
+              ))}
+            </div>
+          </Field>
+          <Field label="Required" hint="Applicants must answer before submitting">
+            <div className="flex h-9 items-center">
+              <Switch checked={required} onCheckedChange={setRequired} />
+            </div>
+          </Field>
 
           {type === 'MULTIPLE_CHOICE' && (
             <Field label="Options">
