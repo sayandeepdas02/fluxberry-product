@@ -3,6 +3,7 @@ import { jobService } from '../services/job.service';
 import type {
   CreateJobInput,
   UpdateJobInput,
+  UpdateJobAccessInput,
   GenerateJdInput,
   JobListQuery,
   JobStatusInput,
@@ -16,7 +17,7 @@ export const jobController = {
   }),
 
   list: asyncHandler(async (req, res) => {
-    const jobs = await jobService.list(req.auth!.workspaceId!, req.query as unknown as JobListQuery);
+    const jobs = await jobService.list(req.auth!.workspaceId!, req.query as unknown as JobListQuery, req.auth!);
     ok(res, jobs);
   }),
 
@@ -73,5 +74,15 @@ export const jobController = {
       (req.body as UpsertPipelineStagesInput).stages,
     );
     ok(res, stages);
+  }),
+
+  updateAccess: asyncHandler(async (req, res) => {
+    const job = await jobService.updateAccess(
+      req.auth!.workspaceId!,
+      req.auth!.user.id,
+      req.params.jobId,
+      req.body as UpdateJobAccessInput,
+    );
+    ok(res, job);
   }),
 };

@@ -1,5 +1,12 @@
 import { Router } from 'express';
-import { authenticate, resolveWorkspace, requireWorkspace, requireRole, requireFeature } from '../middleware/auth';
+import {
+  authenticate,
+  resolveWorkspace,
+  requireWorkspace,
+  requireRole,
+  requireFeature,
+  requireApplicationJobAccess,
+} from '../middleware/auth';
 import { validateBody, validateQuery } from '../middleware/validate';
 import { candidateController } from '../controllers/candidate.controller';
 import { applicationController } from '../controllers/application.controller';
@@ -34,7 +41,10 @@ candidateRouter.post(
   applicationController.bulkAction,
 );
 
-// Applications
+// Applications — every route below is keyed by :applicationId, so a restricted
+// application must be invisible (404) to an excluded caller, same as jobs.
+candidateRouter.use('/applications/:applicationId', requireApplicationJobAccess);
+
 candidateRouter.get('/applications/:applicationId', applicationController.getDetail);
 candidateRouter.get('/applications/:applicationId/timeline', applicationController.getTimeline);
 candidateRouter.get('/applications/:applicationId/workflow-run', workflowController.getRun);

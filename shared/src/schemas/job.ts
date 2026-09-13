@@ -119,6 +119,8 @@ export type JobDto = {
   workflowId?: string | null;
   /** Effective ordered stage list — the job's custom stages, or the 7 system defaults if it hasn't customized. */
   stages: PipelineStage[];
+  /** User ids allowed to see this job; empty = visible to every workspace member (today's default). */
+  restrictedTo: string[];
   createdBy?: string | null;
   publishedAt?: string | null;
   closedAt?: string | null;

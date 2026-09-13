@@ -5,6 +5,8 @@ import { ApplicationModel } from '../models/application.model';
 import { JobModel } from '../models/job.model';
 import { CandidateModel } from '../models/candidate.model';
 import { AnalyticsCacheModel } from '../models/analytics-cache.model';
+import { applyJobAccessFilter, bypassesJobAccess, jobAccessClause } from '../utils/job-access';
+import type { AuthContext } from '../types/auth-context';
 
 const CACHE_TTL_MS = 15 * 60 * 1000;
 
@@ -21,13 +23,23 @@ export const analyticsService = {
   /**
    * Workspace analytics with 15-minute cache (spec §55-56). Re-computes on
    * first hit after TTL expires; stale-while-revalidate keeps latency low.
+   *
+   * The cache is shared per-workspace and holds the *unrestricted* view, so it
+   * is only used for owner/admin (who always see everything). A recruiter
+   * scoped by per-job `restrictedTo` always gets a fresh, auth-aware
+   * computation instead — caching a per-viewer-restricted result would either
+   * leak the full numbers to a restricted viewer (if an owner populated the
+   * cache first) or serve a stale, narrower view to an owner (if a restricted
+   * recruiter populated it first).
    */
-  async compute(workspaceId: string): Promise<AnalyticsDto> {
+  async compute(workspaceId: string, auth: AuthContext): Promise<AnalyticsDto> {
+    if (!bypassesJobAccess(auth.role)) return this._computeFresh(workspaceId, auth);
+
     const cached = await AnalyticsCacheModel.findOne({ workspaceId: new Types.ObjectId(workspaceId) }).lean();
     if (cached && Date.now() - new Date(cached.computedAt).getTime() < CACHE_TTL_MS) {
       return cached.data as AnalyticsDto;
     }
-    const result = await this._computeFresh(workspaceId);
+    const result = await this._computeFresh(workspaceId, auth);
     await AnalyticsCacheModel.findOneAndUpdate(
       { workspaceId: new Types.ObjectId(workspaceId) },
       { data: result, computedAt: new Date() },
@@ -36,9 +48,30 @@ export const analyticsService = {
     return result;
   },
 
-  async _computeFresh(workspaceId: string): Promise<AnalyticsDto> {
+  async _computeFresh(workspaceId: string, auth: AuthContext): Promise<AnalyticsDto> {
     const wsId = new Types.ObjectId(workspaceId);
     const since30 = new Date(Date.now() - 30 * 24 * 3600_000);
+
+    // `null` for owner/admin (no restriction); otherwise the $or clause
+    // limiting to jobs/applications this viewer is allowed to see.
+    const accessClause = jobAccessClause(auth, 'jobRestrictedTo');
+    const candidateVisibilityStages = accessClause
+      ? [
+          {
+            $lookup: {
+              from: 'applications',
+              let: { cid: '$_id' },
+              pipeline: [
+                { $match: { $expr: { $eq: ['$candidateId', '$$cid'] } } },
+                { $match: accessClause },
+                { $limit: 1 },
+              ],
+              as: '_visibleApp',
+            },
+          },
+          { $match: { '_visibleApp.0': { $exists: true } } },
+        ]
+      : [];
 
     const [
       activeJobs,
@@ -46,24 +79,38 @@ export const analyticsService = {
       last30,
       hired,
       locationRows,
-      salaryDocs,
+      salaryRows,
       sourceRows,
       hireTimes,
     ] = await Promise.all([
-      JobModel.countDocuments({ workspaceId: wsId, status: { $in: ['PUBLISHED', 'PAUSED'] } }),
-      ApplicationModel.aggregate([{ $match: { workspaceId: wsId } }, { $group: { _id: '$stage', count: { $sum: 1 } } }]),
-      ApplicationModel.countDocuments({ workspaceId: wsId, appliedAt: { $gte: since30 } }),
-      ApplicationModel.countDocuments({ workspaceId: wsId, status: 'HIRED' }),
+      JobModel.countDocuments(applyJobAccessFilter({ workspaceId: wsId, status: { $in: ['PUBLISHED', 'PAUSED'] } }, auth, 'restrictedTo')),
+      ApplicationModel.aggregate([
+        { $match: applyJobAccessFilter({ workspaceId: wsId }, auth, 'jobRestrictedTo') },
+        { $group: { _id: '$stage', count: { $sum: 1 } } },
+      ]),
+      ApplicationModel.countDocuments(applyJobAccessFilter({ workspaceId: wsId, appliedAt: { $gte: since30 } }, auth, 'jobRestrictedTo')),
+      ApplicationModel.countDocuments(applyJobAccessFilter({ workspaceId: wsId, status: 'HIRED' }, auth, 'jobRestrictedTo')),
       CandidateModel.aggregate([
         { $match: { workspaceId: wsId, location: { $ne: null } } },
+        ...candidateVisibilityStages,
         { $group: { _id: '$location', count: { $sum: 1 } } },
         { $sort: { count: -1 } },
         { $limit: 8 },
       ]),
-      CandidateModel.find({ workspaceId: wsId, expectedSalary: { $ne: null } }).select('expectedSalary').lean(),
-      ApplicationModel.aggregate([{ $match: { workspaceId: wsId } }, { $group: { _id: '$source', count: { $sum: 1 } } }]),
-      ApplicationModel.find({ workspaceId: wsId, status: 'HIRED' }).select('appliedAt updatedAt').lean(),
+      CandidateModel.aggregate([
+        { $match: { workspaceId: wsId, expectedSalary: { $ne: null } } },
+        ...candidateVisibilityStages,
+        { $project: { expectedSalary: 1 } },
+      ]),
+      ApplicationModel.aggregate([
+        { $match: applyJobAccessFilter({ workspaceId: wsId }, auth, 'jobRestrictedTo') },
+        { $group: { _id: '$source', count: { $sum: 1 } } },
+      ]),
+      ApplicationModel.find(applyJobAccessFilter({ workspaceId: wsId, status: 'HIRED' }, auth, 'jobRestrictedTo'))
+        .select('appliedAt updatedAt')
+        .lean(),
     ]);
+    const salaryDocs = salaryRows as Array<{ expectedSalary: number }>;
 
     const stageCount = new Map<string, number>(stageRows.map((r: any) => [r._id, r.count]));
     const totalApplicants = stageRows.reduce((s: number, r: any) => s + r.count, 0);
