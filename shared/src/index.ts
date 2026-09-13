@@ -22,5 +22,6 @@ export * from './schemas/careers';
 export * from './schemas/bulk-action';
 export * from './schemas/billing';
 export * from './schemas/pipeline-stage';
+export * from './schemas/job-access';
 export * from './schemas/label';
 export * from './schemas/message';

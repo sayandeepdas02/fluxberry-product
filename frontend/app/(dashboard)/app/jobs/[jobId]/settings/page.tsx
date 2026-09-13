@@ -2,14 +2,18 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
 import {
   EMPLOYMENT_TYPES,
   WORK_MODES,
   type EmploymentType,
   type WorkMode,
   type UpdateJobInput,
+  type WorkspaceMemberDto,
 } from '@fluxberry/shared';
-import { useJob, useUpdateJob, useSetJobStatus } from '@/hooks/use-jobs';
+import { useJob, useUpdateJob, useUpdateJobAccess, useSetJobStatus } from '@/hooks/use-jobs';
+import { useWorkspace } from '@/components/providers/workspace-provider';
+import { api } from '@/lib/api-client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -20,6 +24,8 @@ import { SkillsInput } from '@/components/jobs/skills-input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/components/ui/sonner';
 import { EMPLOYMENT_LABELS, WORK_MODE_LABELS } from '@/lib/labels';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { cn, initials } from '@/lib/utils';
 
 const numOrUndef = (v: string) => (v.trim() === '' ? undefined : Number(v));
 
@@ -135,6 +141,8 @@ export default function JobSettingsPage() {
         </CardContent>
       </Card>
 
+      <JobAccessCard jobId={jobId} restrictedTo={job.restrictedTo} />
+
       <Card>
         <CardHeader>
           <CardTitle>Danger zone</CardTitle>
@@ -155,5 +163,83 @@ export default function JobSettingsPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+function JobAccessCard({ jobId, restrictedTo }: { jobId: string; restrictedTo: string[] }) {
+  const { currentWorkspace, user } = useWorkspace();
+  const updateAccess = useUpdateJobAccess(jobId);
+  const [selected, setSelected] = useState<string[]>(restrictedTo);
+  const [dirty, setDirty] = useState(false);
+
+  useEffect(() => {
+    if (!dirty) setSelected(restrictedTo);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [restrictedTo]);
+
+  const { data: members, isLoading } = useQuery({
+    queryKey: ['members', currentWorkspace.id],
+    queryFn: () => api.get<WorkspaceMemberDto[]>(`/api/v1/workspaces/${currentWorkspace.id}/members`),
+  });
+
+  const toggle = (userId: string) => {
+    setDirty(true);
+    setSelected((ids) => (ids.includes(userId) ? ids.filter((id) => id !== userId) : [...ids, userId]));
+  };
+
+  const save = async () => {
+    try {
+      await updateAccess.mutateAsync(selected);
+      setDirty(false);
+      toast.success(selected.length === 0 ? 'Job is visible to everyone again' : 'Access updated');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Could not update access');
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Access</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <p className="text-sm text-muted-foreground">
+          {selected.length === 0
+            ? 'Visible to everyone in the workspace.'
+            : `Visible only to the ${selected.length} member${selected.length === 1 ? '' : 's'} selected below.`}
+        </p>
+        {isLoading ? (
+          <Skeleton className="h-16 w-full" />
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            {members?.map((m) => {
+              const active = selected.includes(m.userId);
+              return (
+                <button
+                  key={m.id}
+                  type="button"
+                  onClick={() => toggle(m.userId)}
+                  className={cn(
+                    'flex items-center gap-2 rounded-full border px-2.5 py-1 text-xs transition-colors',
+                    active ? 'border-primary bg-primary/10 text-primary' : 'border-border hover:bg-accent',
+                  )}
+                >
+                  <Avatar className="size-5">
+                    <AvatarFallback className="text-[10px]">{initials(m.user.name)}</AvatarFallback>
+                  </Avatar>
+                  {m.user.name}
+                  {m.userId === user.id && <span className="text-muted-foreground">(You)</span>}
+                </button>
+              );
+            })}
+          </div>
+        )}
+        <div>
+          <Button onClick={save} loading={updateAccess.isPending} disabled={!dirty}>
+            Save access
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

@@ -3,12 +3,13 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams, usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { ArrowLeft, Link2, Pause, Play, XCircle, Copy } from 'lucide-react';
+import { ArrowLeft, Briefcase, Link2, Pause, Play, XCircle, Copy } from 'lucide-react';
 import { useJob, usePublishJob, useSetJobStatus, useCloneJob } from '@/hooks/use-jobs';
 import { useFeature } from '@/hooks/use-features';
 import { useWorkspace } from '@/components/providers/workspace-provider';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { EmptyState } from '@/components/ui/empty-state';
 import { JobStatusBadge } from '@/components/jobs/job-status-badge';
 import { RecordMenu, type RecordMenuAction } from '@/components/ui/record-menu';
 import { PublishConfirmationDialog } from '@/components/jobs/publish-confirmation-dialog';
@@ -24,7 +25,7 @@ export default function JobDetailLayout({ children }: { children: React.ReactNod
   const searchParams = useSearchParams();
   const router = useRouter();
   const { currentWorkspace } = useWorkspace();
-  const { data: job, isLoading } = useJob(jobId);
+  const { data: job, isLoading, isError } = useJob(jobId);
   const publishJob = usePublishJob();
   const setStatus = useSetJobStatus();
   const cloneJob = useCloneJob();
@@ -41,6 +42,26 @@ export default function JobDetailLayout({ children }: { children: React.ReactNod
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
+
+  // A job that's been deleted, or restricted to other members, 404s rather
+  // than 403s (see requireJobAccess) — show one clean "not found" state here
+  // instead of every child tab hitting the same error and hanging on its own
+  // loading skeleton forever.
+  if (isError) {
+    return (
+      <div className="space-y-6">
+        <Link href="/app/jobs" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
+          <ArrowLeft className="size-4" /> Jobs
+        </Link>
+        <EmptyState
+          icon={<Briefcase />}
+          title="Job not found"
+          description="This job may have been removed, or you may not have access to it."
+          action={<Button onClick={() => router.push('/app/jobs')}>Back to jobs</Button>}
+        />
+      </div>
+    );
+  }
 
   const base = `/app/jobs/${jobId}`;
   const tabs = [

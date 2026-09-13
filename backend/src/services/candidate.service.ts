@@ -19,6 +19,8 @@ import { toCandidateDto } from '../serializers/candidate.serializer';
 import { toApplicationDto } from '../serializers/application.serializer';
 import { getStorageProvider } from '../integrations';
 import { notFound } from '../utils/errors';
+import { applyJobAccessFilter, bypassesJobAccess } from '../utils/job-access';
+import type { AuthContext } from '../types/auth-context';
 
 type CandidateCore = Pick<
   PublicApplicationInput,
@@ -59,17 +61,19 @@ export const candidateService = {
   async list(
     workspaceId: string,
     query: CandidateListQuery,
+    auth: AuthContext,
   ): Promise<Paginated<CandidateListItemDto>> {
     const limit = query.limit;
     const page = query.page ?? 1;
     const skip = (page - 1) * limit;
 
-    const match: Record<string, unknown> = { workspaceId: new Types.ObjectId(workspaceId) };
+    let match: Record<string, unknown> = { workspaceId: new Types.ObjectId(workspaceId) };
     if (query.jobId) match.jobId = new Types.ObjectId(query.jobId);
     if (query.stage) match.stage = query.stage;
     if (query.source) match.source = query.source;
     if (query.minScore != null) match.score = { $gte: query.minScore };
     if (query.labelId) match.labelIds = new Types.ObjectId(query.labelId);
+    match = applyJobAccessFilter(match, auth, 'jobRestrictedTo');
 
     const postMatch: Record<string, unknown> = {};
     if (query.location) postMatch['candidate.location'] = { $regex: escapeRegex(query.location), $options: 'i' };
@@ -136,14 +140,20 @@ export const candidateService = {
     return { items, total: res?.total?.[0]?.count ?? 0, page, limit };
   },
 
-  async getProfile(workspaceId: string, candidateId: string): Promise<CandidateProfileDto> {
+  async getProfile(workspaceId: string, candidateId: string, auth: AuthContext): Promise<CandidateProfileDto> {
     const candidate = await candidateRepository.findInWorkspace(workspaceId, candidateId);
     if (!candidate) throw notFound('Candidate not found');
 
-    const apps = await ApplicationModel.find({ workspaceId, candidateId })
+    const apps = await ApplicationModel.find(applyJobAccessFilter({ workspaceId, candidateId }, auth, 'jobRestrictedTo'))
       .sort({ appliedAt: -1 })
       .populate('labelIds')
       .lean();
+    // A candidate whose only applications are to jobs this viewer can't see
+    // must appear not-found, not merely empty — same "invisible" rule as jobs.
+    if (apps.length === 0 && !bypassesJobAccess(auth.role)) {
+      const totalApps = await ApplicationModel.countDocuments({ workspaceId, candidateId });
+      if (totalApps > 0) throw notFound('Candidate not found');
+    }
     const jobIds = apps.map((a) => a.jobId);
     const jobs = await JobModel.find({ _id: { $in: jobIds } }).select('title').lean();
     const titleById = new Map(jobs.map((j) => [String(j._id), j.title]));
@@ -174,9 +184,18 @@ export const candidateService = {
     };
   },
 
-  async getResumeUrl(workspaceId: string, candidateId: string): Promise<string> {
+  async getResumeUrl(workspaceId: string, candidateId: string, auth: AuthContext): Promise<string> {
     const candidate = await candidateRepository.findInWorkspace(workspaceId, candidateId);
     if (!candidate || !candidate.resume) throw notFound('No resume on file');
+    if (!bypassesJobAccess(auth.role)) {
+      const totalApps = await ApplicationModel.countDocuments({ workspaceId, candidateId });
+      if (totalApps > 0) {
+        const visible = await ApplicationModel.exists(
+          applyJobAccessFilter({ workspaceId, candidateId }, auth, 'jobRestrictedTo'),
+        );
+        if (!visible) throw notFound('No resume on file');
+      }
+    }
     const storage = getStorageProvider();
     return storage.createDownloadUrl(
       {

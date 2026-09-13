@@ -4,6 +4,7 @@ import { stageService } from '../services/stage.service';
 import { screeningService } from '../services/screening.service';
 import { assessmentService } from '../services/assessment.service';
 import { ApplicationModel } from '../models/application.model';
+import { isJobAccessible } from '../utils/job-access';
 import type { StageChangeInput, RejectApplicationInput, BulkActionInput } from '@fluxberry/shared';
 
 function actor(req: any) {
@@ -66,12 +67,15 @@ export const applicationController = {
     const body = req.body as BulkActionInput;
     const act = actor(req);
 
-    // Validate all IDs belong to this workspace in one query.
+    // Validate all IDs belong to this workspace, and skip any the actor can't
+    // see under per-job access control (restricted job, actor not listed).
     const owned = await ApplicationModel.find({
       _id: { $in: body.applicationIds },
       workspaceId,
-    }).select('_id').lean();
-    const ownedSet = new Set(owned.map((a) => String(a._id)));
+    }).select('_id jobRestrictedTo').lean();
+    const ownedSet = new Set(
+      owned.filter((a) => isJobAccessible(req.auth!, a.jobRestrictedTo)).map((a) => String(a._id)),
+    );
 
     const results = await Promise.allSettled(
       body.applicationIds
