@@ -24,6 +24,14 @@ interface ResumeFile {
   size: number;
 }
 
+interface QuestionFile {
+  questionId: string | undefined;
+  buffer: Buffer;
+  originalname: string;
+  mimetype: string;
+  size: number;
+}
+
 export const applicationService = {
   async getPublicJob(
     workspaceSlug: string,
@@ -56,6 +64,7 @@ export const applicationService = {
     jobSlug: string,
     input: PublicApplicationInput,
     resume: ResumeFile | undefined,
+    questionFiles: QuestionFile[] = [],
   ): Promise<{ applicationId: string }> {
     const workspace = await workspaceRepository.findBySlug(workspaceSlug);
     if (!workspace) throw notFound('Job not found');
@@ -132,9 +141,27 @@ export const applicationService = {
       }
     }
 
-    // 4. Save answers.
-    if (input.answers?.length) {
-      await answersRepository.upsert(String(application._id), input.answers);
+    // 4. Upload any custom FILE_UPLOAD/VIDEO_RECORDING question answers, then save all answers.
+    // The client never supplies a storage reference directly (see publicAnswerValueSchema) —
+    // only the server, after actually uploading the bytes, may attach a FileRef to an answer.
+    const fileAnswers = await Promise.all(
+      questionFiles
+        .filter((f): f is QuestionFile & { questionId: string } => Boolean(f.questionId))
+        .map(async (f) => {
+          const safeName = f.originalname.replace(/[^a-zA-Z0-9._-]/g, '_').slice(-80);
+          const fileKey = `question-answers/${workspaceId}/${crypto.randomBytes(8).toString('hex')}-${safeName}`;
+          const ref = await storage.upload({
+            key: fileKey,
+            body: f.buffer,
+            contentType: f.mimetype,
+            fileName: f.originalname,
+          });
+          return { questionId: f.questionId, value: ref };
+        }),
+    );
+    const allAnswers = [...input.answers, ...fileAnswers];
+    if (allAnswers.length) {
+      await answersRepository.upsert(String(application._id), allAnswers);
     }
 
     // 5. Emit domain event + 6. enqueue async resume parsing (never blocks response).

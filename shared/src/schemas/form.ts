@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { FORM_QUESTION_TYPES } from '../enums';
+import { FORM_QUESTION_TYPES, MULTIPLE_CHOICE_VARIANTS, OTHER_LINK_PLATFORMS } from '../enums';
 import type { FormQuestionType } from '../enums';
 
 export const formOptionSchema = z.object({
@@ -21,6 +21,10 @@ export const formQuestionSchema = z.object({
   sortOrder: z.number().int().default(0),
   /** System default fields can be disabled but not deleted. */
   system: z.boolean().default(false),
+  /** MULTIPLE_CHOICE only: how the options are presented. */
+  variant: z.enum(MULTIPLE_CHOICE_VARIANTS).optional(),
+  /** OTHER_LINK only: which platform the link is for. */
+  linkPlatform: z.enum(OTHER_LINK_PLATFORMS).optional(),
 });
 export type FormQuestion = z.infer<typeof formQuestionSchema>;
 

@@ -22,5 +22,7 @@ function toQuestion(q: any): FormQuestion {
     options: (q.options ?? []).map((o: any) => ({ id: o.id, label: o.label })),
     sortOrder: q.sortOrder ?? 0,
     system: q.system ?? false,
+    variant: q.variant ?? undefined,
+    linkPlatform: q.linkPlatform ?? undefined,
   };
 }

@@ -16,24 +16,35 @@ export const publicController = {
   }),
 
   apply: asyncHandler(async (req, res) => {
-    // Multipart fields arrive as strings; answers is a JSON-encoded array.
+    // Multipart fields arrive as strings; answers/questionFileMeta are JSON-encoded arrays.
     const raw: Record<string, unknown> = { ...req.body };
-    if (typeof raw.answers === 'string') {
-      try {
-        raw.answers = JSON.parse(raw.answers);
-      } catch {
-        raw.answers = [];
+    for (const field of ['answers', 'questionFileMeta'] as const) {
+      if (typeof raw[field] === 'string') {
+        try {
+          raw[field] = JSON.parse(raw[field] as string);
+        } catch {
+          raw[field] = [];
+        }
       }
     }
     const input = publicApplicationSchema.parse(raw);
-    const file = req.file;
+    const files = req.files as { resume?: Express.Multer.File[]; questionFiles?: Express.Multer.File[] } | undefined;
+    const resumeFile = files?.resume?.[0];
+    const questionFiles = (files?.questionFiles ?? []).map((f, i) => ({
+      questionId: input.questionFileMeta[i]?.questionId,
+      buffer: f.buffer,
+      originalname: f.originalname,
+      mimetype: f.mimetype,
+      size: f.size,
+    }));
     const result = await applicationService.submitPublicApplication(
       req.params.workspaceSlug,
       req.params.jobSlug,
       input,
-      file
-        ? { buffer: file.buffer, originalname: file.originalname, mimetype: file.mimetype, size: file.size }
+      resumeFile
+        ? { buffer: resumeFile.buffer, originalname: resumeFile.originalname, mimetype: resumeFile.mimetype, size: resumeFile.size }
         : undefined,
+      questionFiles,
     );
     created(res, { applicationId: result.applicationId, message: 'Application submitted' });
   }),

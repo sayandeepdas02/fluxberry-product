@@ -82,12 +82,26 @@ export type CandidateSource = (typeof CANDIDATE_SOURCES)[number];
 export const FORM_QUESTION_TYPES = [
   'SHORT_TEXT',
   'LONG_TEXT',
-  'MULTIPLE_CHOICE',
-  'YES_NO',
   'NUMBER',
+  'MULTIPLE_CHOICE',
+  /** Legacy type from before MULTIPLE_CHOICE grew list/dropdown/multi-select variants — kept so old data keeps rendering; no longer offered in the add-question menu (use a 2-option Multiple choice instead). */
+  'YES_NO',
+  'PHONE',
+  'LINKEDIN',
+  'OTHER_LINK',
+  'DATE',
   'FILE_UPLOAD',
+  'VIDEO_RECORDING',
 ] as const;
 export type FormQuestionType = (typeof FORM_QUESTION_TYPES)[number];
+
+/** Presentation variants for a MULTIPLE_CHOICE question. */
+export const MULTIPLE_CHOICE_VARIANTS = ['LIST', 'DROPDOWN', 'MULTI_SELECT'] as const;
+export type MultipleChoiceVariant = (typeof MULTIPLE_CHOICE_VARIANTS)[number];
+
+/** Which link platform an OTHER_LINK question asks for (drives placeholder/icon/validation). */
+export const OTHER_LINK_PLATFORMS = ['TWITTER', 'INSTAGRAM', 'GITHUB', 'YOUTUBE', 'ANY'] as const;
+export type OtherLinkPlatform = (typeof OTHER_LINK_PLATFORMS)[number];
 
 /** Question bank question types. */
 export const QUESTION_TYPES = ['MCQ', 'CODING'] as const;

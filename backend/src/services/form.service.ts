@@ -61,6 +61,8 @@ export const formService = {
       options: q.options ?? [],
       sortOrder: i,
       system: q.system ?? false,
+      variant: q.variant ?? null,
+      linkPlatform: q.linkPlatform ?? null,
     }));
 
     const form = await formRepository.setQuestions(jobId, normalized);

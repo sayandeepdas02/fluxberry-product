@@ -11,15 +11,21 @@ import type {
   CandidateSource,
   ProcessingStatus,
 } from '../enums';
+import { fileRefSchema } from '../common';
 import type { ScoreBreakdown } from '../scoring';
 import type { LabelDto } from './label';
 
-/** A single answer value can be text, number, boolean, or a list (multi-choice). */
+/** A FILE_UPLOAD/VIDEO_RECORDING question's answer — the uploaded file's storage reference. */
+export const answerFileValueSchema = fileRefSchema;
+export type AnswerFileValue = z.infer<typeof answerFileValueSchema>;
+
+/** A single answer value can be text, number, boolean, a list (multi-choice), or an uploaded file reference. */
 export const answerValueSchema = z.union([
   z.string(),
   z.number(),
   z.boolean(),
   z.array(z.string()),
+  answerFileValueSchema,
 ]);
 export type AnswerValue = z.infer<typeof answerValueSchema>;
 
@@ -28,6 +34,25 @@ export const applicationAnswerSchema = z.object({
   value: answerValueSchema,
 });
 export type ApplicationAnswer = z.infer<typeof applicationAnswerSchema>;
+
+/**
+ * What a candidate may submit directly in the multipart `answers` JSON field.
+ * File/video answers are never accepted this way — a client-supplied storage
+ * reference would let it point at an arbitrary file — they arrive as separate
+ * `questionFiles` multipart parts and the server fills in the real FileRef
+ * itself after uploading (see application.service.ts).
+ */
+export const publicAnswerValueSchema = z.union([
+  z.string(),
+  z.number(),
+  z.boolean(),
+  z.array(z.string()),
+]);
+export const publicApplicationAnswerSchema = z.object({
+  questionId: z.string().min(1),
+  value: publicAnswerValueSchema,
+});
+export type PublicApplicationAnswer = z.infer<typeof publicApplicationAnswerSchema>;
 
 /**
  * Public application submission body (multipart form-data: these JSON-ish fields
@@ -45,7 +70,13 @@ export const publicApplicationSchema = z.object({
   /** Referral code from a `?ref=` link (see referral.ts) — server re-validates it, never trusts `source` alone. */
   referralCode: z.string().trim().max(20).optional(),
   /** Answers to custom questions, JSON-encoded when sent as multipart. */
-  answers: z.array(applicationAnswerSchema).default([]),
+  answers: z.array(publicApplicationAnswerSchema).default([]),
+  /**
+   * Maps each `questionFiles` multipart part (by array index) to the custom
+   * question it answers, JSON-encoded when sent as multipart. e.g. the Nth
+   * file in `questionFiles` answers `questionFileMeta[N].questionId`.
+   */
+  questionFileMeta: z.array(z.object({ questionId: z.string().min(1) })).default([]),
 });
 export type PublicApplicationInput = z.infer<typeof publicApplicationSchema>;
 

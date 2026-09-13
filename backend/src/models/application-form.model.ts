@@ -1,5 +1,5 @@
 import { Schema, model, models, type InferSchemaType, type Model } from 'mongoose';
-import { FORM_QUESTION_TYPES } from '@fluxberry/shared';
+import { FORM_QUESTION_TYPES, MULTIPLE_CHOICE_VARIANTS, OTHER_LINK_PLATFORMS } from '@fluxberry/shared';
 
 const formOptionSchema = new Schema(
   { id: { type: String, required: true }, label: { type: String, required: true } },
@@ -18,6 +18,8 @@ const formQuestionSchema = new Schema(
     options: { type: [formOptionSchema], default: [] },
     sortOrder: { type: Number, default: 0 },
     system: { type: Boolean, default: false },
+    variant: { type: String, enum: MULTIPLE_CHOICE_VARIANTS, default: null },
+    linkPlatform: { type: String, enum: OTHER_LINK_PLATFORMS, default: null },
   },
   { _id: false },
 );

@@ -20,6 +20,15 @@ export const applicationController = {
     ok(res, detail);
   }),
 
+  getAnswerFileUrl: asyncHandler(async (req, res) => {
+    const url = await candidateService.getAnswerFileUrl(
+      req.auth!.workspaceId!,
+      req.params.applicationId,
+      req.params.questionId,
+    );
+    ok(res, { url });
+  }),
+
   getTimeline: asyncHandler(async (req, res) => {
     const timeline = await candidateService.getTimeline(req.auth!.workspaceId!, req.params.applicationId);
     ok(res, timeline);
