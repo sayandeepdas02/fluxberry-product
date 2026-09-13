@@ -85,7 +85,7 @@ export function ApplyForm({
     return (
       <div className="flex flex-col items-center rounded-xl border border-border bg-card px-6 py-12 text-center">
         <CheckCircle2 className="size-10 text-success" />
-        <h3 className="mt-4 text-lg font-semibold">Application submitted</h3>
+        <h3 className="mt-4 text-card-title">Application submitted</h3>
         <p className="mt-1 max-w-sm text-sm text-muted-foreground">
           Thanks for applying. We&apos;ll be in touch if your profile is selected.
         </p>

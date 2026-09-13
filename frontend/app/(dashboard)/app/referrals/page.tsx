@@ -65,7 +65,7 @@ function MyReferrals() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Your links</CardTitle>
+        <CardTitle as="h2">Your links</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {jobsLoading ? (
@@ -131,7 +131,7 @@ function RewardManagement() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Manage rewards</CardTitle>
+        <CardTitle as="h2">Manage rewards</CardTitle>
       </CardHeader>
       <CardContent>
         <p className="mb-4 text-sm text-muted-foreground">

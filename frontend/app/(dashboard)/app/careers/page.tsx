@@ -120,7 +120,7 @@ export default function CareersBuilderPage() {
 
       {/* URL */}
       <Card>
-        <CardHeader><CardTitle>Public URL</CardTitle></CardHeader>
+        <CardHeader><CardTitle as="h2">Public URL</CardTitle></CardHeader>
         <CardContent className="space-y-2">
           <div className="flex items-center gap-2">
             <span className="shrink-0 text-sm text-muted-foreground">{publicConfig.appUrl}/</span>
@@ -141,7 +141,7 @@ export default function CareersBuilderPage() {
 
       {/* Header */}
       <Card>
-        <CardHeader><CardTitle>Header</CardTitle></CardHeader>
+        <CardHeader><CardTitle as="h2">Header</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           <Field label="Headline"><Input value={config.headline} onChange={(e) => set({ headline: e.target.value })} placeholder="Join us" /></Field>
           <Field label="Tagline"><Input value={config.tagline} onChange={(e) => set({ tagline: e.target.value })} placeholder="We're building something great." /></Field>
@@ -212,7 +212,7 @@ function SectionCard({ title, enabled, onToggle, children }: { title: string; en
   return (
     <Card>
       <CardHeader className="flex-row items-center justify-between">
-        <CardTitle>{title}</CardTitle>
+        <CardTitle as="h2">{title}</CardTitle>
         <label className="flex flex-col items-end gap-1 text-xs text-muted-foreground">
           <span className="flex items-center gap-2">
             {enabled ? 'Visible' : 'Hidden'}

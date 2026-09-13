@@ -45,7 +45,7 @@ export default function LoginPage() {
 
   return (
     <Card className="p-6">
-      <h1 className="text-xl font-semibold">Welcome back</h1>
+      <h1 className="text-card-title">Welcome back</h1>
       <p className="mt-1 text-sm text-muted-foreground">Log in to continue hiring.</p>
 
       <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">

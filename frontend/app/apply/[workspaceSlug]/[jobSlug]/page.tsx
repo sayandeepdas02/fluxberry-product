@@ -4,8 +4,9 @@ import { fetchPublicJob } from '@/lib/public-api';
 import { Markdown } from '@/components/ui/markdown';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ApplyForm } from './apply-form';
-import { EMPLOYMENT_LABELS, WORK_MODE_LABELS } from '@/lib/labels';
+import { EMPLOYMENT_LABELS, WORK_MODE_LABELS, toSchemaEmploymentType } from '@/lib/labels';
 import { formatSalary, initials } from '@/lib/utils';
+import { toPlainDescription, publicPageMetadata } from '@/lib/seo';
 
 type Params = Promise<{ workspaceSlug: string; jobSlug: string }>;
 
@@ -14,12 +15,8 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const data = await fetchPublicJob(workspaceSlug, jobSlug);
   if (!data) return { title: 'Job not found' };
   const title = `${data.job.title} · ${data.job.workspace.name}`;
-  const description = data.job.description.replace(/[#*_>-]/g, '').slice(0, 160);
-  return {
-    title,
-    description,
-    openGraph: { title, description, type: 'website' },
-  };
+  const description = toPlainDescription(data.job.description);
+  return publicPageMetadata({ title, description, path: `/apply/${workspaceSlug}/${jobSlug}` });
 }
 
 export default async function PublicJobPage({ params }: { params: Params }) {
@@ -30,8 +27,38 @@ export default async function PublicJobPage({ params }: { params: Params }) {
   const { job, questions } = data;
   const salary = formatSalary(job.salary);
 
+  const jobPostingJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'JobPosting',
+    title: job.title,
+    description: job.description,
+    // Google Jobs requires datePosted for rich-result eligibility; omit rather
+    // than fabricate if a job somehow has no publish timestamp.
+    ...(job.publishedAt ? { datePosted: job.publishedAt } : {}),
+    employmentType: toSchemaEmploymentType(job.employmentType),
+    hiringOrganization: {
+      '@type': 'Organization',
+      name: job.workspace.name,
+      ...(job.workspace.logoUrl ? { logo: job.workspace.logoUrl } : {}),
+    },
+    ...(job.location
+      ? { jobLocation: { '@type': 'Place', address: { '@type': 'PostalAddress', addressLocality: job.location } } }
+      : {}),
+    ...(job.workMode === 'REMOTE' ? { jobLocationType: 'TELECOMMUTE' } : {}),
+    ...(job.salary
+      ? {
+          baseSalary: {
+            '@type': 'MonetaryAmount',
+            currency: job.salary.currency,
+            value: { '@type': 'QuantitativeValue', minValue: job.salary.min, maxValue: job.salary.max, unitText: 'YEAR' },
+          },
+        }
+      : {}),
+  };
+
   return (
     <div className="mx-auto max-w-2xl px-5 py-10 sm:py-16">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jobPostingJsonLd).replace(/</g, '\\u003c') }} />
       <div className="flex items-center gap-3">
         <Avatar className="h-11 w-11 rounded-lg">
           {job.workspace.logoUrl && <AvatarImage src={job.workspace.logoUrl} alt={job.workspace.name} />}
@@ -42,7 +69,7 @@ export default async function PublicJobPage({ params }: { params: Params }) {
         <div className="text-sm font-medium text-muted-foreground">{job.workspace.name}</div>
       </div>
 
-      <h1 className="mt-6 text-3xl font-semibold tracking-tight">{job.title}</h1>
+      <h1 className="mt-6 text-page-title">{job.title}</h1>
       <p className="mt-2 text-sm text-muted-foreground">
         {[job.location, EMPLOYMENT_LABELS[job.employmentType], WORK_MODE_LABELS[job.workMode]]
           .filter(Boolean)

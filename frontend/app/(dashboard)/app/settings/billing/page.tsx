@@ -61,6 +61,7 @@ export default function BillingSettingsPage() {
 
   return (
     <div className="space-y-6">
+      <h2 className="sr-only">Billing</h2>
       <Card>
         <CardHeader>
           <CardTitle>Current plan</CardTitle>

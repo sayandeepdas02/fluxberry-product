@@ -1,4 +1,5 @@
 import type { Config } from 'tailwindcss';
+import typography from '@tailwindcss/typography';
 
 const config: Config = {
   darkMode: ['class'],
@@ -62,10 +63,28 @@ const config: Config = {
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
       },
+      fontFamily: {
+        sans: ['var(--font-geist-sans)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        mono: ['var(--font-geist-mono)', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+      },
       fontSize: {
-        // deliberate type scale (spec §7)
-        'page-title': ['1.75rem', { lineHeight: '2.125rem', fontWeight: '600' }],
+        // deliberate type scale (spec §7) — named by role, not size, so meaning survives a rescale
+        display: ['3rem', { lineHeight: '3.375rem', fontWeight: '700', letterSpacing: '-0.02em' }],
+        'page-title': ['1.75rem', { lineHeight: '2.125rem', fontWeight: '600', letterSpacing: '-0.01em' }],
         'section-title': ['1.125rem', { lineHeight: '1.5rem', fontWeight: '600' }],
+        'card-title': ['1rem', { lineHeight: '1.375rem', fontWeight: '600' }],
+        'subtle-title': ['0.875rem', { lineHeight: '1.25rem', fontWeight: '600' }],
+        'body-lg': ['1.0625rem', { lineHeight: '1.625rem', fontWeight: '400' }],
+        body: ['0.875rem', { lineHeight: '1.375rem', fontWeight: '400' }],
+        'body-sm': ['0.8125rem', { lineHeight: '1.25rem', fontWeight: '400' }],
+        caption: ['0.75rem', { lineHeight: '1rem', fontWeight: '500', letterSpacing: '0.01em' }],
+      },
+      typography: {
+        DEFAULT: {
+          css: {
+            'code, pre': { fontFamily: 'var(--font-geist-mono)' },
+          },
+        },
       },
       keyframes: {
         'fade-in': { from: { opacity: '0' }, to: { opacity: '1' } },
@@ -76,7 +95,7 @@ const config: Config = {
       },
     },
   },
-  plugins: [require('@tailwindcss/typography')],
+  plugins: [typography],
 };
 
 export default config;

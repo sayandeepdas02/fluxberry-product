@@ -54,6 +54,7 @@ export default function JobDetailLayout({ children }: { children: React.ReactNod
           <ArrowLeft className="size-4" /> Jobs
         </Link>
         <EmptyState
+          as="h1"
           icon={<Briefcase />}
           title="Job not found"
           description="This job may have been removed, or you may not have access to it."

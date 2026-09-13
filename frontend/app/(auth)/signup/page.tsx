@@ -55,7 +55,7 @@ export default function SignupPage() {
 
   return (
     <Card className="p-6">
-      <h1 className="text-xl font-semibold">Create your account</h1>
+      <h1 className="text-card-title">Create your account</h1>
       <p className="mt-1 text-sm text-muted-foreground">Start hiring in minutes.</p>
 
       <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">

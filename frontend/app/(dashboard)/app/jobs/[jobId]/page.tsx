@@ -18,6 +18,7 @@ export default function JobOverviewPage() {
   const c = job.counts;
   return (
     <div className="space-y-6">
+      <h2 className="sr-only">Job overview</h2>
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <MetricCard label="Applicants" value={c?.applicants ?? 0} />
         <MetricCard label="Shortlisted" value={c?.shortlisted ?? 0} />

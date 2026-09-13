@@ -73,7 +73,7 @@ export default function HomePage() {
 
           <Card>
             <CardHeader className="flex-row items-center justify-between">
-              <CardTitle>Active jobs</CardTitle>
+              <CardTitle as="h2">Active jobs</CardTitle>
               <Link href="/app/jobs" className="text-sm text-muted-foreground hover:text-foreground">View all</Link>
             </CardHeader>
             <CardContent className="p-0">
@@ -105,7 +105,7 @@ export default function HomePage() {
           {!!recent?.items.length && (
             <Card>
               <CardHeader className="flex-row items-center justify-between">
-                <CardTitle>Recent candidates</CardTitle>
+                <CardTitle as="h2">Recent candidates</CardTitle>
                 <Link href="/app/candidates" className="text-sm text-muted-foreground hover:text-foreground">View all</Link>
               </CardHeader>
               <CardContent className="divide-y divide-border p-0">

@@ -52,6 +52,7 @@ export function toPublicJobDto(
     location: j.location ?? null,
     salary: j.salary ? { min: j.salary.min ?? undefined, max: j.salary.max ?? undefined, currency: j.salary.currency ?? 'INR' } : null,
     experience: j.experience ? { min: j.experience.min ?? undefined, max: j.experience.max ?? undefined } : null,
+    publishedAt: j.publishedAt ? new Date(j.publishedAt).toISOString() : null,
     workspace: { name: workspace.name, slug: workspace.slug, logoUrl: workspace.logoUrl ?? null },
   };
 }

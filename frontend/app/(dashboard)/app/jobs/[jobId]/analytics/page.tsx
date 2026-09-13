@@ -44,6 +44,7 @@ export default function JobAnalyticsPage() {
 
   return (
     <div className="space-y-6">
+      <h2 className="sr-only">Job analytics</h2>
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <MetricCard label="Assessments sent" value={a.totalSent} />
         <MetricCard label="Completed" value={a.completed} />

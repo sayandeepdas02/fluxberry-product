@@ -36,7 +36,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <Card className="p-6">
-      <h1 className="text-xl font-semibold">Reset your password</h1>
+      <h1 className="text-card-title">Reset your password</h1>
       {sent ? (
         <p className="mt-2 text-sm text-muted-foreground">
           If an account exists for that email, we&apos;ve sent a reset link.

@@ -15,7 +15,7 @@ export function MetricCard({
   return (
     <Card className={cn('p-4', className)}>
       <div className="text-xs font-medium text-muted-foreground">{label}</div>
-      <div className="mt-1 text-2xl font-semibold tabular-nums">{value}</div>
+      <div className="mt-1 font-mono text-2xl font-semibold tabular-nums">{value}</div>
       {hint && <div className="mt-0.5 text-xs text-muted-foreground">{hint}</div>}
     </Card>
   );

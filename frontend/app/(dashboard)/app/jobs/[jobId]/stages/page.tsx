@@ -71,7 +71,7 @@ export default function JobStagesPage() {
     <div className="max-w-2xl space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Pipeline stages</CardTitle>
+          <CardTitle as="h2">Pipeline stages</CardTitle>
           <CardDescription>
             Customize the stages candidates move through for this job. Built-in stages can be renamed and
             reordered but not removed.

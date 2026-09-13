@@ -11,7 +11,7 @@ export function ScoreBadge({ score, className }: { score?: number | null; classN
     : score >= 4 ? 'bg-warning/10 text-[hsl(32_80%_38%)]'
     : 'bg-muted text-muted-foreground';
   return (
-    <span className={cn('inline-flex items-center rounded-md px-1.5 py-0.5 text-sm font-semibold tabular-nums', band, className)}>
+    <span className={cn('inline-flex items-center rounded-md px-1.5 py-0.5 font-mono text-sm font-semibold tabular-nums', band, className)}>
       {score.toFixed(1)}
     </span>
   );
