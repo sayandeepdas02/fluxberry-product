@@ -13,6 +13,7 @@ import {
   Settings,
   HelpCircle,
   Bell,
+  Gift,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { WorkspaceSwitcher } from './workspace-switcher';
@@ -32,6 +33,7 @@ const NAV = [
   { href: '/app/assessments', label: 'Assessments', icon: ClipboardCheck },
   { href: '/app/questions', label: 'Question Bank', icon: Library },
   { href: '/app/analytics', label: 'Analytics', icon: BarChart3 },
+  { href: '/app/referrals', label: 'Referrals', icon: Gift },
 ];
 
 export function Sidebar() {

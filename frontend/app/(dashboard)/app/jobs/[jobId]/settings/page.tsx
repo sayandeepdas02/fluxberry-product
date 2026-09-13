@@ -11,9 +11,11 @@ import {
   type UpdateJobInput,
   type WorkspaceMemberDto,
 } from '@fluxberry/shared';
-import { useJob, useUpdateJob, useUpdateJobAccess, useSetJobStatus } from '@/hooks/use-jobs';
+import { Linkedin } from 'lucide-react';
+import { useJob, useUpdateJob, useUpdateJobAccess, useSetJobStatus, useSetLinkedInPosted } from '@/hooks/use-jobs';
 import { useWorkspace } from '@/components/providers/workspace-provider';
 import { api } from '@/lib/api-client';
+import { publicConfig } from '@/lib/config';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -22,10 +24,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { SkillsInput } from '@/components/jobs/skills-input';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
 import { toast } from '@/components/ui/sonner';
 import { EMPLOYMENT_LABELS, WORK_MODE_LABELS } from '@/lib/labels';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { cn, initials } from '@/lib/utils';
+import type { JobDto } from '@fluxberry/shared';
 
 const numOrUndef = (v: string) => (v.trim() === '' ? undefined : Number(v));
 
@@ -143,6 +147,8 @@ export default function JobSettingsPage() {
 
       <JobAccessCard jobId={jobId} restrictedTo={job.restrictedTo} />
 
+      <LinkedInShareCard job={job} />
+
       <Card>
         <CardHeader>
           <CardTitle>Danger zone</CardTitle>
@@ -238,6 +244,67 @@ function JobAccessCard({ jobId, restrictedTo }: { jobId: string; restrictedTo: s
           <Button onClick={save} loading={updateAccess.isPending} disabled={!dirty}>
             Save access
           </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+const LINKEDIN_STATUS_LABEL: Record<JobDto['linkedIn']['status'], string> = {
+  NOT_POSTED: 'Not posted',
+  POSTED: 'Posted',
+  CLOSED: 'Closed',
+};
+const LINKEDIN_STATUS_VARIANT: Record<JobDto['linkedIn']['status'], 'muted' | 'success' | 'default'> = {
+  NOT_POSTED: 'muted',
+  POSTED: 'success',
+  CLOSED: 'default',
+};
+
+/**
+ * There's no real LinkedIn job-posting API integration — that needs Talent
+ * Solutions partnership access we don't have. This opens LinkedIn's public
+ * share dialog pre-filled with the apply link, and lets the recruiter record
+ * that they used it; status auto-shows "Closed" once the job itself closes.
+ */
+function LinkedInShareCard({ job }: { job: JobDto }) {
+  const { currentWorkspace } = useWorkspace();
+  const setPosted = useSetLinkedInPosted(job.id);
+  const applyUrl = `${publicConfig.appUrl}/apply/${currentWorkspace.slug}/${job.slug}`;
+  const shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(applyUrl)}`;
+
+  const togglePosted = (posted: boolean) => {
+    setPosted.mutate(posted, {
+      onSuccess: () => toast.success(posted ? 'Marked as posted on LinkedIn' : 'Marked as not posted'),
+      onError: () => toast.error('Could not update LinkedIn status'),
+    });
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>LinkedIn</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <p className="text-sm text-muted-foreground">
+          Fluxberry doesn&apos;t auto-post to LinkedIn — share the role with LinkedIn&apos;s pre-filled dialog, then mark it here so your team knows it&apos;s out there.
+        </p>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button variant="outline" asChild>
+            <a href={shareUrl} target="_blank" rel="noreferrer">
+              <Linkedin className="size-4" /> Share to LinkedIn
+            </a>
+          </Button>
+          <Badge variant={LINKEDIN_STATUS_VARIANT[job.linkedIn.status]}>{LINKEDIN_STATUS_LABEL[job.linkedIn.status]}</Badge>
+          {job.linkedIn.status === 'NOT_POSTED' ? (
+            <Button size="sm" variant="ghost" onClick={() => togglePosted(true)} loading={setPosted.isPending}>
+              Mark as posted
+            </Button>
+          ) : job.linkedIn.status === 'POSTED' ? (
+            <Button size="sm" variant="ghost" onClick={() => togglePosted(false)} loading={setPosted.isPending}>
+              Undo
+            </Button>
+          ) : null}
         </div>
       </CardContent>
     </Card>

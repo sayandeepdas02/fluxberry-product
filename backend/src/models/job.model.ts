@@ -77,6 +77,13 @@ const jobSchema = new Schema(
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
     publishedAt: { type: Date, default: null },
     closedAt: { type: Date, default: null },
+    /**
+     * Manual "I posted this to LinkedIn" tracking (Phase 3.2). There's no
+     * automated cross-posting here — LinkedIn's job-posting API needs Talent
+     * Solutions partnership access we don't have, so this just remembers the
+     * pre-filled share link was used; status derives from this + job.status.
+     */
+    linkedInPostedAt: { type: Date, default: null },
   },
   { timestamps: true, collection: 'jobs' },
 );

@@ -391,4 +391,24 @@ export const jobService = {
     const counts = await candidateService.funnelCountsForJob(workspaceId, jobId);
     return toJobDto(updated!.toObject(), counts);
   },
+
+  /**
+   * Manual "I shared this on LinkedIn" toggle (Phase 3.2) — there's no real
+   * LinkedIn job-posting API integration (needs Talent Solutions partnership
+   * access), so this just records that the recruiter used the pre-filled
+   * share link the frontend generates. See job.serializer.ts's linkedInStatus.
+   */
+  async setLinkedInPosted(workspaceId: string, userId: string, jobId: string, posted: boolean): Promise<JobDto> {
+    const job = await jobRepository.findInWorkspace(workspaceId, jobId);
+    if (!job) throw notFound('Job not found');
+    const updated = await jobRepository.update(jobId, { linkedInPostedAt: posted ? new Date() : null });
+    await auditService.log({
+      workspaceId,
+      userId,
+      action: posted ? 'job.linkedin_marked_posted' : 'job.linkedin_marked_unposted',
+      resourceType: 'job',
+      resourceId: jobId,
+    });
+    return toJobDto(updated!.toObject());
+  },
 };

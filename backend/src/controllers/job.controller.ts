@@ -8,6 +8,7 @@ import type {
   JobListQuery,
   JobStatusInput,
   UpsertPipelineStagesInput,
+  SetLinkedInPostedInput,
 } from '@fluxberry/shared';
 
 export const jobController = {
@@ -82,6 +83,16 @@ export const jobController = {
       req.auth!.user.id,
       req.params.jobId,
       req.body as UpdateJobAccessInput,
+    );
+    ok(res, job);
+  }),
+
+  setLinkedInPosted: asyncHandler(async (req, res) => {
+    const job = await jobService.setLinkedInPosted(
+      req.auth!.workspaceId!,
+      req.auth!.user.id,
+      req.params.jobId,
+      (req.body as SetLinkedInPostedInput).posted,
     );
     ok(res, job);
   }),

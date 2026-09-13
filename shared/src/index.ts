@@ -25,3 +25,4 @@ export * from './schemas/pipeline-stage';
 export * from './schemas/job-access';
 export * from './schemas/label';
 export * from './schemas/message';
+export * from './schemas/referral';

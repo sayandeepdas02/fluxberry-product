@@ -66,6 +66,9 @@ export const PIPELINE_STAGES = [
   'HIRED',
 ] as const;
 
+export const REFERRAL_REWARD_STATUSES = ['NONE', 'PENDING', 'PAID'] as const;
+export type ReferralRewardStatus = (typeof REFERRAL_REWARD_STATUSES)[number];
+
 export const CANDIDATE_SOURCES = [
   'DIRECT',
   'REFERRAL',

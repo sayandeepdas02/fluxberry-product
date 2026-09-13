@@ -34,6 +34,8 @@ const applicationSchema = new Schema(
     // job's current stage ids") is enforced in stage.service.ts, not here.
     stage: { type: String, default: 'APPLIED' },
     source: { type: String, enum: CANDIDATE_SOURCES, default: 'DIRECT' },
+    /** Set only when `source` was attributed via a validated Referral doc — see referral.service.ts. */
+    referralCode: { type: String, default: null },
     score: { type: Number, default: null },
     screeningResult: { type: screeningResultSchema, default: () => ({ status: 'PENDING' }) },
     labelIds: { type: [Schema.Types.ObjectId], ref: 'Label', default: [] },

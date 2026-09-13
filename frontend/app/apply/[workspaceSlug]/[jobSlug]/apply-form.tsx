@@ -49,12 +49,16 @@ export function ApplyForm({
     if (values.expectedSalary) fd.set('expectedSalary', values.expectedSalary);
     if (values.linkedinUrl) fd.set('linkedinUrl', values.linkedinUrl);
 
-    const srcParam = new URLSearchParams(window.location.search).get('source')?.toUpperCase();
+    const query = new URLSearchParams(window.location.search);
+    const srcParam = query.get('source')?.toUpperCase();
     const source: CandidateSource =
       srcParam && (CANDIDATE_SOURCES as readonly string[]).includes(srcParam)
         ? (srcParam as CandidateSource)
         : 'DIRECT';
     fd.set('source', source);
+    // Re-validated server-side against the actual Referral doc — `source` alone is never trusted for reward eligibility.
+    const refParam = query.get('ref');
+    if (refParam) fd.set('referralCode', refParam);
 
     const answerList = custom
       .filter((q) => answers[q.id] != null && answers[q.id] !== '')

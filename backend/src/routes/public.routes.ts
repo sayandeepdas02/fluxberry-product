@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { publicController } from '../controllers/public.controller';
 import { careersController } from '../controllers/careers.controller';
 import { messageController } from '../controllers/message.controller';
+import { referralController } from '../controllers/referral.controller';
 import { resumeUpload } from '../middleware/upload';
 import { publicApplyLimiter, uploadLimiter, assessmentLimiter, codingRunLimiter } from '../middleware/rate-limit';
 
@@ -17,6 +18,10 @@ publicRouter.post(
   resumeUpload,
   publicController.apply,
 );
+
+// Referral link resolution — resolved by the frontend's /r/[code] page, which
+// redirects to the apply page with ?source=REFERRAL&ref=:code (spec §Phase 3.1).
+publicRouter.get('/public/referrals/:code', referralController.resolvePublic);
 
 // Public company careers page + embeddable jobs section.
 publicRouter.get('/public/careers/:slug', careersController.publicGet);

@@ -1,6 +1,13 @@
 import type { JobDto, JobFunnelCounts, PublicJobDto } from '@fluxberry/shared';
 import { defaultPipelineStages } from '@fluxberry/shared';
 
+function linkedInStatus(j: any): { status: 'NOT_POSTED' | 'POSTED' | 'CLOSED'; postedAt: string | null } {
+  if (!j.linkedInPostedAt) return { status: 'NOT_POSTED', postedAt: null };
+  const postedAt = new Date(j.linkedInPostedAt).toISOString();
+  const closed = j.status === 'CLOSED' || j.status === 'ARCHIVED';
+  return { status: closed ? 'CLOSED' : 'POSTED', postedAt };
+}
+
 /* Accepts a lean job document or hydrated doc. */
 export function toJobDto(j: any, counts?: JobFunnelCounts): JobDto {
   return {
@@ -28,6 +35,7 @@ export function toJobDto(j: any, counts?: JobFunnelCounts): JobDto {
     createdAt: new Date(j.createdAt).toISOString(),
     updatedAt: new Date(j.updatedAt).toISOString(),
     counts,
+    linkedIn: linkedInStatus(j),
   };
 }
 

@@ -40,6 +40,7 @@ export function toApplicationDto(a: any): ApplicationDto {
     status: a.status,
     stage: a.stage,
     source: a.source,
+    referralCode: a.referralCode ?? null,
     score: a.score ?? null,
     screeningResult: toScreeningResultDto(a.screeningResult),
     labels: toLabels(a.labelIds),

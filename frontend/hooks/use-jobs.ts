@@ -116,6 +116,18 @@ export function useUpdateJobAccess(jobId: string) {
   });
 }
 
+export function useSetLinkedInPosted(jobId: string) {
+  const queryClient = useQueryClient();
+  const { currentWorkspace } = useWorkspace();
+  return useMutation({
+    mutationFn: (posted: boolean) => api.post<JobDto>(`/api/v1/jobs/${jobId}/linkedin-posted`, { posted }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['jobs'] });
+      queryClient.invalidateQueries({ queryKey: ['job', currentWorkspace.id, jobId] });
+    },
+  });
+}
+
 export function useUpdateJobStages(jobId: string) {
   const queryClient = useQueryClient();
   const { currentWorkspace } = useWorkspace();

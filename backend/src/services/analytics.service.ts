@@ -1,11 +1,21 @@
 import { Types } from 'mongoose';
-import type { AnalyticsDto, JobAnalyticsDto, ApplicationStage, CandidateSource } from '@fluxberry/shared';
+import type {
+  AnalyticsDto,
+  JobAnalyticsDto,
+  ApplicationStage,
+  CandidateSource,
+  CohortComparisonDto,
+  CohortMetrics,
+  RecruiterLeaderboardDto,
+  FunnelBenchmarkDto,
+} from '@fluxberry/shared';
 import { PIPELINE_STAGES, CANDIDATE_SOURCES } from '@fluxberry/shared';
 import { ApplicationModel } from '../models/application.model';
 import { JobModel } from '../models/job.model';
 import { CandidateModel } from '../models/candidate.model';
 import { AnalyticsCacheModel } from '../models/analytics-cache.model';
 import { applyJobAccessFilter, bypassesJobAccess, jobAccessClause } from '../utils/job-access';
+import { notFound } from '../utils/errors';
 import type { AuthContext } from '../types/auth-context';
 
 const CACHE_TTL_MS = 15 * 60 * 1000;
@@ -192,7 +202,7 @@ export const analyticsService = {
       ApplicationModel.aggregate([
         { $match: { workspaceId: wsId, jobId: jId } },
         { $lookup: { from: 'candidate_assessments', localField: '_id', foreignField: 'applicationId', as: 'ca' } },
-        { $unwind: { path: '$ca', preserveNullAndEmpty: true } },
+        { $unwind: { path: '$ca', preserveNullAndEmptyArrays: true } },
         { $group: {
           _id: null,
           totalSent: { $sum: { $cond: [{ $ifNull: ['$ca._id', false] }, 1, 0] } },
@@ -234,4 +244,223 @@ export const analyticsService = {
       sources,
     };
   },
+
+  // ---- Advanced analytics (Phase 3.3) — all gated by requirePlanFeature('ADVANCED_ANALYTICS') ----
+
+  /** One date-range slice of the cohort comparison: metrics + funnel, scoped by `appliedAt`. */
+  async _computeCohortSlice(
+    workspaceId: string,
+    auth: AuthContext,
+    start: Date,
+    end: Date,
+  ): Promise<{ metrics: CohortMetrics; funnel: AnalyticsDto['funnel'] }> {
+    const wsId = new Types.ObjectId(workspaceId);
+    const baseMatch = applyJobAccessFilter(
+      { workspaceId: wsId, appliedAt: { $gte: start, $lte: end } },
+      auth,
+      'jobRestrictedTo',
+    );
+
+    const [stageRows, hireTimes] = await Promise.all([
+      ApplicationModel.aggregate([
+        { $match: baseMatch },
+        { $group: { _id: '$stage', count: { $sum: 1 } } },
+      ]),
+      ApplicationModel.find({ ...baseMatch, status: 'HIRED' }).select('appliedAt updatedAt').lean(),
+    ]);
+
+    const stageCount = new Map<string, number>(stageRows.map((r: any) => [r._id, r.count]));
+    const totalApplicants = stageRows.reduce((s: number, r: any) => s + r.count, 0);
+    const countFor = (stage: ApplicationStage) => stageCount.get(stage) ?? 0;
+    const funnel = PIPELINE_STAGES.map((stage) => ({ stage, count: countFor(stage) }));
+    const shortlisted = ['SCREENING', 'ASSESSMENT', 'INTERVIEW', 'OFFER', 'HIRED'].reduce(
+      (s, st) => s + countFor(st as ApplicationStage),
+      0,
+    );
+
+    let timeToHireDays: number | null = null;
+    if (hireTimes.length) {
+      const totalDays = hireTimes.reduce((s: number, a: any) => {
+        const d = (new Date(a.updatedAt).getTime() - new Date(a.appliedAt).getTime()) / 86_400_000;
+        return s + Math.max(0, d);
+      }, 0);
+      timeToHireDays = Math.round((totalDays / hireTimes.length) * 10) / 10;
+    }
+
+    return {
+      metrics: { totalApplicants, shortlisted, hired: countFor('HIRED'), timeToHireDays },
+      funnel,
+    };
+  },
+
+  /** Side-by-side comparison of two arbitrary date ranges — reruns the same aggregations, parameterized. */
+  async computeCohortComparison(
+    workspaceId: string,
+    auth: AuthContext,
+    range: { aStart: Date; aEnd: Date; bStart: Date; bEnd: Date },
+  ): Promise<CohortComparisonDto> {
+    // The frontend sends plain dates (an <input type="date">), which parse to
+    // midnight — treat the *end* of a range as inclusive of that whole
+    // calendar day, not the first instant of it.
+    const endOfDay = (d: Date) => new Date(d.getTime() + 24 * 3600_000 - 1);
+    const [a, b] = await Promise.all([
+      this._computeCohortSlice(workspaceId, auth, range.aStart, endOfDay(range.aEnd)),
+      this._computeCohortSlice(workspaceId, auth, range.bStart, endOfDay(range.bEnd)),
+    ]);
+    return {
+      rangeA: { start: range.aStart.toISOString(), end: range.aEnd.toISOString(), ...a },
+      rangeB: { start: range.bStart.toISOString(), end: range.bEnd.toISOString(), ...b },
+      deltas: {
+        totalApplicants: b.metrics.totalApplicants - a.metrics.totalApplicants,
+        shortlisted: b.metrics.shortlisted - a.metrics.shortlisted,
+        hired: b.metrics.hired - a.metrics.hired,
+        timeToHireDays:
+          a.metrics.timeToHireDays != null && b.metrics.timeToHireDays != null
+            ? Math.round((b.metrics.timeToHireDays - a.metrics.timeToHireDays) * 10) / 10
+            : null,
+      },
+    };
+  },
+
+  /**
+   * Approximation, not a precise metric (see RecruiterLeaderboardDto.isApproximate):
+   * attributed by `Job.createdBy` since no per-application ownership model
+   * exists yet. Owner/admin only (see analytics.routes.ts) — this is
+   * workspace-wide activity, not something a restricted recruiter should see
+   * about their peers.
+   */
+  async computeLeaderboard(workspaceId: string): Promise<RecruiterLeaderboardDto> {
+    const wsId = new Types.ObjectId(workspaceId);
+    // Aggregate scalars *inside* the $lookup pipeline rather than pulling every
+    // application document into a job's `apps` array — a job with a large
+    // applicant pool could otherwise push the whole aggregation past Mongo's
+    // 16MB per-document limit.
+    const rows = await JobModel.aggregate([
+      { $match: { workspaceId: wsId, createdBy: { $ne: null } } },
+      {
+        $lookup: {
+          from: 'applications',
+          let: { jobId: '$_id' },
+          pipeline: [
+            { $match: { $expr: { $eq: ['$jobId', '$$jobId'] } } },
+            {
+              $group: {
+                _id: null,
+                count: { $sum: 1 },
+                hired: { $sum: { $cond: [{ $eq: ['$status', 'HIRED'] }, 1, 0] } },
+                hireDurationDaysSum: {
+                  $sum: {
+                    $cond: [
+                      { $eq: ['$status', 'HIRED'] },
+                      { $max: [0, { $divide: [{ $subtract: ['$updatedAt', '$appliedAt'] }, 86_400_000] }] },
+                      0,
+                    ],
+                  },
+                },
+              },
+            },
+          ],
+          as: 'appStats',
+        },
+      },
+      { $unwind: { path: '$appStats', preserveNullAndEmptyArrays: true } },
+      {
+        $group: {
+          _id: '$createdBy',
+          jobsCreated: { $sum: 1 },
+          totalApplicants: { $sum: { $ifNull: ['$appStats.count', 0] } },
+          hired: { $sum: { $ifNull: ['$appStats.hired', 0] } },
+          hireDurationDaysSum: { $sum: { $ifNull: ['$appStats.hireDurationDaysSum', 0] } },
+        },
+      },
+      { $lookup: { from: 'users', localField: '_id', foreignField: '_id', as: 'user' } },
+      { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
+      { $sort: { totalApplicants: -1 } },
+    ]);
+
+    const toRow = (r: any) => ({
+      userId: String(r._id),
+      name: r.user?.name ?? 'Unknown',
+      jobsCreated: r.jobsCreated,
+      totalApplicants: r.totalApplicants,
+      hired: r.hired,
+      avgTimeToHireDays: r.hired > 0 ? Math.round((r.hireDurationDaysSum / r.hired) * 10) / 10 : null,
+    });
+
+    return { rows: rows.map(toRow), isApproximate: true };
+  },
+
+  /**
+   * A job's cumulative stage-reach vs. the same metric across the whole
+   * workspace — each rate is "% of applicants who reached this stage or
+   * further" (see FunnelBenchmarkPoint). An application currently sitting at
+   * OFFER has necessarily already passed SCREENING/ASSESSMENT/INTERVIEW, so
+   * it counts toward those buckets too. The one thing we can't reconstruct
+   * without a stage-history log is *where* a REJECTED (or custom-stage)
+   * application actually got to — those only count toward APPLIED, the one
+   * stage every application unambiguously reached.
+   */
+  async computeFunnelBenchmark(workspaceId: string, jobId: string, auth: AuthContext): Promise<FunnelBenchmarkDto> {
+    const job = await JobModel.findOne({ _id: jobId, workspaceId }).select('_id').lean();
+    if (!job) throw notFound('Job not found');
+
+    const wsId = new Types.ObjectId(workspaceId);
+    const jId = new Types.ObjectId(jobId);
+
+    const [jobRows, workspaceRows] = await Promise.all([
+      ApplicationModel.aggregate([
+        { $match: { workspaceId: wsId, jobId: jId } },
+        { $group: { _id: '$stage', count: { $sum: 1 } } },
+      ]),
+      ApplicationModel.aggregate([
+        // Workspace-wide comparator must respect the caller's job access too —
+        // otherwise a restricted recruiter could infer volume on jobs they
+        // can't otherwise see.
+        { $match: applyJobAccessFilter({ workspaceId: wsId }, auth, 'jobRestrictedTo') },
+        { $group: { _id: '$stage', count: { $sum: 1 } } },
+      ]),
+    ]);
+
+    const rate = (count: number, total: number) => (total > 0 ? Math.round((count / total) * 1000) / 10 : 0);
+    const { total: jobTotal, cumulative: jobCumulative } = cumulativeStageReach(jobRows);
+    const { total: wsTotal, cumulative: wsCumulative } = cumulativeStageReach(workspaceRows);
+
+    const points = PIPELINE_STAGES.map((stage, i) => ({
+      stage,
+      jobRate: rate(jobCumulative[i], jobTotal),
+      workspaceRate: rate(wsCumulative[i], wsTotal),
+    }));
+
+    return { points };
+  },
 };
+
+/**
+ * Reverse-cumulative stage counts from a `{_id: stage, count}[]` aggregation:
+ * `cumulative[i]` = applications currently at PIPELINE_STAGES[i] or later.
+ * Stages outside PIPELINE_STAGES (REJECTED, or a job's custom stage ids) only
+ * count at index 0 — every application reached APPLIED, but we can't know how
+ * much further they got without a stage-history log.
+ */
+function cumulativeStageReach(rows: Array<{ _id: string; count: number }>): { total: number; cumulative: number[] } {
+  const stageIndex = new Map(PIPELINE_STAGES.map((s, i) => [s as string, i]));
+  const perStage = new Array(PIPELINE_STAGES.length).fill(0);
+  let total = 0;
+  let unmapped = 0;
+  for (const r of rows) {
+    total += r.count;
+    const idx = stageIndex.get(r._id);
+    if (idx !== undefined) perStage[idx] += r.count;
+    else unmapped += r.count;
+  }
+  const cumulative = new Array(PIPELINE_STAGES.length).fill(0);
+  let running = 0;
+  for (let i = PIPELINE_STAGES.length - 1; i >= 0; i -= 1) {
+    running += perStage[i];
+    cumulative[i] = running;
+  }
+  // Unmapped (REJECTED / custom-stage) applications only count at APPLIED —
+  // they don't inflate later-stage buckets whose actual reach is unknown.
+  cumulative[0] += unmapped;
+  return { total, cumulative };
+}

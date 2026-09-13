@@ -6,6 +6,7 @@ import {
   requireRole,
   requireFeature,
   requireJobAccess,
+  requirePlanFeature,
 } from '../middleware/auth';
 import { validateBody, validateQuery } from '../middleware/validate';
 import { aiLimiter } from '../middleware/rate-limit';
@@ -22,6 +23,7 @@ import {
   generateJdSchema,
   jobListQuerySchema,
   jobStatusSchema,
+  setLinkedInPostedSchema,
   upsertFormSchema,
   upsertWorkflowSchema,
   upsertInterviewConfigSchema,
@@ -66,6 +68,15 @@ jobRouter.put(
   jobController.updateAccess,
 );
 
+// Manual LinkedIn share tracking (no real cross-posting API — see job.service.ts).
+jobRouter.post(
+  '/jobs/:jobId/linkedin-posted',
+  requireJobAccess,
+  requireRole('recruiter'),
+  validateBody(setLinkedInPostedSchema),
+  jobController.setLinkedInPosted,
+);
+
 // Custom pipeline stages (one list per job; defaults to the 7 system stages).
 jobRouter.get('/jobs/:jobId/stages', requireJobAccess, jobController.getStages);
 jobRouter.put(
@@ -78,6 +89,12 @@ jobRouter.put(
 
 // Per-job analytics.
 jobRouter.get('/jobs/:jobId/analytics', requireJobAccess, analyticsController.getForJob);
+jobRouter.get(
+  '/jobs/:jobId/analytics/benchmark',
+  requireJobAccess,
+  requirePlanFeature('ADVANCED_ANALYTICS'),
+  analyticsController.getFunnelBenchmark,
+);
 
 // Per-job assessment status across all candidates.
 jobRouter.get('/jobs/:jobId/assessments', requireJobAccess, assessmentController.listForJob);
