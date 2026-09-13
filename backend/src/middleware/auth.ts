@@ -4,9 +4,12 @@ import { ROLE_RANK, planIncludesFeature } from '@fluxberry/shared';
 import { authService } from '../services/auth.service';
 import { memberRepository } from '../repositories/member.repository';
 import { workspaceRepository } from '../repositories/workspace.repository';
+import { jobRepository } from '../repositories/job.repository';
+import { applicationRepository } from '../repositories/application.repository';
 import { getTokenVerifier } from '../auth';
 import { config } from '../config/env';
 import { unauthorized, forbidden, planUpgradeRequired, notFound } from '../utils/errors';
+import { isJobAccessible } from '../utils/job-access';
 
 /**
  * Local/dev-only escape hatch (AUTH_BYPASS_ENABLED=true). Never a supported
@@ -84,6 +87,37 @@ export function requireRole(min: Role): RequestHandler {
     next();
   };
 }
+
+/**
+ * Guard: reject with 404 (not 403) when the job at `:jobId` restricts
+ * visibility and the caller isn't in `restrictedTo` — a restricted job must be
+ * invisible to an excluded recruiter, not merely blocked, so its existence
+ * (title, whether it exists at all) isn't leaked. Owner/admin always pass.
+ */
+export const requireJobAccess: RequestHandler = async (req, _res, next) => {
+  try {
+    const auth = req.auth!;
+    const job = await jobRepository.findInWorkspace(auth.workspaceId!, req.params.jobId);
+    if (!job) return next(notFound('Job not found'));
+    if (!isJobAccessible(auth, job.restrictedTo)) return next(notFound('Job not found'));
+    next();
+  } catch (err) {
+    next(err);
+  }
+};
+
+/** Same as `requireJobAccess`, but for routes keyed by `:applicationId` — resolves the owning job via the application's denormalized `jobRestrictedTo`. */
+export const requireApplicationJobAccess: RequestHandler = async (req, _res, next) => {
+  try {
+    const auth = req.auth!;
+    const application = await applicationRepository.findInWorkspace(auth.workspaceId!, req.params.applicationId);
+    if (!application) return next(notFound('Application not found'));
+    if (!isJobAccessible(auth, application.jobRestrictedTo)) return next(notFound('Application not found'));
+    next();
+  } catch (err) {
+    next(err);
+  }
+};
 
 /** Guard: reject the request outright when a feature flag is off, instead of relying on frontend hiding. */
 export function requireFeature(flag: keyof typeof config.features): RequestHandler {

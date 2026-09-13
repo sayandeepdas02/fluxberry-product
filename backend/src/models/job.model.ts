@@ -60,6 +60,8 @@ const jobSchema = new Schema(
     structuredRequirements: { type: structuredRequirementsSchema, default: null },
     /** null = use the 7 system default stages; set once a job customizes its pipeline. */
     stages: { type: [pipelineStageSchema], default: null },
+    /** Empty = visible to every workspace member (today's default); non-empty scopes visibility to these users. */
+    restrictedTo: { type: [Schema.Types.ObjectId], ref: 'User', default: [] },
     applicationFormId: { type: Schema.Types.ObjectId, ref: 'ApplicationForm', default: null },
     workflowId: { type: Schema.Types.ObjectId, ref: 'Workflow', default: null },
     interviewConfigId: { type: Schema.Types.ObjectId, ref: 'AiInterviewConfig', default: null },

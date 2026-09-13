@@ -1,6 +1,7 @@
 import type {
   CreateJobInput,
   UpdateJobInput,
+  UpdateJobAccessInput,
   GenerateJdInput,
   GenerateJdResult,
   JobDto,
@@ -11,6 +12,7 @@ import type {
 import { APPLICATION_STAGES, defaultPipelineStages } from '@fluxberry/shared';
 import { jobRepository } from '../repositories/job.repository';
 import { applicationRepository } from '../repositories/application.repository';
+import { memberRepository } from '../repositories/member.repository';
 import { toJobDto } from '../serializers/job.serializer';
 import { uniqueSlug } from '../utils/slug';
 import { notFound, badRequest, conflict } from '../utils/errors';
@@ -20,9 +22,11 @@ import { getAIProvider } from '../integrations';
 import { candidateService } from './candidate.service';
 import { logger } from '../utils/logger';
 import { JobModel } from '../models/job.model';
+import { ApplicationModel } from '../models/application.model';
 import { ApplicationFormModel } from '../models/application-form.model';
 import { WorkflowModel } from '../models/workflow.model';
 import { trackEvent } from '../integrations/posthog';
+import type { AuthContext } from '../types/auth-context';
 
 const SYSTEM_STAGE_IDS = new Set<string>(APPLICATION_STAGES);
 
@@ -87,8 +91,11 @@ export const jobService = {
     return toJobDto(job.toObject());
   },
 
-  async list(workspaceId: string, query: JobListQuery): Promise<JobDto[]> {
-    const jobs = await jobRepository.list(workspaceId, { status: query.status, search: query.search });
+  async list(workspaceId: string, query: JobListQuery, auth: AuthContext): Promise<JobDto[]> {
+    const jobs = await jobRepository.list(workspaceId, { status: query.status, search: query.search }, auth);
+    // Unfiltered by design: only counts for jobs already present in `jobs` (itself
+    // access-filtered above) ever get attached below, so a restricted job's counts
+    // are computed but never exposed to an excluded viewer.
     const counts = await candidateService.funnelCountsByJob(workspaceId);
     return jobs.map((j) => toJobDto(j, counts[String(j._id)]));
   },
@@ -238,6 +245,7 @@ export const jobService = {
       skills: original.skills,
       structuredRequirements: original.structuredRequirements,
       stages: original.stages,
+      restrictedTo: original.restrictedTo,
       rawGenerationPrompt: original.rawGenerationPrompt,
       generatedDescription: original.generatedDescription,
       createdBy: userId,
@@ -343,5 +351,44 @@ export const jobService = {
     });
 
     return normalized;
+  },
+
+  /**
+   * Full-replace the set of users allowed to see this job. Empty = visible to
+   * everyone (today's default). Denormalizes onto every existing application
+   * for this job so hot-path candidate/analytics queries never need to
+   * `$lookup` the job (see `Application.jobRestrictedTo`).
+   */
+  async updateAccess(
+    workspaceId: string,
+    userId: string,
+    jobId: string,
+    input: UpdateJobAccessInput,
+  ): Promise<JobDto> {
+    const job = await jobRepository.findInWorkspace(workspaceId, jobId);
+    if (!job) throw notFound('Job not found');
+
+    const unique = Array.from(new Set(input.restrictedTo));
+    if (unique.length) {
+      const members = await memberRepository.listByWorkspace(workspaceId);
+      const memberIds = new Set(members.map((m) => String(m.userId)));
+      const invalid = unique.filter((id) => !memberIds.has(id));
+      if (invalid.length) throw badRequest(`Not workspace members: ${invalid.join(', ')}`);
+    }
+
+    const updated = await jobRepository.update(jobId, { restrictedTo: unique });
+    await ApplicationModel.updateMany({ workspaceId, jobId }, { jobRestrictedTo: unique });
+
+    await auditService.log({
+      workspaceId,
+      userId,
+      action: 'job.access_updated',
+      resourceType: 'job',
+      resourceId: jobId,
+      metadata: { restrictedCount: unique.length },
+    });
+
+    const counts = await candidateService.funnelCountsForJob(workspaceId, jobId);
+    return toJobDto(updated!.toObject(), counts);
   },
 };

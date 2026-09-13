@@ -103,6 +103,19 @@ export function useJobStages(jobId: string) {
   });
 }
 
+export function useUpdateJobAccess(jobId: string) {
+  const queryClient = useQueryClient();
+  const { currentWorkspace } = useWorkspace();
+  return useMutation({
+    mutationFn: (restrictedTo: string[]) =>
+      api.put<JobDto>(`/api/v1/jobs/${jobId}/access`, { restrictedTo }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['jobs'] });
+      queryClient.invalidateQueries({ queryKey: ['job', currentWorkspace.id, jobId] });
+    },
+  });
+}
+
 export function useUpdateJobStages(jobId: string) {
   const queryClient = useQueryClient();
   const { currentWorkspace } = useWorkspace();
