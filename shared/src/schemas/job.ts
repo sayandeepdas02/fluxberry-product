@@ -159,5 +159,7 @@ export type PublicJobDto = {
   location?: string | null;
   salary?: SalaryRange | null;
   experience?: ExperienceRange | null;
+  /** ISO timestamp the job was first published — feeds JobPosting.datePosted for public job pages. */
+  publishedAt: string | null;
   workspace: { name: string; slug: string; logoUrl?: string | null };
 };

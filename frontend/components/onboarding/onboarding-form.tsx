@@ -33,6 +33,7 @@ export function OnboardingForm() {
   if (!session.needsOnboarding) return <PageSpinner label="Loading…" />;
 
   const submit = async () => {
+    if (submitting) return;
     if (!name.trim() || !company.trim()) return;
     setSubmitting(true);
     try {

@@ -27,13 +27,14 @@ export default async function PublicJobPage({ params }: { params: Params }) {
   const { job, questions } = data;
   const salary = formatSalary(job.salary);
 
-  // No publish timestamp on PublicJobDto — omit datePosted rather than fabricate one;
-  // Google Jobs treats it as optional for basic JSON-LD validity.
   const jobPostingJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'JobPosting',
     title: job.title,
     description: job.description,
+    // Google Jobs requires datePosted for rich-result eligibility; omit rather
+    // than fabricate if a job somehow has no publish timestamp.
+    ...(job.publishedAt ? { datePosted: job.publishedAt } : {}),
     employmentType: toSchemaEmploymentType(job.employmentType),
     hiringOrganization: {
       '@type': 'Organization',
@@ -57,7 +58,7 @@ export default async function PublicJobPage({ params }: { params: Params }) {
 
   return (
     <div className="mx-auto max-w-2xl px-5 py-10 sm:py-16">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jobPostingJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jobPostingJsonLd).replace(/</g, '\\u003c') }} />
       <div className="flex items-center gap-3">
         <Avatar className="h-11 w-11 rounded-lg">
           {job.workspace.logoUrl && <AvatarImage src={job.workspace.logoUrl} alt={job.workspace.name} />}

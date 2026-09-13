@@ -74,9 +74,8 @@ export default function GeneralSettingsPage() {
 
   return (
     <Card>
-      <h2 className="sr-only">Workspace</h2>
       <CardHeader>
-        <CardTitle>Workspace</CardTitle>
+        <CardTitle as="h2">Workspace</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <Field label="Workspace name">

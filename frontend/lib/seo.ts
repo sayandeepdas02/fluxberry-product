@@ -1,8 +1,18 @@
 import type { Metadata } from 'next';
 
-/** Strips common markdown syntax so descriptions read as plain text in search/OG previews. */
+/**
+ * Strips common markdown syntax so descriptions read as plain text in search/OG
+ * previews. Only strips markdown *constructs* (links, leading list/heading/quote
+ * markers, emphasis) — a global strip of `-` would mangle prose like "AI-native".
+ */
 export function toPlainDescription(markdown: string, maxLength = 160): string {
-  return markdown.replace(/[#*_>`-]/g, '').replace(/\s+/g, ' ').trim().slice(0, maxLength);
+  return markdown
+    .replace(/!?\[([^\]]*)\]\([^)]+\)/g, '$1')
+    .replace(/^[#>*-]+\s*/gm, '')
+    .replace(/[*_`]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, maxLength);
 }
 
 /** Every auth, dashboard, and token-gated route spreads this into its metadata export. */

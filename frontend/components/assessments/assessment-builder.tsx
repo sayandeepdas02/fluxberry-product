@@ -109,10 +109,9 @@ export function AssessmentBuilder({ initial }: { initial?: AssessmentDto | null 
         </CardContent>
       </Card>
 
-      <h2 className="sr-only">Questions</h2>
       <Card>
         <CardHeader className="flex-row items-center justify-between">
-          <CardTitle>Questions</CardTitle>
+          <CardTitle as="h2">Questions</CardTitle>
           <span className="text-sm text-muted-foreground">{selected.length} selected</span>
         </CardHeader>
         <CardContent>

@@ -70,6 +70,7 @@ export function AssessmentTake() {
     try {
       const d = await api.get<PublicAssessmentDto>(`/api/v1/public/assessments/${token}`, { public: true });
       applyData(d);
+      setError(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Assessment not found');
     } finally {
@@ -127,8 +128,12 @@ export function AssessmentTake() {
   }, [remaining, data?.status, done, submit]);
 
   const start = async () => {
-    const d = await api.post<PublicAssessmentDto>(`/api/v1/public/assessments/${token}/start`, undefined, { public: true });
-    applyData(d);
+    try {
+      const d = await api.post<PublicAssessmentDto>(`/api/v1/public/assessments/${token}/start`, undefined, { public: true });
+      applyData(d);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not start assessment');
+    }
   };
 
   const choose = (questionId: string, optionId: string, isMultiSelect: boolean) => {
@@ -343,6 +348,13 @@ function CodingRunner({
   const [runError, setRunError] = useState<string | null>(null);
   const isLast = current === data.questions.length - 1;
 
+  // The Monaco instance is reused across questions (no key/path), so its onMount
+  // blur handler closes over whatever q/ca were current when it first mounted.
+  // Read the live question/language from a ref instead, or a blur after
+  // navigating saves the visible code under the previous question's id.
+  const liveRef = useRef({ questionId: q.id, languageId: ca.languageId });
+  liveRef.current = { questionId: q.id, languageId: ca.languageId };
+
   useEffect(() => {
     setRunResult(null);
     setRunError(null);
@@ -416,7 +428,10 @@ function CodingRunner({
               value={ca.code}
               onChange={(v) => { if (v !== undefined) setCode(v); }}
               onMount={(editor) => {
-                editor.onDidBlurEditorWidget(() => saveCode(q.id, { code: editor.getValue(), languageId: ca.languageId }));
+                editor.onDidBlurEditorWidget(() => {
+                  const { questionId, languageId } = liveRef.current;
+                  saveCode(questionId, { code: editor.getValue(), languageId });
+                });
               }}
               theme="vs-dark"
               options={{

@@ -25,6 +25,7 @@ export function InterviewTake() {
     try {
       const d = await api.get<PublicInterviewDto>(`/api/v1/public/interviews/${token}`, { public: true });
       setData(d);
+      setError(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Interview not found');
     } finally {
