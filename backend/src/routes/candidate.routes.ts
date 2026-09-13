@@ -22,6 +22,8 @@ import {
   bulkActionSchema,
   setApplicationLabelsSchema,
   sendMessageSchema,
+  createScheduledInterviewSchema,
+  createInterviewFeedbackSchema,
 } from '@fluxberry/shared';
 
 export const candidateRouter = Router();
@@ -88,4 +90,27 @@ candidateRouter.post(
   requireFeature('AI_INTERVIEW'),
   validateBody(sendInterviewSchema),
   interviewController.send,
+);
+
+// Scheduled (human) interviews — "Schedule interview" (binary.so parity).
+candidateRouter.get('/applications/:applicationId/scheduled-interviews', applicationController.listScheduledInterviews);
+candidateRouter.post(
+  '/applications/:applicationId/scheduled-interviews',
+  requireRole('recruiter'),
+  validateBody(createScheduledInterviewSchema),
+  applicationController.createScheduledInterview,
+);
+candidateRouter.delete(
+  '/applications/:applicationId/scheduled-interviews/:id',
+  requireRole('recruiter'),
+  applicationController.deleteScheduledInterview,
+);
+
+// Interview feedback — "Add feedback" (binary.so parity).
+candidateRouter.get('/applications/:applicationId/interview-feedback', applicationController.listInterviewFeedback);
+candidateRouter.post(
+  '/applications/:applicationId/interview-feedback',
+  requireRole('recruiter'),
+  validateBody(createInterviewFeedbackSchema),
+  applicationController.createInterviewFeedback,
 );

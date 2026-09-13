@@ -8,6 +8,7 @@ export { getEmailProvider, __resetEmailProvider, emailTemplates, mockOutbox } fr
 export { getStorageProvider, __resetStorageProvider, mockStorageRouter } from './storage';
 export { getCodeExecutionProvider, __resetCodeExecutionProvider } from './coding';
 export { getInterviewProvider, getInterviewProviderByName, __resetInterviewProvider } from './interview';
+export { getCalendarProvider, __resetCalendarProvider } from './calendar';
 export {
   getBillingProvider,
   __resetBillingProvider,
@@ -23,3 +24,4 @@ export type { StorageProvider, FileRef } from './storage/types';
 export type { CodeExecutionProvider } from './coding/types';
 export type { InterviewProvider } from './interview/types';
 export type { BillingProvider } from './dodo/types';
+export type { CalendarProvider } from './calendar/types';

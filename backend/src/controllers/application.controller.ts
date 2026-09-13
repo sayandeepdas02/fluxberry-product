@@ -1,11 +1,19 @@
-import { asyncHandler, ok } from '../utils/http';
+import { asyncHandler, ok, created } from '../utils/http';
 import { candidateService } from '../services/candidate.service';
 import { stageService } from '../services/stage.service';
 import { screeningService } from '../services/screening.service';
 import { assessmentService } from '../services/assessment.service';
+import { scheduledInterviewService } from '../services/scheduled-interview.service';
+import { interviewFeedbackService } from '../services/interview-feedback.service';
 import { ApplicationModel } from '../models/application.model';
 import { isJobAccessible } from '../utils/job-access';
-import type { StageChangeInput, RejectApplicationInput, BulkActionInput } from '@fluxberry/shared';
+import type {
+  StageChangeInput,
+  RejectApplicationInput,
+  BulkActionInput,
+  CreateScheduledInterviewInput,
+  CreateInterviewFeedbackInput,
+} from '@fluxberry/shared';
 
 function actor(req: any) {
   return { userId: req.auth.user.id, label: req.auth.user.name };
@@ -18,6 +26,41 @@ export const applicationController = {
       req.params.applicationId,
     );
     ok(res, detail);
+  }),
+
+  // ---- Scheduled interviews ("Schedule interview" — binary.so parity) ----
+  listScheduledInterviews: asyncHandler(async (req, res) => {
+    ok(res, await scheduledInterviewService.listForApplication(req.auth!.workspaceId!, req.params.applicationId));
+  }),
+
+  createScheduledInterview: asyncHandler(async (req, res) => {
+    const iv = await scheduledInterviewService.create(
+      req.auth!.workspaceId!,
+      req.params.applicationId,
+      req.body as CreateScheduledInterviewInput,
+      actor(req),
+    );
+    created(res, iv);
+  }),
+
+  deleteScheduledInterview: asyncHandler(async (req, res) => {
+    await scheduledInterviewService.remove(req.auth!.workspaceId!, req.params.applicationId, req.params.id);
+    ok(res, { deleted: true });
+  }),
+
+  // ---- Interview feedback ("Add feedback" — binary.so parity) ----
+  listInterviewFeedback: asyncHandler(async (req, res) => {
+    ok(res, await interviewFeedbackService.listForApplication(req.auth!.workspaceId!, req.params.applicationId));
+  }),
+
+  createInterviewFeedback: asyncHandler(async (req, res) => {
+    const fb = await interviewFeedbackService.create(
+      req.auth!.workspaceId!,
+      req.params.applicationId,
+      req.body as CreateInterviewFeedbackInput,
+      actor(req),
+    );
+    created(res, fb);
   }),
 
   getAnswerFileUrl: asyncHandler(async (req, res) => {

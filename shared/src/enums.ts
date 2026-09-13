@@ -131,6 +131,18 @@ export type CandidateAssessmentStatus = (typeof CANDIDATE_ASSESSMENT_STATUSES)[n
 export const INTERVIEW_TYPES = ['AI_VOICE', 'AI_VIDEO'] as const;
 export type InterviewType = (typeof INTERVIEW_TYPES)[number];
 
+/** A manually-scheduled human interview's location. */
+export const SCHEDULED_INTERVIEW_LOCATION_TYPES = ['ONLINE', 'IN_PERSON'] as const;
+export type ScheduledInterviewLocationType = (typeof SCHEDULED_INTERVIEW_LOCATION_TYPES)[number];
+
+/** Who created the scheduled interview record's calendar event. */
+export const CALENDAR_PROVIDERS = ['GOOGLE', 'MOCK'] as const;
+export type CalendarProviderName = (typeof CALENDAR_PROVIDERS)[number];
+
+/** Overall rating scale for post-interview feedback (spec: binary.so parity). */
+export const INTERVIEW_FEEDBACK_RATINGS = ['STRONG_NO', 'NO', 'YES', 'STRONG_YES'] as const;
+export type InterviewFeedbackRating = (typeof INTERVIEW_FEEDBACK_RATINGS)[number];
+
 export const INTERVIEW_STATUSES = [
   'INVITED', // link sent, candidate hasn't joined
   'STARTED', // candidate opened the interview
@@ -250,6 +262,8 @@ export const EVENT_TYPES = [
   'interview.created',
   'interview.started',
   'interview.completed',
+  'interview.scheduled',
+  'interview.feedback.added',
 ] as const;
 export type EventType = (typeof EVENT_TYPES)[number];
 
