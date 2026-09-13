@@ -69,6 +69,7 @@ export default function AnalyticsPage() {
         />
       ) : (
         <>
+          <h2 className="sr-only">Overview</h2>
           <Card>
             <CardHeader><CardTitle>Hiring funnel</CardTitle></CardHeader>
             <CardContent>

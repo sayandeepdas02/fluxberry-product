@@ -90,6 +90,7 @@ export default function JobFormBuilderPage() {
 
   return (
     <div className="max-w-2xl space-y-6">
+      <h2 className="sr-only">Application form</h2>
       <Card>
         <CardHeader>
           <CardTitle>Candidate information</CardTitle>

@@ -99,6 +99,7 @@ export default function JobSettingsPage() {
 
   return (
     <div className="max-w-2xl space-y-6">
+      <h2 className="sr-only">Job settings</h2>
       <Card>
         <CardHeader>
           <CardTitle>Job details</CardTitle>

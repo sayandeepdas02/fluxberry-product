@@ -69,6 +69,7 @@ export default function JobStagesPage() {
 
   return (
     <div className="max-w-2xl space-y-6">
+      <h2 className="sr-only">Pipeline stages</h2>
       <Card>
         <CardHeader>
           <CardTitle>Pipeline stages</CardTitle>

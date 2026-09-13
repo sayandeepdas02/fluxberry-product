@@ -79,6 +79,7 @@ export function AssessmentBuilder({ initial }: { initial?: AssessmentDto | null 
         <h1 className="text-page-title">{initial ? 'Edit assessment' : 'Create assessment'}</h1>
       </div>
 
+      <h2 className="sr-only">Assessment details</h2>
       <Card>
         <CardContent className="space-y-4 pt-5">
           {!initial && codingEnabled && (
@@ -108,6 +109,7 @@ export function AssessmentBuilder({ initial }: { initial?: AssessmentDto | null 
         </CardContent>
       </Card>
 
+      <h2 className="sr-only">Questions</h2>
       <Card>
         <CardHeader className="flex-row items-center justify-between">
           <CardTitle>Questions</CardTitle>

@@ -161,6 +161,7 @@ export function CandidateDetailPanel({
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
+          <h2 className="sr-only">Candidate details</h2>
           <ScreeningCard
             screening={activeApp?.screeningResult}
             retrying={rescreen.isPending}
@@ -219,6 +220,7 @@ export function CandidateDetailPanel({
         </div>
 
         <div className="space-y-6">
+          <h2 className="sr-only">Actions</h2>
           <Card>
             <CardHeader><CardTitle>Next action</CardTitle></CardHeader>
             <CardContent className="space-y-3">

@@ -4,6 +4,7 @@ import { fetchPublicCareers } from '@/lib/public-api';
 import { CareersJobs } from '@/components/careers/careers-jobs';
 import { publicConfig } from '@/lib/config';
 import { initials } from '@/lib/utils';
+import { toPlainDescription, publicPageMetadata } from '@/lib/seo';
 
 type Params = Promise<{ careersSlug: string }>;
 
@@ -12,8 +13,8 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const data = await fetchPublicCareers(careersSlug);
   if (!data) return { title: 'Careers' };
   const title = `Careers at ${data.company.name}`;
-  const description = (data.tagline || data.about.content || `Open roles at ${data.company.name}`).slice(0, 160);
-  return { title, description, openGraph: { title, description, type: 'website' } };
+  const description = toPlainDescription(data.tagline || data.about.content || `Open roles at ${data.company.name}`);
+  return publicPageMetadata({ title, description, path: `/${careersSlug}/careers` });
 }
 
 export default async function PublicCareersPage({ params }: { params: Params }) {
@@ -37,7 +38,7 @@ export default async function PublicCareersPage({ params }: { params: Params }) 
           <div className="text-sm font-medium text-muted-foreground">{data.company.name}</div>
         </div>
 
-        <h1 className="mt-6 text-3xl font-semibold tracking-tight sm:text-4xl">
+        <h1 className="mt-6 text-page-title">
           {data.headline || `Join ${data.company.name}`}
         </h1>
         {data.tagline && <p className="mt-3 max-w-2xl text-lg text-muted-foreground">{data.tagline}</p>}

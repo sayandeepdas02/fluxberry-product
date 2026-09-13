@@ -26,9 +26,19 @@ const features = [
   },
 ];
 
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: publicConfig.appName,
+  applicationCategory: 'BusinessApplication',
+  description: 'A simple, AI-native applicant tracking system.',
+  offers: { '@type': 'Offer', category: 'SaaS' },
+};
+
 export default function LandingPage() {
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       {/* Nav */}
       <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
@@ -49,7 +59,7 @@ export default function LandingPage() {
         <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-border bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
           AI-native applicant tracking
         </div>
-        <h1 className="max-w-2xl text-5xl font-bold leading-tight tracking-tight">
+        <h1 className="max-w-2xl text-display">
           Hire faster with less noise
         </h1>
         <p className="mt-5 max-w-xl text-lg text-muted-foreground">
@@ -67,13 +77,14 @@ export default function LandingPage() {
 
       {/* Features */}
       <section className="mx-auto w-full max-w-5xl px-6 pb-24">
-        <div className="grid gap-6 sm:grid-cols-2">
+        <h2 className="text-center text-section-title">Everything you need to hire</h2>
+        <div className="mt-8 grid gap-6 sm:grid-cols-2">
           {features.map(({ icon: Icon, title, description }) => (
             <div key={title} className="rounded-xl border border-border bg-muted/30 p-6">
               <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
                 <Icon className="size-5" />
               </div>
-              <h3 className="font-semibold">{title}</h3>
+              <h3 className="text-card-title">{title}</h3>
               <p className="mt-1 text-sm text-muted-foreground">{description}</p>
             </div>
           ))}

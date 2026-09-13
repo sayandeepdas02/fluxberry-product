@@ -64,6 +64,7 @@ function MyReferrals() {
 
   return (
     <Card>
+      <h2 className="sr-only">Your links</h2>
       <CardHeader>
         <CardTitle>Your links</CardTitle>
       </CardHeader>
@@ -130,6 +131,7 @@ function RewardManagement() {
 
   return (
     <Card>
+      <h2 className="sr-only">Manage rewards</h2>
       <CardHeader>
         <CardTitle>Manage rewards</CardTitle>
       </CardHeader>

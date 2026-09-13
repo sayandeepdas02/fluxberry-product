@@ -74,6 +74,7 @@ export default function GeneralSettingsPage() {
 
   return (
     <Card>
+      <h2 className="sr-only">Workspace</h2>
       <CardHeader>
         <CardTitle>Workspace</CardTitle>
       </CardHeader>

@@ -209,6 +209,7 @@ export default function NewJobPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-6 pb-10">
+      <h1 className="sr-only">{jobId ? 'Edit job' : 'Create job'}</h1>
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => router.push('/app/jobs')}>

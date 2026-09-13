@@ -40,6 +40,19 @@ export const WORK_MODE_LABELS: Record<WorkMode, string> = {
   ONSITE: 'On-site',
 };
 
+/** Maps this app's employment types to schema.org's JobPosting enum strings (for JSON-LD). */
+export const SCHEMA_EMPLOYMENT_TYPES: Record<EmploymentType, string> = {
+  FULL_TIME: 'FULL_TIME',
+  PART_TIME: 'PART_TIME',
+  CONTRACT: 'CONTRACTOR',
+  INTERNSHIP: 'INTERN',
+  TEMPORARY: 'TEMPORARY',
+};
+
+export function toSchemaEmploymentType(type: EmploymentType): string {
+  return SCHEMA_EMPLOYMENT_TYPES[type];
+}
+
 /** Default labels for the 7 system stages — used as a fallback when a job's real stage list isn't loaded. */
 export const STAGE_LABELS = SYSTEM_STAGE_LABELS;
 
