@@ -5,9 +5,10 @@ import Link from 'next/link';
 import { Search, Users, LayoutGrid, Table as TableIcon, X } from 'lucide-react';
 import type { CandidateAssessmentStatus, PipelineStage } from '@fluxberry/shared';
 import { CANDIDATE_ASSESSMENT_STATUSES, defaultPipelineStages } from '@fluxberry/shared';
-import { useCandidates, useMoveStage, useBulkAction } from '@/hooks/use-candidates';
+import { useCandidates, useMoveStage, useBulkAction, useShortlist, useReject } from '@/hooks/use-candidates';
 import { useJobs, useJobStages } from '@/hooks/use-jobs';
 import { useLabels } from '@/hooks/use-labels';
+import { useCandidateListIds } from '@/app/(dashboard)/app/candidates/candidate-list-context';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -15,6 +16,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { CandidateTable } from './candidate-table';
 import { CandidateBoard } from './candidate-board';
+import { RejectDialog } from './reject-dialog';
 import { toast } from '@/components/ui/sonner';
 import { cn } from '@/lib/utils';
 import { ASSESSMENT_STATUS_LABELS } from '@/lib/labels';
@@ -28,6 +30,10 @@ export function CandidatesView({ jobId: fixedJobId }: { jobId?: string }) {
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [rejectTarget, setRejectTarget] = useState<string | null>(null);
+  const { setIds: setListIds } = useCandidateListIds();
+  const shortlist = useShortlist();
+  const reject = useReject();
 
   useEffect(() => {
     const t = setTimeout(() => setSearch(searchInput.trim()), 300);
@@ -52,6 +58,15 @@ export function CandidatesView({ jobId: fixedJobId }: { jobId?: string }) {
   const { data: labels } = useLabels();
   const moveStage = useMoveStage();
   const bulkAction = useBulkAction();
+
+  const items = data?.items ?? [];
+
+  // Feeds the candidates-list modal's prev/next navigation (spec item 4.1) — a
+  // no-op outside the global candidates route, since the context defaults to
+  // a harmless no-op there (e.g. a job-scoped candidates tab).
+  useEffect(() => {
+    setListIds(items.map((c) => c.candidateId));
+  }, [items, setListIds]);
 
   // The cross-job "All candidates" view can't meaningfully merge differently
   // named per-job stages, so it stays on the 7 system defaults; a job-scoped
@@ -92,8 +107,8 @@ export function CandidatesView({ jobId: fixedJobId }: { jobId?: string }) {
     );
   };
 
-  const items = data?.items ?? [];
   const allIds = items.map((c) => c.applicationId);
+  const rejectTargetApp = items.find((c) => c.applicationId === rejectTarget);
 
   return (
     <div className="space-y-4">
@@ -190,6 +205,10 @@ export function CandidatesView({ jobId: fixedJobId }: { jobId?: string }) {
           onSelectAll={() => setSelectedIds((prev) =>
             prev.size === allIds.length ? new Set() : new Set(allIds),
           )}
+          onShortlist={(applicationId) =>
+            shortlist.mutate({ applicationId }, { onSuccess: () => toast.success('Candidate shortlisted') })
+          }
+          onRequestReject={setRejectTarget}
         />
       ) : (
         <CandidateBoard items={items} stages={stages} onMove={onMove} />
@@ -229,6 +248,19 @@ export function CandidatesView({ jobId: fixedJobId }: { jobId?: string }) {
           </div>
         </div>
       )}
+
+      <RejectDialog
+        open={Boolean(rejectTarget)}
+        onOpenChange={(o) => { if (!o) setRejectTarget(null); }}
+        loading={reject.isPending}
+        onReject={(reason, note) => {
+          if (!rejectTargetApp) return;
+          reject.mutate(
+            { applicationId: rejectTargetApp.applicationId, body: { reason, note } },
+            { onSuccess: () => { toast.success('Candidate rejected and notified'); setRejectTarget(null); } },
+          );
+        }}
+      />
     </div>
   );
 }

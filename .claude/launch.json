@@ -1,0 +1,18 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "fluxberry-backend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--workspace", "@fluxberry/backend"],
+      "port": 4000
+    },
+    {
+      "name": "fluxberry-frontend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--workspace", "@fluxberry/frontend"],
+      "port": 3000,
+      "url": "http://localhost:3000"
+    }
+  ]
+}

@@ -2,9 +2,11 @@
 
 import { useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
+import { UserCheck, UserX } from 'lucide-react';
 import type { CandidateListItemDto, PipelineStage } from '@fluxberry/shared';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card } from '@/components/ui/card';
+import { RecordMenu } from '@/components/ui/record-menu';
 import { ScoreBadge } from './score-badge';
 import { StageBadge } from './stage-badge';
 import { LabelChips } from './label-picker';
@@ -18,6 +20,8 @@ export function CandidateTable({
   selectedIds,
   onSelect,
   onSelectAll,
+  onShortlist,
+  onRequestReject,
 }: {
   items: CandidateListItemDto[];
   showJob?: boolean;
@@ -26,11 +30,15 @@ export function CandidateTable({
   selectedIds?: Set<string>;
   onSelect?: (applicationId: string) => void;
   onSelectAll?: () => void;
+  /** Per-row quick actions (spec item 4.7) — omit either to hide that action everywhere. */
+  onShortlist?: (applicationId: string) => void;
+  onRequestReject?: (applicationId: string) => void;
 }) {
   const router = useRouter();
   const selectable = Boolean(selectedIds && onSelect && onSelectAll);
   const allSelected = selectable && selectedIds!.size === items.length && items.length > 0;
   const someSelected = selectable && selectedIds!.size > 0 && selectedIds!.size < items.length;
+  const hasRowActions = Boolean(onShortlist || onRequestReject);
 
   return (
     <Card>
@@ -56,6 +64,7 @@ export function CandidateTable({
             <TableHead className="w-32">Location</TableHead>
             <TableHead className="w-32">Expected</TableHead>
             <TableHead className="w-28">Applied</TableHead>
+            {hasRowActions && <TableHead className="w-10" />}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -103,6 +112,16 @@ export function CandidateTable({
                 <TableCell className="text-xs text-muted-foreground">
                   {formatDistanceToNow(new Date(c.appliedAt), { addSuffix: true })}
                 </TableCell>
+                {hasRowActions && (
+                  <TableCell onClick={(e) => e.stopPropagation()}>
+                    <RecordMenu
+                      actions={[
+                        { label: 'Shortlist', icon: <UserCheck className="size-4" />, hidden: !onShortlist, onSelect: () => onShortlist!(c.applicationId) },
+                        { label: 'Reject', icon: <UserX className="size-4" />, variant: 'destructive', hidden: !onRequestReject, onSelect: () => onRequestReject!(c.applicationId) },
+                      ]}
+                    />
+                  </TableCell>
+                )}
               </TableRow>
             );
           })}
