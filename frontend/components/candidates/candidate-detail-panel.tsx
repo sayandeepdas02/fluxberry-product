@@ -21,6 +21,7 @@ import { useFeature } from '@/hooks/use-features';
 import { useHotkey } from '@/hooks/use-hotkey';
 import { SendAssessmentDialog } from '@/components/candidates/send-assessment-dialog';
 import { InterviewCard } from '@/components/candidates/interview-card';
+import { InterviewsPanel } from '@/components/candidates/interviews-panel';
 import { WorkflowRunCard } from '@/components/candidates/workflow-run-card';
 import { RejectDialog } from '@/components/candidates/reject-dialog';
 import { Button } from '@/components/ui/button';
@@ -64,6 +65,7 @@ export function CandidateDetailPanel({
   const { data: profile, isLoading } = useCandidateProfile(candidateId);
   const [rejectOpen, setRejectOpen] = useState(false);
   const [sendOpen, setSendOpen] = useState(false);
+  const [interviewDialogOpen, setInterviewDialogOpen] = useState(false);
   const [selectedApplicationId, setSelectedApplicationId] = useState<string | undefined>(undefined);
 
   const activeApp =
@@ -87,7 +89,7 @@ export function CandidateDetailPanel({
   // Select trigger or dialog button doesn't count, so without this a keypress
   // meant for an open dialog (e.g. typeahead in the reject-reason select) can
   // still fire a panel-level shortcut behind it.
-  const dialogOpen = rejectOpen || sendOpen;
+  const dialogOpen = rejectOpen || sendOpen || interviewDialogOpen;
 
   useHotkey('s', () => {
     if (canShortlist) {
@@ -298,6 +300,15 @@ export function CandidateDetailPanel({
           )}
 
           {(interviews.data?.length ?? 0) > 0 && <InterviewCard interviews={interviews.data!} />}
+
+          {activeApp && (
+            <InterviewsPanel
+              applicationId={activeApp.id}
+              candidateName={candidate.name}
+              candidateEmail={candidate.email}
+              onDialogOpenChange={setInterviewDialogOpen}
+            />
+          )}
 
           {activeApp && <WorkflowRunCard applicationId={activeApp.id} />}
 

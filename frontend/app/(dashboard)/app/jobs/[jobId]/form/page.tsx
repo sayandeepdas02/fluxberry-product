@@ -37,7 +37,6 @@ import {
   Calendar,
   Paperclip,
   Video,
-  ToggleLeft,
   X,
 } from 'lucide-react';
 import {
@@ -584,6 +583,3 @@ function AddQuestionMenu({
     </DropdownMenu>
   );
 }
-
-// Re-exported so the legacy YES_NO icon (still valid for old data) is available if ever surfaced elsewhere.
-export const LEGACY_YES_NO_ICON = <ToggleLeft className="size-4" />;

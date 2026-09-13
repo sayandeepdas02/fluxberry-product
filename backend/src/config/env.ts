@@ -89,6 +89,16 @@ const envSchema = z.object({
   /** Required only when JUDGE0_AUTH_MODE=rapidapi (the X-RapidAPI-Host value). */
   JUDGE0_RAPIDAPI_HOST: z.string().optional().default(''),
 
+  /**
+   * Google Calendar OAuth (for the "Schedule interview" feature). Blank ->
+   * a realistic mock calendar adapter activates: interviews are recorded
+   * internally with a fake meet link, no real Google account is ever touched.
+   */
+  GOOGLE_CLIENT_ID: z.string().optional().default(''),
+  GOOGLE_CLIENT_SECRET: z.string().optional().default(''),
+  /** Must exactly match an authorized redirect URI on the Google OAuth client. */
+  GOOGLE_CALENDAR_REDIRECT_URI: z.string().optional().default(''),
+
   INTERVIEW_PROVIDER: z.string().default('mock'),
   INTERVIEW_PROVIDER_API_KEY: z.string().optional().default(''),
   BOLNA_API_BASE: z.string().default('https://api.bolna.ai'),
@@ -188,6 +198,11 @@ export const config = {
       webhookSecret: e.BOLNA_WEBHOOK_SECRET,
       llmModel: e.BOLNA_LLM_MODEL,
       voiceId: e.BOLNA_VOICE_ID,
+    },
+    calendar: {
+      clientId: e.GOOGLE_CLIENT_ID,
+      clientSecret: e.GOOGLE_CLIENT_SECRET,
+      redirectUri: e.GOOGLE_CALENDAR_REDIRECT_URI || `${e.PUBLIC_API_URL || `http://localhost:${e.PORT}`}/api/v1/integrations/google-calendar/callback`,
     },
   },
 

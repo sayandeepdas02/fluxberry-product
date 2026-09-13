@@ -2,11 +2,13 @@ import { asyncHandler, ok, created } from '../utils/http';
 import { applicationService } from '../services/application.service';
 import { candidateAssessmentService } from '../services/candidate-assessment.service';
 import { interviewService } from '../services/interview.service';
+import { scheduledInterviewService } from '../services/scheduled-interview.service';
 import {
   publicApplicationSchema,
   autosaveAnswerSchema,
   submitAssessmentSchema,
   runCodeSchema,
+  submitInterviewFeedbackSchema,
 } from '@fluxberry/shared';
 
 export const publicController = {
@@ -79,6 +81,15 @@ export const publicController = {
   completeInterview: asyncHandler(async (req, res) => {
     const executionId = typeof req.body?.executionId === 'string' ? req.body.executionId : undefined;
     ok(res, await interviewService.reportCompletion(req.params.token, executionId));
+  }),
+
+  // ---- Interviewer access link ("link that only interviewer can access", token-gated, no account) ----
+  getInterviewerAccess: asyncHandler(async (req, res) => {
+    ok(res, await scheduledInterviewService.getInterviewerAccess(req.params.token));
+  }),
+  submitInterviewerFeedback: asyncHandler(async (req, res) => {
+    const body = submitInterviewFeedbackSchema.parse(req.body);
+    created(res, await scheduledInterviewService.submitInterviewerFeedback(req.params.token, body));
   }),
 
   // ---- Bolna webhook (secret-in-URL; Bolna does not sign) ----
