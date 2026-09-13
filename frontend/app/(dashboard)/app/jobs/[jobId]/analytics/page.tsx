@@ -5,7 +5,8 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   LineChart, Line, CartesianGrid,
 } from 'recharts';
-import { useJobAnalytics } from '@/hooks/use-analytics';
+import { useJobAnalytics, useFunnelBenchmark } from '@/hooks/use-analytics';
+import { useFeature } from '@/hooks/use-features';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MetricCard } from '@/components/ui/metric-card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -82,7 +83,7 @@ export default function JobAnalyticsPage() {
         <Card>
           <CardHeader><CardTitle>Screening score distribution</CardTitle></CardHeader>
           <CardContent>
-            <HBarChart items={data.screeningScoreDistribution} />
+            <HBarChart items={data.screeningScoreDistribution.map((s) => ({ label: s.label, value: s.count }))} />
           </CardContent>
         </Card>
         <Card>
@@ -101,6 +102,43 @@ export default function JobAnalyticsPage() {
           </CardContent>
         </Card>
       )}
+
+      <FunnelBenchmarkCard jobId={jobId} />
     </div>
+  );
+}
+
+function FunnelBenchmarkCard({ jobId }: { jobId: string }) {
+  const advancedAnalytics = useFeature('ADVANCED_ANALYTICS');
+  const { data, isLoading } = useFunnelBenchmark(jobId);
+  if (!advancedAnalytics) return null;
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Benchmark vs. workspace</CardTitle>
+        <p className="text-xs text-muted-foreground">Share of applicants currently sitting at each stage, this job vs. every job.</p>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <Skeleton className="h-40 w-full" />
+        ) : !data ? (
+          <p className="text-sm text-muted-foreground">Not available on your plan.</p>
+        ) : (
+          <ResponsiveContainer width="100%" height={Math.max(140, data.points.length * 40)}>
+            <BarChart data={data.points.map((p) => ({ label: STAGE_LABELS[p.stage], job: p.jobRate, workspace: p.workspaceRate }))} layout="vertical" margin={{ left: 8, right: 24, top: 4, bottom: 4 }}>
+              <XAxis type="number" hide />
+              <YAxis type="category" dataKey="label" width={80} tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
+              <Tooltip
+                contentStyle={{ fontSize: 12, borderRadius: 6, border: '1px solid hsl(var(--border))' }}
+                formatter={(v: number, name: string) => [`${v}%`, name === 'job' ? 'This job' : 'Workspace avg.']}
+              />
+              <Bar dataKey="job" fill={PRIMARY} radius={[0, 4, 4, 0]} maxBarSize={14} />
+              <Bar dataKey="workspace" fill="hsl(var(--muted-foreground))" radius={[0, 4, 4, 0]} maxBarSize={14} />
+            </BarChart>
+          </ResponsiveContainer>
+        )}
+      </CardContent>
+    </Card>
   );
 }

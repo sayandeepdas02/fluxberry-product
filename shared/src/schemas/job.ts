@@ -73,6 +73,12 @@ export const jobStatusSchema = z.object({
 });
 export type JobStatusInput = z.infer<typeof jobStatusSchema>;
 
+/** Manual "I shared this on LinkedIn" toggle — see job.serializer.ts's linkedInStatus. */
+export const setLinkedInPostedSchema = z.object({
+  posted: z.boolean(),
+});
+export type SetLinkedInPostedInput = z.infer<typeof setLinkedInPostedSchema>;
+
 /** Input to AI job-description generation (spec §17). */
 export const generateJdSchema = z.object({
   title: z.string().trim().min(1).max(160),
@@ -128,6 +134,8 @@ export type JobDto = {
   updatedAt: string;
   // convenience counts for list/overview
   counts?: JobFunnelCounts;
+  /** Manual LinkedIn share tracking (Phase 3.2) — no automated cross-posting, see job.serializer.ts. */
+  linkedIn: { status: 'NOT_POSTED' | 'POSTED' | 'CLOSED'; postedAt: string | null };
 };
 
 export type JobFunnelCounts = {

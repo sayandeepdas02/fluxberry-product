@@ -24,6 +24,20 @@ export async function fetchPublicJob(
   }
 }
 
+/** Server-side resolve of a `/r/:code` referral link. Returns null on 404 (unknown/removed code). */
+export async function fetchReferralTarget(code: string): Promise<{ workspaceSlug: string; jobSlug: string } | null> {
+  try {
+    const res = await fetch(`${publicConfig.apiUrl}/api/v1/public/referrals/${encodeURIComponent(code)}`, {
+      cache: 'no-store',
+    });
+    if (!res.ok) return null;
+    const json = await res.json();
+    return json?.success ? (json.data as { workspaceSlug: string; jobSlug: string }) : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function fetchPublicCareers(slug: string): Promise<PublicCareersDto | null> {
   try {
     const res = await fetch(`${publicConfig.apiUrl}/api/v1/public/careers/${encodeURIComponent(slug)}`, { cache: 'no-store' });

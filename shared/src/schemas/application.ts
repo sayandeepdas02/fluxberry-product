@@ -42,6 +42,8 @@ export const publicApplicationSchema = z.object({
   expectedSalary: z.coerce.number().int().nonnegative().optional(),
   linkedinUrl: z.string().url().optional().or(z.literal('')),
   source: z.enum(CANDIDATE_SOURCES).default('DIRECT'),
+  /** Referral code from a `?ref=` link (see referral.ts) — server re-validates it, never trusts `source` alone. */
+  referralCode: z.string().trim().max(20).optional(),
   /** Answers to custom questions, JSON-encoded when sent as multipart. */
   answers: z.array(applicationAnswerSchema).default([]),
 });
@@ -83,6 +85,7 @@ export type ApplicationDto = {
   /** The job's stage id this application currently sits in (custom or system default). */
   stage: string;
   source: CandidateSource;
+  referralCode?: string | null;
   score?: number | null;
   screeningResult?: ScreeningResultDto | null;
   labels: LabelDto[];

@@ -12,6 +12,7 @@ import { assertValidResume } from '../utils/file-validation';
 import { eventBus } from '../events/event-bus';
 import { jobQueue } from '../queue/job-queue';
 import { workflowEngine } from './workflow-engine.service';
+import { referralService } from './referral.service';
 import { notFound, badRequest, conflict } from '../utils/errors';
 import { logger } from '../utils/logger';
 import { trackEvent } from '../integrations/posthog';
@@ -93,6 +94,11 @@ export const applicationService = {
     });
 
     // 3. Create the application (unique index enforces one per job+candidate).
+    // Referral attribution never trusts the client-supplied `source` alone —
+    // only a code that actually resolves to a Referral for *this job* flips
+    // it, since Referral.applicationIds feeds reward eligibility (real money,
+    // however manually disbursed in v1).
+    const referralId = await referralService.resolveForAttribution(input.referralCode, jobId);
     let application;
     try {
       application = await applicationRepository.create({
@@ -101,13 +107,15 @@ export const applicationService = {
         candidateId: candidate._id,
         status: 'ACTIVE',
         stage: 'APPLIED',
-        source: input.source,
+        source: referralId ? 'REFERRAL' : input.source,
+        referralCode: referralId ? input.referralCode : null,
         appliedAt: new Date(),
       });
     } catch (err) {
       if (isDup(err)) throw conflict("You've already applied to this role");
       throw err;
     }
+    if (referralId) await referralService.recordApplication(referralId, String(application._id));
 
     // 4. Save answers.
     if (input.answers?.length) {
