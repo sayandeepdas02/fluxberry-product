@@ -3,7 +3,7 @@ import { publicController } from '../controllers/public.controller';
 import { careersController } from '../controllers/careers.controller';
 import { messageController } from '../controllers/message.controller';
 import { referralController } from '../controllers/referral.controller';
-import { resumeUpload } from '../middleware/upload';
+import { applicationUpload } from '../middleware/upload';
 import { publicApplyLimiter, uploadLimiter, assessmentLimiter, codingRunLimiter } from '../middleware/rate-limit';
 
 /** Candidate-facing endpoints — no auth, clearly isolated (spec §60, §77). */
@@ -15,7 +15,7 @@ publicRouter.post(
   '/public/jobs/:workspaceSlug/:jobSlug/apply',
   publicApplyLimiter,
   uploadLimiter,
-  resumeUpload,
+  applicationUpload,
   publicController.apply,
 );
 

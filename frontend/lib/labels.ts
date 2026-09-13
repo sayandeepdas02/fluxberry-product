@@ -18,12 +18,17 @@ export const FEATURE_FLAG_LABELS: Record<FeatureFlag, string> = {
 };
 
 export const FORM_QUESTION_TYPE_LABELS: Record<FormQuestionType, string> = {
-  SHORT_TEXT: 'Short text',
-  LONG_TEXT: 'Paragraph',
+  SHORT_TEXT: 'Short answer',
+  LONG_TEXT: 'Long answer',
+  NUMBER: 'Number',
   MULTIPLE_CHOICE: 'Multiple choice',
   YES_NO: 'Yes / No',
-  NUMBER: 'Number',
+  PHONE: 'Phone',
+  LINKEDIN: 'LinkedIn profile',
+  OTHER_LINK: 'Other links',
+  DATE: 'Date',
   FILE_UPLOAD: 'File upload',
+  VIDEO_RECORDING: 'Video recording',
 };
 
 export const EMPLOYMENT_LABELS: Record<EmploymentType, string> = {

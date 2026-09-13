@@ -184,6 +184,21 @@ export const candidateService = {
     };
   },
 
+  /** A signed download URL for a custom FILE_UPLOAD/VIDEO_RECORDING question's answer file. */
+  async getAnswerFileUrl(workspaceId: string, applicationId: string, questionId: string): Promise<string> {
+    const app = await applicationRepository.findInWorkspace(workspaceId, applicationId);
+    if (!app) throw notFound('Application not found');
+    const answersDoc = await answersRepository.findByApplication(applicationId);
+    const answer = answersDoc?.answers.find((a: any) => a.questionId === questionId);
+    const value = answer?.value as { storageKey?: string; fileName?: string; mimeType?: string } | undefined;
+    if (!value?.storageKey) throw notFound('No file on this answer');
+    const storage = getStorageProvider();
+    return storage.createDownloadUrl(
+      { storageKey: value.storageKey, fileName: value.fileName ?? 'file', mimeType: value.mimeType ?? 'application/octet-stream' },
+      300,
+    );
+  },
+
   async getResumeUrl(workspaceId: string, candidateId: string, auth: AuthContext): Promise<string> {
     const candidate = await candidateRepository.findInWorkspace(workspaceId, candidateId);
     if (!candidate || !candidate.resume) throw notFound('No resume on file');

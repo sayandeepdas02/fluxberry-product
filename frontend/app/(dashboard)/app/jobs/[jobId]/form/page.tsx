@@ -1,38 +1,95 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { Plus, Trash2, ArrowUp, ArrowDown, GripVertical, Type, AlignLeft, Hash, List, ToggleLeft, Paperclip } from 'lucide-react';
 import {
-  FORM_QUESTION_TYPES,
+  DndContext,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  closestCenter,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+  arrayMove,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import {
+  Plus,
+  Trash2,
+  GripVertical,
+  Type,
+  AlignLeft,
+  Hash,
+  List,
+  ChevronDown,
+  ListChecks,
+  Phone,
+  Linkedin,
+  Twitter,
+  Instagram,
+  Github,
+  Youtube,
+  Link2,
+  Calendar,
+  Paperclip,
+  Video,
+  ToggleLeft,
+  X,
+} from 'lucide-react';
+import {
   type FormQuestion,
   type FormQuestionType,
+  type MultipleChoiceVariant,
+  type OtherLinkPlatform,
 } from '@fluxberry/shared';
 import { useApplicationForm, useUpdateForm } from '@/hooks/use-form';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Field } from '@/components/ui/field';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { toast } from '@/components/ui/sonner';
-import { FORM_QUESTION_TYPE_LABELS } from '@/lib/labels';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
+} from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
-
-const FORM_QUESTION_TYPE_ICONS: Record<FormQuestionType, React.ReactNode> = {
-  SHORT_TEXT: <Type className="size-4" />,
-  LONG_TEXT: <AlignLeft className="size-4" />,
-  MULTIPLE_CHOICE: <List className="size-4" />,
-  YES_NO: <ToggleLeft className="size-4" />,
-  NUMBER: <Hash className="size-4" />,
-  FILE_UPLOAD: <Paperclip className="size-4" />,
-};
 
 function uid() {
   return Math.random().toString(36).slice(2, 10);
 }
+
+const OTHER_LINK_LABELS: Record<OtherLinkPlatform, string> = {
+  TWITTER: 'X (Twitter)',
+  INSTAGRAM: 'Instagram',
+  GITHUB: 'Github',
+  YOUTUBE: 'YouTube video',
+  ANY: 'Any link',
+};
+
+const OTHER_LINK_ICONS: Record<OtherLinkPlatform, React.ReactNode> = {
+  TWITTER: <Twitter className="size-4" />,
+  INSTAGRAM: <Instagram className="size-4" />,
+  GITHUB: <Github className="size-4" />,
+  YOUTUBE: <Youtube className="size-4" />,
+  ANY: <Link2 className="size-4" />,
+};
+
+const OTHER_LINK_PLACEHOLDERS: Record<OtherLinkPlatform, string> = {
+  TWITTER: 'x.com/username',
+  INSTAGRAM: 'instagram.com/username',
+  GITHUB: 'github.com/username',
+  YOUTUBE: 'youtube.com/watch?v=…',
+  ANY: 'https://…',
+};
 
 export default function JobFormBuilderPage() {
   const { jobId } = useParams<{ jobId: string }>();
@@ -40,14 +97,28 @@ export default function JobFormBuilderPage() {
   const updateForm = useUpdateForm(jobId);
 
   const [questions, setQuestions] = useState<FormQuestion[] | null>(null);
-  const [addOpen, setAddOpen] = useState(false);
   const [dirty, setDirty] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     if (form && !questions) setQuestions(form.questions);
   }, [form, questions]);
 
-  if (isLoading || !questions) return <Skeleton className="h-96 w-full" />;
+  // Global ⌘K / Ctrl+K opens the add-question menu, matching the shortcut hint on the button.
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setMenuOpen((o) => !o);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
+
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+
+  if (isLoading || !questions) return <Skeleton className="mx-auto h-96 max-w-2xl" />;
 
   const systemFields = questions.filter((q) => q.system);
   const customFields = questions.filter((q) => !q.system);
@@ -62,19 +133,24 @@ export default function JobFormBuilderPage() {
     setDirty(true);
   };
 
-  const moveCustom = (id: string, dir: -1 | 1) => {
-    const idx = customFields.findIndex((q) => q.id === id);
-    const target = idx + dir;
-    if (target < 0 || target >= customFields.length) return;
-    const reordered = [...customFields];
-    [reordered[idx], reordered[target]] = [reordered[target], reordered[idx]];
+  const addQuestion = (q: FormQuestion) => {
+    setQuestions((qs) => [...qs!, q]);
+    setDirty(true);
+  };
+
+  const reorderCustom = (activeId: string, overId: string) => {
+    const fromIdx = customFields.findIndex((q) => q.id === activeId);
+    const toIdx = customFields.findIndex((q) => q.id === overId);
+    if (fromIdx === -1 || toIdx === -1) return;
+    const reordered = arrayMove(customFields, fromIdx, toIdx);
     setQuestions([...systemFields, ...reordered]);
     setDirty(true);
   };
 
-  const addQuestion = (q: FormQuestion) => {
-    setQuestions([...questions, q]);
-    setDirty(true);
+  const onDragEnd = (e: DragEndEvent) => {
+    const overId = e.over?.id;
+    if (!overId || e.active.id === overId) return;
+    reorderCustom(String(e.active.id), String(overId));
   };
 
   const save = async () => {
@@ -89,197 +165,425 @@ export default function JobFormBuilderPage() {
   };
 
   return (
-    <div className="max-w-2xl space-y-6">
-      <h2 className="sr-only">Application form</h2>
-      <Card>
-        <CardHeader>
-          <CardTitle>Candidate information</CardTitle>
-        </CardHeader>
-        <CardContent className="divide-y divide-border">
+    <div className="mx-auto max-w-2xl pb-16">
+      <div className="rounded-2xl border border-border bg-card p-8 shadow-sm sm:p-10">
+        <h2 className="text-xl font-semibold tracking-tight">Application form</h2>
+        <p className="mt-1 text-sm text-muted-foreground">This is exactly what candidates see and fill out.</p>
+
+        <div className="mt-8 space-y-6">
           {systemFields.map((q) => (
-            <div key={q.id} className="flex items-center gap-4 py-3">
-              <div className="flex-1">
-                <div className="text-sm font-medium">{q.label}</div>
-                <div className="text-xs text-muted-foreground">
-                  {FORM_QUESTION_TYPE_LABELS[q.type]}
-                </div>
-              </div>
-              <label className="flex flex-col items-end gap-1 text-xs text-muted-foreground">
-                <span className="flex items-center gap-2">
-                  Required
-                  <Switch checked={q.required} onCheckedChange={(v) => patch(q.id, { required: v })} disabled={!q.enabled} />
-                </span>
-                <span className="text-[11px]">Applicants must answer before submitting</span>
-              </label>
-              <label className="flex flex-col items-end gap-1 text-xs text-muted-foreground">
-                <span className="flex items-center gap-2">
-                  Enabled
-                  <Switch checked={q.enabled} onCheckedChange={(v) => patch(q.id, { enabled: v })} />
-                </span>
-                <span className="text-[11px]">Show on the application form</span>
-              </label>
-            </div>
+            <FieldRow key={q.id} q={q} onPatch={(c) => patch(q.id, c)} />
           ))}
-        </CardContent>
-      </Card>
 
-      <Card>
-        <CardHeader className="flex-row items-center justify-between">
-          <CardTitle>Custom questions</CardTitle>
-          <Button size="sm" variant="outline" onClick={() => setAddOpen(true)}>
-            <Plus className="size-4" /> Add question
-          </Button>
-        </CardHeader>
-        <CardContent>
-          {customFields.length === 0 ? (
-            <p className="py-2 text-sm text-muted-foreground">
-              No custom questions yet. Add one to collect more from applicants.
-            </p>
-          ) : (
-            <div className="divide-y divide-border">
-              {customFields.map((q, i) => (
-                <div key={q.id} className="flex items-center gap-3 py-3">
-                  <GripVertical className="size-4 text-muted-foreground/50" />
-                  <div className="flex-1">
-                    <div className="text-sm font-medium">{q.label}</div>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <span>{FORM_QUESTION_TYPE_LABELS[q.type]}</span>
-                      {q.required && <Badge variant="muted">Required</Badge>}
-                    </div>
-                  </div>
-                  <Button variant="ghost" size="icon" onClick={() => moveCustom(q.id, -1)} disabled={i === 0}>
-                    <ArrowUp className="size-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" onClick={() => moveCustom(q.id, 1)} disabled={i === customFields.length - 1}>
-                    <ArrowDown className="size-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" onClick={() => removeQuestion(q.id)} className="text-muted-foreground hover:text-destructive">
-                    <Trash2 className="size-4" />
-                  </Button>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+            <SortableContext items={customFields.map((q) => q.id)} strategy={verticalListSortingStrategy}>
+              <div className="space-y-6">
+                {customFields.map((q) => (
+                  <SortableFieldRow
+                    key={q.id}
+                    q={q}
+                    onPatch={(c) => patch(q.id, c)}
+                    onRemove={() => removeQuestion(q.id)}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
+        </div>
 
-      <div className="flex justify-end">
+        <div className="mt-8 flex justify-center">
+          <AddQuestionMenu open={menuOpen} onOpenChange={setMenuOpen} onAdd={addQuestion} />
+        </div>
+      </div>
+
+      <div className="mt-4 flex justify-end">
         <Button onClick={save} loading={updateForm.isPending} disabled={!dirty}>
           Save form
         </Button>
       </div>
-
-      <AddQuestionDialog open={addOpen} onOpenChange={setAddOpen} onAdd={addQuestion} uid={uid} />
     </div>
   );
 }
 
-function AddQuestionDialog({
+function SortableFieldRow({
+  q,
+  onPatch,
+  onRemove,
+}: {
+  q: FormQuestion;
+  onPatch: (c: Partial<FormQuestion>) => void;
+  onRemove: () => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: q.id });
+  return (
+    <div
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition }}
+      className={cn(isDragging && 'z-10 opacity-90')}
+    >
+      <FieldRow
+        q={q}
+        onPatch={onPatch}
+        onRemove={onRemove}
+        dragHandle={
+          <button
+            type="button"
+            {...attributes}
+            {...listeners}
+            className="cursor-grab touch-none text-muted-foreground/40 hover:text-muted-foreground active:cursor-grabbing"
+            aria-label="Drag to reorder"
+          >
+            <GripVertical className="size-4" />
+          </button>
+        }
+      />
+    </div>
+  );
+}
+
+function FieldRow({
+  q,
+  onPatch,
+  onRemove,
+  dragHandle,
+}: {
+  q: FormQuestion;
+  onPatch: (c: Partial<FormQuestion>) => void;
+  onRemove?: () => void;
+  dragHandle?: React.ReactNode;
+}) {
+  return (
+    <div className="group relative rounded-lg -mx-3 px-3 py-1.5 transition-colors hover:bg-muted/40">
+      <div className="flex items-start gap-2">
+        {dragHandle && <div className="mt-2.5 shrink-0">{dragHandle}</div>}
+        <div className="min-w-0 flex-1">
+          <QuestionLabel q={q} onPatch={onPatch} />
+          <div className="mt-2">
+            <QuestionInputPreview q={q} onPatch={onPatch} />
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-2 flex items-center justify-end gap-4 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
+        <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          Required
+          <Switch checked={q.required} onCheckedChange={(v) => onPatch({ required: v })} disabled={q.system && !q.enabled} />
+        </label>
+        {q.system && (
+          <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            Enabled
+            <Switch checked={q.enabled} onCheckedChange={(v) => onPatch({ enabled: v })} />
+          </label>
+        )}
+        {onRemove && (
+          <button
+            type="button"
+            onClick={onRemove}
+            className="text-muted-foreground/60 hover:text-destructive"
+            aria-label="Delete question"
+          >
+            <Trash2 className="size-4" />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function QuestionLabel({ q, onPatch }: { q: FormQuestion; onPatch: (c: Partial<FormQuestion>) => void }) {
+  if (q.system) {
+    return (
+      <div className="text-sm font-semibold">
+        {q.label} {q.required && <span className="text-destructive">*</span>}
+      </div>
+    );
+  }
+  return (
+    <div className="flex items-center gap-1 text-sm font-semibold">
+      <input
+        value={q.label}
+        onChange={(e) => onPatch({ label: e.target.value })}
+        placeholder="Question"
+        className="min-w-0 flex-1 rounded border border-transparent bg-transparent px-1 -mx-1 outline-none hover:border-input focus:border-input focus:bg-background"
+      />
+      {q.required && <span className="text-destructive">*</span>}
+    </div>
+  );
+}
+
+/** Decorative (mostly non-interactive) preview of what this question looks like on the live form. */
+function QuestionInputPreview({ q, onPatch }: { q: FormQuestion; onPatch: (c: Partial<FormQuestion>) => void }) {
+  const baseInput =
+    'h-9 w-full rounded-md border border-input bg-background px-3 text-sm text-muted-foreground/70 pointer-events-none';
+
+  switch (q.type) {
+    case 'LONG_TEXT':
+      return <div className={cn(baseInput, 'h-20 pt-2')} />;
+    case 'NUMBER':
+      return <div className={baseInput} />;
+    case 'PHONE':
+      return <div className={baseInput}>+1 (555) 000-0000</div>;
+    case 'LINKEDIN':
+      return <div className={baseInput}>linkedin.com/in/username</div>;
+    case 'OTHER_LINK':
+      return <div className={baseInput}>{OTHER_LINK_PLACEHOLDERS[q.linkPlatform ?? 'ANY']}</div>;
+    case 'DATE':
+      return (
+        <div className={cn(baseInput, 'flex items-center gap-2')}>
+          <Calendar className="size-4" /> Select a date
+        </div>
+      );
+    case 'FILE_UPLOAD':
+      return (
+        <div className="flex items-center gap-2 rounded-md border border-dashed border-input px-3 py-2.5 text-sm text-muted-foreground/70">
+          <Paperclip className="size-4" /> Upload a file
+        </div>
+      );
+    case 'VIDEO_RECORDING':
+      return (
+        <div className="flex items-center gap-2 rounded-md border border-dashed border-input px-3 py-2.5 text-sm text-muted-foreground/70">
+          <Video className="size-4" /> Record or upload a video
+        </div>
+      );
+    case 'YES_NO':
+      return (
+        <div className="flex gap-4 text-sm text-muted-foreground">
+          <label className="flex items-center gap-1.5"><input type="radio" disabled /> Yes</label>
+          <label className="flex items-center gap-1.5"><input type="radio" disabled /> No</label>
+        </div>
+      );
+    case 'MULTIPLE_CHOICE':
+      return <MultipleChoicePreview q={q} onPatch={onPatch} />;
+    case 'SHORT_TEXT':
+    default:
+      return <div className={baseInput} />;
+  }
+}
+
+function MultipleChoicePreview({ q, onPatch }: { q: FormQuestion; onPatch: (c: Partial<FormQuestion>) => void }) {
+  const variant: MultipleChoiceVariant = q.variant ?? 'LIST';
+  const options = q.options.length ? q.options : [];
+
+  const setOptionLabel = (id: string, label: string) => {
+    onPatch({ options: q.options.map((o) => (o.id === id ? { ...o, label } : o)) });
+  };
+  const removeOption = (id: string) => {
+    onPatch({ options: q.options.filter((o) => o.id !== id) });
+  };
+  const addOption = () => {
+    onPatch({ options: [...q.options, { id: uid(), label: `Option ${q.options.length + 1}` }] });
+  };
+
+  if (variant === 'DROPDOWN') {
+    return (
+      <div className="space-y-2">
+        <div className="flex h-9 w-full items-center justify-between rounded-md border border-input bg-background px-3 text-sm text-muted-foreground/70">
+          Select an option <ChevronDown className="size-4" />
+        </div>
+        <OptionEditor options={options} onChangeLabel={setOptionLabel} onRemove={removeOption} onAdd={addOption} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      {options.map((opt) => (
+        <div key={opt.id} className="flex items-center gap-2">
+          {variant === 'MULTI_SELECT' ? (
+            <input type="checkbox" disabled className="size-4" />
+          ) : (
+            <input type="radio" disabled className="size-4" />
+          )}
+          <input
+            value={opt.label}
+            onChange={(e) => setOptionLabel(opt.id, e.target.value)}
+            className="h-8 flex-1 rounded border border-transparent bg-transparent px-1.5 text-sm outline-none hover:border-input focus:border-input focus:bg-background"
+          />
+          <button type="button" onClick={() => removeOption(opt.id)} className="text-muted-foreground/50 hover:text-destructive">
+            <X className="size-3.5" />
+          </button>
+        </div>
+      ))}
+      <button type="button" onClick={addOption} className="flex items-center gap-1.5 pl-6 text-xs font-medium text-muted-foreground hover:text-foreground">
+        <Plus className="size-3.5" /> Add option
+      </button>
+    </div>
+  );
+}
+
+function OptionEditor({
+  options,
+  onChangeLabel,
+  onRemove,
+  onAdd,
+}: {
+  options: FormQuestion['options'];
+  onChangeLabel: (id: string, label: string) => void;
+  onRemove: (id: string) => void;
+  onAdd: () => void;
+}) {
+  return (
+    <div className="space-y-1.5 pl-1">
+      {options.map((opt) => (
+        <div key={opt.id} className="flex items-center gap-2">
+          <input
+            value={opt.label}
+            onChange={(e) => onChangeLabel(opt.id, e.target.value)}
+            className="h-8 flex-1 rounded border border-input bg-background px-2 text-sm outline-none"
+          />
+          <button type="button" onClick={() => onRemove(opt.id)} className="text-muted-foreground/50 hover:text-destructive">
+            <X className="size-3.5" />
+          </button>
+        </div>
+      ))}
+      <button type="button" onClick={onAdd} className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground">
+        <Plus className="size-3.5" /> Add option
+      </button>
+    </div>
+  );
+}
+
+function newQuestion(overrides: Partial<FormQuestion> & { type: FormQuestionType; label: string }): FormQuestion {
+  return {
+    id: uid(),
+    required: false,
+    enabled: true,
+    options: [],
+    sortOrder: 0,
+    system: false,
+    ...overrides,
+  };
+}
+
+function AddQuestionMenu({
   open,
   onOpenChange,
   onAdd,
-  uid,
 }: {
   open: boolean;
   onOpenChange: (o: boolean) => void;
   onAdd: (q: FormQuestion) => void;
-  uid: () => string;
 }) {
-  const [label, setLabel] = useState('');
-  const [type, setType] = useState<FormQuestionType>('SHORT_TEXT');
-  const [required, setRequired] = useState(false);
-  const [options, setOptions] = useState<string[]>(['', '']);
-
-  const reset = () => {
-    setLabel('');
-    setType('SHORT_TEXT');
-    setRequired(false);
-    setOptions(['', '']);
-  };
-
-  const submit = () => {
-    if (!label.trim()) return;
-    const q: FormQuestion = {
-      id: uid(),
-      type,
-      label: label.trim(),
-      required,
-      enabled: true,
-      options:
-        type === 'MULTIPLE_CHOICE'
-          ? options.filter((o) => o.trim()).map((o) => ({ id: uid(), label: o.trim() }))
-          : [],
-      sortOrder: 0,
-      system: false,
-    };
+  const add = (q: FormQuestion) => {
     onAdd(q);
-    reset();
     onOpenChange(false);
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Add question</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          <Field label="Question">
-            <Input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="What's your expected salary?" autoFocus />
-          </Field>
-          <Field label="Type">
-            <div className="grid grid-cols-2 gap-2">
-              {FORM_QUESTION_TYPES.filter((t) => t !== 'FILE_UPLOAD').map((t) => (
-                <button
-                  key={t}
-                  type="button"
-                  onClick={() => setType(t)}
-                  className={cn(
-                    'flex items-center gap-2 rounded-lg border px-3 py-2 text-left text-sm font-medium transition-colors',
-                    type === t ? 'border-primary bg-primary/5 text-foreground' : 'border-border text-muted-foreground hover:text-foreground',
-                  )}
-                >
-                  {FORM_QUESTION_TYPE_ICONS[t]}
-                  <span className="truncate">{FORM_QUESTION_TYPE_LABELS[t]}</span>
-                </button>
-              ))}
-            </div>
-          </Field>
-          <Field label="Required" hint="Applicants must answer before submitting">
-            <div className="flex h-9 items-center">
-              <Switch checked={required} onCheckedChange={setRequired} />
-            </div>
-          </Field>
+    <DropdownMenu open={open} onOpenChange={onOpenChange}>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          className="flex items-center gap-2 rounded-lg bg-muted px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-muted/70"
+        >
+          <Plus className="size-4" /> Add new question
+          <span className="ml-2 flex items-center gap-0.5 text-[11px] text-muted-foreground">
+            <kbd className="rounded border border-border bg-background px-1">⌘</kbd>
+            <kbd className="rounded border border-border bg-background px-1">K</kbd>
+          </span>
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="center" className="w-56">
+        <DropdownMenuItem onSelect={() => add(newQuestion({ type: 'SHORT_TEXT', label: 'Question' }))}>
+          <Type className="size-4" /> Short answer
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => add(newQuestion({ type: 'LONG_TEXT', label: 'Question' }))}>
+          <AlignLeft className="size-4" /> Long answer
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => add(newQuestion({ type: 'NUMBER', label: 'Question' }))}>
+          <Hash className="size-4" /> Number
+        </DropdownMenuItem>
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger>
+            <List className="size-4" /> Multiple choice
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent>
+            <DropdownMenuItem
+              onSelect={() =>
+                add(
+                  newQuestion({
+                    type: 'MULTIPLE_CHOICE',
+                    label: 'Question',
+                    variant: 'LIST',
+                    options: [{ id: uid(), label: 'Option 1' }, { id: uid(), label: 'Option 2' }],
+                  }),
+                )
+              }
+            >
+              <List className="size-4" /> List
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onSelect={() =>
+                add(
+                  newQuestion({
+                    type: 'MULTIPLE_CHOICE',
+                    label: 'Question',
+                    variant: 'DROPDOWN',
+                    options: [{ id: uid(), label: 'Option 1' }, { id: uid(), label: 'Option 2' }],
+                  }),
+                )
+              }
+            >
+              <ChevronDown className="size-4" /> Dropdown
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onSelect={() =>
+                add(
+                  newQuestion({
+                    type: 'MULTIPLE_CHOICE',
+                    label: 'Question',
+                    variant: 'MULTI_SELECT',
+                    options: [{ id: uid(), label: 'Option 1' }, { id: uid(), label: 'Option 2' }],
+                  }),
+                )
+              }
+            >
+              <ListChecks className="size-4" /> Multi-select
+            </DropdownMenuItem>
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
 
-          {type === 'MULTIPLE_CHOICE' && (
-            <Field label="Options">
-              <div className="space-y-2">
-                {options.map((opt, i) => (
-                  <div key={i} className="flex gap-2">
-                    <Input
-                      value={opt}
-                      onChange={(e) => setOptions((o) => o.map((x, j) => (j === i ? e.target.value : x)))}
-                      placeholder={`Option ${i + 1}`}
-                    />
-                    {options.length > 2 && (
-                      <Button variant="ghost" size="icon" onClick={() => setOptions((o) => o.filter((_, j) => j !== i))}>
-                        <Trash2 className="size-4" />
-                      </Button>
-                    )}
-                  </div>
-                ))}
-                <Button variant="ghost" size="sm" onClick={() => setOptions((o) => [...o, ''])}>
-                  <Plus className="size-4" /> Add option
-                </Button>
-              </div>
-            </Field>
-          )}
-        </div>
-        <DialogFooter>
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={submit} disabled={!label.trim()}>Add question</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        <DropdownMenuSeparator />
+
+        <DropdownMenuItem onSelect={() => add(newQuestion({ type: 'PHONE', label: 'Phone number' }))}>
+          <Phone className="size-4" /> Phone
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => add(newQuestion({ type: 'LINKEDIN', label: 'LinkedIn profile' }))}>
+          <Linkedin className="size-4" /> LinkedIn profile
+        </DropdownMenuItem>
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger>
+            <Twitter className="size-4" /> Other links
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent>
+            {(Object.keys(OTHER_LINK_LABELS) as OtherLinkPlatform[]).map((platform) => (
+              <DropdownMenuItem
+                key={platform}
+                onSelect={() =>
+                  add(newQuestion({ type: 'OTHER_LINK', label: OTHER_LINK_LABELS[platform], linkPlatform: platform }))
+                }
+              >
+                {OTHER_LINK_ICONS[platform]} {OTHER_LINK_LABELS[platform]}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+
+        <DropdownMenuSeparator />
+
+        <DropdownMenuItem onSelect={() => add(newQuestion({ type: 'DATE', label: 'Date' }))}>
+          <Calendar className="size-4" /> Date
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => add(newQuestion({ type: 'FILE_UPLOAD', label: 'Upload a file' }))}>
+          <Paperclip className="size-4" /> File upload
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => add(newQuestion({ type: 'VIDEO_RECORDING', label: 'Record a video' }))}>
+          <Video className="size-4" /> Video recording
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
+
+// Re-exported so the legacy YES_NO icon (still valid for old data) is available if ever surfaced elsewhere.
+export const LEGACY_YES_NO_ICON = <ToggleLeft className="size-4" />;

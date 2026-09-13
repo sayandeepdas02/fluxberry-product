@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { FileText } from 'lucide-react';
+import { FileText, Paperclip, Video } from 'lucide-react';
 import {
   useCandidateProfile,
   useApplicationDetail,
@@ -11,6 +11,7 @@ import {
   useMoveStage,
   useRescreen,
   fetchResumeUrl,
+  fetchAnswerFileUrl,
 } from '@/hooks/use-candidates';
 import { useApplicationForm } from '@/hooks/use-form';
 import { useJobStages } from '@/hooks/use-jobs';
@@ -102,7 +103,7 @@ export function CandidateDetailPanel({
   const candidate = profile.candidate;
   const parsed = candidate.parsedProfile;
   const answers = detail.data?.answers.answers ?? [];
-  const labelById = new Map((form.data?.questions ?? []).map((q) => [q.id, q.label]));
+  const questionById = new Map((form.data?.questions ?? []).map((q) => [q.id, q]));
 
   const openResume = async () => {
     try {
@@ -208,12 +209,25 @@ export function CandidateDetailPanel({
             <Card>
               <CardHeader><CardTitle>Application responses</CardTitle></CardHeader>
               <CardContent className="space-y-3 text-sm">
-                {answers.map((a) => (
-                  <div key={a.questionId}>
-                    <div className="text-xs font-medium text-muted-foreground">{labelById.get(a.questionId) ?? 'Question'}</div>
-                    <div>{Array.isArray(a.value) ? a.value.join(', ') : String(a.value)}</div>
-                  </div>
-                ))}
+                {answers.map((a) => {
+                  const question = questionById.get(a.questionId);
+                  const isFileAnswer = a.value != null && typeof a.value === 'object' && !Array.isArray(a.value) && 'storageKey' in a.value;
+                  return (
+                    <div key={a.questionId}>
+                      <div className="text-xs font-medium text-muted-foreground">{question?.label ?? 'Question'}</div>
+                      {isFileAnswer && activeApp ? (
+                        <AnswerFileLink
+                          applicationId={activeApp.id}
+                          questionId={a.questionId}
+                          fileName={(a.value as { fileName?: string }).fileName}
+                          isVideo={question?.type === 'VIDEO_RECORDING'}
+                        />
+                      ) : (
+                        <div>{Array.isArray(a.value) ? a.value.join(', ') : String(a.value)}</div>
+                      )}
+                    </div>
+                  );
+                })}
               </CardContent>
             </Card>
           )}
@@ -344,6 +358,33 @@ export function CandidateDetailPanel({
         <SendAssessmentDialog applicationId={activeApp.id} open={sendOpen} onOpenChange={setSendOpen} />
       )}
     </div>
+  );
+}
+
+function AnswerFileLink({
+  applicationId,
+  questionId,
+  fileName,
+  isVideo,
+}: {
+  applicationId: string;
+  questionId: string;
+  fileName?: string;
+  isVideo: boolean;
+}) {
+  const open = async () => {
+    try {
+      const url = await fetchAnswerFileUrl(applicationId, questionId);
+      window.open(url, '_blank', 'noopener');
+    } catch {
+      toast.error('Could not open file');
+    }
+  };
+  return (
+    <button type="button" onClick={open} className="mt-0.5 flex items-center gap-1.5 text-primary hover:underline">
+      {isVideo ? <Video className="size-3.5" /> : <Paperclip className="size-3.5" />}
+      {fileName ?? (isVideo ? 'Watch video' : 'Download file')}
+    </button>
   );
 }
 

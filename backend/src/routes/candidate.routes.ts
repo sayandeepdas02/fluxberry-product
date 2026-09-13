@@ -46,6 +46,7 @@ candidateRouter.post(
 candidateRouter.use('/applications/:applicationId', requireApplicationJobAccess);
 
 candidateRouter.get('/applications/:applicationId', applicationController.getDetail);
+candidateRouter.get('/applications/:applicationId/answers/:questionId/file-url', applicationController.getAnswerFileUrl);
 candidateRouter.get('/applications/:applicationId/timeline', applicationController.getTimeline);
 candidateRouter.get('/applications/:applicationId/workflow-run', workflowController.getRun);
 candidateRouter.post(

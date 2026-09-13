@@ -130,3 +130,10 @@ export async function fetchResumeUrl(candidateId: string): Promise<string> {
   const { url } = await api.get<{ url: string }>(`/api/v1/candidates/${candidateId}/resume-url`);
   return url;
 }
+
+export async function fetchAnswerFileUrl(applicationId: string, questionId: string): Promise<string> {
+  const { url } = await api.get<{ url: string }>(
+    `/api/v1/applications/${applicationId}/answers/${questionId}/file-url`,
+  );
+  return url;
+}
