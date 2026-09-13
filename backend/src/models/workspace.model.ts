@@ -1,5 +1,15 @@
 import { Schema, model, models, type InferSchemaType, type Model } from 'mongoose';
-import { WORKSPACE_PLANS } from '@fluxberry/shared';
+import { WORKSPACE_PLANS, BILLING_SUBSCRIPTION_STATUSES } from '@fluxberry/shared';
+
+const billingSchema = new Schema(
+  {
+    customerId: { type: String, default: null },
+    subscriptionId: { type: String, default: null },
+    subscriptionStatus: { type: String, enum: BILLING_SUBSCRIPTION_STATUSES, default: 'none' },
+    currentPeriodEnd: { type: Date, default: null },
+  },
+  { _id: false },
+);
 
 const workspaceSchema = new Schema(
   {
@@ -8,7 +18,9 @@ const workspaceSchema = new Schema(
     /** Public careers-page URL slug; unique across workspaces (set in the Careers builder). */
     careersSlug: { type: String, default: null },
     logoUrl: { type: String, default: null },
+    /** Effective gate for feature access — only ever flipped by the billing webhook handler. */
     plan: { type: String, enum: WORKSPACE_PLANS, default: 'FREE' },
+    billing: { type: billingSchema, default: () => ({}) },
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   },
   { timestamps: true, collection: 'workspaces' },

@@ -6,6 +6,7 @@ const NOTIFICATION_TYPES = [
   'interview_completed',
   'candidate_hired',
   'screening_completed',
+  'new_message',
 ] as const;
 
 const notificationSchema = new Schema(

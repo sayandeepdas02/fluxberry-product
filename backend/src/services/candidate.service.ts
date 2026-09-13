@@ -69,6 +69,7 @@ export const candidateService = {
     if (query.stage) match.stage = query.stage;
     if (query.source) match.source = query.source;
     if (query.minScore != null) match.score = { $gte: query.minScore };
+    if (query.labelId) match.labelIds = new Types.ObjectId(query.labelId);
 
     const postMatch: Record<string, unknown> = {};
     if (query.location) postMatch['candidate.location'] = { $regex: escapeRegex(query.location), $options: 'i' };
@@ -92,6 +93,7 @@ export const candidateService = {
       { $unwind: '$candidate' },
       { $lookup: { from: 'jobs', localField: 'jobId', foreignField: '_id', as: 'job' } },
       { $unwind: '$job' },
+      { $lookup: { from: 'labels', localField: 'labelIds', foreignField: '_id', as: 'labels' } },
       ...(query.assessmentStatus ? [
         { $lookup: { from: 'candidate_assessments', localField: '_id', foreignField: 'applicationId', as: '_ca' } },
         { $match: { '_ca.status': query.assessmentStatus } },
@@ -120,6 +122,15 @@ export const candidateService = {
       expectedSalary: a.candidate.expectedSalary ?? null,
       appliedAt: new Date(a.appliedAt).toISOString(),
       screeningStatus: a.screeningResult?.status ?? 'PENDING',
+      labels: (a.labels ?? [])
+        .map((l: any) => ({
+          id: String(l._id),
+          workspaceId: String(l.workspaceId),
+          name: l.name,
+          color: l.color,
+          createdAt: new Date(l.createdAt).toISOString(),
+        }))
+        .sort((x: { name: string }, y: { name: string }) => x.name.localeCompare(y.name)),
     }));
 
     return { items, total: res?.total?.[0]?.count ?? 0, page, limit };
@@ -131,6 +142,7 @@ export const candidateService = {
 
     const apps = await ApplicationModel.find({ workspaceId, candidateId })
       .sort({ appliedAt: -1 })
+      .populate('labelIds')
       .lean();
     const jobIds = apps.map((a) => a.jobId);
     const jobs = await JobModel.find({ _id: { $in: jobIds } }).select('title').lean();

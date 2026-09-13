@@ -8,6 +8,7 @@ import type {
   GenerateJdInput,
   GenerateJdResult,
   JobStatus,
+  PipelineStage,
 } from '@fluxberry/shared';
 import { api } from '@/lib/api-client';
 import { useWorkspace } from '@/components/providers/workspace-provider';
@@ -91,4 +92,27 @@ export function useCloneJob() {
 
 export function generateJd(input: GenerateJdInput): Promise<GenerateJdResult> {
   return api.post<GenerateJdResult>('/api/v1/jobs/generate-description', input);
+}
+
+export function useJobStages(jobId: string) {
+  const { currentWorkspace } = useWorkspace();
+  return useQuery({
+    queryKey: ['job-stages', currentWorkspace.id, jobId],
+    queryFn: () => api.get<PipelineStage[]>(`/api/v1/jobs/${jobId}/stages`),
+    enabled: Boolean(jobId),
+  });
+}
+
+export function useUpdateJobStages(jobId: string) {
+  const queryClient = useQueryClient();
+  const { currentWorkspace } = useWorkspace();
+  return useMutation({
+    mutationFn: (stages: PipelineStage[]) =>
+      api.put<PipelineStage[]>(`/api/v1/jobs/${jobId}/stages`, { stages }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['job-stages', currentWorkspace.id, jobId] });
+      queryClient.invalidateQueries({ queryKey: ['job', currentWorkspace.id, jobId] });
+      queryClient.invalidateQueries({ queryKey: ['candidates'] });
+    },
+  });
 }

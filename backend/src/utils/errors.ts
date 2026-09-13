@@ -8,6 +8,7 @@ export type ErrorCode =
   | 'VALIDATION_ERROR'
   | 'UNAUTHORIZED'
   | 'FORBIDDEN'
+  | 'PLAN_UPGRADE_REQUIRED'
   | 'NOT_FOUND'
   | 'CONFLICT'
   | 'RATE_LIMITED'
@@ -49,6 +50,10 @@ export const unauthorized = (message = 'Not authenticated') =>
 
 export const forbidden = (message = 'You do not have access to this resource') =>
   new AppError('FORBIDDEN', message, 403);
+
+/** Distinct from a plain 403 so the frontend can show an upgrade prompt instead of a generic error. */
+export const planUpgradeRequired = (flag: string, message = 'This feature requires an upgraded plan') =>
+  new AppError('PLAN_UPGRADE_REQUIRED', message, 403, { details: { flag } });
 
 export const notFound = (message = 'Not found') =>
   new AppError('NOT_FOUND', message, 404);

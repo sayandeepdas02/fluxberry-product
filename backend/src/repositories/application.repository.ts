@@ -5,13 +5,15 @@ export const applicationRepository = {
   create: (data: Record<string, any>) => ApplicationModel.create(data),
   findById: (id: string) => ApplicationModel.findById(id),
   findInWorkspace: (workspaceId: string, id: string) =>
-    ApplicationModel.findOne({ _id: id, workspaceId }),
+    ApplicationModel.findOne({ _id: id, workspaceId }).populate('labelIds'),
   findByJobAndCandidate: (jobId: string, candidateId: string) =>
     ApplicationModel.findOne({ jobId, candidateId }),
   update: (id: string, patch: Record<string, any>) =>
-    ApplicationModel.findByIdAndUpdate(id, patch, { new: true }),
+    ApplicationModel.findByIdAndUpdate(id, patch, { new: true }).populate('labelIds'),
   listByCandidate: (candidateId: string) =>
     ApplicationModel.find({ candidateId }).sort({ appliedAt: -1 }).lean(),
+  countByJobAndStage: (jobId: string, stage: string) =>
+    ApplicationModel.countDocuments({ jobId, stage }),
 };
 
 export const answersRepository = {

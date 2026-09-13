@@ -6,7 +6,6 @@ import {
   WORKFLOW_STEP_STATUSES,
   CONDITION_FIELDS,
   CONDITION_OPERATORS,
-  APPLICATION_STAGES,
 } from '../enums';
 import type {
   WorkflowNodeType,
@@ -33,7 +32,8 @@ const emptyConfig = z.object({}).default({});
 const conditionConfig = z.object({ condition: conditionSchema });
 const sendAssessmentConfig = z.object({ assessmentId: z.string().min(1) });
 const waitConfig = z.object({ durationHours: z.number().min(0).max(24 * 90) });
-const moveStageConfig = z.object({ stage: z.enum(APPLICATION_STAGES) });
+/** A job's stage id — one of its custom stages, or a system default if it hasn't customized. */
+const moveStageConfig = z.object({ stage: z.string().trim().min(1).max(40) });
 const sendEmailConfig = z.object({
   template: z.string().default('custom'),
   subject: z.string().max(200).optional(),

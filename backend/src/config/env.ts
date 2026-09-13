@@ -43,6 +43,11 @@ const envSchema = z.object({
   SUPABASE_JWT_SECRET: z.string().optional().default(''),
   AUTH_ALLOW_TEST_TOKENS: bool(true),
   AUTH_TEST_TOKEN_SECRET: z.string().default('dev-only-insecure-test-secret'),
+  /**
+   * Local/dev-only escape hatch that restores the old fixed-dev-user, no-RBAC
+   * behavior. Never a supported production mode — must be false in production.
+   */
+  AUTH_BYPASS_ENABLED: bool(false),
 
   MOCK_EXTERNAL_SERVICES: bool(false),
 
@@ -52,6 +57,20 @@ const envSchema = z.object({
 
   RESEND_API_KEY: z.string().optional().default(''),
   EMAIL_FROM: z.string().default('Fluxberry <noreply@example.com>'),
+  /**
+   * Domain used for the Reply-To convention on ad-hoc candidate messages
+   * (application+<id>@this-domain). Inbound parsing itself is provider-agnostic
+   * — see message.service.ts's receiveInbound — configure whichever inbound
+   * email vendor you choose to POST at the /webhooks/inbound-email/:secret route.
+   */
+  INBOUND_EMAIL_DOMAIN: z.string().optional().default(''),
+  INBOUND_EMAIL_SECRET: z.string().optional().default(''),
+
+  DODO_API_KEY: z.string().optional().default(''),
+  DODO_WEBHOOK_SECRET: z.string().optional().default(''),
+  DODO_API_BASE: z.string().default('https://api.dodopayments.com'),
+  /** Dodo product/price id billed for the PRO plan. */
+  DODO_PRO_PRODUCT_ID: z.string().optional().default(''),
 
   STORAGE_ENDPOINT: z.string().optional().default(''),
   STORAGE_REGION: z.string().default('auto'),
@@ -133,12 +152,20 @@ export const config = {
     supabaseJwtSecret: e.SUPABASE_JWT_SECRET,
     allowTestTokens: e.AUTH_ALLOW_TEST_TOKENS,
     testTokenSecret: e.AUTH_TEST_TOKEN_SECRET,
+    bypassEnabled: e.AUTH_BYPASS_ENABLED,
   },
 
   providers: {
     mockAll: e.MOCK_EXTERNAL_SERVICES,
     ai: { provider: e.AI_PROVIDER, apiKey: e.AI_API_KEY, model: e.AI_MODEL },
     email: { resendApiKey: e.RESEND_API_KEY, from: e.EMAIL_FROM },
+    messaging: { inboundDomain: e.INBOUND_EMAIL_DOMAIN, inboundSecret: e.INBOUND_EMAIL_SECRET },
+    billing: {
+      apiKey: e.DODO_API_KEY,
+      webhookSecret: e.DODO_WEBHOOK_SECRET,
+      apiBase: e.DODO_API_BASE,
+      proProductId: e.DODO_PRO_PRODUCT_ID,
+    },
     storage: {
       endpoint: e.STORAGE_ENDPOINT,
       region: e.STORAGE_REGION,

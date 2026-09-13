@@ -5,9 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, FileText } from 'lucide-react';
 import {
-  APPLICATION_STAGES,
   REJECTION_REASONS,
-  type ApplicationStage,
   type RejectionReason,
 } from '@fluxberry/shared';
 import {
@@ -21,6 +19,7 @@ import {
   fetchResumeUrl,
 } from '@/hooks/use-candidates';
 import { useApplicationForm } from '@/hooks/use-form';
+import { useJobStages } from '@/hooks/use-jobs';
 import { useApplicationAssessments } from '@/hooks/use-assessments';
 import { useApplicationInterviews, useSendInterview } from '@/hooks/use-interview';
 import { useFeature } from '@/hooks/use-features';
@@ -36,11 +35,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { StageBadge } from '@/components/candidates/stage-badge';
+import { LabelPicker, LabelChips } from '@/components/candidates/label-picker';
 import { Badge } from '@/components/ui/badge';
 import { ScreeningCard } from '@/components/candidates/screening-card';
 import { Timeline } from '@/components/candidates/timeline';
+import { MessageThread } from '@/components/candidates/message-thread';
 import { toast } from '@/components/ui/sonner';
-import { STAGE_LABELS } from '@/lib/labels';
+import { stageLabel } from '@/lib/labels';
 import { formatSalary, initials } from '@/lib/utils';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
@@ -64,6 +65,7 @@ export default function CandidateProfilePage() {
   const detail = useApplicationDetail(activeApp?.id ?? '');
   const timeline = useApplicationTimeline(activeApp?.id ?? '');
   const form = useApplicationForm(activeApp?.jobId ?? '');
+  const jobStages = useJobStages(activeApp?.jobId ?? '');
   const assessments = useApplicationAssessments(activeApp?.id ?? '');
   const interviews = useApplicationInterviews(activeApp?.id ?? '');
   const sendInterview = useSendInterview();
@@ -89,11 +91,11 @@ export default function CandidateProfilePage() {
     }
   };
 
-  const doMove = (stage: ApplicationStage) => {
+  const doMove = (stage: string) => {
     if (!activeApp) return;
     moveStage.mutate(
       { applicationId: activeApp.id, body: { stage } },
-      { onSuccess: () => toast.success(`Moved to ${STAGE_LABELS[stage]}`) },
+      { onSuccess: () => toast.success(`Moved to ${stageLabel(jobStages.data, stage)}`) },
     );
   };
 
@@ -121,14 +123,18 @@ export default function CandidateProfilePage() {
           <div>
             <div className="flex items-center gap-3">
               <h1 className="text-page-title">{candidate.name}</h1>
-              {activeApp && <StageBadge stage={activeApp.stage} />}
+              {activeApp && <StageBadge stage={activeApp.stage} stages={jobStages.data} />}
             </div>
             <p className="mt-0.5 text-sm text-muted-foreground">
               {activeApp?.jobTitle} · {candidate.email}
             </p>
+            {activeApp && activeApp.labels.length > 0 && (
+              <div className="mt-1.5"><LabelChips labels={activeApp.labels} /></div>
+            )}
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          {activeApp && <LabelPicker applicationId={activeApp.id} selected={activeApp.labels} />}
           <Button variant="outline" onClick={openResume} disabled={!candidate.resume}>
             <FileText className="size-4" /> Resume
           </Button>
@@ -180,6 +186,15 @@ export default function CandidateProfilePage() {
             </Card>
           ) : null}
 
+          {activeApp && (
+            <Card>
+              <CardHeader><CardTitle>Messages</CardTitle></CardHeader>
+              <CardContent>
+                <MessageThread applicationId={activeApp.id} />
+              </CardContent>
+            </Card>
+          )}
+
           {answers.length > 0 && (
             <Card>
               <CardHeader><CardTitle>Application responses</CardTitle></CardHeader>
@@ -223,11 +238,11 @@ export default function CandidateProfilePage() {
                 </Button>
               )}
               <Field label="Move to stage">
-                <Select value={activeApp?.stage} onValueChange={(v) => doMove(v as ApplicationStage)} disabled={!activeApp}>
+                <Select value={activeApp?.stage} onValueChange={(v) => doMove(v)} disabled={!activeApp}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {APPLICATION_STAGES.map((s) => (
-                      <SelectItem key={s} value={s}>{STAGE_LABELS[s]}</SelectItem>
+                    {(jobStages.data ?? []).map((s) => (
+                      <SelectItem key={s.id} value={s.id}>{s.label}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>

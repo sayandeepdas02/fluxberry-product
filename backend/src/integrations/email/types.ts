@@ -4,6 +4,8 @@ export interface EmailInput {
   html: string;
   text?: string;
   from?: string;
+  /** Set for ad-hoc recruiter messages so a candidate's reply threads back in (see message.service.ts). */
+  replyTo?: string;
   /** Dedupe key to avoid double-sends on retries (spec §91). */
   idempotencyKey?: string;
 }

@@ -1,4 +1,5 @@
 import type { JobDto, JobFunnelCounts, PublicJobDto } from '@fluxberry/shared';
+import { defaultPipelineStages } from '@fluxberry/shared';
 
 /* Accepts a lean job document or hydrated doc. */
 export function toJobDto(j: any, counts?: JobFunnelCounts): JobDto {
@@ -17,6 +18,7 @@ export function toJobDto(j: any, counts?: JobFunnelCounts): JobDto {
     experience: j.experience ? { min: j.experience.min ?? undefined, max: j.experience.max ?? undefined } : null,
     skills: (j.skills ?? []).map((s: any) => ({ name: s.name, required: s.required, weight: s.weight })),
     structuredRequirements: j.structuredRequirements ?? null,
+    stages: j.stages && j.stages.length ? j.stages : defaultPipelineStages(),
     applicationFormId: j.applicationFormId ? String(j.applicationFormId) : null,
     workflowId: j.workflowId ? String(j.workflowId) : null,
     createdBy: j.createdBy ? String(j.createdBy) : null,

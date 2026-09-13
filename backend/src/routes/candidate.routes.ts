@@ -5,7 +5,17 @@ import { candidateController } from '../controllers/candidate.controller';
 import { applicationController } from '../controllers/application.controller';
 import { workflowController } from '../controllers/workflow.controller';
 import { interviewController } from '../controllers/interview.controller';
-import { candidateListQuerySchema, stageChangeSchema, rejectApplicationSchema, sendInterviewSchema, bulkActionSchema } from '@fluxberry/shared';
+import { labelController } from '../controllers/label.controller';
+import { messageController } from '../controllers/message.controller';
+import {
+  candidateListQuerySchema,
+  stageChangeSchema,
+  rejectApplicationSchema,
+  sendInterviewSchema,
+  bulkActionSchema,
+  setApplicationLabelsSchema,
+  sendMessageSchema,
+} from '@fluxberry/shared';
 
 export const candidateRouter = Router();
 
@@ -42,6 +52,21 @@ candidateRouter.post(
   requireRole('recruiter'),
   validateBody(rejectApplicationSchema),
   applicationController.reject,
+);
+candidateRouter.put(
+  '/applications/:applicationId/labels',
+  requireRole('recruiter'),
+  validateBody(setApplicationLabelsSchema),
+  labelController.setApplicationLabels,
+);
+
+// Candidate messaging (a thread per application).
+candidateRouter.get('/applications/:applicationId/messages', messageController.list);
+candidateRouter.post(
+  '/applications/:applicationId/messages',
+  requireRole('recruiter'),
+  validateBody(sendMessageSchema),
+  messageController.send,
 );
 
 // AI interviews for an application.

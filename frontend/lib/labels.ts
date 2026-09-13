@@ -1,12 +1,21 @@
+import { SYSTEM_STAGE_LABELS } from '@fluxberry/shared';
 import type {
   EmploymentType,
   WorkMode,
-  ApplicationStage,
   ApplicationStatus,
   Difficulty,
   FormQuestionType,
   CandidateAssessmentStatus,
+  FeatureFlag,
+  PipelineStage,
 } from '@fluxberry/shared';
+
+export const FEATURE_FLAG_LABELS: Record<FeatureFlag, string> = {
+  CODING_ASSESSMENT: 'Coding assessments',
+  AI_INTERVIEW: 'AI voice interviews',
+  WORKFLOW_AUTOMATION: 'Workflow automation',
+  ADVANCED_ANALYTICS: 'Advanced analytics',
+};
 
 export const FORM_QUESTION_TYPE_LABELS: Record<FormQuestionType, string> = {
   SHORT_TEXT: 'Short text',
@@ -31,15 +40,21 @@ export const WORK_MODE_LABELS: Record<WorkMode, string> = {
   ONSITE: 'On-site',
 };
 
-export const STAGE_LABELS: Record<ApplicationStage, string> = {
-  APPLIED: 'Applied',
-  SCREENING: 'Screening',
-  ASSESSMENT: 'Assessment',
-  INTERVIEW: 'Interview',
-  OFFER: 'Offer',
-  HIRED: 'Hired',
-  REJECTED: 'Rejected',
-};
+/** Default labels for the 7 system stages — used as a fallback when a job's real stage list isn't loaded. */
+export const STAGE_LABELS = SYSTEM_STAGE_LABELS;
+
+/**
+ * Resolves a stage id's display label. Prefers the job's actual (possibly
+ * customized) stage list; falls back to the system default labels, then the
+ * raw id itself for a custom stage seen without its job's list loaded (e.g.
+ * the cross-job "All candidates" view, which intentionally stays on system
+ * stages only — see IMPLEMENTATION.md).
+ */
+export function stageLabel(stages: PipelineStage[] | undefined, stageId: string): string {
+  const match = stages?.find((s) => s.id === stageId);
+  if (match) return match.label;
+  return (STAGE_LABELS as Record<string, string>)[stageId] ?? stageId;
+}
 
 export const STATUS_LABELS: Record<ApplicationStatus, string> = {
   ACTIVE: 'Active',

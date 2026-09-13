@@ -1,11 +1,11 @@
 import { z } from 'zod';
-import { APPLICATION_STAGES, REJECTION_REASONS } from '../enums';
+import { REJECTION_REASONS } from '../enums';
 
 export const bulkActionSchema = z.discriminatedUnion('action', [
   z.object({
     action: z.literal('move_stage'),
     applicationIds: z.array(z.string().min(1)).min(1).max(50),
-    stage: z.enum(APPLICATION_STAGES),
+    stage: z.string().trim().min(1).max(40),
   }),
   z.object({
     action: z.literal('reject'),

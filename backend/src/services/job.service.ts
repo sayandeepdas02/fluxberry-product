@@ -6,11 +6,14 @@ import type {
   JobDto,
   JobListQuery,
   JobStatus,
+  PipelineStage,
 } from '@fluxberry/shared';
+import { APPLICATION_STAGES, defaultPipelineStages } from '@fluxberry/shared';
 import { jobRepository } from '../repositories/job.repository';
+import { applicationRepository } from '../repositories/application.repository';
 import { toJobDto } from '../serializers/job.serializer';
 import { uniqueSlug } from '../utils/slug';
-import { notFound, badRequest } from '../utils/errors';
+import { notFound, badRequest, conflict } from '../utils/errors';
 import { auditService } from './audit.service';
 import { eventBus } from '../events/event-bus';
 import { getAIProvider } from '../integrations';
@@ -20,6 +23,23 @@ import { JobModel } from '../models/job.model';
 import { ApplicationFormModel } from '../models/application-form.model';
 import { WorkflowModel } from '../models/workflow.model';
 import { trackEvent } from '../integrations/posthog';
+
+const SYSTEM_STAGE_IDS = new Set<string>(APPLICATION_STAGES);
+
+/** Force-derive system/terminal flags server-side — never trust client input for these. */
+function normalizeStages(input: PipelineStage[], existingSystemIds: Set<string>): PipelineStage[] {
+  return input.map((s, index) => {
+    const isSystem = existingSystemIds.has(s.id) || SYSTEM_STAGE_IDS.has(s.id);
+    return {
+      id: s.id,
+      label: s.label,
+      color: s.color ?? null,
+      sortOrder: index,
+      system: isSystem,
+      terminal: isSystem ? s.id === 'REJECTED' : Boolean(s.terminal),
+    };
+  });
+}
 
 export const jobService = {
   async create(workspaceId: string, userId: string, input: CreateJobInput): Promise<JobDto> {
@@ -217,6 +237,7 @@ export const jobService = {
       experience: original.experience,
       skills: original.skills,
       structuredRequirements: original.structuredRequirements,
+      stages: original.stages,
       rawGenerationPrompt: original.rawGenerationPrompt,
       generatedDescription: original.generatedDescription,
       createdBy: userId,
@@ -265,5 +286,62 @@ export const jobService = {
 
     const fresh = await JobModel.findById(newJob._id).lean();
     return toJobDto(fresh!);
+  },
+
+  async getStages(workspaceId: string, jobId: string): Promise<PipelineStage[]> {
+    const job = await jobRepository.findInWorkspace(workspaceId, jobId);
+    if (!job) throw notFound('Job not found');
+    return (job.stages as PipelineStage[] | null) ?? defaultPipelineStages();
+  },
+
+  async updateStages(
+    workspaceId: string,
+    userId: string,
+    jobId: string,
+    input: PipelineStage[],
+  ): Promise<PipelineStage[]> {
+    const job = await jobRepository.findInWorkspace(workspaceId, jobId);
+    if (!job) throw notFound('Job not found');
+
+    const existing = (job.stages as PipelineStage[] | null) ?? defaultPipelineStages();
+    const existingSystemIds = new Set(existing.filter((s) => s.system).map((s) => s.id));
+
+    const ids = input.map((s) => s.id);
+    if (new Set(ids).size !== ids.length) throw badRequest('Stage ids must be unique');
+
+    const newIds = new Set(ids);
+    const missingSystemIds = [...existingSystemIds].filter((id) => !newIds.has(id));
+    if (missingSystemIds.length) {
+      throw badRequest(`Built-in stages can be renamed or reordered but not deleted: ${missingSystemIds.join(', ')}`);
+    }
+
+    const removedIds = existing.filter((s) => !s.system && !newIds.has(s.id)).map((s) => s.id);
+    for (const id of removedIds) {
+      const count = await applicationRepository.countByJobAndStage(jobId, id);
+      if (count > 0) {
+        throw conflict(`${count} candidate${count === 1 ? ' is' : 's are'} on the stage you're removing — move them first.`, {
+          stageId: id,
+          count,
+        });
+      }
+    }
+
+    const normalized = normalizeStages(input, existingSystemIds);
+    if (!normalized.some((s) => !s.terminal)) {
+      throw badRequest('At least one non-terminal stage is required');
+    }
+
+    await jobRepository.update(jobId, { stages: normalized });
+
+    await auditService.log({
+      workspaceId,
+      userId,
+      action: 'job.stages_updated',
+      resourceType: 'job',
+      resourceId: jobId,
+      metadata: { stageCount: normalized.length },
+    });
+
+    return normalized;
   },
 };

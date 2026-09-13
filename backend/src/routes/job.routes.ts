@@ -17,6 +17,7 @@ import {
   upsertFormSchema,
   upsertWorkflowSchema,
   upsertInterviewConfigSchema,
+  upsertPipelineStagesSchema,
 } from '@fluxberry/shared';
 
 export const jobRouter = Router();
@@ -43,6 +44,15 @@ jobRouter.post(
   requireRole('recruiter'),
   validateBody(jobStatusSchema),
   jobController.setStatus,
+);
+
+// Custom pipeline stages (one list per job; defaults to the 7 system stages).
+jobRouter.get('/jobs/:jobId/stages', jobController.getStages);
+jobRouter.put(
+  '/jobs/:jobId/stages',
+  requireRole('recruiter'),
+  validateBody(upsertPipelineStagesSchema),
+  jobController.updateStages,
 );
 
 // Per-job analytics.

@@ -7,12 +7,12 @@ import {
   REJECTION_REASONS,
 } from '../enums';
 import type {
-  ApplicationStage,
   ApplicationStatus,
   CandidateSource,
   ProcessingStatus,
 } from '../enums';
 import type { ScoreBreakdown } from '../scoring';
+import type { LabelDto } from './label';
 
 /** A single answer value can be text, number, boolean, or a list (multi-choice). */
 export const answerValueSchema = z.union([
@@ -48,7 +48,8 @@ export const publicApplicationSchema = z.object({
 export type PublicApplicationInput = z.infer<typeof publicApplicationSchema>;
 
 export const stageChangeSchema = z.object({
-  stage: z.enum(APPLICATION_STAGES),
+  /** A job's stage id — one of its custom stages, or a system default if it hasn't customized. */
+  stage: z.string().trim().min(1).max(40),
   note: z.string().trim().max(1000).optional(),
 });
 export type StageChangeInput = z.infer<typeof stageChangeSchema>;
@@ -79,10 +80,12 @@ export type ApplicationDto = {
   jobId: string;
   candidateId: string;
   status: ApplicationStatus;
-  stage: ApplicationStage;
+  /** The job's stage id this application currently sits in (custom or system default). */
+  stage: string;
   source: CandidateSource;
   score?: number | null;
   screeningResult?: ScreeningResultDto | null;
+  labels: LabelDto[];
   appliedAt: string;
   createdAt: string;
   updatedAt: string;

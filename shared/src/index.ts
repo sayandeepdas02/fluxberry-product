@@ -2,6 +2,8 @@ export * from './enums';
 export * from './common';
 export * from './scoring';
 export * from './feature-flags';
+export * from './plan-features';
+export * from './pipeline-stages';
 export * from './coding';
 
 // Domain contract schemas (added per slice)
@@ -18,3 +20,7 @@ export * from './schemas/workflow';
 export * from './schemas/analytics';
 export * from './schemas/careers';
 export * from './schemas/bulk-action';
+export * from './schemas/billing';
+export * from './schemas/pipeline-stage';
+export * from './schemas/label';
+export * from './schemas/message';

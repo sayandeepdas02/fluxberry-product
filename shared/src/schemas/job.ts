@@ -7,6 +7,7 @@ import {
 import type { EmploymentType, WorkMode, JobStatus } from '../enums';
 import { salaryRangeSchema, experienceRangeSchema } from '../common';
 import type { SalaryRange, ExperienceRange } from '../common';
+import type { PipelineStage } from './pipeline-stage';
 
 export const jobSkillSchema = z.object({
   name: z.string().trim().min(1).max(60),
@@ -116,6 +117,8 @@ export type JobDto = {
   structuredRequirements?: StructuredRequirements | null;
   applicationFormId?: string | null;
   workflowId?: string | null;
+  /** Effective ordered stage list — the job's custom stages, or the 7 system defaults if it hasn't customized. */
+  stages: PipelineStage[];
   createdBy?: string | null;
   publishedAt?: string | null;
   closedAt?: string | null;

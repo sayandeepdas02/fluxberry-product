@@ -7,7 +7,6 @@ import type {
   Paginated,
   TimelineEntryDto,
   ApplicationDto,
-  ApplicationStage,
   RejectApplicationInput,
   ApplicationAnswersDto,
   CandidateDto,
@@ -19,7 +18,8 @@ import { useWorkspace } from '@/components/providers/workspace-provider';
 
 export interface CandidateFilters {
   jobId?: string;
-  stage?: ApplicationStage;
+  stage?: string;
+  labelId?: string;
   assessmentStatus?: CandidateAssessmentStatus;
   minScore?: number;
   search?: string;
@@ -100,7 +100,7 @@ function useAppMutation<TBody>(path: (id: string) => string, method: 'post' = 'p
 }
 
 export function useMoveStage() {
-  return useAppMutation<{ stage: ApplicationStage; note?: string }>((id) => `/api/v1/applications/${id}/stage`);
+  return useAppMutation<{ stage: string; note?: string }>((id) => `/api/v1/applications/${id}/stage`);
 }
 export function useShortlist() {
   return useAppMutation<undefined>((id) => `/api/v1/applications/${id}/shortlist`);
