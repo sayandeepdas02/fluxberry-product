@@ -197,6 +197,7 @@ export const JOB_QUEUE_TYPES = [
   'PROCESS_INTERVIEW',
   'AGGREGATE_ANALYTICS',
   'PROCESS_BILLING_WEBHOOK',
+  'LINK_REFERRAL_APPLICATION',
 ] as const;
 export type JobQueueType = (typeof JOB_QUEUE_TYPES)[number];
 
