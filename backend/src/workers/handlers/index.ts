@@ -22,6 +22,7 @@ import { gradeCodingHandler } from './grade-coding';
 import { evaluateInterviewHandler } from './evaluate-interview';
 import { aggregateAnalyticsHandler } from './aggregate-analytics';
 import { processBillingWebhookHandler } from './process-billing-webhook';
+import { linkReferralApplicationHandler } from './link-referral-application';
 
 export const handlers: Partial<Record<JobQueueType, JobHandler>> = {
   PARSE_RESUME: parseResumeHandler,
@@ -32,4 +33,5 @@ export const handlers: Partial<Record<JobQueueType, JobHandler>> = {
   PROCESS_INTERVIEW: evaluateInterviewHandler,
   AGGREGATE_ANALYTICS: aggregateAnalyticsHandler,
   PROCESS_BILLING_WEBHOOK: processBillingWebhookHandler,
+  LINK_REFERRAL_APPLICATION: linkReferralApplicationHandler,
 };

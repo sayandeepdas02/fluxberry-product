@@ -117,14 +117,18 @@ export const applicationService = {
       throw err;
     }
     if (referralId) {
-      // Best-effort: the application itself is already committed, so a
-      // hiccup recording it against the referral (reward-tracking bookkeeping)
-      // must never fail the candidate's apply request or leave them unable to
-      // retry (a retry after a hard failure here would 409 as a duplicate).
+      // Best-effort inline attempt; on transient failure fall back to a durable
+      // background job so the referral linkage is never silently lost. The
+      // idempotency key and $addToSet in the repo make double-execution safe.
       try {
         await referralService.recordApplication(referralId, String(application._id));
       } catch (err) {
-        logger.error({ err, referralId, applicationId: String(application._id) }, 'failed to record referral application');
+        logger.error({ err, referralId, applicationId: String(application._id) }, 'failed to record referral application; enqueueing for retry');
+        await jobQueue.enqueue(
+          'LINK_REFERRAL_APPLICATION',
+          { referralId, applicationId: String(application._id) },
+          { idempotencyKey: `link-referral:${application._id}` },
+        );
       }
     }
 
