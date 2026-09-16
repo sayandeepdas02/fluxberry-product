@@ -44,6 +44,7 @@ export function CandidateDetailBody({ state }: { state: CandidateDetailState }) 
     interviews,
     sendInterview,
     aiInterviewEnabled,
+    assessmentsEnabled,
     rescreen,
     sendOpen,
     setSendOpen,
@@ -175,9 +176,11 @@ export function CandidateDetailBody({ state }: { state: CandidateDetailState }) 
           <Card>
             <CardHeader><CardTitle>Next action</CardTitle></CardHeader>
             <CardContent className="space-y-3">
-              <Button className="w-full" onClick={() => setSendOpen(true)} disabled={!activeApp}>
-                Send assessment
-              </Button>
+              {assessmentsEnabled && (
+                <Button className="w-full" onClick={() => setSendOpen(true)} disabled={!activeApp}>
+                  Send assessment
+                </Button>
+              )}
               {aiInterviewEnabled && (
                 <Button
                   variant="outline"
@@ -201,7 +204,7 @@ export function CandidateDetailBody({ state }: { state: CandidateDetailState }) 
             </CardContent>
           </Card>
 
-          {(assessments.data?.length ?? 0) > 0 && (
+          {assessmentsEnabled && (assessments.data?.length ?? 0) > 0 && (
             <Card>
               <CardHeader><CardTitle>Assessments</CardTitle></CardHeader>
               <CardContent className="space-y-3">

@@ -53,6 +53,7 @@ export function useCandidateDetail(
   const interviews = useApplicationInterviews(activeApp?.id ?? '');
   const sendInterview = useSendInterview();
   const aiInterviewEnabled = useFeature('AI_INTERVIEW');
+  const assessmentsEnabled = useFeature('ASSESSMENTS');
   const shortlist = useShortlist();
   const reject = useReject();
   const moveStage = useMoveStage();
@@ -98,6 +99,7 @@ export function useCandidateDetail(
     interviews,
     sendInterview,
     aiInterviewEnabled,
+    assessmentsEnabled,
     shortlist,
     reject,
     moveStage,
