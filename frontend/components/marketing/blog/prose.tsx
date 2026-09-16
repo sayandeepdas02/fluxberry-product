@@ -23,6 +23,16 @@ function toText(children: ReactNode): string {
 }
 
 export function Prose({ content }: { content: string }) {
+  // Mirrors the unique-ID logic in extractHeadings so TocMinimap links and
+  // rendered anchor IDs always agree, even when a heading text repeats.
+  const slugCounts = new Map<string, number>();
+  function nextHeadingId(children: ReactNode): string {
+    const slug = slugifyHeading(toText(children));
+    const count = slugCounts.get(slug) ?? 0;
+    slugCounts.set(slug, count + 1);
+    return count === 0 ? slug : `${slug}-${count}`;
+  }
+
   return (
     <div className="text-[18px] leading-[30px] text-ink-600">
       <ReactMarkdown
@@ -30,7 +40,7 @@ export function Prose({ content }: { content: string }) {
         components={{
           h2: ({ children }) => (
             <h2
-              id={slugifyHeading(toText(children))}
+              id={nextHeadingId(children)}
               className="mb-4 mt-11 scroll-mt-24 text-mk-h4 text-ink"
             >
               {children}
@@ -38,7 +48,7 @@ export function Prose({ content }: { content: string }) {
           ),
           h3: ({ children }) => (
             <h3
-              id={slugifyHeading(toText(children))}
+              id={nextHeadingId(children)}
               className="mb-3.5 mt-9 scroll-mt-24 text-[22px] font-medium leading-[1.25] tracking-[-0.5px] text-ink"
             >
               {children}
@@ -54,7 +64,7 @@ export function Prose({ content }: { content: string }) {
           li: ({ children }) => <li className="text-[18px] leading-7">{children}</li>,
           a: ({ href, children }) => {
             const target = href ?? '#';
-            const isInternal = target.startsWith('/');
+            const isInternal = target.startsWith('/') || target.startsWith('#');
             const className = 'text-berry-700 underline underline-offset-2 hover:text-berry-900';
             return isInternal ? (
               <Link href={target} className={className}>

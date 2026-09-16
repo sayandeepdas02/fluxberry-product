@@ -53,7 +53,7 @@ hire instead of the ninety that do not.
 
 1. A candidate applies through your careers page or a referral link.
 2. Screening runs immediately and attaches a score and summary.
-3. A workflow you configured once sends the assessment, or moves them to `Interview`.
+3. A workflow you configured once sends the assessment for their stage.
 4. Interview slots sync to Google Calendar; a scorecard opens when the call ends.
 5. Analytics show where candidates drop out, by source and by stage.
 

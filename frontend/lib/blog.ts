@@ -26,10 +26,19 @@ function cleanInline(text: string): string {
 export function extractHeadings(markdown: string): Heading[] {
   const headings: Heading[] = [];
   let inFence = false;
+  let fenceMarker = '';
+  const slugCounts = new Map<string, number>();
 
   for (const line of markdown.split('\n')) {
-    if (line.trimStart().startsWith('```')) {
-      inFence = !inFence;
+    const trimmed = line.trimStart();
+    if (!inFence && (trimmed.startsWith('```') || trimmed.startsWith('~~~'))) {
+      inFence = true;
+      fenceMarker = trimmed.startsWith('```') ? '```' : '~~~';
+      continue;
+    }
+    if (inFence && trimmed.startsWith(fenceMarker)) {
+      inFence = false;
+      fenceMarker = '';
       continue;
     }
     if (inFence) continue;
@@ -38,7 +47,11 @@ export function extractHeadings(markdown: string): Heading[] {
     if (!match) continue;
 
     const text = cleanInline(match[2]);
-    headings.push({ id: slugifyHeading(text), text, depth: match[1].length as 2 | 3 });
+    const slug = slugifyHeading(text);
+    const count = slugCounts.get(slug) ?? 0;
+    slugCounts.set(slug, count + 1);
+    const id = count === 0 ? slug : `${slug}-${count}`;
+    headings.push({ id, text, depth: match[1].length as 2 | 3 });
   }
   return headings;
 }

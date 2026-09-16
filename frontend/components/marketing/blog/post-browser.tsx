@@ -93,7 +93,7 @@ export function PostBrowser({ posts, categories }: { posts: PostMeta[]; categori
                 <PostCard post={post} />
               </div>
             ) : (
-              <div key={`empty-${i}`} className={CELL}>
+              <div key={`empty-${i}`} className={cn(CELL, 'hidden lg:block')}>
                 <EmptyCard />
               </div>
             ),

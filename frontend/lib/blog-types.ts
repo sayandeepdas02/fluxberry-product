@@ -34,7 +34,7 @@ export function slugifyHeading(text: string): string {
 }
 
 export function formatPostDate(date: string): string {
-  const parsed = new Date(date);
+  const parsed = /^\d{4}-\d{2}-\d{2}$/.test(date) ? new Date(`${date}T00:00:00`) : new Date(date);
   if (Number.isNaN(parsed.getTime())) return date;
   return parsed.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }

@@ -115,6 +115,8 @@ export function SiteHeader() {
             {openMenu && <span className="absolute inset-x-0 top-full h-[22px]" aria-hidden />}
 
             <div
+              {...(!openMenu && { inert: '' })}
+              aria-hidden={!openMenu}
               className={cn(
                 'absolute left-1/2 top-[calc(100%+6px)] z-[60] w-[min(640px,100vw-48px)] -translate-x-1/2',
                 'origin-top rounded-[18px] border border-ink-200 bg-white p-6 shadow-[0_12px_32px_-12px_rgba(13,17,23,0.16)]',

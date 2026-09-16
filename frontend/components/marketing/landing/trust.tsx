@@ -11,7 +11,7 @@ const items = [
   {
     icon: UserCheck,
     title: 'AI suggests, people decide',
-    body: 'Scores and summaries are recommendations attached to a candidate. Every stage change is made by a person on your team.',
+    body: 'Scores and summaries are recommendations attached to a candidate. Your team retains control of every hiring decision.',
   },
   {
     icon: ListChecks,
