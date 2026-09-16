@@ -93,6 +93,7 @@ mockStorageRouter.get('/files/mock', (req, res, next) => {
     if (!full.startsWith(ROOT + path.sep)) throw forbidden('Invalid key');
     if (!fs.existsSync(full)) throw notFound('File not found');
     res.setHeader('Content-Type', mime);
+    res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Content-Disposition', `${disposition}; filename="${fileName.replace(/"/g, '')}"`);
     fs.createReadStream(full).pipe(res);
   } catch (err) {

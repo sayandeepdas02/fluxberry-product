@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { fetchResumeUrl } from '@/hooks/use-candidates';
 import { toast } from '@/components/ui/sonner';
+import { reserveTab } from '@/lib/utils';
 
 /** In-app preview of a candidate's resume PDF, with a separate download action. */
 export function ResumeViewerDialog({
@@ -27,21 +28,32 @@ export function ResumeViewerDialog({
       setUrl(null);
       return;
     }
+    let cancelled = false;
     setLoading(true);
     fetchResumeUrl(candidateId, 'inline')
-      .then(setUrl)
+      .then((nextUrl) => {
+        if (!cancelled) setUrl(nextUrl);
+      })
       .catch(() => {
+        if (cancelled) return;
         toast.error('No resume available');
         onOpenChange(false);
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [open, candidateId, onOpenChange]);
 
   const download = async () => {
+    const tab = reserveTab();
     try {
       const downloadUrl = await fetchResumeUrl(candidateId, 'attachment');
-      window.open(downloadUrl, '_blank', 'noopener');
+      tab.navigate(downloadUrl);
     } catch {
+      tab.close();
       toast.error('Could not download resume');
     }
   };

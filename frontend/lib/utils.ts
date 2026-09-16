@@ -66,6 +66,24 @@ export function formatSalary(
   return fmt((salary.min ?? salary.max)!);
 }
 
+/**
+ * Opens a blank tab synchronously — before an async URL fetch — so the click's
+ * transient user activation isn't lost by the time the fetch resolves (which
+ * would otherwise get the `window.open` call blocked as a popup). `noopener`
+ * itself makes browsers return `null` instead of a usable handle, so opener
+ * access is severed manually instead, keeping the reference to navigate later.
+ */
+export function reserveTab() {
+  const tab = window.open('', '_blank');
+  if (tab) tab.opener = null;
+  return {
+    navigate: (url: string) => {
+      if (tab) tab.location.href = url;
+    },
+    close: () => tab?.close(),
+  };
+}
+
 export function initials(name: string): string {
   return name
     .split(' ')

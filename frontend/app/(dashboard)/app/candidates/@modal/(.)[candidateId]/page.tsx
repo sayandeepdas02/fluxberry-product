@@ -37,7 +37,7 @@ export default function CandidateModal() {
   const index = ids.indexOf(candidateId);
   const prevId = index > 0 ? ids[index - 1] : undefined;
   const nextId = index >= 0 && index < ids.length - 1 ? ids[index + 1] : undefined;
-  const showNav = ids.length > 1;
+  const showNav = index >= 0 && ids.length > 1;
 
   const close = () => router.back();
   const navigate = (direction: 'prev' | 'next') => {

@@ -64,7 +64,7 @@ export function useCandidateDetail(
   // Select trigger or dialog button doesn't count, so without this a keypress
   // meant for an open dialog (e.g. typeahead in the reject-reason select) can
   // still fire a panel-level shortcut behind it.
-  const dialogOpen = rejectOpen || sendOpen || interviewDialogOpen;
+  const dialogOpen = rejectOpen || sendOpen || interviewDialogOpen || resumeOpen;
 
   useHotkey('s', () => {
     if (canShortlist) {

@@ -19,7 +19,7 @@ import { ScreeningCard } from '@/components/candidates/screening-card';
 import { Timeline } from '@/components/candidates/timeline';
 import { MessageThread } from '@/components/candidates/message-thread';
 import { toast } from '@/components/ui/sonner';
-import { formatSalary, initials } from '@/lib/utils';
+import { formatSalary, initials, reserveTab } from '@/lib/utils';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 /**
@@ -281,10 +281,12 @@ function AnswerFileLink({
   isVideo: boolean;
 }) {
   const open = async () => {
+    const tab = reserveTab();
     try {
       const url = await fetchAnswerFileUrl(applicationId, questionId);
-      window.open(url, '_blank', 'noopener');
+      tab.navigate(url);
     } catch {
+      tab.close();
       toast.error('Could not open file');
     }
   };
