@@ -1,5 +1,45 @@
 import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+import { extendTailwindMerge } from 'tailwind-merge';
+
+/**
+ * tailwind-merge has to be told about our named font sizes. Without this it can't
+ * tell `text-card-title` (a size) from `text-ink` (a colour) — both look like
+ * `text-*` — so it treats them as conflicting and silently drops the first one.
+ */
+const twMerge = extendTailwindMerge({
+  extend: {
+    classGroups: {
+      'font-size': [
+        {
+          text: [
+            'display',
+            'page-title',
+            'section-title',
+            'card-title',
+            'subtle-title',
+            'body-lg',
+            'body',
+            'body-sm',
+            'caption',
+            'mk-hero',
+            'mk-h1',
+            'mk-h2',
+            'mk-h3',
+            'mk-h4',
+            'mk-h5',
+            'mk-title',
+            'mk-lead',
+            'mk-body',
+            'mk-label',
+            'mk-nav',
+            'mk-meta',
+            'mk-micro',
+          ],
+        },
+      ],
+    },
+  },
+});
 
 /** Merge Tailwind class names (shadcn convention). */
 export function cn(...inputs: ClassValue[]): string {

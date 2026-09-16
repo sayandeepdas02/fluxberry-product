@@ -1,17 +1,9 @@
-import Link from 'next/link';
 import type { Metadata } from 'next';
-import { publicConfig } from '@/lib/config';
 import { noIndexMetadata } from '@/lib/seo';
+import { AuthShell } from '@/components/marketing/auth-shell';
 
 export const metadata: Metadata = noIndexMetadata;
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-muted/40 px-6 py-12">
-      <Link href="/" className="mb-8 text-lg font-semibold tracking-tight">
-        {publicConfig.appName}
-      </Link>
-      <div className="w-full max-w-sm">{children}</div>
-    </div>
-  );
+  return <AuthShell>{children}</AuthShell>;
 }

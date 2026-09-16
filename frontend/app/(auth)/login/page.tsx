@@ -10,7 +10,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Field } from '@/components/ui/field';
-import { Card } from '@/components/ui/card';
+import { AuthHeading, authButtonClass, authInputClass } from '@/components/marketing/auth-shell';
 import { toast } from '@/components/ui/sonner';
 import { signIn } from '@/lib/auth-actions';
 import { hasSupabase } from '@/lib/config';
@@ -44,32 +44,44 @@ export default function LoginPage() {
   };
 
   return (
-    <Card className="p-6">
-      <h1 className="text-card-title">Welcome back</h1>
-      <p className="mt-1 text-sm text-muted-foreground">Log in to continue hiring.</p>
+    <>
+      <AuthHeading title="Welcome back" subtitle="Log in to continue hiring." />
 
-      <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="mt-7 space-y-4">
         <Field label="Email" htmlFor="email" error={errors.email?.message}>
-          <Input id="email" type="email" autoComplete="email" placeholder="you@company.com" {...register('email')} />
+          <Input
+            id="email"
+            type="email"
+            autoComplete="email"
+            placeholder="you@company.com"
+            className={authInputClass}
+            {...register('email')}
+          />
         </Field>
         {hasSupabase && (
           <Field label="Password" htmlFor="password" error={errors.password?.message}>
-            <Input id="password" type="password" autoComplete="current-password" {...register('password')} />
+            <Input
+              id="password"
+              type="password"
+              autoComplete="current-password"
+              className={authInputClass}
+              {...register('password')}
+            />
           </Field>
         )}
-        <Button type="submit" className="w-full" loading={submitting}>
+        <Button type="submit" className={authButtonClass} loading={submitting}>
           Log in
         </Button>
       </form>
 
-      <div className="mt-4 flex items-center justify-between text-sm">
-        <Link href="/forgot-password" className="text-muted-foreground hover:text-foreground">
+      <div className="mt-6 flex items-center justify-between border-t border-ink-200 pt-4 text-[13px]">
+        <Link href="/forgot-password" className="text-ink-500 transition-colors hover:text-ink">
           Forgot password?
         </Link>
-        <Link href="/signup" className="font-medium text-primary hover:underline">
+        <Link href="/signup" className="font-medium text-berry-700 hover:underline">
           Create account
         </Link>
       </div>
-    </Card>
+    </>
   );
 }

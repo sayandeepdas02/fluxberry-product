@@ -8,7 +8,7 @@ import { forgotPasswordSchema, type ForgotPasswordInput } from '@fluxberry/share
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Field } from '@/components/ui/field';
-import { Card } from '@/components/ui/card';
+import { AuthHeading, authButtonClass, authInputClass } from '@/components/marketing/auth-shell';
 import { toast } from '@/components/ui/sonner';
 import { requestPasswordReset } from '@/lib/auth-actions';
 import { hasSupabase } from '@/lib/config';
@@ -35,34 +35,40 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <Card className="p-6">
-      <h1 className="text-card-title">Reset your password</h1>
-      {sent ? (
-        <p className="mt-2 text-sm text-muted-foreground">
-          If an account exists for that email, we&apos;ve sent a reset link.
-        </p>
-      ) : (
-        <>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {hasSupabase
+    <>
+      <AuthHeading
+        title="Reset your password"
+        subtitle={
+          sent
+            ? "If an account exists for that email, we've sent a reset link."
+            : hasSupabase
               ? "Enter your email and we'll send a reset link."
-              : 'Password reset is available once Supabase auth is configured.'}
-          </p>
-          <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
-            <Field label="Email" htmlFor="email" error={errors.email?.message}>
-              <Input id="email" type="email" placeholder="you@company.com" {...register('email')} />
-            </Field>
-            <Button type="submit" className="w-full" loading={submitting} disabled={!hasSupabase}>
-              Send reset link
-            </Button>
-          </form>
-        </>
+              : 'Password reset is available once Supabase auth is configured.'
+        }
+      />
+
+      {!sent && (
+        <form onSubmit={handleSubmit(onSubmit)} className="mt-7 space-y-4">
+          <Field label="Email" htmlFor="email" error={errors.email?.message}>
+            <Input
+              id="email"
+              type="email"
+              placeholder="you@company.com"
+              className={authInputClass}
+              {...register('email')}
+            />
+          </Field>
+          <Button type="submit" className={authButtonClass} loading={submitting} disabled={!hasSupabase}>
+            Send reset link
+          </Button>
+        </form>
       )}
-      <p className="mt-4 text-center text-sm">
-        <Link href="/login" className="text-muted-foreground hover:text-foreground">
+
+      <p className="mt-6 border-t border-ink-200 pt-4 text-center text-[13px]">
+        <Link href="/login" className="text-ink-500 transition-colors hover:text-ink">
           Back to log in
         </Link>
       </p>
-    </Card>
+    </>
   );
 }
