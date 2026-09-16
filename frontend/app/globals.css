@@ -95,3 +95,244 @@
   transform: translateX(-100%);
   animation: shimmer 1.4s infinite;
 }
+
+/* ---------------------------------------------------------------------------
+ * Marketing surface (landing, blog, auth).
+ *
+ * These pages are built on a ruled-paper grid: a 1200px column with 1px vertical
+ * rails, horizontal rules that break out to the full viewport width, and 8px
+ * crosshairs pinned wherever a rule crosses a rail. Everything here is `mk-`
+ * prefixed and light-only; the dashboard keeps its own HSL theme tokens.
+ * ------------------------------------------------------------------------- */
+@layer components {
+  /* The outer frame: 1248px wide, 24px gutters, 1200px of content between rails. */
+  .mk-frame {
+    position: relative;
+    margin-inline: auto;
+    max-width: 1248px;
+    padding-inline: 24px;
+  }
+
+  /* Vertical hairlines at the column edges. Decorative, so never interactive. */
+  .mk-rails {
+    position: absolute;
+    inset: 0 24px;
+    z-index: 2;
+    border-left: 1px solid theme('colors.ink.200');
+    border-right: 1px solid theme('colors.ink.200');
+    pointer-events: none;
+  }
+
+  /* Full-bleed horizontal rule, escaping whatever column it is nested in. */
+  .mk-divider {
+    position: relative;
+    left: 50%;
+    width: 100vw;
+    transform: translateX(-50%);
+  }
+
+  .mk-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    z-index: 1;
+    height: 1px;
+    background: theme('colors.ink.200');
+  }
+  .mk-line-top { top: 0; }
+  .mk-line-bottom { bottom: 0; }
+
+  /* Short vertical rails inside a divider band, aligned to the column edges. */
+  .mk-rail {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: 1;
+    width: 1px;
+    background: theme('colors.ink.200');
+  }
+  .mk-rail-left { left: max(24px, -600px + 50vw); }
+  .mk-rail-right { right: max(24px, -600px + 50vw); }
+
+  /*
+   * Crosshair. `max(24px, -600px + 50vw)` is what keeps it welded to the rail at
+   * every viewport width: the column is centred and 1200px wide, so its edge sits
+   * 600px from centre until the gutter takes over below 1248px.
+   */
+  .mk-cross {
+    position: absolute;
+    z-index: 3;
+    width: 8px;
+    height: 8px;
+    pointer-events: none;
+  }
+  .mk-cross::before,
+  .mk-cross::after {
+    content: '';
+    position: absolute;
+    background: theme('colors.ink.300');
+  }
+  .mk-cross::before {
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    transform: translateY(-50%);
+  }
+  .mk-cross::after {
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 1px;
+    transform: translateX(-50%);
+  }
+  .mk-cross-tl { top: 0; left: max(24px, -600px + 50vw); margin: -3.5px 0 0 -3.5px; }
+  .mk-cross-tr { top: 0; right: max(24px, -600px + 50vw); margin: -3.5px -3.5px 0 0; }
+  .mk-cross-bl { bottom: 0; left: max(24px, -600px + 50vw); margin: 0 0 -3.5px -3.5px; }
+  .mk-cross-br { bottom: 0; right: max(24px, -600px + 50vw); margin: 0 -3.5px -3.5px 0; }
+
+  /* Dashed rule used for the standalone separators between grid rows. */
+  .mk-dash-line {
+    height: 1px;
+    background: repeating-linear-gradient(to right, theme('colors.ink.300') 0 4px, transparent 4px 8px);
+  }
+
+  /* Diagonal hatch (borrowed from chanhdai.com) for the gutters beside a divider. */
+  .mk-hatch {
+    background-image: repeating-linear-gradient(
+      315deg,
+      rgb(196 196 196 / 0.56) 0,
+      rgb(196 196 196 / 0.56) 1px,
+      transparent 0,
+      transparent 50%
+    );
+    background-size: 10px 10px;
+  }
+
+  /* Panel the product mockups sit on: faint dotted graph paper. */
+  .mk-surface {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid theme('colors.ink.200');
+    background-color: theme('colors.ink.50');
+    background-image: radial-gradient(theme('colors.ink.200') 1px, transparent 1px);
+    background-position: -1px -1px;
+    background-size: 18px 18px;
+  }
+
+  /* 68px square grid, faded out at the edges — the blog and auth hero backdrop. */
+  .mk-grid-bg {
+    position: absolute;
+    inset: -1px 0;
+    z-index: 0;
+    opacity: 0.55;
+    pointer-events: none;
+    background-image:
+      linear-gradient(theme('colors.ink.200') 1px, transparent 1px),
+      linear-gradient(90deg, theme('colors.ink.200') 1px, transparent 1px);
+    background-position: 50% center;
+    background-size: 68px 68px;
+    -webkit-mask-image: radial-gradient(120% 90% at 50% 38%, #000 22%, transparent 68%);
+    mask-image: radial-gradient(120% 90% at 50% 38%, #000 22%, transparent 68%);
+  }
+
+  /*
+   * Closing CTA: warm brand ground, a glow rising from below, and a dot screen.
+   * `position: relative` is load-bearing — without a positioned ancestor the
+   * inset-0 pseudo-elements resolve against the viewport and tile the whole page.
+   */
+  .mk-dots {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+  }
+  .mk-dots::before,
+  .mk-dots::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+  }
+  .mk-dots::before {
+    background: radial-gradient(
+      65% 85% at 50% 115%,
+      rgb(236 72 153 / 0.10) 0%,
+      rgb(251 207 232 / 0.16) 48%,
+      transparent 78%
+    );
+  }
+  .mk-dots::after {
+    background-image: radial-gradient(circle, rgb(190 24 93 / 0.15) 0.7px, transparent 0.85px);
+    background-position: 50% center;
+    background-size: 12px 12px;
+  }
+
+  /* Scroll reveal. Native scroll-driven animation where supported, no-op elsewhere. */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .mk-reveal {
+        animation: mk-reveal-up linear both;
+        animation-timeline: view();
+        animation-range: entry entry 75%;
+      }
+    }
+  }
+
+
+  /*
+   * Ported from chanhdai.com: a rule that runs the full width of the screen but
+   * is declared on the element it belongs to, rather than as a separate divider
+   * node. `left:-100vw; width:200vw` is what escapes the column. Used for
+   * secondary boundaries; <Divider/> owns the crosshair-pinned solid ones.
+   *
+   * Unlike the original this sits at z-index 1, not -1: our sections paint an
+   * explicit white background, which would hide a negative-z pseudo-element.
+   */
+  /* Dashed variant — chanhdai's exact 6px tile. */
+  .mk-screen-dashed-top::before,
+  .mk-screen-dashed-bottom::after {
+    background: linear-gradient(to right, theme('colors.ink.300') 4px, transparent 2px) repeat-x;
+    background-size: 6px 1px;
+  }
+  .mk-screen-dashed-top { position: relative; }
+  .mk-screen-dashed-bottom { position: relative; }
+  .mk-screen-dashed-top::before,
+  .mk-screen-dashed-bottom::after {
+    content: '';
+    position: absolute;
+    left: -100vw;
+    z-index: 1;
+    width: 200vw;
+    height: 1px;
+    pointer-events: none;
+  }
+  .mk-screen-dashed-top::before { top: 0; }
+  .mk-screen-dashed-bottom::after { bottom: 0; }
+
+  /*
+   * Corner marks: four 8px squares straddling a panel's corners, the way a
+   * drawing marks a cut line. chanhdai offsets them by -4.5px so the square's
+   * centre lands exactly on the 1px border.
+   */
+  .mk-corners > span {
+    position: absolute;
+    z-index: 2;
+    display: flex;
+    width: 8px;
+    height: 8px;
+    border: 1px solid theme('colors.ink.300');
+    background: #fff;
+    pointer-events: none;
+  }
+  .mk-corners > span:nth-of-type(1) { top: -4.5px; left: -4.5px; }
+  .mk-corners > span:nth-of-type(2) { top: -4.5px; right: -4.5px; }
+  .mk-corners > span:nth-of-type(3) { bottom: -4.5px; left: -4.5px; }
+  .mk-corners > span:nth-of-type(4) { bottom: -4.5px; right: -4.5px; }
+
+  /* Brand focus ring for every marketing control. */
+  .mk-focus:focus-visible {
+    outline: 2px solid theme('colors.berry.700');
+    outline-offset: 3px;
+  }
+}
