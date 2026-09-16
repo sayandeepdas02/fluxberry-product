@@ -185,16 +185,22 @@ export const applicationService = {
     await workflowEngine.startRunForApplication(workspaceId, jobId, String(application._id));
 
     // Send confirmation email to the candidate (fire-and-forget, never blocks apply response).
-    const confirmEmail = emailTemplates.applicationConfirmation({
-      candidateName: candidate.name,
-      jobTitle: job.title,
-      companyName: workspace.name,
-    });
-    await jobQueue.enqueue(
-      'SEND_EMAIL',
-      { to: candidate.email, subject: confirmEmail.subject, html: confirmEmail.html, text: confirmEmail.text },
-      { idempotencyKey: `app-confirm:${application._id}` },
-    );
+    void (async () => {
+      try {
+        const confirmEmail = emailTemplates.applicationConfirmation({
+          candidateName: candidate.name,
+          jobTitle: job.title,
+          companyName: workspace.name,
+        });
+        await jobQueue.enqueue(
+          'SEND_EMAIL',
+          { to: candidate.email, subject: confirmEmail.subject, html: confirmEmail.html, text: confirmEmail.text },
+          { idempotencyKey: `app-confirm:${application._id}` },
+        );
+      } catch (e) {
+        logger.warn({ applicationId: String(application._id), err: e }, 'application confirmation email enqueue failed');
+      }
+    })();
 
     trackEvent(String(candidate._id), 'candidate.applied', { workspaceId, jobId, applicationId: String(application._id) });
     logger.info({ applicationId: String(application._id), jobId }, 'application submitted');

@@ -17,7 +17,7 @@ import { JobModel } from '../models/job.model';
 import { EventModel } from '../models/event.model';
 import { toCandidateDto } from '../serializers/candidate.serializer';
 import { toApplicationDto } from '../serializers/application.serializer';
-import { getStorageProvider } from '../integrations';
+import { getStorageProvider, type DownloadUrlOptions } from '../integrations';
 import { notFound } from '../utils/errors';
 import { applyJobAccessFilter, bypassesJobAccess } from '../utils/job-access';
 import type { AuthContext } from '../types/auth-context';
@@ -185,7 +185,12 @@ export const candidateService = {
   },
 
   /** A signed download URL for a custom FILE_UPLOAD/VIDEO_RECORDING question's answer file. */
-  async getAnswerFileUrl(workspaceId: string, applicationId: string, questionId: string): Promise<string> {
+  async getAnswerFileUrl(
+    workspaceId: string,
+    applicationId: string,
+    questionId: string,
+    opts?: DownloadUrlOptions,
+  ): Promise<string> {
     const app = await applicationRepository.findInWorkspace(workspaceId, applicationId);
     if (!app) throw notFound('Application not found');
     const answersDoc = await answersRepository.findByApplication(applicationId);
@@ -196,10 +201,16 @@ export const candidateService = {
     return storage.createDownloadUrl(
       { storageKey: value.storageKey, fileName: value.fileName ?? 'file', mimeType: value.mimeType ?? 'application/octet-stream' },
       300,
+      opts,
     );
   },
 
-  async getResumeUrl(workspaceId: string, candidateId: string, auth: AuthContext): Promise<string> {
+  async getResumeUrl(
+    workspaceId: string,
+    candidateId: string,
+    auth: AuthContext,
+    opts?: DownloadUrlOptions,
+  ): Promise<string> {
     const candidate = await candidateRepository.findInWorkspace(workspaceId, candidateId);
     if (!candidate || !candidate.resume) throw notFound('No resume on file');
     if (!bypassesJobAccess(auth.role)) {
@@ -219,6 +230,7 @@ export const candidateService = {
         mimeType: candidate.resume.mimeType,
       },
       300,
+      opts,
     );
   },
 

@@ -1,4 +1,4 @@
-import { asyncHandler, ok } from '../utils/http';
+import { asyncHandler, ok, requestOrigin, requestDisposition } from '../utils/http';
 import { candidateService } from '../services/candidate.service';
 import type { CandidateListQuery } from '@fluxberry/shared';
 
@@ -18,7 +18,10 @@ export const candidateController = {
   }),
 
   getResumeUrl: asyncHandler(async (req, res) => {
-    const url = await candidateService.getResumeUrl(req.auth!.workspaceId!, req.params.candidateId, req.auth!);
+    const url = await candidateService.getResumeUrl(req.auth!.workspaceId!, req.params.candidateId, req.auth!, {
+      disposition: requestDisposition(req),
+      originOverride: requestOrigin(req),
+    });
     ok(res, { url });
   }),
 };

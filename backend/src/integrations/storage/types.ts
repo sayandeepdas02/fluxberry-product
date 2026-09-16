@@ -7,6 +7,19 @@ export interface UploadInput {
   fileName: string;
 }
 
+export interface DownloadUrlOptions {
+  /** 'inline' (default) renders in-browser; 'attachment' forces a download. */
+  disposition?: 'inline' | 'attachment';
+  /**
+   * Externally-reachable origin to build the URL against (e.g. derived from
+   * the incoming request's protocol/host), taking precedence over the
+   * server's own `PUBLIC_API_URL` config. Only meaningful for providers that
+   * build URLs against this server (the mock/local provider); ignored by
+   * providers that return an already-absolute external URL (e.g. S3).
+   */
+  originOverride?: string;
+}
+
 /** Provider-agnostic object storage (spec §127). Files never live in Mongo. */
 export interface StorageProvider {
   readonly name: string;
@@ -15,6 +28,7 @@ export interface StorageProvider {
   createDownloadUrl(
     ref: Pick<FileRef, 'storageKey' | 'fileName' | 'mimeType'>,
     ttlSec?: number,
+    opts?: DownloadUrlOptions,
   ): Promise<string>;
   /** Permanent, unsigned URL for assets meant to be public (e.g. workspace logos). */
   getPublicUrl(key: string): string;

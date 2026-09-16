@@ -6,7 +6,7 @@ import {
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import type { FileRef } from '@fluxberry/shared';
-import type { StorageProvider, UploadInput } from './types';
+import type { DownloadUrlOptions, StorageProvider, UploadInput } from './types';
 import { config } from '../../config/env';
 
 /** S3-compatible storage — works for AWS S3 and Cloudflare R2 (via endpoint). */
@@ -46,13 +46,15 @@ export class S3StorageProvider implements StorageProvider {
   async createDownloadUrl(
     ref: Pick<FileRef, 'storageKey' | 'fileName' | 'mimeType'>,
     ttlSec = 300,
+    opts?: DownloadUrlOptions,
   ): Promise<string> {
+    const disposition = opts?.disposition ?? 'inline';
     return getSignedUrl(
       this.client,
       new GetObjectCommand({
         Bucket: this.bucket,
         Key: ref.storageKey,
-        ResponseContentDisposition: `inline; filename="${ref.fileName}"`,
+        ResponseContentDisposition: `${disposition}; filename="${ref.fileName}"`,
       }),
       { expiresIn: ttlSec },
     );

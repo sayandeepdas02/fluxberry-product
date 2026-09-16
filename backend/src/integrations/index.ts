@@ -20,7 +20,7 @@ export {
 
 export type { AIProvider } from './ai/types';
 export type { EmailProvider } from './email/types';
-export type { StorageProvider, FileRef } from './storage/types';
+export type { StorageProvider, FileRef, DownloadUrlOptions } from './storage/types';
 export type { CodeExecutionProvider } from './coding/types';
 export type { InterviewProvider } from './interview/types';
 export type { BillingProvider } from './dodo/types';
