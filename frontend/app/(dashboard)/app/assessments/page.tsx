@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Plus, ClipboardCheck, Trash2 } from 'lucide-react';
 import type { AssessmentDto } from '@fluxberry/shared';
 import { useAssessments, useDeleteAssessment } from '@/hooks/use-assessments';
+import { useFeature } from '@/hooks/use-features';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -17,9 +18,14 @@ import { toast } from '@/components/ui/sonner';
 
 export default function AssessmentsPage() {
   const router = useRouter();
+  const enabled = useFeature('ASSESSMENTS');
   const { data: assessments, isLoading } = useAssessments();
   const deleteAssessment = useDeleteAssessment();
   const [deleteTarget, setDeleteTarget] = useState<AssessmentDto | null>(null);
+
+  if (!enabled) {
+    return <EmptyState icon={<ClipboardCheck />} title="Assessments are off" description="This feature is coming in a future release." />;
+  }
 
   const confirmDelete = async () => {
     if (!deleteTarget) return;

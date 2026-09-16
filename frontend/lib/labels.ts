@@ -15,6 +15,8 @@ export const FEATURE_FLAG_LABELS: Record<FeatureFlag, string> = {
   AI_INTERVIEW: 'AI voice interviews',
   WORKFLOW_AUTOMATION: 'Workflow automation',
   ADVANCED_ANALYTICS: 'Advanced analytics',
+  ASSESSMENTS: 'Assessments',
+  QUESTION_BANK: 'Question bank',
 };
 
 export const FORM_QUESTION_TYPE_LABELS: Record<FormQuestionType, string> = {

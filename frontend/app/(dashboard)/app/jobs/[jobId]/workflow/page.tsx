@@ -60,13 +60,14 @@ export default function WorkflowBuilderPage() {
   const save = useSaveWorkflow(jobId);
   const { data: assessments } = useAssessments();
   const { data: jobStages } = useJobStages(jobId);
+  const assessmentsEnabled = useFeature('ASSESSMENTS');
   const codingEnabled = useFeature('CODING_ASSESSMENT');
   const aiInterviewEnabled = useFeature('AI_INTERVIEW');
   const addable: WorkflowNodeType[] = [
     'AI_SCREEN',
     'CONDITION',
-    'SEND_ASSESSMENT',
-    ...(codingEnabled ? (['CODING_ASSESSMENT'] as const) : []),
+    ...(assessmentsEnabled ? (['SEND_ASSESSMENT'] as const) : []),
+    ...(assessmentsEnabled && codingEnabled ? (['CODING_ASSESSMENT'] as const) : []),
     ...(aiInterviewEnabled ? (['AI_INTERVIEW'] as const) : []),
     'WAIT',
     'MOVE_STAGE',

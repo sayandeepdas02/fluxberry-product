@@ -4,6 +4,8 @@ export const FEATURE_FLAGS = [
   'AI_INTERVIEW',
   'WORKFLOW_AUTOMATION',
   'ADVANCED_ANALYTICS',
+  'ASSESSMENTS',
+  'QUESTION_BANK',
 ] as const;
 export type FeatureFlag = (typeof FEATURE_FLAGS)[number];
 
@@ -14,4 +16,6 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlagState = {
   AI_INTERVIEW: false,
   WORKFLOW_AUTOMATION: true,
   ADVANCED_ANALYTICS: false,
+  ASSESSMENTS: false,
+  QUESTION_BANK: false,
 };

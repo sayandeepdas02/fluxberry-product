@@ -30,6 +30,7 @@ export default function JobDetailLayout({ children }: { children: React.ReactNod
   const setStatus = useSetJobStatus();
   const cloneJob = useCloneJob();
   const aiInterview = useFeature('AI_INTERVIEW');
+  const assessmentsEnabled = useFeature('ASSESSMENTS');
   const [publishConfirmOpen, setPublishConfirmOpen] = useState(false);
 
   // The job-creation flow redirects here with ?published=1 after a first publish
@@ -70,7 +71,7 @@ export default function JobDetailLayout({ children }: { children: React.ReactNod
     { href: `${base}/candidates`, label: 'Candidates' },
     { href: `${base}/form`, label: 'Application form' },
     { href: `${base}/stages`, label: 'Pipeline' },
-    { href: `${base}/assessments`, label: 'Assessments' },
+    ...(assessmentsEnabled ? [{ href: `${base}/assessments`, label: 'Assessments' }] : []),
     ...(aiInterview ? [{ href: `${base}/interview`, label: 'AI Interview' }] : []),
     { href: `${base}/workflow`, label: 'Workflow' },
     { href: `${base}/analytics`, label: 'Analytics' },

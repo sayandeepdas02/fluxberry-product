@@ -16,6 +16,7 @@ import {
   Gift,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useFeatures } from '@/hooks/use-features';
 import { WorkspaceSwitcher } from './workspace-switcher';
 import {
   DropdownMenu,
@@ -30,14 +31,15 @@ const NAV = [
   { href: '/app', label: 'Home', icon: Home, exact: true },
   { href: '/app/jobs', label: 'Jobs', icon: Briefcase },
   { href: '/app/candidates', label: 'Candidates', icon: Users },
-  { href: '/app/assessments', label: 'Assessments', icon: ClipboardCheck },
-  { href: '/app/questions', label: 'Question Bank', icon: Library },
+  { href: '/app/assessments', label: 'Assessments', icon: ClipboardCheck, flag: 'ASSESSMENTS' as const },
+  { href: '/app/questions', label: 'Question Bank', icon: Library, flag: 'QUESTION_BANK' as const },
   { href: '/app/analytics', label: 'Analytics', icon: BarChart3 },
   { href: '/app/referrals', label: 'Referrals', icon: Gift },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
+  const features = useFeatures();
   const isActive = (href: string, exact?: boolean) =>
     exact ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
 
@@ -46,7 +48,7 @@ export function Sidebar() {
       <WorkspaceSwitcher />
 
       <nav className="mt-6 flex flex-1 flex-col gap-0.5">
-        {NAV.map((item) => {
+        {NAV.filter((item) => !item.flag || features[item.flag]).map((item) => {
           const active = isActive(item.href, item.exact);
           const Icon = item.icon;
           return (
