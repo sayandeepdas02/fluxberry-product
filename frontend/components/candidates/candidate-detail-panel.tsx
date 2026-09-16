@@ -78,6 +78,7 @@ export function CandidateDetailPanel({
   const interviews = useApplicationInterviews(activeApp?.id ?? '');
   const sendInterview = useSendInterview();
   const aiInterviewEnabled = useFeature('AI_INTERVIEW');
+  const assessmentsEnabled = useFeature('ASSESSMENTS');
   const shortlist = useShortlist();
   const reject = useReject();
   const moveStage = useMoveStage();
@@ -240,9 +241,11 @@ export function CandidateDetailPanel({
           <Card>
             <CardHeader><CardTitle>Next action</CardTitle></CardHeader>
             <CardContent className="space-y-3">
-              <Button className="w-full" onClick={() => setSendOpen(true)} disabled={!activeApp}>
-                Send assessment
-              </Button>
+              {assessmentsEnabled && (
+                <Button className="w-full" onClick={() => setSendOpen(true)} disabled={!activeApp}>
+                  Send assessment
+                </Button>
+              )}
               {aiInterviewEnabled && (
                 <Button
                   variant="outline"
@@ -266,7 +269,7 @@ export function CandidateDetailPanel({
             </CardContent>
           </Card>
 
-          {(assessments.data?.length ?? 0) > 0 && (
+          {assessmentsEnabled && (assessments.data?.length ?? 0) > 0 && (
             <Card>
               <CardHeader><CardTitle>Assessments</CardTitle></CardHeader>
               <CardContent className="space-y-3">

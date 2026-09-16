@@ -5,6 +5,7 @@ import { ListChecks, Code2, ChevronRight } from 'lucide-react';
 import { useQuestions } from '@/hooks/use-questions';
 import { useFeature } from '@/hooks/use-features';
 import { Card } from '@/components/ui/card';
+import { EmptyState } from '@/components/ui/empty-state';
 
 function useTypeCount(type: 'MCQ' | 'CODING') {
   const { data } = useQuestions({ type, limit: 1 });
@@ -15,6 +16,11 @@ export default function QuestionBankPage() {
   const mcqCount = useTypeCount('MCQ');
   const dsaCount = useTypeCount('CODING');
   const codingEnabled = useFeature('CODING_ASSESSMENT');
+  const questionBankEnabled = useFeature('QUESTION_BANK');
+
+  if (!questionBankEnabled) {
+    return <EmptyState title="Question bank is off" description="This feature is coming in a future release." />;
+  }
 
   return (
     <div className="space-y-6">

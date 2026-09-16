@@ -6,6 +6,7 @@ import { useParams, notFound } from 'next/navigation';
 import { Plus, Search, ArrowLeft, Pencil, Trash2, ListChecks, Code2 } from 'lucide-react';
 import { DIFFICULTIES, type QuestionDto, type Difficulty, type QuestionType } from '@fluxberry/shared';
 import { useQuestions, useArchiveQuestion } from '@/hooks/use-questions';
+import { useFeature } from '@/hooks/use-features';
 import { QuestionDialog } from '@/components/questions/question-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,7 +27,11 @@ const BANKS: Record<string, { type: QuestionType; label: string; icon: React.Rea
 export default function QuestionBankTypePage() {
   const { bank } = useParams<{ bank: string }>();
   const meta = BANKS[bank];
+  const enabled = useFeature('QUESTION_BANK');
   if (!meta) notFound();
+  if (!enabled) {
+    return <EmptyState title="Question bank is off" description="This feature is coming in a future release." />;
+  }
 
   const [search, setSearch] = useState('');
   const [difficulty, setDifficulty] = useState<Difficulty | 'all'>('all');

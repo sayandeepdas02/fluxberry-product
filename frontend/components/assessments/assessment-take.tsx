@@ -12,8 +12,10 @@ import {
   type SubmitAssessmentResult,
 } from '@fluxberry/shared';
 import { api } from '@/lib/api-client';
+import { useFeature } from '@/hooks/use-features';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { EmptyState } from '@/components/ui/empty-state';
 import { PageSpinner } from '@/components/ui/spinner';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { publicConfig } from '@/lib/config';
@@ -32,6 +34,7 @@ const monacoLang = (id: number) => langById(id)?.monaco ?? 'plaintext';
 
 export function AssessmentTake() {
   const { token } = useParams<{ token: string }>();
+  const enabled = useFeature('ASSESSMENTS');
   const [data, setData] = useState<PublicAssessmentDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -79,8 +82,9 @@ export function AssessmentTake() {
   }, [token, applyData]);
 
   useEffect(() => {
+    if (!enabled) return;
     void load();
-  }, [load]);
+  }, [load, enabled]);
 
   // While a coding submission grades, poll until it finalizes.
   useEffect(() => {
@@ -126,6 +130,14 @@ export function AssessmentTake() {
     const t = setTimeout(() => setRemaining((r) => (r == null ? r : r - 1)), 1000);
     return () => clearTimeout(t);
   }, [remaining, data?.status, done, submit]);
+
+  if (!enabled) {
+    return (
+      <div className="mx-auto max-w-2xl px-5 py-16">
+        <EmptyState title="Assessment unavailable" description="This assessment link is no longer active." />
+      </div>
+    );
+  }
 
   const start = async () => {
     try {

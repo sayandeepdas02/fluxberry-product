@@ -6,12 +6,14 @@ import { Command } from 'cmdk';
 import { Briefcase, Users, ClipboardCheck, Plus, BarChart3, Search } from 'lucide-react';
 import { useJobs } from '@/hooks/use-jobs';
 import { useCandidates } from '@/hooks/use-candidates';
+import { useFeature } from '@/hooks/use-features';
 import { cn } from '@/lib/utils';
 
 export function CommandMenu() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const router = useRouter();
+  const assessmentsEnabled = useFeature('ASSESSMENTS');
 
   const jobsQuery = useJobs({ status: 'all' });
   const candidatesQuery = useCandidates({ search: query || undefined, limit: 5 });
@@ -98,7 +100,9 @@ export function CommandMenu() {
             )}
 
             <CommandSection heading="Navigate">
-              <CommandItem icon={<ClipboardCheck className="size-4" />} label="Assessments" onSelect={() => go('/app/assessments')} />
+              {assessmentsEnabled && (
+                <CommandItem icon={<ClipboardCheck className="size-4" />} label="Assessments" onSelect={() => go('/app/assessments')} />
+              )}
               <CommandItem icon={<Users className="size-4" />} label="All candidates" onSelect={() => go('/app/candidates')} />
               <CommandItem icon={<Briefcase className="size-4" />} label="All jobs" onSelect={() => go('/app/jobs')} />
             </CommandSection>

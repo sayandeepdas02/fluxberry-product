@@ -1,6 +1,5 @@
 import { WORKSPACE_PLANS } from './enums';
 import type { WorkspacePlan } from './enums';
-import { FEATURE_FLAGS } from './feature-flags';
 import type { FeatureFlag } from './feature-flags';
 
 /**
@@ -10,8 +9,8 @@ import type { FeatureFlag } from './feature-flags';
  * operational kill-switch, it only narrows what a given plan is allowed to use.
  */
 export const PLAN_FEATURES: Record<WorkspacePlan, FeatureFlag[]> = {
-  FREE: ['CODING_ASSESSMENT', 'WORKFLOW_AUTOMATION'],
-  PRO: [...FEATURE_FLAGS],
+  FREE: ['WORKFLOW_AUTOMATION'],
+  PRO: ['AI_INTERVIEW', 'WORKFLOW_AUTOMATION', 'ADVANCED_ANALYTICS'],
 };
 
 export function planIncludesFeature(plan: WorkspacePlan, flag: FeatureFlag): boolean {
