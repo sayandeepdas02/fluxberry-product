@@ -3,15 +3,15 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { Router } from 'express';
 import type { FileRef } from '@fluxberry/shared';
-import type { StorageProvider, UploadInput } from './types';
+import type { DownloadUrlOptions, StorageProvider, UploadInput } from './types';
 import { config } from '../../config/env';
 import { notFound, forbidden } from '../../utils/errors';
 
 const ROOT = path.resolve(process.cwd(), '.storage');
 const SIGN_SECRET = config.auth.testTokenSecret + ':storage';
 
-function sign(key: string, exp: number): string {
-  return crypto.createHmac('sha256', SIGN_SECRET).update(`${key}:${exp}`).digest('base64url');
+function sign(key: string, exp: number, mime: string, disposition: string): string {
+  return crypto.createHmac('sha256', SIGN_SECRET).update(`${key}:${exp}:${mime}:${disposition}`).digest('base64url');
 }
 
 /** Local-filesystem storage used when no S3/R2 keys are configured. */
@@ -33,11 +33,22 @@ export class MockStorageProvider implements StorageProvider {
   async createDownloadUrl(
     ref: Pick<FileRef, 'storageKey' | 'fileName' | 'mimeType'>,
     ttlSec = 300,
+    opts?: DownloadUrlOptions,
   ): Promise<string> {
     const exp = Date.now() + ttlSec * 1000;
-    const sig = sign(ref.storageKey, exp);
-    const qs = new URLSearchParams({ key: ref.storageKey, exp: String(exp), sig });
-    return `${config.publicApiUrl}/files/mock?${qs.toString()}`;
+    const disposition = opts?.disposition ?? 'inline';
+    const mime = ref.mimeType || 'application/octet-stream';
+    const sig = sign(ref.storageKey, exp, mime, disposition);
+    const qs = new URLSearchParams({
+      key: ref.storageKey,
+      exp: String(exp),
+      sig,
+      mime,
+      disposition,
+      fileName: ref.fileName,
+    });
+    const origin = opts?.originOverride || config.publicApiUrl;
+    return `${origin}/files/mock?${qs.toString()}`;
   }
 
   getPublicUrl(key: string): string {
@@ -66,9 +77,12 @@ mockStorageRouter.get('/files/mock', (req, res, next) => {
     const key = String(req.query.key ?? '');
     const exp = Number(req.query.exp ?? 0);
     const sig = String(req.query.sig ?? '');
+    const mime = String(req.query.mime ?? 'application/octet-stream');
+    const disposition = req.query.disposition === 'attachment' ? 'attachment' : 'inline';
+    const fileName = String(req.query.fileName ?? path.basename(key));
     if (!key || !exp || !sig) throw notFound('File not found');
     if (Date.now() > exp) throw forbidden('Link expired');
-    const expected = sign(key, exp);
+    const expected = sign(key, exp, mime, disposition);
     const sigBuf = Buffer.from(sig);
     const expBuf = Buffer.from(expected);
     if (sigBuf.length !== expBuf.length || !crypto.timingSafeEqual(sigBuf, expBuf)) {
@@ -78,7 +92,9 @@ mockStorageRouter.get('/files/mock', (req, res, next) => {
     const full = path.join(ROOT, key);
     if (!full.startsWith(ROOT + path.sep)) throw forbidden('Invalid key');
     if (!fs.existsSync(full)) throw notFound('File not found');
-    res.setHeader('Content-Disposition', `inline; filename="${path.basename(key)}"`);
+    res.setHeader('Content-Type', mime);
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Content-Disposition', `${disposition}; filename="${fileName.replace(/"/g, '')}"`);
     fs.createReadStream(full).pipe(res);
   } catch (err) {
     next(err);

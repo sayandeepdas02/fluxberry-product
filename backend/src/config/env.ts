@@ -157,6 +157,8 @@ export const config = {
   port: e.PORT,
   corsOrigins: e.CORS_ORIGINS.split(',').map((s) => s.trim()).filter(Boolean),
   publicApiUrl: e.PUBLIC_API_URL || `http://localhost:${e.PORT}`,
+  /** The raw, operator-set `PUBLIC_API_URL` — empty when not configured, unlike `publicApiUrl` above which always falls back to localhost. */
+  publicApiUrlExplicit: e.PUBLIC_API_URL,
   publicAppUrl: e.PUBLIC_APP_URL,
 
   mongoUri: e.MONGODB_URI,

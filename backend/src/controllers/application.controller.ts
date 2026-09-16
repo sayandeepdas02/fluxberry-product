@@ -1,4 +1,4 @@
-import { asyncHandler, ok, created } from '../utils/http';
+import { asyncHandler, ok, created, requestOrigin, requestDisposition } from '../utils/http';
 import { candidateService } from '../services/candidate.service';
 import { stageService } from '../services/stage.service';
 import { screeningService } from '../services/screening.service';
@@ -68,6 +68,7 @@ export const applicationController = {
       req.auth!.workspaceId!,
       req.params.applicationId,
       req.params.questionId,
+      { disposition: requestDisposition(req), originOverride: requestOrigin(req) },
     );
     ok(res, { url });
   }),

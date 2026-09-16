@@ -126,14 +126,23 @@ export function useBulkAction() {
   });
 }
 
-export async function fetchResumeUrl(candidateId: string): Promise<string> {
-  const { url } = await api.get<{ url: string }>(`/api/v1/candidates/${candidateId}/resume-url`);
+export async function fetchResumeUrl(
+  candidateId: string,
+  disposition: 'inline' | 'attachment' = 'inline',
+): Promise<string> {
+  const { url } = await api.get<{ url: string }>(
+    `/api/v1/candidates/${candidateId}/resume-url?disposition=${disposition}`,
+  );
   return url;
 }
 
-export async function fetchAnswerFileUrl(applicationId: string, questionId: string): Promise<string> {
+export async function fetchAnswerFileUrl(
+  applicationId: string,
+  questionId: string,
+  disposition: 'inline' | 'attachment' = 'inline',
+): Promise<string> {
   const { url } = await api.get<{ url: string }>(
-    `/api/v1/applications/${applicationId}/answers/${questionId}/file-url`,
+    `/api/v1/applications/${applicationId}/answers/${questionId}/file-url?disposition=${disposition}`,
   );
   return url;
 }
