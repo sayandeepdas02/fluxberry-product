@@ -14,6 +14,7 @@ import type {
 
 const SCOPES = [
   'https://www.googleapis.com/auth/calendar.events',
+  'https://www.googleapis.com/auth/calendar.events.freebusy',
   'https://www.googleapis.com/auth/userinfo.email',
 ];
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Field } from '@/components/ui/field';
 import { AuthHeading, authButtonClass, authInputClass } from '@/components/marketing/auth-shell';
 import { toast } from '@/components/ui/sonner';
-import { signUp } from '@/lib/auth-actions';
+import { signUp, safeNextPath } from '@/lib/auth-actions';
 import { hasSupabase } from '@/lib/config';
 
 const schema = z.object({
@@ -23,9 +23,17 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 export default function SignupPage() {
+  return (
+    <Suspense fallback={null}>
+      <SignupForm />
+    </Suspense>
+  );
+}
+
+function SignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const next = searchParams.get('next');
+  const next = safeNextPath(searchParams.get('next'));
   const prefillEmail = searchParams.get('email') ?? '';
   const queryClient = useQueryClient();
   const [submitting, setSubmitting] = useState(false);

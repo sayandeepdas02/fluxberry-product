@@ -27,6 +27,7 @@ import { config } from '../config/env';
 import { emailTemplates } from '../integrations';
 import { jobQueue } from '../queue/job-queue';
 import type { WorkspaceInviteDoc } from '../models/workspace-invite.model';
+import type { UserDoc } from '../models/user.model';
 import type { HydratedDocument } from 'mongoose';
 
 const INVITE_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000;
@@ -51,10 +52,31 @@ async function lazyExpire(
   invite: HydratedDocument<WorkspaceInviteDoc>,
 ): Promise<HydratedDocument<WorkspaceInviteDoc>> {
   if (invite.status === 'PENDING' && invite.expiresAt.getTime() < Date.now()) {
-    const updated = await workspaceInviteRepository.updateStatus(String(invite._id), { status: 'EXPIRED' });
-    return updated ?? invite;
+    const updated = await workspaceInviteRepository.expirePending(String(invite._id));
+    if (updated) return updated;
+    // The conditional expire didn't match — someone else changed it concurrently
+    // (accepted/revoked/expired already); re-fetch for the true current state.
+    const fresh = await workspaceInviteRepository.findById(String(invite._id));
+    return fresh ?? invite;
   }
   return invite;
+}
+
+/** Idempotent re-accept path: the invite is already ACCEPTED by this same user — return their existing membership. */
+async function acceptedResult(
+  workspaceId: string,
+  userId: string,
+  user: HydratedDocument<UserDoc>,
+): Promise<AcceptInviteResultDto> {
+  const [member, workspace] = await Promise.all([
+    memberRepository.find(workspaceId, userId),
+    workspaceRepository.findById(workspaceId),
+  ]);
+  if (!member || !workspace) throw notFound('Workspace not found');
+  return {
+    member: toMemberDto(member, user),
+    workspace: { id: String(workspace._id), name: workspace.name, slug: workspace.slug },
+  };
 }
 
 export const workspaceService = {
@@ -237,12 +259,12 @@ export const workspaceService = {
 
     const token = secureToken(24);
     const expiresAt = new Date(Date.now() + INVITE_EXPIRY_MS);
-    const updated = await workspaceInviteRepository.updateStatus(inviteId, {
+    const updated = await workspaceInviteRepository.resendIfNotAccepted(inviteId, {
       token,
       expiresAt,
       status: 'PENDING',
     });
-    if (!updated) throw notFound('Invite not found');
+    if (!updated) throw badRequest('This invite has already been accepted');
 
     const [workspace, inviter] = await Promise.all([
       workspaceRepository.findById(workspaceId),
@@ -277,10 +299,8 @@ export const workspaceService = {
   async revokeInvite(workspaceId: string, inviteId: string, actorId: string): Promise<void> {
     const invite = await workspaceInviteRepository.findById(inviteId);
     if (!invite || String(invite.workspaceId) !== workspaceId) throw notFound('Invite not found');
-    if (invite.status === 'ACCEPTED') {
-      throw badRequest('This invite has already been accepted; remove the member instead');
-    }
-    await workspaceInviteRepository.updateStatus(inviteId, { status: 'REVOKED' });
+    const revoked = await workspaceInviteRepository.revokeIfNotAccepted(inviteId);
+    if (!revoked) throw badRequest('This invite has already been accepted; remove the member instead');
     await auditService.log({
       workspaceId,
       userId: actorId,
@@ -320,10 +340,6 @@ export const workspaceService = {
     invite = await lazyExpire(invite);
     if (invite.status === 'EXPIRED') throw conflict('This invite has expired — ask an admin to resend it');
 
-    if (invite.status === 'ACCEPTED' && String(invite.acceptedBy) !== userId) {
-      throw conflict('This invite has already been accepted');
-    }
-
     const user = await userRepository.findById(userId);
     if (!user) throw notFound('User not found');
     if (user.email.toLowerCase() !== invite.email) {
@@ -331,16 +347,37 @@ export const workspaceService = {
     }
 
     const workspaceId = String(invite.workspaceId);
-    let member = await memberRepository.find(workspaceId, userId);
-    if (!member) {
-      member = await memberRepository.create({ workspaceId: workspaceId as any, userId: userId as any, role: invite.role as Role });
+
+    if (invite.status === 'ACCEPTED') {
+      if (String(invite.acceptedBy) !== userId) throw conflict('This invite has already been accepted');
+      return acceptedResult(workspaceId, userId, user);
     }
 
-    if (invite.status !== 'ACCEPTED') {
-      await workspaceInviteRepository.updateStatus(String(invite._id), {
-        status: 'ACCEPTED',
-        acceptedAt: new Date(),
-        acceptedBy: userId as any,
+    // Atomically claim PENDING -> ACCEPTED so a concurrent revoke/expire/accept
+    // (e.g. an admin revoking at the same moment) can't race a read-then-write
+    // and let a lapsed invite still grant membership.
+    const claimed = await workspaceInviteRepository.claimPending(String(invite._id), {
+      status: 'ACCEPTED',
+      acceptedAt: new Date(),
+      acceptedBy: userId as any,
+    });
+
+    if (!claimed) {
+      const latest = await workspaceInviteRepository.findById(String(invite._id));
+      if (latest?.status === 'ACCEPTED' && String(latest.acceptedBy) === userId) {
+        return acceptedResult(workspaceId, userId, user);
+      }
+      if (latest?.status === 'ACCEPTED') throw conflict('This invite has already been accepted');
+      if (latest?.status === 'REVOKED') throw conflict('This invite has been revoked');
+      throw conflict('This invite has expired — ask an admin to resend it');
+    }
+
+    let member = await memberRepository.find(workspaceId, userId);
+    if (!member) {
+      member = await memberRepository.create({
+        workspaceId: workspaceId as any,
+        userId: userId as any,
+        role: claimed.role as Role,
       });
     }
 
@@ -350,7 +387,7 @@ export const workspaceService = {
       action: 'member.accepted',
       resourceType: 'workspace_member',
       resourceId: String(member._id),
-      metadata: { email: invite.email, role: invite.role },
+      metadata: { email: claimed.email, role: claimed.role },
     });
 
     const workspace = await workspaceRepository.findById(workspaceId);

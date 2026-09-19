@@ -12,14 +12,19 @@ export class ResendEmailProvider implements EmailProvider {
   }
 
   async send(input: EmailInput): Promise<EmailResult> {
-    const { data, error } = await this.client.emails.send({
-      from: input.from ?? config.providers.email.from,
-      to: input.to,
-      subject: input.subject,
-      html: input.html,
-      text: input.text,
-      ...(input.replyTo ? { replyTo: input.replyTo } : {}),
-    });
+    const { data, error } = await this.client.emails.send(
+      {
+        from: input.from ?? config.providers.email.from,
+        to: input.to,
+        subject: input.subject,
+        html: input.html,
+        text: input.text,
+        ...(input.replyTo ? { replyTo: input.replyTo } : {}),
+      },
+      // A retried queue job reuses the same key, so Resend returns the original
+      // send instead of dispatching a duplicate.
+      input.idempotencyKey ? { idempotencyKey: input.idempotencyKey } : undefined,
+    );
     if (error) throw providerError(`Email send failed: ${error.message}`);
     return { id: data?.id ?? 'unknown', provider: 'resend' };
   }

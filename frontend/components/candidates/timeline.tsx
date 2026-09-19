@@ -44,9 +44,11 @@ export function Timeline({ entries }: { entries: TimelineEntryDto[] }) {
     <ol className="space-y-0">
       {visible.map((e, i) => (
         <li key={e.id} className="relative flex gap-3">
-          {/* Connecting line to next item */}
+          {/* Connecting line to next item — runs from this dot's center to the
+              next dot's center (11px = mt-1 + half the dot wrapper's height),
+              overshooting this <li>'s own bottom edge to reach it. */}
           {i < visible.length - 1 && (
-            <div className="absolute left-[6px] top-[18px] bottom-0 w-px bg-border" />
+            <div className="absolute left-[7px] top-[11px] bottom-[-11px] w-px bg-border" />
           )}
           {/* Dot */}
           <div className="relative z-10 mt-1 flex h-3.5 w-3.5 shrink-0 items-center justify-center">

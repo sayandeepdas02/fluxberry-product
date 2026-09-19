@@ -9,6 +9,23 @@ export interface Credentials {
   password: string;
 }
 
+/**
+ * Only allow same-origin, single-slash relative paths for post-auth
+ * navigation — the `next` query param is attacker-controlled, so a bare
+ * `startsWith('/')` check isn't enough (e.g. `//evil.com` or `/\evil.com` are
+ * both browser-navigable to an external origin). Returns null for anything
+ * that isn't a safe in-app path.
+ */
+export function safeNextPath(value: string | null): string | null {
+  if (!value || !value.startsWith('/') || value.startsWith('//')) return null;
+  try {
+    const url = new URL(value, 'https://safe-next.invalid');
+    return url.origin === 'https://safe-next.invalid' ? value : null;
+  } catch {
+    return null;
+  }
+}
+
 /** Sign up. With Supabase: real account. Without: dev test-token path. */
 export async function signUp(
   input: { name: string; redirectTo?: string } & Credentials,

@@ -3,7 +3,7 @@ import { CandidateAssessmentModel } from '../../models/candidate-assessment.mode
 import { ScheduledInterviewModel } from '../../models/scheduled-interview.model';
 import type { JobHandler } from './index';
 
-export const sendEmailHandler: JobHandler = async (payload) => {
+export const sendEmailHandler: JobHandler = async (payload, ctx) => {
   // Conditional send: skip if the referenced entity no longer meets the required status.
   if (payload.conditionCheck?.type === 'candidate_assessment_status') {
     const ca = await CandidateAssessmentModel.findById(payload.conditionCheck.candidateAssessmentId)
@@ -26,5 +26,8 @@ export const sendEmailHandler: JobHandler = async (payload) => {
     text: payload.text,
     from: payload.from,
     replyTo: payload.replyTo,
+    // Forwarded to the provider (e.g. Resend's Idempotency-Key header) so a
+    // queue retry after an already-accepted send can't double-deliver.
+    idempotencyKey: ctx.idempotencyKey,
   });
 };
