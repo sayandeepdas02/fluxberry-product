@@ -3,7 +3,7 @@ import { authenticate, resolveWorkspace, requireWorkspace, requireRole } from '.
 import { validateBody } from '../middleware/validate';
 import { logoUpload } from '../middleware/upload';
 import { uploadLimiter } from '../middleware/rate-limit';
-import { workspaceController } from '../controllers/workspace.controller';
+import { workspaceController, workspaceInviteController } from '../controllers/workspace.controller';
 import {
   createWorkspaceSchema,
   updateWorkspaceSchema,
@@ -53,15 +53,44 @@ workspaceRouter.get(
   requireWorkspace,
   workspaceController.listMembers,
 );
+workspaceRouter.get(
+  '/workspaces/:workspaceId/invites',
+  authenticate,
+  resolveWorkspace,
+  requireWorkspace,
+  workspaceInviteController.list,
+);
 workspaceRouter.post(
-  '/workspaces/:workspaceId/members',
+  '/workspaces/:workspaceId/invites',
   authenticate,
   resolveWorkspace,
   requireWorkspace,
   requireRole('admin'),
   validateBody(inviteMemberSchema),
-  workspaceController.inviteMember,
+  workspaceInviteController.create,
 );
+workspaceRouter.post(
+  '/workspaces/:workspaceId/invites/:inviteId/resend',
+  authenticate,
+  resolveWorkspace,
+  requireWorkspace,
+  requireRole('admin'),
+  workspaceInviteController.resend,
+);
+workspaceRouter.delete(
+  '/workspaces/:workspaceId/invites/:inviteId',
+  authenticate,
+  resolveWorkspace,
+  requireWorkspace,
+  requireRole('admin'),
+  workspaceInviteController.revoke,
+);
+
+// Accept is intentionally NOT gated by resolveWorkspace/requireWorkspace — the
+// caller isn't a member of the target workspace yet; workspaceId is implied by
+// the token itself.
+workspaceRouter.post('/invites/:token/accept', authenticate, workspaceInviteController.accept);
+
 workspaceRouter.patch(
   '/workspaces/:workspaceId/members/:memberId',
   authenticate,

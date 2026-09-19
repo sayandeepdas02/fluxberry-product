@@ -10,13 +10,18 @@ export interface Credentials {
 }
 
 /** Sign up. With Supabase: real account. Without: dev test-token path. */
-export async function signUp(input: { name: string } & Credentials): Promise<{ needsEmailConfirm: boolean }> {
+export async function signUp(
+  input: { name: string; redirectTo?: string } & Credentials,
+): Promise<{ needsEmailConfirm: boolean }> {
   if (hasSupabase) {
     const sb = getSupabaseClient()!;
     const { data, error } = await sb.auth.signUp({
       email: input.email,
       password: input.password,
-      options: { data: { name: input.name } },
+      options: {
+        data: { name: input.name },
+        ...(input.redirectTo ? { emailRedirectTo: input.redirectTo } : {}),
+      },
     });
     if (error) throw new Error(error.message);
     return { needsEmailConfirm: !data.session };

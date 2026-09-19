@@ -6,21 +6,55 @@ import type {
   Role,
   WorkspaceDto,
   WorkspaceMemberDto,
+  WorkspaceInviteDto,
+  PublicInviteDto,
+  AcceptInviteResultDto,
 } from '@fluxberry/shared';
 import crypto from 'node:crypto';
 import { workspaceRepository } from '../repositories/workspace.repository';
 import { memberRepository } from '../repositories/member.repository';
 import { userRepository } from '../repositories/user.repository';
+import { workspaceInviteRepository } from '../repositories/workspace-invite.repository';
 import { toWorkspaceDto, toMemberDto } from '../serializers/workspace.serializer';
 import { uniqueSlug } from '../utils/slug';
-import { conflict, forbidden, notFound } from '../utils/errors';
+import { conflict, forbidden, notFound, badRequest } from '../utils/errors';
 import { assertValidImage } from '../utils/file-validation';
 import { getStorageProvider } from '../integrations';
 import { auditService } from './audit.service';
 import { eventBus } from '../events/event-bus';
+import { secureToken } from '../utils/ids';
+import { config } from '../config/env';
+import { emailTemplates } from '../integrations';
+import { jobQueue } from '../queue/job-queue';
+import type { WorkspaceInviteDoc } from '../models/workspace-invite.model';
+import type { HydratedDocument } from 'mongoose';
 
-function nameFromEmail(email: string): string {
-  return email.split('@')[0].replace(/[._-]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+const INVITE_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000;
+
+async function toInviteDto(
+  invite: HydratedDocument<WorkspaceInviteDoc>,
+  inviter: { _id: unknown; name: string } | null,
+): Promise<WorkspaceInviteDto> {
+  return {
+    id: String(invite._id),
+    email: invite.email,
+    role: invite.role as Role,
+    status: invite.status as WorkspaceInviteDto['status'],
+    invitedBy: inviter ? { id: String(inviter._id), name: inviter.name } : { id: '', name: 'Unknown' },
+    createdAt: (invite as unknown as { createdAt: Date }).createdAt.toISOString(),
+    expiresAt: invite.expiresAt.toISOString(),
+  };
+}
+
+/** Flip a stale PENDING invite to EXPIRED in place, so status is always fresh on read. */
+async function lazyExpire(
+  invite: HydratedDocument<WorkspaceInviteDoc>,
+): Promise<HydratedDocument<WorkspaceInviteDoc>> {
+  if (invite.status === 'PENDING' && invite.expiresAt.getTime() < Date.now()) {
+    const updated = await workspaceInviteRepository.updateStatus(String(invite._id), { status: 'EXPIRED' });
+    return updated ?? invite;
+  }
+  return invite;
 }
 
 export const workspaceService = {
@@ -126,35 +160,206 @@ export const workspaceService = {
       .filter((x): x is WorkspaceMemberDto => x !== null);
   },
 
-  async inviteMember(
+  /** Create a pending invite + email a token link; membership is only granted on acceptance. */
+  async createInvite(
     workspaceId: string,
     actorId: string,
     input: InviteMemberInput,
-  ): Promise<WorkspaceMemberDto> {
-    let user = await userRepository.findByEmail(input.email);
-    if (!user) {
-      user = await userRepository.create({
-        email: input.email.toLowerCase().trim(),
-        name: nameFromEmail(input.email),
-      });
-    }
-    const existing = await memberRepository.find(workspaceId, String(user._id));
-    if (existing) throw conflict('This person is already a member');
+  ): Promise<WorkspaceInviteDto> {
+    const email = input.email.toLowerCase().trim();
 
-    const member = await memberRepository.create({
+    const existingUser = await userRepository.findByEmail(email);
+    if (existingUser) {
+      const existingMember = await memberRepository.find(workspaceId, String(existingUser._id));
+      if (existingMember) throw conflict('This person is already a member of this workspace');
+    }
+
+    const pending = await workspaceInviteRepository.findActivePendingByEmail(workspaceId, email);
+    if (pending) throw conflict('An invite is already pending for this email — resend or revoke it instead');
+
+    const token = secureToken(24);
+    const expiresAt = new Date(Date.now() + INVITE_EXPIRY_MS);
+    const invite = await workspaceInviteRepository.create({
       workspaceId: workspaceId as any,
-      userId: user._id,
+      email,
       role: input.role,
+      invitedBy: actorId as any,
+      token,
+      status: 'PENDING',
+      expiresAt,
     });
+
+    const [workspace, inviter] = await Promise.all([
+      workspaceRepository.findById(workspaceId),
+      userRepository.findById(actorId),
+    ]);
+
+    const link = `${config.publicAppUrl}/accept-invite/${token}`;
+    const template = emailTemplates.workspaceInvite({
+      inviterName: inviter?.name ?? 'A teammate',
+      workspaceName: workspace?.name ?? 'a workspace',
+      role: input.role,
+      link,
+    });
+    await jobQueue.enqueue(
+      'SEND_EMAIL',
+      { to: email, subject: template.subject, html: template.html, text: template.text },
+      { idempotencyKey: `workspace-invite:${invite._id}` },
+    );
+
     await auditService.log({
       workspaceId,
       userId: actorId,
       action: 'member.invited',
+      resourceType: 'workspace_invite',
+      resourceId: String(invite._id),
+      metadata: { email, role: input.role },
+    });
+
+    return toInviteDto(invite, inviter ? { _id: inviter._id, name: inviter.name } : null);
+  },
+
+  async listInvites(workspaceId: string): Promise<WorkspaceInviteDto[]> {
+    const invites = await workspaceInviteRepository.listByWorkspace(workspaceId);
+    const expired = await Promise.all(invites.map((i) => lazyExpire(i)));
+    const inviters = await userRepository.findByIds(expired.map((i) => String(i.invitedBy)));
+    const inviterById = new Map(inviters.map((u) => [String(u._id), u]));
+    return Promise.all(
+      expired.map((i) => toInviteDto(i, inviterById.get(String(i.invitedBy)) ?? null)),
+    );
+  },
+
+  async resendInvite(workspaceId: string, inviteId: string, actorId: string): Promise<WorkspaceInviteDto> {
+    const invite = await workspaceInviteRepository.findById(inviteId);
+    if (!invite || String(invite.workspaceId) !== workspaceId) throw notFound('Invite not found');
+    if (invite.status === 'ACCEPTED') throw badRequest('This invite has already been accepted');
+    if (invite.status === 'REVOKED') throw badRequest('This invite was revoked — send a new one instead');
+
+    const token = secureToken(24);
+    const expiresAt = new Date(Date.now() + INVITE_EXPIRY_MS);
+    const updated = await workspaceInviteRepository.updateStatus(inviteId, {
+      token,
+      expiresAt,
+      status: 'PENDING',
+    });
+    if (!updated) throw notFound('Invite not found');
+
+    const [workspace, inviter] = await Promise.all([
+      workspaceRepository.findById(workspaceId),
+      userRepository.findById(actorId),
+    ]);
+
+    const link = `${config.publicAppUrl}/accept-invite/${token}`;
+    const template = emailTemplates.workspaceInvite({
+      inviterName: inviter?.name ?? 'A teammate',
+      workspaceName: workspace?.name ?? 'a workspace',
+      role: updated.role,
+      link,
+    });
+    await jobQueue.enqueue(
+      'SEND_EMAIL',
+      { to: updated.email, subject: template.subject, html: template.html, text: template.text },
+      { idempotencyKey: `workspace-invite:${updated._id}:${token}` },
+    );
+
+    await auditService.log({
+      workspaceId,
+      userId: actorId,
+      action: 'member.resent',
+      resourceType: 'workspace_invite',
+      resourceId: String(updated._id),
+      metadata: { email: updated.email, role: updated.role },
+    });
+
+    return toInviteDto(updated, inviter ? { _id: inviter._id, name: inviter.name } : null);
+  },
+
+  async revokeInvite(workspaceId: string, inviteId: string, actorId: string): Promise<void> {
+    const invite = await workspaceInviteRepository.findById(inviteId);
+    if (!invite || String(invite.workspaceId) !== workspaceId) throw notFound('Invite not found');
+    if (invite.status === 'ACCEPTED') {
+      throw badRequest('This invite has already been accepted; remove the member instead');
+    }
+    await workspaceInviteRepository.updateStatus(inviteId, { status: 'REVOKED' });
+    await auditService.log({
+      workspaceId,
+      userId: actorId,
+      action: 'member.invite_revoked',
+      resourceType: 'workspace_invite',
+      resourceId: inviteId,
+      metadata: { email: invite.email },
+    });
+  },
+
+  async getInviteByToken(token: string): Promise<PublicInviteDto> {
+    let invite = await workspaceInviteRepository.findByToken(token);
+    if (!invite) throw notFound('Invite not found');
+    invite = await lazyExpire(invite);
+
+    const [workspace, inviter] = await Promise.all([
+      workspaceRepository.findById(String(invite.workspaceId)),
+      userRepository.findById(String(invite.invitedBy)),
+    ]);
+
+    return {
+      email: invite.email,
+      role: invite.role as Role,
+      status: invite.status as PublicInviteDto['status'],
+      workspaceName: workspace?.name ?? 'a workspace',
+      workspaceLogoUrl: workspace?.logoUrl ?? null,
+      inviterName: inviter?.name ?? 'A teammate',
+      expiresAt: invite.expiresAt.toISOString(),
+    };
+  },
+
+  async acceptInvite(token: string, userId: string): Promise<AcceptInviteResultDto> {
+    let invite = await workspaceInviteRepository.findByToken(token);
+    if (!invite) throw notFound('Invite not found');
+    if (invite.status === 'REVOKED') throw conflict('This invite has been revoked');
+
+    invite = await lazyExpire(invite);
+    if (invite.status === 'EXPIRED') throw conflict('This invite has expired — ask an admin to resend it');
+
+    if (invite.status === 'ACCEPTED' && String(invite.acceptedBy) !== userId) {
+      throw conflict('This invite has already been accepted');
+    }
+
+    const user = await userRepository.findById(userId);
+    if (!user) throw notFound('User not found');
+    if (user.email.toLowerCase() !== invite.email) {
+      throw forbidden('This invite was sent to a different email address than the one you are logged in as');
+    }
+
+    const workspaceId = String(invite.workspaceId);
+    let member = await memberRepository.find(workspaceId, userId);
+    if (!member) {
+      member = await memberRepository.create({ workspaceId: workspaceId as any, userId: userId as any, role: invite.role as Role });
+    }
+
+    if (invite.status !== 'ACCEPTED') {
+      await workspaceInviteRepository.updateStatus(String(invite._id), {
+        status: 'ACCEPTED',
+        acceptedAt: new Date(),
+        acceptedBy: userId as any,
+      });
+    }
+
+    await auditService.log({
+      workspaceId,
+      userId,
+      action: 'member.accepted',
       resourceType: 'workspace_member',
       resourceId: String(member._id),
-      metadata: { email: input.email, role: input.role },
+      metadata: { email: invite.email, role: invite.role },
     });
-    return toMemberDto(member, user);
+
+    const workspace = await workspaceRepository.findById(workspaceId);
+    if (!workspace) throw notFound('Workspace not found');
+
+    return {
+      member: toMemberDto(member, user),
+      workspace: { id: String(workspace._id), name: workspace.name, slug: workspace.slug },
+    };
   },
 
   async updateMemberRole(

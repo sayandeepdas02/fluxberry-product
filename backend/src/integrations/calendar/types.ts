@@ -28,6 +28,16 @@ export interface CalendarEventResult {
   htmlLink?: string | null;
 }
 
+export interface CalendarFreeBusyQuery {
+  timeMin: Date;
+  timeMax: Date;
+}
+
+export interface CalendarBusyBlock {
+  start: Date;
+  end: Date;
+}
+
 /** Provider-agnostic Google Calendar OAuth + event creation (spec: interview scheduling, binary.so parity). */
 export interface CalendarProvider {
   readonly name: string;
@@ -39,4 +49,6 @@ export interface CalendarProvider {
   refreshAccessToken(refreshToken: string): Promise<CalendarTokens>;
   createEvent(tokens: CalendarTokens, input: CalendarEventInput): Promise<CalendarEventResult>;
   deleteEvent(tokens: CalendarTokens, eventId: string): Promise<void>;
+  /** Organizer-only busy blocks for their own primary calendar (spec: interview availability picker). */
+  getFreeBusy(tokens: CalendarTokens, query: CalendarFreeBusyQuery): Promise<CalendarBusyBlock[]>;
 }

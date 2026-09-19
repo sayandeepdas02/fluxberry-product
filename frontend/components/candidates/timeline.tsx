@@ -41,14 +41,23 @@ export function Timeline({ entries }: { entries: TimelineEntryDto[] }) {
   const visible = entries.filter((e) => !HIDDEN.has(e.type));
   if (!visible.length) return <p className="text-sm text-muted-foreground">No activity yet.</p>;
   return (
-    <ol className="relative space-y-4 border-l border-border pl-5">
-      {visible.map((e) => (
-        <li key={e.id} className="relative">
-          <span className="absolute -left-[23px] top-1 size-2.5 rounded-full border-2 border-background bg-primary" />
-          <div className="text-sm font-medium text-foreground">{describe(e)}</div>
-          <div className="text-xs text-muted-foreground">
-            {format(new Date(e.createdAt), 'MMM d, yyyy · h:mm a')}
-            {e.actor && e.actor !== 'system' ? ` · ${e.actor}` : ''}
+    <ol className="space-y-0">
+      {visible.map((e, i) => (
+        <li key={e.id} className="relative flex gap-3">
+          {/* Connecting line to next item */}
+          {i < visible.length - 1 && (
+            <div className="absolute left-[6px] top-[18px] bottom-0 w-px bg-border" />
+          )}
+          {/* Dot */}
+          <div className="relative z-10 mt-1 flex h-3.5 w-3.5 shrink-0 items-center justify-center">
+            <span className="size-2.5 rounded-full border-2 border-background bg-primary" />
+          </div>
+          <div className="pb-5">
+            <div className="text-sm font-medium text-foreground">{describe(e)}</div>
+            <div className="text-xs text-muted-foreground">
+              {format(new Date(e.createdAt), 'MMM d, yyyy · h:mm a')}
+              {e.actor && e.actor !== 'system' ? ` · ${e.actor}` : ''}
+            </div>
           </div>
         </li>
       ))}

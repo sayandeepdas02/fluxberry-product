@@ -1,6 +1,13 @@
 import crypto from 'node:crypto';
 import { config } from '../../config/env';
-import type { CalendarProvider, CalendarTokens, CalendarEventInput, CalendarEventResult } from './types';
+import type {
+  CalendarProvider,
+  CalendarTokens,
+  CalendarEventInput,
+  CalendarEventResult,
+  CalendarFreeBusyQuery,
+  CalendarBusyBlock,
+} from './types';
 
 /**
  * Simulated Google Calendar used when no GOOGLE_CLIENT_ID/SECRET are
@@ -46,5 +53,23 @@ export class MockCalendarProvider implements CalendarProvider {
 
   async deleteEvent(): Promise<void> {
     // No real event to delete.
+  }
+
+  /** Two fixed fabricated busy blocks so the availability picker's shading is exercisable without real Google. */
+  async getFreeBusy(_tokens: CalendarTokens, query: CalendarFreeBusyQuery): Promise<CalendarBusyBlock[]> {
+    const dayStart = new Date(query.timeMin);
+    const fixedBlocks = [
+      { startHour: 10, endHour: 10.5 },
+      { startHour: 14, endHour: 15 },
+    ];
+    return fixedBlocks
+      .map(({ startHour, endHour }) => {
+        const start = new Date(dayStart);
+        start.setHours(Math.floor(startHour), (startHour % 1) * 60, 0, 0);
+        const end = new Date(dayStart);
+        end.setHours(Math.floor(endHour), (endHour % 1) * 60, 0, 0);
+        return { start, end };
+      })
+      .filter((b) => b.start < query.timeMax && b.end > query.timeMin);
   }
 }
