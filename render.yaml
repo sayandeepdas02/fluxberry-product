@@ -1,0 +1,73 @@
+envVarGroups:
+  - name: fluxberry-backend-shared
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: AUTH_PROVIDER
+        value: clerk
+      - key: AUTH_ALLOW_TEST_TOKENS
+        value: "false"
+      - key: MONGODB_URI
+        sync: false
+      - key: CLERK_SECRET_KEY
+        sync: false
+      - key: CLERK_PUBLISHABLE_KEY
+        sync: false
+      - key: CLERK_WEBHOOK_SECRET
+        sync: false
+      - key: CAREERS_PREVIEW_SECRET
+        sync: false
+      - key: PUBLIC_API_URL
+        sync: false
+      - key: PUBLIC_APP_URL
+        value: https://fluxberry.in
+      - key: CORS_ORIGINS
+        value: https://fluxberry.in,https://www.fluxberry.in
+      - key: STORAGE_ENDPOINT
+        sync: false
+      - key: STORAGE_REGION
+        sync: false
+      - key: STORAGE_BUCKET
+        sync: false
+      - key: STORAGE_ACCESS_KEY
+        sync: false
+      - key: STORAGE_SECRET_KEY
+        sync: false
+      - key: STORAGE_PUBLIC_URL
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: AI_PROVIDER
+        value: anthropic
+      - key: AI_API_KEY
+        sync: false
+      - key: AI_MODEL
+        sync: false
+      - key: SENTRY_DSN
+        sync: false
+      - key: SENTRY_ENVIRONMENT
+        value: production
+      - key: POSTHOG_KEY
+        sync: false
+
+services:
+  - type: web
+    name: fluxberry-api
+    env: node
+    plan: starter
+    buildCommand: npm install && npm run build --workspace @fluxberry/backend
+    startCommand: npm run start --workspace @fluxberry/backend
+    healthCheckPath: /health
+    envVars:
+      - fromGroup: fluxberry-backend-shared
+
+  - type: worker
+    name: fluxberry-worker
+    env: node
+    plan: starter
+    buildCommand: npm install && npm run build --workspace @fluxberry/backend
+    startCommand: npm run start:worker --workspace @fluxberry/backend
+    envVars:
+      - fromGroup: fluxberry-backend-shared
