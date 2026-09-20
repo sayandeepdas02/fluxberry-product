@@ -41,7 +41,7 @@ export function CareersJobs({
                 {salary ? ` · ${salary}` : ''}
               </div>
             </div>
-            <span className="shrink-0 text-sm font-medium text-primary">View →</span>
+            <span className="shrink-0 text-sm font-medium text-primary">Apply →</span>
           </a>
         );
       })}
