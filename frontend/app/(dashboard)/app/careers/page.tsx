@@ -107,7 +107,7 @@ export default function CareersBuilderPage() {
       const fd = new FormData();
       fd.set('avatar', file);
       const result = await api.post<{ url: string }>(`/api/v1/careers/avatar`, fd);
-      set({ team: { ...config.team, members: config.team.members.map((m, j) => j === idx ? { ...m, avatarUrl: result.url } : m) } });
+      setConfig((c) => c ? { ...c, team: { ...c.team, members: c.team.members.map((m, j) => j === idx ? { ...m, avatarUrl: result.url } : m) } } : c);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Could not upload avatar');
     } finally {
@@ -238,10 +238,10 @@ export default function CareersBuilderPage() {
               </button>
               <Input placeholder="Name" value={m.name} onChange={(e) => set({ team: { ...config.team, members: config.team.members.map((x, j) => j === i ? { ...x, name: e.target.value } : x) } })} className="max-w-[150px]" />
               <Input placeholder="Role" value={m.role ?? ''} onChange={(e) => set({ team: { ...config.team, members: config.team.members.map((x, j) => j === i ? { ...x, role: e.target.value } : x) } })} />
-              <Button variant="ghost" size="icon" onClick={() => set({ team: { ...config.team, members: config.team.members.filter((_, j) => j !== i) } })}><Trash2 className="size-4" /></Button>
+              <Button variant="ghost" size="icon" disabled={uploadingAvatarIdx !== null} onClick={() => set({ team: { ...config.team, members: config.team.members.filter((_, j) => j !== i) } })}><Trash2 className="size-4" /></Button>
             </div>
           ))}
-          <Button variant="ghost" size="sm" onClick={() => set({ team: { ...config.team, members: [...config.team.members, { name: '', role: '', avatarUrl: '' }] } })}><Plus className="size-4" /> Add member</Button>
+          <Button variant="ghost" size="sm" disabled={uploadingAvatarIdx !== null} onClick={() => set({ team: { ...config.team, members: [...config.team.members, { name: '', role: '', avatarUrl: '' }] } })}><Plus className="size-4" /> Add member</Button>
         </div>
       </SectionCard>
 
