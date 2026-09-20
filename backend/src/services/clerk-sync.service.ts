@@ -1,5 +1,5 @@
 import type { WebhookEvent } from '@clerk/backend';
-import type { OrganizationMembershipJSON, UserJSON } from '@clerk/backend';
+import type { OrganizationJSON, OrganizationMembershipJSON, UserJSON } from '@clerk/backend';
 import type { Role } from '@fluxberry/shared';
 import { ROLES } from '@fluxberry/shared';
 import { userRepository } from '../repositories/user.repository';
@@ -38,6 +38,9 @@ export const clerkSyncService = {
       case 'user.updated':
         await this.syncUser(event.data);
         return;
+      case 'organization.created':
+        await this.syncOrganizationCreated(event.data as OrganizationJSON);
+        return;
       case 'organizationMembership.created':
         await this.syncMembershipCreated(event.data);
         return;
@@ -51,6 +54,21 @@ export const clerkSyncService = {
         // Other event types (organization.*, session.*, etc.) are not synced yet.
         return;
     }
+  },
+
+  /** `organization.created` — associate the Clerk org with an existing workspace by slug, or log if none found. */
+  async syncOrganizationCreated(data: OrganizationJSON): Promise<void> {
+    const existing = await workspaceRepository.findByClerkOrgId(data.id);
+    if (existing) return; // already associated
+
+    // Try to find a workspace by slug and backfill the clerkOrgId.
+    const workspace = await workspaceRepository.findBySlug(data.slug);
+    if (workspace) {
+      await workspaceRepository.update(String(workspace._id), { clerkOrgId: data.id });
+      logger.info({ clerkOrgId: data.id, workspaceId: String(workspace._id) }, 'backfilled clerkOrgId on workspace via organization.created');
+      return;
+    }
+    logger.warn({ clerkOrgId: data.id, slug: data.slug }, 'organization.created: no matching workspace found by slug');
   },
 
   /** `user.created` / `user.updated` — upsert the Mongo User by clerkId. */
@@ -92,10 +110,17 @@ export const clerkSyncService = {
 
   /** `organizationMembership.created` — create the local WorkspaceMember row. */
   async syncMembershipCreated(data: OrganizationMembershipJSON): Promise<void> {
-    const workspace = await workspaceRepository.findByClerkOrgId(data.organization.id);
+    let workspace = await workspaceRepository.findByClerkOrgId(data.organization.id);
     if (!workspace) {
-      logger.warn({ clerkOrgId: data.organization.id }, 'clerk org membership webhook: no matching workspace');
-      return;
+      // Try to find by slug and backfill clerkOrgId for workspaces created before Clerk integration.
+      workspace = await workspaceRepository.findBySlug(data.organization.slug);
+      if (workspace) {
+        await workspaceRepository.update(String(workspace._id), { clerkOrgId: data.organization.id });
+        logger.info({ clerkOrgId: data.organization.id, workspaceId: String(workspace._id) }, 'backfilled clerkOrgId on workspace via membership webhook');
+      } else {
+        logger.warn({ clerkOrgId: data.organization.id }, 'clerk org membership webhook: no matching workspace');
+        return;
+      }
     }
 
     const user = await this.ensureLocalUserForMembership(data);

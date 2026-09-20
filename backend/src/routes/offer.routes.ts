@@ -5,13 +5,12 @@ import { offerController } from '../controllers/offer.controller';
 import { createOfferSchema } from '@fluxberry/shared';
 
 export const offerRouter = Router();
-const guard = [authenticate, resolveWorkspace, requireWorkspace];
+const guard = [authenticate, resolveWorkspace, requireWorkspace, requireFeature('OFFER_MANAGEMENT')];
 
 offerRouter.post(
   '/applications/:applicationId/offers',
   ...guard,
   requireRole('recruiter'),
-  requireFeature('OFFER_MANAGEMENT'),
   validateBody(createOfferSchema),
   offerController.create,
 );

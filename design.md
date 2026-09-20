@@ -175,7 +175,7 @@ The marketing pages use a "ruled notebook" metaphor. Every visual treatment come
 
 ### 3.3 Surface Treatments
 
-**Dotted surface** (`.mk-surface`): `radial-gradient(ink-200 1px, transparent 1px); background-size: 18px 18px` on `bg-ink-50`. Graph paper texture for mockup panels.
+**Dotted surface** (`.mk-surface`): `bg-[radial-gradient(theme(colors.ink.200)_1px,transparent_1px)]` (resolves to `radial-gradient(#e8e8e8 1px, transparent 1px)`); `background-size: 18px 18px` on `bg-ink-50`. Graph paper texture for mockup panels.
 
 **Grid background** (`.mk-grid-bg`): 68px grid in `ink-200` at 55% opacity with a radial mask that fades edges. Used behind blog hero and auth pages.
 
@@ -264,6 +264,7 @@ All 26 components use `cn()` from `lib/utils.ts` for class merging. CVA (class-v
 
 #### Kbd
 - `h-[18px] min-w-[18px] rounded border bg-muted px-1 font-mono text-[10px]`
+- Kbd is the one exception to the 12px minimum rule — keyboard hints use 10px for visual compactness at their small physical size.
 
 ### 4.2 Marketing Primitives (`components/marketing/`)
 
@@ -347,7 +348,7 @@ All 26 components use `cn()` from `lib/utils.ts` for class merging. CVA (class-v
 - Default transition: `transition-colors` (for hover/focus state changes)
 - Modal/popover: `duration-200 ease-[cubic-bezier(0.23,1,0.32,1)]` (snappy spring)
 - Marketing hover: `duration-500` (deliberate, not reactive)
-- Always respect `prefers-reduced-motion` — use `motion-reduce:transition-none` or `@supports (animation-timeline: view())`
+- Always respect `prefers-reduced-motion` — use `motion-reduce:transition-none`. Scroll-driven reveals in `globals.css` are nested inside both `@media (prefers-reduced-motion: no-preference)` and `@supports (animation-timeline: view())` so both conditions must pass.
 
 ### 6.2 Animations
 
@@ -452,7 +453,7 @@ These rules are non-negotiable. Every PR must pass them.
 ### General
 1. **No new typefaces.** Geist Sans and Geist Mono only.
 2. **No inline styles.** Everything goes through Tailwind utilities or CSS custom properties.
-3. **No raw color values in TSX.** Dashboard uses `hsl(var(--token))`. Marketing uses `berry-*` / `ink-*` tokens.
+3. **No raw color values in TSX.** Dashboard uses `hsl(var(--token))`. Marketing uses `berry-*` / `ink-*` tokens. Exception: one-off `hsl()`/`rgba()` values are acceptable in component variant definitions (CVA) and shadow tokens where no CSS custom property exists.
 4. **No `!important`.** If you need specificity, restructure the component.
 5. **Use `cn()` for all conditional classes.** Never template-literal class strings.
 

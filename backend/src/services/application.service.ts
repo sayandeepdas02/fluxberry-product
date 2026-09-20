@@ -101,6 +101,7 @@ export const applicationService = {
       resume: fileRef,
       resumeStatus: 'PENDING',
       parseError: null,
+      ...(config.features.AV_SCANNING ? { avScanStatus: 'PENDING', avScanDetails: null, avScannedAt: null } : {}),
     });
 
     // 3. Create the application (unique index enforces one per job+candidate).

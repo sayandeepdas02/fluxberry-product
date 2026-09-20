@@ -13,7 +13,7 @@ import { emailTemplates } from '../integrations';
 import { jobQueue } from '../queue/job-queue';
 import { secureToken } from '../utils/ids';
 import { config } from '../config/env';
-import { badRequest, notFound } from '../utils/errors';
+import { badRequest, notFound, conflict } from '../utils/errors';
 
 interface Actor {
   userId: string;
@@ -69,7 +69,6 @@ export const offerService = {
   async send(workspaceId: string, offerId: string, actor: Actor): Promise<OfferDto> {
     const offer = await offerRepository.findInWorkspace(workspaceId, offerId);
     if (!offer) throw notFound('Offer not found');
-    if (offer.status !== 'DRAFT') throw badRequest('Only draft offers can be sent');
 
     const application = await applicationRepository.findInWorkspace(workspaceId, String(offer.applicationId));
     if (!application) throw notFound('Application not found');
@@ -81,11 +80,12 @@ export const offerService = {
     if (!candidate || !job || !workspace) throw notFound('Offer not found');
 
     const token = secureToken(24);
-    const updated = await offerRepository.update(offerId, {
-      status: 'SENT',
-      token,
-      sentAt: new Date(),
-    });
+    const updated = await offerRepository.updateWithCondition(
+      offerId,
+      { status: 'SENT', token, sentAt: new Date() },
+      { status: 'DRAFT' },
+    );
+    if (!updated) throw conflict('Offer has already been sent or is no longer in draft');
 
     const link = `${config.publicAppUrl}/offer/${token}`;
     const email = emailTemplates.offerSent({
@@ -128,9 +128,13 @@ export const offerService = {
   async rescind(workspaceId: string, offerId: string, actor: Actor): Promise<OfferDto> {
     const offer = await offerRepository.findInWorkspace(workspaceId, offerId);
     if (!offer) throw notFound('Offer not found');
-    if (offer.status !== 'SENT') throw badRequest('Only sent offers can be rescinded');
 
-    const updated = await offerRepository.update(offerId, { status: 'RESCINDED' });
+    const updated = await offerRepository.updateWithCondition(
+      offerId,
+      { status: 'RESCINDED' },
+      { status: 'SENT' },
+    );
+    if (!updated) throw conflict('Only sent offers can be rescinded');
 
     await eventBus.publish({
       workspaceId,
@@ -191,7 +195,7 @@ export const offerService = {
     if (!offer) throw notFound('Offer not found');
     if (offer.status !== 'SENT') throw badRequest('This offer is no longer awaiting a response');
     if (offer.expiresAt.getTime() < Date.now()) {
-      await offerRepository.update(String(offer._id), { status: 'EXPIRED' });
+      await offerRepository.updateWithCondition(String(offer._id), { status: 'EXPIRED' }, { status: 'SENT' });
       throw badRequest('This offer has expired');
     }
 
@@ -211,11 +215,12 @@ export const offerService = {
     const applicationId = String(offer.applicationId);
 
     if (input.decision === 'ACCEPT') {
-      const updated = await offerRepository.update(String(offer._id), {
-        status: 'ACCEPTED',
-        respondedAt: new Date(),
-        decisionNote: input.note ?? null,
-      });
+      const updated = await offerRepository.updateWithCondition(
+        String(offer._id),
+        { status: 'ACCEPTED', respondedAt: new Date(), decisionNote: input.note ?? null },
+        { status: 'SENT' },
+      );
+      if (!updated) throw conflict('This offer is no longer awaiting a response');
       await stageService.hire(workspaceId, applicationId, systemActor);
       await eventBus.publish({
         workspaceId,
@@ -234,11 +239,12 @@ export const offerService = {
       });
     }
 
-    const updated = await offerRepository.update(String(offer._id), {
-      status: 'DECLINED',
-      respondedAt: new Date(),
-      decisionNote: input.note ?? null,
-    });
+    const updated = await offerRepository.updateWithCondition(
+      String(offer._id),
+      { status: 'DECLINED', respondedAt: new Date(), decisionNote: input.note ?? null },
+      { status: 'SENT' },
+    );
+    if (!updated) throw conflict('This offer is no longer awaiting a response');
     await eventBus.publish({
       workspaceId,
       type: 'offer.declined',

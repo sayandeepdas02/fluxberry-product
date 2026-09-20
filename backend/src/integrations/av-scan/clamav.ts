@@ -40,12 +40,16 @@ export class ClamAvProvider implements AvScanProvider {
 
       socket.on('end', () => {
         const reply = Buffer.concat(chunks).toString('utf8').replace(/\0/g, '').trim();
-        if (reply.endsWith('OK')) {
+        if (/^stream:\s+OK$/i.test(reply)) {
           resolve({ clean: true });
-        } else {
-          const match = reply.match(/stream:\s*(.+)\s+FOUND/i);
-          resolve({ clean: false, signature: match?.[1] ?? reply });
+          return;
         }
+        const match = reply.match(/^stream:\s*(.+)\s+FOUND$/i);
+        if (match) {
+          resolve({ clean: false, signature: match[1] });
+          return;
+        }
+        reject(new Error(`Unexpected clamd response: ${reply || '<empty>'}`));
       });
 
       socket.on('timeout', () => {

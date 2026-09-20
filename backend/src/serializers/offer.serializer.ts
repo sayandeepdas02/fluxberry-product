@@ -21,7 +21,6 @@ export function toOfferDto(o: any): OfferDto {
     status: o.status,
     compensation: toCompensationDto(o.compensation),
     note: o.note ?? null,
-    token: o.token ?? null,
     expiresAt: new Date(o.expiresAt).toISOString(),
     sentAt: o.sentAt ? new Date(o.sentAt).toISOString() : null,
     respondedAt: o.respondedAt ? new Date(o.respondedAt).toISOString() : null,

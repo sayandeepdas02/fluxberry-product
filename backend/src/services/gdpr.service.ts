@@ -1,10 +1,12 @@
 import type { CreateGdprRequestInput } from '@fluxberry/shared';
+import { CandidateModel } from '../models/candidate.model';
 import { candidateRepository } from '../repositories/candidate.repository';
 import { gdprRequestRepository } from '../repositories/gdpr-request.repository';
 import { eventBus } from '../events/event-bus';
 import { jobQueue } from '../queue/job-queue';
 import { auditService } from './audit.service';
-import { notFound, badRequest } from '../utils/errors';
+import { logger } from '../utils/logger';
+import { notFound, badRequest, conflict } from '../utils/errors';
 
 export const gdprService = {
   /**
@@ -21,9 +23,16 @@ export const gdprService = {
   ) {
     const candidate = await candidateRepository.findInWorkspace(workspaceId, candidateId);
     if (!candidate) throw notFound('Candidate not found');
-    if (candidate.gdprStatus && candidate.gdprStatus !== 'ACTIVE') {
-      throw badRequest('A GDPR request is already pending or completed for this candidate');
-    }
+
+    const pendingStatus = input.type === 'DELETE' ? 'DELETION_PENDING' : 'ANONYMIZATION_PENDING';
+
+    // Atomic ACTIVE -> PENDING transition prevents concurrent requests.
+    const updated = await CandidateModel.findOneAndUpdate(
+      { _id: candidateId, workspaceId, $or: [{ gdprStatus: 'ACTIVE' }, { gdprStatus: { $exists: false } }] },
+      { gdprStatus: pendingStatus, gdprRequestedAt: new Date(), gdprRequestedBy: actorUserId, gdprDeletionReason: input.reason },
+      { new: true },
+    );
+    if (!updated) throw conflict('Candidate is not in ACTIVE state or a deletion is already in progress');
 
     const request = await gdprRequestRepository.create({
       workspaceId: workspaceId as any,
@@ -32,14 +41,6 @@ export const gdprService = {
       status: 'PENDING',
       requestedBy: actorUserId as any,
       reason: input.reason,
-    });
-
-    const pendingStatus = input.type === 'DELETE' ? 'DELETION_PENDING' : 'ANONYMIZATION_PENDING';
-    await candidateRepository.update(candidateId, {
-      gdprStatus: pendingStatus,
-      gdprRequestedAt: new Date(),
-      gdprRequestedBy: actorUserId,
-      gdprDeletionReason: input.reason,
     });
 
     await auditService.log({
@@ -63,11 +64,18 @@ export const gdprService = {
     });
 
     const jobType = input.type === 'DELETE' ? 'DELETE_CANDIDATE' : 'ANONYMIZE_CANDIDATE';
-    await jobQueue.enqueue(
-      jobType,
-      { workspaceId, candidateId, gdprRequestId: String(request._id) },
-      { idempotencyKey: `${jobType.toLowerCase()}:${String(request._id)}` },
-    );
+    try {
+      await jobQueue.enqueue(
+        jobType,
+        { workspaceId, candidateId, gdprRequestId: String(request._id) },
+        { idempotencyKey: `${jobType.toLowerCase()}:${String(request._id)}` },
+      );
+    } catch (err) {
+      logger.error({ err, candidateId, requestId: String(request._id) }, 'Failed to enqueue GDPR job; restoring candidate to ACTIVE');
+      await CandidateModel.findByIdAndUpdate(candidateId, { gdprStatus: 'ACTIVE', gdprRequestedAt: null, gdprRequestedBy: null, gdprDeletionReason: null });
+      await gdprRequestRepository.update(String(request._id), { status: 'FAILED' });
+      throw err;
+    }
 
     return request;
   },

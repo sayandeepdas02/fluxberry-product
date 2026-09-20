@@ -7,9 +7,9 @@ export const createOfferSchema = z.object({
   currency: z.string().min(1).max(10).default('USD'),
   bonus: z.number().optional(),
   equity: z.string().max(200).optional(),
-  startDate: z.coerce.date(),
+  startDate: z.union([z.string().min(1), z.date()]).pipe(z.coerce.date()),
   employmentType: z.string().optional(),
-  expiresAt: z.coerce.date(),
+  expiresAt: z.union([z.string().min(1), z.date()]).pipe(z.coerce.date()),
   note: z.string().max(2000).optional(),
 });
 export type CreateOfferInput = z.infer<typeof createOfferSchema>;
@@ -43,7 +43,6 @@ export type OfferDto = {
   status: OfferStatus;
   compensation: OfferCompensationDto;
   note?: string | null;
-  token?: string | null;
   expiresAt: string;
   sentAt?: string | null;
   respondedAt?: string | null;

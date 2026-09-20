@@ -9,4 +9,6 @@ export const offerRepository = {
     OfferModel.find({ applicationId }).sort({ createdAt: -1 }),
   update: (id: string, patch: Record<string, any>) =>
     OfferModel.findByIdAndUpdate(id, patch, { new: true }),
+  updateWithCondition: (id: string, patch: Record<string, any>, condition: Record<string, any>) =>
+    OfferModel.findOneAndUpdate({ _id: id, ...condition }, patch, { new: true }),
 };

@@ -120,6 +120,20 @@ export const webhookEndpointService = {
         signal: AbortSignal.timeout(10_000),
       });
 
+      const reader = response.body?.getReader();
+      let responseBody = '';
+      if (reader) {
+        const decoder = new TextDecoder();
+        let bytes = 0;
+        while (bytes < 2048) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          responseBody += decoder.decode(value, { stream: true });
+          bytes += value.length;
+        }
+        reader.cancel();
+      }
+
       await webhookDeliveryRepository.create({
         webhookEndpointId: endpoint._id,
         workspaceId,
@@ -127,7 +141,7 @@ export const webhookEndpointService = {
         status: response.ok ? 'SUCCESS' : 'FAILED',
         requestPayload: envelope,
         responseStatus: response.status,
-        responseBodySnippet: (await response.text()).slice(0, 2048),
+        responseBodySnippet: responseBody.slice(0, 2048),
         deliveredAt: new Date(),
       });
 

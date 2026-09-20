@@ -30,7 +30,11 @@ export class ClerkVerifier implements AuthTokenVerifier {
       throw unauthorized('Invalid or expired token');
     }
 
-    const email = claims.email ?? claims.email_address;
+    let email = claims.email ?? claims.email_address;
+    if (typeof email !== 'string') {
+      const user = await this.client.users.getUser(claims.sub);
+      email = user.primaryEmailAddress?.emailAddress;
+    }
     if (!claims.sub || typeof email !== 'string') throw unauthorized('Invalid token');
 
     const rawName =

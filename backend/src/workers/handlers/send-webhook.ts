@@ -45,7 +45,21 @@ export const sendWebhookHandler: JobHandler = async (payload, ctx) => {
       signal: AbortSignal.timeout(10_000),
     });
 
-    const responseBody = await response.text().catch(() => '');
+    let responseBody = '';
+    try {
+      const reader = response.body?.getReader();
+      if (reader) {
+        const decoder = new TextDecoder();
+        let bytes = 0;
+        while (bytes < 2048) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          responseBody += decoder.decode(value, { stream: true });
+          bytes += value.length;
+        }
+        reader.cancel();
+      }
+    } catch { /* ignore read errors */ }
 
     if (response.ok) {
       await webhookDeliveryRepository.update(String(delivery._id), {
