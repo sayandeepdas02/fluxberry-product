@@ -15,6 +15,7 @@ export function toJobDto(j: any, counts?: JobFunnelCounts): JobDto {
     workspaceId: String(j.workspaceId),
     title: j.title,
     slug: j.slug,
+    department: j.department ?? null,
     description: j.description ?? '',
     status: j.status,
     employmentType: j.employmentType,
@@ -46,6 +47,7 @@ export function toPublicJobDto(
   return {
     title: j.title,
     slug: j.slug,
+    department: j.department ?? null,
     description: j.description ?? '',
     employmentType: j.employmentType,
     workMode: j.workMode,

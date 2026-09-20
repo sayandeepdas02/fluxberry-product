@@ -1,6 +1,7 @@
 import { asyncHandler, ok } from '../utils/http';
 import { careersService } from '../services/careers.service';
 import { careersSlugSchema, setCareersSlugSchema, type UpdateCareersInput } from '@fluxberry/shared';
+import { badRequest } from '../utils/errors';
 
 export const careersController = {
   get: asyncHandler(async (req, res) => {
@@ -27,9 +28,23 @@ export const careersController = {
     ok(res, await careersService.setSlug(req.auth!.workspaceId!, req.auth!.user.id, body.slug));
   }),
 
+  uploadCoverImage: asyncHandler(async (req, res) => {
+    if (!req.file) throw badRequest('No image file provided');
+    ok(res, await careersService.uploadCoverImage(req.auth!.workspaceId!, {
+      buffer: req.file.buffer,
+      originalname: req.file.originalname,
+      mimetype: req.file.mimetype,
+    }));
+  }),
+
+  generatePreview: asyncHandler(async (req, res) => {
+    ok(res, careersService.generatePreviewToken(req.auth!.workspaceId!));
+  }),
+
   // ---- public ----
   publicGet: asyncHandler(async (req, res) => {
-    ok(res, await careersService.getPublicCareers(req.params.slug));
+    const previewToken = typeof req.query.preview === 'string' ? req.query.preview : undefined;
+    ok(res, await careersService.getPublicCareers(req.params.slug, previewToken));
   }),
 
   publicJobs: asyncHandler(async (req, res) => {

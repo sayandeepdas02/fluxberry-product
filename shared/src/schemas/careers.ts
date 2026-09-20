@@ -37,6 +37,16 @@ export const careersTeamMemberSchema = z.object({
 });
 export type CareersTeamMember = z.infer<typeof careersTeamMemberSchema>;
 
+export const careersBenefitSchema = z.object({
+  emoji: z.string().max(4),
+  label: z.string().trim().min(1).max(60),
+  description: z.string().trim().max(200).optional().or(z.literal('')),
+});
+export type CareersBenefit = z.infer<typeof careersBenefitSchema>;
+
+export const SECTION_KEYS = ['about', 'links', 'team', 'jobs', 'benefits'] as const;
+export type SectionKey = (typeof SECTION_KEYS)[number];
+
 export const updateCareersSchema = z.object({
   headline: z.string().trim().max(120).optional(),
   tagline: z.string().trim().max(280).optional(),
@@ -45,6 +55,10 @@ export const updateCareersSchema = z.object({
   links: z.object({ enabled: z.boolean(), items: z.array(careersLinkSchema).max(12) }).optional(),
   team: z.object({ enabled: z.boolean(), members: z.array(careersTeamMemberSchema).max(24) }).optional(),
   jobs: z.object({ enabled: z.boolean(), heading: z.string().trim().max(80) }).optional(),
+  benefits: z.object({ enabled: z.boolean(), items: z.array(careersBenefitSchema).max(12) }).optional(),
+  sectionOrder: z.array(z.enum(SECTION_KEYS)).optional(),
+  accentColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).nullable().optional(),
+  coverImageUrl: z.string().url().nullable().optional(),
 });
 export type UpdateCareersInput = z.infer<typeof updateCareersSchema>;
 
@@ -57,12 +71,17 @@ export type CareersPageDto = {
   links: { enabled: boolean; items: CareersLink[] };
   team: { enabled: boolean; members: CareersTeamMember[] };
   jobs: { enabled: boolean; heading: string };
+  benefits: { enabled: boolean; items: CareersBenefit[] };
+  sectionOrder: SectionKey[];
+  accentColor: string | null;
+  coverImageUrl: string | null;
   updatedAt: string;
 };
 
 /** A job shown on the public careers page. */
 export type PublicCareersJob = {
   title: string;
+  department?: string | null;
   location?: string | null;
   employmentType: EmploymentType;
   workMode: WorkMode;
@@ -78,5 +97,9 @@ export type PublicCareersDto = {
   links: { enabled: boolean; items: CareersLink[] };
   team: { enabled: boolean; members: CareersTeamMember[] };
   jobs: { enabled: boolean; heading: string };
+  benefits: { enabled: boolean; items: CareersBenefit[] };
+  sectionOrder: SectionKey[];
+  accentColor: string | null;
+  coverImageUrl: string | null;
   openings: PublicCareersJob[];
 };

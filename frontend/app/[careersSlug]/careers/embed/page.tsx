@@ -18,7 +18,7 @@ export default async function CareersEmbedPage({ params }: { params: Params }) {
   return (
     <div className="bg-transparent p-2">
       {data.heading && <h1 className="mb-3 text-card-title">{data.heading}</h1>}
-      <CareersJobs jobs={data.openings} appUrl={publicConfig.appUrl} target="_blank" />
+      <CareersJobs jobs={data.openings} appUrl={publicConfig.appUrl} target="_blank" source="EMBED" />
     </div>
   );
 }

@@ -138,6 +138,8 @@ const envSchema = z.object({
   FEATURE_OFFER_MANAGEMENT: bool(DEFAULT_FEATURE_FLAGS.OFFER_MANAGEMENT),
   FEATURE_BULK_IMPORT: bool(DEFAULT_FEATURE_FLAGS.BULK_IMPORT),
 
+  CAREERS_PREVIEW_SECRET: z.string().default('dev-preview-secret-change-me'),
+
   WORKER_POLL_INTERVAL_MS: z.coerce.number().int().default(1500),
   WORKER_MAX_ATTEMPTS: z.coerce.number().int().default(4),
 });
@@ -238,6 +240,8 @@ export const config = {
     },
     avScan: { host: e.CLAMD_HOST || '', port: e.CLAMD_PORT },
   },
+
+  careersPreviewSecret: e.CAREERS_PREVIEW_SECRET,
 
   observability: {
     sentryDsn: e.SENTRY_DSN,

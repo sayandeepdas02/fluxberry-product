@@ -41,6 +41,7 @@ const jobSchema = new Schema(
     workspaceId: { type: Schema.Types.ObjectId, ref: 'Workspace', required: true },
     title: { type: String, required: true, trim: true },
     slug: { type: String, required: true },
+    department: { type: String, default: null, trim: true },
     description: { type: String, default: '' },
     status: { type: String, enum: JOB_STATUSES, default: 'DRAFT' },
     employmentType: { type: String, enum: EMPLOYMENT_TYPES, default: 'FULL_TIME' },

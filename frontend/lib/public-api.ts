@@ -38,9 +38,11 @@ export async function fetchReferralTarget(code: string): Promise<{ workspaceSlug
   }
 }
 
-export async function fetchPublicCareers(slug: string): Promise<PublicCareersDto | null> {
+export async function fetchPublicCareers(slug: string, previewToken?: string): Promise<PublicCareersDto | null> {
   try {
-    const res = await fetch(`${publicConfig.apiUrl}/api/v1/public/careers/${encodeURIComponent(slug)}`, { cache: 'no-store' });
+    const url = new URL(`${publicConfig.apiUrl}/api/v1/public/careers/${encodeURIComponent(slug)}`);
+    if (previewToken) url.searchParams.set('preview', previewToken);
+    const res = await fetch(url.toString(), { cache: 'no-store' });
     if (!res.ok) return null;
     const json = await res.json();
     return json?.success ? (json.data as PublicCareersDto) : null;
