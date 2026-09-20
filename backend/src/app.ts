@@ -91,7 +91,7 @@ export function createApp() {
 
   app.use(notFoundHandler);
   if (config.observability?.sentryDsn && !config.isTest) {
-    app.use(Sentry.expressErrorHandler());
+    app.use(Sentry.expressErrorHandler() as unknown as express.ErrorRequestHandler);
   }
   app.use(errorHandler);
   return app;

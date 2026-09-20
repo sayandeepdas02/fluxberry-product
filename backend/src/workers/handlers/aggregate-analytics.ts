@@ -13,7 +13,7 @@ const SYSTEM_AUTH: AuthContext = {
 export const aggregateAnalyticsHandler: JobHandler = async (payload) => {
   const { workspaceId } = payload as { workspaceId: string };
   await analyticsService._computeFresh(workspaceId, SYSTEM_AUTH).then(async (result) => {
-    const { AnalyticsCacheModel } = await import('../../models/analytics-cache.model');
+    const { AnalyticsCacheModel } = await import('../../models/analytics-cache.model.js');
     const { Types } = await import('mongoose');
     await AnalyticsCacheModel.findOneAndUpdate(
       { workspaceId: new Types.ObjectId(workspaceId) },
