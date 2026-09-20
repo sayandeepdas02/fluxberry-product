@@ -55,6 +55,7 @@ export interface PublicCareersJobs {
   company: { name: string; logoUrl?: string | null; careersSlug: string };
   heading: string;
   openings: PublicCareersJob[];
+  accentColor: string | null;
 }
 
 export async function fetchPublicCareersJobs(slug: string): Promise<PublicCareersJobs | null> {
