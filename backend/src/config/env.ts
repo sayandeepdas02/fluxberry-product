@@ -140,7 +140,10 @@ const envSchema = z.object({
 
   WORKER_POLL_INTERVAL_MS: z.coerce.number().int().default(1500),
   WORKER_MAX_ATTEMPTS: z.coerce.number().int().default(4),
-});
+}).refine(
+  (env) => env.AUTH_PROVIDER !== 'clerk' || (env.CLERK_SECRET_KEY != null && env.CLERK_SECRET_KEY !== ''),
+  { message: 'CLERK_SECRET_KEY is required when AUTH_PROVIDER=clerk', path: ['CLERK_SECRET_KEY'] },
+);
 
 const parsed = envSchema.safeParse(process.env);
 if (!parsed.success) {

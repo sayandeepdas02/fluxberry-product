@@ -34,46 +34,52 @@ export const gdprService = {
     );
     if (!updated) throw conflict('Candidate is not in ACTIVE state or a deletion is already in progress');
 
-    const request = await gdprRequestRepository.create({
-      workspaceId: workspaceId as any,
-      candidateId: candidateId as any,
-      type: input.type,
-      status: 'PENDING',
-      requestedBy: actorUserId as any,
-      reason: input.reason,
-    });
-
-    await auditService.log({
-      workspaceId,
-      userId: actorUserId,
-      action: 'gdpr.deletion_requested',
-      resourceType: 'candidate',
-      resourceId: candidateId,
-      metadata: { type: input.type, reason: input.reason, requestId: String(request._id) },
-    });
-
-    await eventBus.publish({
-      workspaceId,
-      type: 'candidate.deletion.requested',
-      entityType: 'candidate',
-      entityId: candidate._id,
-      candidateId: candidate._id,
-      actorId: actorUserId,
-      actorLabel: 'system',
-      payload: { type: input.type, reason: input.reason, requestId: String(request._id) },
-    });
-
-    const jobType = input.type === 'DELETE' ? 'DELETE_CANDIDATE' : 'ANONYMIZE_CANDIDATE';
+    // All post-update operations are wrapped in a single try/catch so that a
+    // failure in any step (record creation, audit, event, or enqueue) reverts
+    // the candidate back to ACTIVE instead of leaving it stuck in PENDING.
+    let request: any;
     try {
+      request = await gdprRequestRepository.create({
+        workspaceId: workspaceId as any,
+        candidateId: candidateId as any,
+        type: input.type,
+        status: 'PENDING',
+        requestedBy: actorUserId as any,
+        reason: input.reason,
+      });
+
+      await auditService.log({
+        workspaceId,
+        userId: actorUserId,
+        action: 'gdpr.deletion_requested',
+        resourceType: 'candidate',
+        resourceId: candidateId,
+        metadata: { type: input.type, reason: input.reason, requestId: String(request._id) },
+      });
+
+      await eventBus.publish({
+        workspaceId,
+        type: 'candidate.deletion.requested',
+        entityType: 'candidate',
+        entityId: candidate._id,
+        candidateId: candidate._id,
+        actorId: actorUserId,
+        actorLabel: 'system',
+        payload: { type: input.type, reason: input.reason, requestId: String(request._id) },
+      });
+
+      const jobType = input.type === 'DELETE' ? 'DELETE_CANDIDATE' : 'ANONYMIZE_CANDIDATE';
       await jobQueue.enqueue(
         jobType,
         { workspaceId, candidateId, gdprRequestId: String(request._id) },
         { idempotencyKey: `${jobType.toLowerCase()}:${String(request._id)}` },
       );
     } catch (err) {
-      logger.error({ err, candidateId, requestId: String(request._id) }, 'Failed to enqueue GDPR job; restoring candidate to ACTIVE');
+      logger.error({ err, candidateId, requestId: request ? String(request._id) : 'n/a' }, 'GDPR post-update step failed; restoring candidate to ACTIVE');
       await CandidateModel.findByIdAndUpdate(candidateId, { gdprStatus: 'ACTIVE', gdprRequestedAt: null, gdprRequestedBy: null, gdprDeletionReason: null });
-      await gdprRequestRepository.update(String(request._id), { status: 'FAILED' });
+      if (request) {
+        await gdprRequestRepository.update(String(request._id), { status: 'FAILED' });
+      }
       throw err;
     }
 

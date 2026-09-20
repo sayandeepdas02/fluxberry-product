@@ -54,6 +54,11 @@ export const anonymizeCandidateHandler: JobHandler = async (payload, ctx) => {
       await getStorageProvider().delete(candidate.resume.storageKey);
     }
 
+    // TODO(gdpr-v2): Candidate PII may still exist in related collections —
+    // e.g. candidate name embedded in Message bodies, InterviewFeedback notes,
+    // or ScheduledInterview descriptions. A future pass should scrub or redact
+    // PII references in those models as well. The candidate-level scrub below
+    // is the critical path for V1.
     await candidateRepository.update(candidateId, {
       name: 'Anonymized',
       email: `deleted-${candidateId}@anonymized.fluxberry.invalid`,

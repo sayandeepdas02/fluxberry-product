@@ -117,6 +117,7 @@ export const webhookEndpointService = {
           'X-Fluxberry-Delivery': envelope.id,
         },
         body,
+        redirect: 'manual',
         signal: AbortSignal.timeout(10_000),
       });
 

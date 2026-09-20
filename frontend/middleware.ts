@@ -4,7 +4,10 @@ import { NextResponse } from 'next/server';
 // clerkMiddleware() throws on every request when no publishable/secret key is
 // configured, so keep it opt-in during the migration (AUTH_PROVIDER=supabase
 // deployments ship with these blank and must keep working unmodified).
-const clerkConfigured = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
+// Both keys are required: publishable (client) + secret (server-side).
+const clerkConfigured =
+  Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) &&
+  Boolean(process.env.CLERK_SECRET_KEY);
 
 export default clerkConfigured ? clerkMiddleware() : () => NextResponse.next();
 

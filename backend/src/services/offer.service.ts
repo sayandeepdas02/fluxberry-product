@@ -14,6 +14,7 @@ import { jobQueue } from '../queue/job-queue';
 import { secureToken } from '../utils/ids';
 import { config } from '../config/env';
 import { badRequest, notFound, conflict } from '../utils/errors';
+import { logger } from '../utils/logger';
 
 interface Actor {
   userId: string;
@@ -94,11 +95,18 @@ export const offerService = {
       companyName: workspace.name,
       offerLink: link,
     });
-    await jobQueue.enqueue(
-      'SEND_EMAIL',
-      { to: candidate.email, subject: email.subject, html: email.html, text: email.text },
-      { idempotencyKey: `offer-sent:${offerId}` },
-    );
+    try {
+      await jobQueue.enqueue(
+        'SEND_EMAIL',
+        { to: candidate.email, subject: email.subject, html: email.html, text: email.text },
+        { idempotencyKey: `offer-sent:${offerId}` },
+      );
+    } catch (err) {
+      // Revert status back to DRAFT so the send can be retried.
+      logger.error({ err, offerId }, 'Failed to enqueue offer email; reverting offer to DRAFT');
+      await offerRepository.updateWithCondition(offerId, { status: 'DRAFT', token: null, sentAt: null }, { status: 'SENT' });
+      throw err;
+    }
 
     await stageService.moveToStage(workspaceId, String(offer.applicationId), 'OFFER', actor);
 
@@ -179,8 +187,11 @@ export const offerService = {
 
     let plain: Record<string, unknown> = offer.toObject();
     if (offer.status === 'SENT' && offer.expiresAt.getTime() < Date.now()) {
-      await offerRepository.update(String(offer._id), { status: 'EXPIRED' });
-      plain = { ...plain, status: 'EXPIRED' };
+      // Use conditional update to avoid overwriting a concurrent RESCINDED status.
+      const expired = await offerRepository.updateWithCondition(String(offer._id), { status: 'EXPIRED' }, { status: 'SENT' });
+      if (expired) {
+        plain = { ...plain, status: 'EXPIRED' };
+      }
     }
 
     return toPublicOfferDto(plain, {
@@ -221,7 +232,18 @@ export const offerService = {
         { status: 'SENT' },
       );
       if (!updated) throw conflict('This offer is no longer awaiting a response');
-      await stageService.hire(workspaceId, applicationId, systemActor);
+      try {
+        await stageService.hire(workspaceId, applicationId, systemActor);
+      } catch (err) {
+        // Revert ACCEPTED back to SENT so the candidate can retry.
+        logger.error({ err, offerId: String(offer._id) }, 'hire() failed after ACCEPTED; reverting offer to SENT');
+        await offerRepository.updateWithCondition(
+          String(offer._id),
+          { status: 'SENT', respondedAt: null, decisionNote: null },
+          { status: 'ACCEPTED' },
+        );
+        throw err;
+      }
       await eventBus.publish({
         workspaceId,
         type: 'offer.accepted',

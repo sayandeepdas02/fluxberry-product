@@ -30,6 +30,8 @@ const candidateSchema = new Schema(
     avScanStatus: { type: String, enum: AV_SCAN_STATUSES, default: 'PENDING' },
     avScanDetails: { type: String, default: null },
     avScannedAt: { type: Date, default: null },
+    /** The storageKey that was scanned — used to detect TOCTOU races if the resume is replaced between scan and serve. */
+    avScannedStorageKey: { type: String, default: null },
     gdprStatus: { type: String, enum: GDPR_STATUSES, default: 'ACTIVE' },
     gdprAnonymizedAt: { type: Date, default: null },
     gdprRequestedAt: { type: Date, default: null },
