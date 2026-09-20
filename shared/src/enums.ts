@@ -77,6 +77,8 @@ export const CANDIDATE_SOURCES = [
   'REFERRAL',
   'LINKEDIN',
   'WEBSITE',
+  'CAREERS_PAGE',
+  'EMBED',
   'OTHER',
 ] as const;
 export type CandidateSource = (typeof CANDIDATE_SOURCES)[number];

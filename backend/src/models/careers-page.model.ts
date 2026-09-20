@@ -5,6 +5,10 @@ const memberSchema = new Schema(
   { name: String, role: { type: String, default: '' }, avatarUrl: { type: String, default: '' } },
   { _id: false },
 );
+const benefitSchema = new Schema(
+  { emoji: String, label: String, description: { type: String, default: '' } },
+  { _id: false },
+);
 
 /** Careers-page configuration, one per workspace. */
 const careersPageSchema = new Schema(
@@ -29,6 +33,13 @@ const careersPageSchema = new Schema(
       enabled: { type: Boolean, default: true },
       heading: { type: String, default: 'Open roles' },
     },
+    benefits: {
+      enabled: { type: Boolean, default: false },
+      items: { type: [benefitSchema], default: [] },
+    },
+    sectionOrder: { type: [String], default: ['about', 'links', 'team', 'jobs'] },
+    accentColor: { type: String, default: null },
+    coverImageUrl: { type: String, default: null },
   },
   { timestamps: true, collection: 'careers_pages' },
 );

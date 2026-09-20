@@ -2,19 +2,18 @@ import type { PublicCareersJob } from '@fluxberry/shared';
 import { EMPLOYMENT_LABELS, WORK_MODE_LABELS } from '@/lib/labels';
 import { formatSalary } from '@/lib/utils';
 
-/**
- * The core "open roles" list — shared by the public careers page and the
- * embeddable widget. `target="_blank"` is used inside the iframe embed so apply
- * links open in a new tab instead of navigating the iframe.
- */
 export function CareersJobs({
   jobs,
   appUrl = '',
   target,
+  accentColor,
+  source = 'CAREERS_PAGE',
 }: {
   jobs: PublicCareersJob[];
   appUrl?: string;
   target?: '_blank';
+  accentColor?: string | null;
+  source?: string;
 }) {
   if (!jobs.length) {
     return <p className="text-sm text-muted-foreground">No open roles right now — check back soon.</p>;
@@ -29,7 +28,7 @@ export function CareersJobs({
         return (
           <a
             key={j.applyPath}
-            href={`${appUrl}${j.applyPath}`}
+            href={`${appUrl}${j.applyPath}?source=${source}`}
             target={target}
             rel="noreferrer"
             className="flex items-center justify-between gap-4 p-4 transition-colors hover:bg-muted/50"
@@ -41,7 +40,9 @@ export function CareersJobs({
                 {salary ? ` · ${salary}` : ''}
               </div>
             </div>
-            <span className="shrink-0 text-sm font-medium text-primary">Apply →</span>
+            <span className="shrink-0 text-sm font-medium text-primary" style={accentColor ? { color: accentColor } : undefined}>
+              Apply →
+            </span>
           </a>
         );
       })}

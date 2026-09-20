@@ -36,6 +36,7 @@ export const aiMetaInputSchema = z.object({
 /** Step 1 — Basics. Only the title is truly required. */
 export const createJobSchema = z.object({
   title: z.string().trim().min(1, 'Job title is required').max(160),
+  department: z.string().trim().max(80).optional().nullable(),
   employmentType: z.enum(EMPLOYMENT_TYPES).default('FULL_TIME'),
   workMode: z.enum(WORK_MODES).default('ONSITE'),
   location: z.string().trim().max(160).optional(),
@@ -52,6 +53,7 @@ export type CreateJobInput = z.infer<typeof createJobSchema>;
 
 export const updateJobSchema = z.object({
   title: z.string().trim().min(1).max(160).optional(),
+  department: z.string().trim().max(80).optional().nullable(),
   employmentType: z.enum(EMPLOYMENT_TYPES).optional(),
   workMode: z.enum(WORK_MODES).optional(),
   location: z.string().trim().max(160).optional(),
@@ -111,6 +113,7 @@ export type JobDto = {
   workspaceId: string;
   title: string;
   slug: string;
+  department?: string | null;
   description: string;
   status: JobStatus;
   employmentType: EmploymentType;
@@ -153,6 +156,7 @@ export type JobFunnelCounts = {
 export type PublicJobDto = {
   title: string;
   slug: string;
+  department?: string | null;
   description: string;
   employmentType: EmploymentType;
   workMode: WorkMode;

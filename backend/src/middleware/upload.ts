@@ -62,6 +62,16 @@ export const logoUpload = multer({
   },
 }).single('logo');
 
+/** In-memory single-file cover image upload, 2MB cap, PNG/JPEG/WEBP only. */
+export const coverImageUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 2 * 1024 * 1024, files: 1 },
+  fileFilter: (_req, file, cb) => {
+    if (ALLOWED_IMAGE_MIME.has(file.mimetype)) cb(null, true);
+    else cb(unsupportedMediaType('Please upload a PNG, JPEG, or WEBP image') as unknown as null, false);
+  },
+}).single('coverImage');
+
 export const bulkImportUpload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 10 * 1024 * 1024 },

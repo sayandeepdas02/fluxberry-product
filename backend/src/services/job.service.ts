@@ -52,6 +52,7 @@ export const jobService = {
       workspaceId: workspaceId as any,
       title: input.title,
       slug,
+      department: input.department ?? null,
       description: input.description ?? '',
       status: 'DRAFT',
       employmentType: input.employmentType,
@@ -118,7 +119,7 @@ export const jobService = {
 
     const patch: Record<string, unknown> = {};
     const assignable: (keyof UpdateJobInput)[] = [
-      'title', 'employmentType', 'workMode', 'location', 'openings',
+      'title', 'department', 'employmentType', 'workMode', 'location', 'openings',
       'salary', 'experience', 'skills', 'description', 'structuredRequirements',
     ];
     for (const key of assignable) if (input[key] !== undefined) patch[key] = input[key];

@@ -41,6 +41,7 @@ export default function JobSettingsPage() {
 
   const [form, setForm] = useState<null | {
     title: string;
+    department: string;
     employmentType: EmploymentType;
     workMode: WorkMode;
     location: string;
@@ -58,6 +59,7 @@ export default function JobSettingsPage() {
     if (job && !form) {
       setForm({
         title: job.title,
+        department: job.department ?? '',
         employmentType: job.employmentType,
         workMode: job.workMode,
         location: job.location ?? '',
@@ -78,6 +80,7 @@ export default function JobSettingsPage() {
   const save = async () => {
     const input: UpdateJobInput = {
       title: form.title.trim(),
+      department: form.department.trim() || null,
       employmentType: form.employmentType,
       workMode: form.workMode,
       location: form.location || undefined,
@@ -107,6 +110,9 @@ export default function JobSettingsPage() {
         <CardContent className="space-y-4">
           <Field label="Job title">
             <Input value={form.title} onChange={(e) => set({ title: e.target.value })} />
+          </Field>
+          <Field label="Department">
+            <Input value={form.department} onChange={(e) => set({ department: e.target.value })} placeholder="e.g. Engineering, Design, Sales" />
           </Field>
           <div className="grid grid-cols-2 gap-4">
             <Field label="Employment type">
