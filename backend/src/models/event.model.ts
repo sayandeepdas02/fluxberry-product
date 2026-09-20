@@ -22,6 +22,7 @@ const eventSchema = new Schema(
 );
 
 eventSchema.index({ workspaceId: 1, createdAt: -1 });
+eventSchema.index({ workspaceId: 1, type: 1, createdAt: 1 });
 eventSchema.index({ applicationId: 1, createdAt: 1 });
 eventSchema.index({ candidateId: 1, createdAt: 1 });
 
