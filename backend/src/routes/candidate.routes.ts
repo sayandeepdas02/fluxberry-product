@@ -4,26 +4,21 @@ import {
   resolveWorkspace,
   requireWorkspace,
   requireRole,
-  requireFeature,
   requireApplicationJobAccess,
 } from '../middleware/auth';
 import { validateBody, validateQuery } from '../middleware/validate';
 import { candidateController } from '../controllers/candidate.controller';
 import { applicationController } from '../controllers/application.controller';
 import { workflowController } from '../controllers/workflow.controller';
-import { interviewController } from '../controllers/interview.controller';
 import { labelController } from '../controllers/label.controller';
 import { messageController } from '../controllers/message.controller';
 import {
   candidateListQuerySchema,
   stageChangeSchema,
   rejectApplicationSchema,
-  sendInterviewSchema,
   bulkActionSchema,
   setApplicationLabelsSchema,
   sendMessageSchema,
-  createScheduledInterviewSchema,
-  createInterviewFeedbackSchema,
 } from '../shared';
 
 export const candidateRouter = Router();
@@ -80,37 +75,4 @@ candidateRouter.post(
   requireRole('recruiter'),
   validateBody(sendMessageSchema),
   messageController.send,
-);
-
-// AI interviews for an application.
-candidateRouter.get('/applications/:applicationId/interviews', interviewController.listForApplication);
-candidateRouter.post(
-  '/applications/:applicationId/interview',
-  requireRole('recruiter'),
-  requireFeature('AI_INTERVIEW'),
-  validateBody(sendInterviewSchema),
-  interviewController.send,
-);
-
-// Scheduled (human) interviews — "Schedule interview" (binary.so parity).
-candidateRouter.get('/applications/:applicationId/scheduled-interviews', applicationController.listScheduledInterviews);
-candidateRouter.post(
-  '/applications/:applicationId/scheduled-interviews',
-  requireRole('recruiter'),
-  validateBody(createScheduledInterviewSchema),
-  applicationController.createScheduledInterview,
-);
-candidateRouter.delete(
-  '/applications/:applicationId/scheduled-interviews/:id',
-  requireRole('recruiter'),
-  applicationController.deleteScheduledInterview,
-);
-
-// Interview feedback — "Add feedback" (binary.so parity).
-candidateRouter.get('/applications/:applicationId/interview-feedback', applicationController.listInterviewFeedback);
-candidateRouter.post(
-  '/applications/:applicationId/interview-feedback',
-  requireRole('recruiter'),
-  validateBody(createInterviewFeedbackSchema),
-  applicationController.createInterviewFeedback,
 );

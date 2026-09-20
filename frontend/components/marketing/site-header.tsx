@@ -6,8 +6,6 @@ import {
   Menu,
   X,
   Sparkles,
-  ClipboardCheck,
-  CalendarClock,
   GitBranch,
   BarChart3,
   Share2,
@@ -26,18 +24,6 @@ const productMenu: NavChild[] = [
     description: 'Every applicant scored and summarised on arrival.',
     href: '/#screening',
     icon: Sparkles,
-  },
-  {
-    title: 'Assessments',
-    description: 'Send skills and coding tests that grade themselves.',
-    href: '/#assessments',
-    icon: ClipboardCheck,
-  },
-  {
-    title: 'Interviews',
-    description: 'Scheduling, Google Calendar, and structured feedback.',
-    href: '/#interviews',
-    icon: CalendarClock,
   },
   {
     title: 'Workflows',

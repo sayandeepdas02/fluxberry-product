@@ -20,8 +20,8 @@ export function Hero({ announcement }: { announcement?: { href: string; title: s
           </h1>
 
           <p className="mt-6 max-w-[540px] text-balance text-mk-lead text-ink-500">
-            Fluxberry scores every applicant on arrival, runs the assessments and interviews, and moves
-            your pipeline forward on its own — from first application to offer.
+            Fluxberry scores every applicant on arrival, moves your pipeline forward automatically,
+            and keeps everything from first application to offer in one place.
           </p>
 
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4">

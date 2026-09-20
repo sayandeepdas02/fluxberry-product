@@ -15,8 +15,8 @@ const items = [
   },
   {
     icon: ListChecks,
-    title: 'Structured feedback',
-    body: 'Interviewers fill in the same scorecard, so decisions rest on comparable notes instead of hallway impressions.',
+    title: 'Structured pipeline',
+    body: 'Every stage of the hiring process is tracked and consistent, so decisions rest on comparable data instead of hallway impressions.',
   },
   {
     icon: ShieldCheck,
@@ -26,7 +26,7 @@ const items = [
   {
     icon: ScrollText,
     title: 'Audit trail',
-    body: 'Stage moves, assessment sends and member changes are recorded, so you can reconstruct how a hire happened.',
+    body: 'Stage moves, emails sent and member changes are recorded, so you can reconstruct how a hire happened.',
   },
   {
     icon: Building2,

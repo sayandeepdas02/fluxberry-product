@@ -48,7 +48,7 @@ export default function IntegrationsSettingsPage() {
                       Connected{status.connectedEmail ? ` as ${status.connectedEmail}` : ''}
                     </span>
                   ) : (
-                    'Sync scheduled interviews to Google Calendar with an auto-generated Meet link.'
+                    'Sync calendar events from Fluxberry to Google Calendar with an auto-generated Meet link.'
                   )}
                 </p>
               </div>
@@ -65,8 +65,8 @@ export default function IntegrationsSettingsPage() {
           </div>
         )}
         <p className="mt-3 text-xs text-muted-foreground">
-          Not connected? Scheduling an interview still works — it's recorded in Fluxberry with a shareable meeting
-          link, and everyone gets emailed the details.
+          Not connected? You can still share meeting links directly — connecting Google Calendar adds automatic
+          event creation and Meet links.
         </p>
       </CardContent>
     </Card>

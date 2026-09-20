@@ -9,7 +9,6 @@ import { useJobAnalytics, useFunnelBenchmark } from '@/hooks/use-analytics';
 import { useFeature } from '@/hooks/use-features';
 import { getPlanUpgradeFlag } from '@/lib/api-client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { MetricCard } from '@/components/ui/metric-card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { STAGE_LABELS } from '@/lib/labels';
 
@@ -40,17 +39,9 @@ export default function JobAnalyticsPage() {
   if (isLoading) return <Skeleton className="h-96 w-full" />;
   if (!data) return null;
 
-  const a = data.assessments;
-
   return (
     <div className="space-y-6">
       <h2 className="sr-only">Job analytics</h2>
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <MetricCard label="Assessments sent" value={a.totalSent} />
-        <MetricCard label="Completed" value={a.completed} />
-        <MetricCard label="Avg score" value={a.avgScore != null ? `${a.avgScore}` : '—'} />
-        <MetricCard label="Completion rate" value={a.completionRate != null ? `${a.completionRate}%` : '—'} />
-      </div>
 
       <Card>
         <CardHeader><CardTitle>Applicants over last 30 days</CardTitle></CardHeader>

@@ -4,15 +4,10 @@ import { workflowRepository, workflowRunRepository, workflowStepRepository } fro
 import { applicationRepository } from '../repositories/application.repository';
 import { candidateRepository } from '../repositories/candidate.repository';
 import { jobRepository } from '../repositories/job.repository';
-import { CandidateAssessmentModel } from '../models/candidate-assessment.model';
-import { InterviewModel } from '../models/interview.model';
-import { assessmentService } from './assessment.service';
-import { interviewService } from './interview.service';
 import { stageService } from './stage.service';
 import { jobQueue } from '../queue/job-queue';
 import { emailTemplates } from '../integrations';
 import { logger } from '../utils/logger';
-import { config } from '../config/env';
 import type { PipelineStage } from '../shared';
 import { defaultPipelineStages } from '../shared';
 
@@ -21,34 +16,14 @@ const MAX_STEPS_PER_RUN = 100;
 async function buildContext(
   app: any,
   candidate: any,
-  assessmentScore: number | null,
-  interviewScore: number | null,
 ): Promise<WorkflowContext> {
   return {
     screening_score: app.screeningResult?.score ?? app.score ?? null,
-    assessment_score: assessmentScore,
-    interview_score: interviewScore,
     years_experience: candidate?.parsedProfile?.yearsExperience ?? null,
     expected_salary: candidate?.expectedSalary ?? null,
     location: candidate?.location ?? null,
     stage: app.stage,
   };
-}
-
-async function latestInterviewScore(applicationId: string): Promise<number | null> {
-  const iv = await InterviewModel.findOne({ applicationId, status: 'COMPLETED' })
-    .sort({ completedAt: -1 })
-    .select('evaluation')
-    .lean();
-  return (iv?.evaluation as any)?.overallScore ?? null;
-}
-
-async function latestCompletedAssessmentScore(applicationId: string): Promise<number | null> {
-  const ca = await CandidateAssessmentModel.findOne({ applicationId, status: 'COMPLETED' })
-    .sort({ completedAt: -1 })
-    .select('score')
-    .lean();
-  return ca?.score ?? null;
 }
 
 export const workflowEngine = {
@@ -71,7 +46,7 @@ export const workflowEngine = {
     logger.info({ runId: String(run._id), applicationId }, 'workflow run started');
   },
 
-  /** Poke a waiting run to continue (after screening/assessment completes). */
+  /** Poke a waiting run to continue (after screening completes). */
   async resumeForApplication(applicationId: string): Promise<void> {
     const run = await workflowRunRepository.activeByApplication(applicationId);
     if (!run) return;
@@ -93,11 +68,9 @@ export const workflowEngine = {
     const workspaceId = String(run.workspaceId);
     const applicationId = String(run.applicationId);
 
-    const assessmentScore = await latestCompletedAssessmentScore(applicationId);
-    const interviewScore = await latestInterviewScore(applicationId);
     const ctx: WorkflowContext = {
       ...(run.context as WorkflowContext),
-      ...(await buildContext(app, candidate, assessmentScore, interviewScore)),
+      ...(await buildContext(app, candidate)),
     };
     const nodes = wf.nodes;
     let index = (ctx.index as number) ?? 0;
@@ -152,29 +125,6 @@ export const workflowEngine = {
             }
             break;
           }
-          case 'SEND_ASSESSMENT': {
-            if (!ctx.assessmentSent) {
-              if (cfg.assessmentId) {
-                await assessmentService.send(workspaceId, applicationId, { assessmentId: cfg.assessmentId, expiresInHours: 168 }, actor);
-              }
-              ctx.assessmentSent = true;
-              await recordStep(node, 'COMPLETED', { sent: true });
-              ctx.index = index;
-              await persist({ status: 'WAITING', currentNodeId: node.id, context: ctx });
-              return; // resumes on assessment.completed
-            }
-            if (assessmentScore != null) {
-              ctx.assessment_score = assessmentScore;
-              ctx.assessmentSent = false;
-              await recordStep(node, 'COMPLETED', { score: assessmentScore });
-              index++;
-            } else {
-              ctx.index = index;
-              await persist({ status: 'WAITING', currentNodeId: node.id, context: ctx });
-              return;
-            }
-            break;
-          }
           case 'WAIT': {
             const hours = Number(cfg.durationHours ?? 0);
             const now = Date.now();
@@ -219,79 +169,6 @@ export const workflowEngine = {
             }
             await recordStep(node, 'COMPLETED');
             index++;
-            break;
-          }
-          case 'CODING_ASSESSMENT': {
-            // Send-and-wait, mirroring SEND_ASSESSMENT: dispatch the coding test
-            // once, pause, and resume when Judge0 grading completes.
-            if (!ctx.codingSent) {
-              if (cfg.assessmentId) {
-                await assessmentService.send(
-                  workspaceId,
-                  applicationId,
-                  { assessmentId: cfg.assessmentId, expiresInHours: 168 },
-                  actor,
-                );
-              }
-              ctx.codingSent = true;
-              await recordStep(node, 'COMPLETED', { sent: true });
-              ctx.index = index;
-              await persist({ status: 'WAITING', currentNodeId: node.id, context: ctx });
-              return; // resumes when the coding assessment is graded
-            }
-            const codingDone = cfg.assessmentId
-              ? await CandidateAssessmentModel.findOne({
-                  applicationId,
-                  assessmentId: cfg.assessmentId,
-                  status: 'COMPLETED',
-                })
-                  .sort({ completedAt: -1 })
-                  .select('score')
-                  .lean()
-              : null;
-            if (codingDone) {
-              ctx.assessment_score = codingDone.score ?? null;
-              ctx.codingSent = false;
-              await recordStep(node, 'COMPLETED', { score: codingDone.score ?? null });
-              index++;
-            } else {
-              ctx.index = index;
-              await persist({ status: 'WAITING', currentNodeId: node.id, context: ctx });
-              return;
-            }
-            break;
-          }
-          case 'AI_INTERVIEW': {
-            if (!config.features.AI_INTERVIEW) {
-              logger.warn({ applicationId }, 'AI_INTERVIEW step skipped — feature disabled');
-              await recordStep(node, 'COMPLETED', { skipped: true, reason: 'AI_INTERVIEW feature disabled' });
-              index++;
-              break;
-            }
-            // Send-and-wait: dispatch the interview invite once, pause, and
-            // resume when the transcript has been evaluated.
-            if (!ctx.interviewSent) {
-              await interviewService.send(workspaceId, applicationId, { expiresInHours: 168 }, actor);
-              ctx.interviewSent = true;
-              await recordStep(node, 'COMPLETED', { sent: true });
-              ctx.index = index;
-              await persist({ status: 'WAITING', currentNodeId: node.id, context: ctx });
-              return; // resumes when the interview is evaluated
-            }
-            const interviewDone = await InterviewModel.findOne({ applicationId, status: 'COMPLETED' })
-              .sort({ completedAt: -1 })
-              .select('evaluation')
-              .lean();
-            if (interviewDone) {
-              ctx.interview_score = (interviewDone.evaluation as any)?.overallScore ?? null;
-              ctx.interviewSent = false;
-              await recordStep(node, 'COMPLETED', { score: ctx.interview_score });
-              index++;
-            } else {
-              ctx.index = index;
-              await persist({ status: 'WAITING', currentNodeId: node.id, context: ctx });
-              return;
-            }
             break;
           }
           default: {

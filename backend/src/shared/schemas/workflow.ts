@@ -30,7 +30,6 @@ export type Condition = z.infer<typeof conditionSchema>;
 // Per-node-type config schemas
 const emptyConfig = z.object({}).default({});
 const conditionConfig = z.object({ condition: conditionSchema });
-const sendAssessmentConfig = z.object({ assessmentId: z.string().min(1) });
 const waitConfig = z.object({ durationHours: z.number().min(0).max(24 * 90) });
 /** A job's stage id — one of its custom stages, or a system default if it hasn't customized. */
 const moveStageConfig = z.object({ stage: z.string().trim().min(1).max(40) });
@@ -56,12 +55,9 @@ export const workflowNodeSchema = z.discriminatedUnion('type', [
   nodeOf('APPLICATION_RECEIVED', emptyConfig),
   nodeOf('AI_SCREEN', emptyConfig),
   nodeOf('CONDITION', conditionConfig),
-  nodeOf('SEND_ASSESSMENT', sendAssessmentConfig),
   nodeOf('WAIT', waitConfig),
   nodeOf('MOVE_STAGE', moveStageConfig),
   nodeOf('SEND_EMAIL', sendEmailConfig),
-  nodeOf('CODING_ASSESSMENT', sendAssessmentConfig),
-  nodeOf('AI_INTERVIEW', emptyConfig),
 ]);
 export type WorkflowNodeInput = z.infer<typeof workflowNodeSchema>;
 

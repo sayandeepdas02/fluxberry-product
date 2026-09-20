@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { ApplicationStage, CandidateSource, InterviewFeedbackRating, RejectionReason } from '../enums';
+import type { ApplicationStage, CandidateSource, RejectionReason } from '../enums';
 
 export type FunnelPoint = { stage: ApplicationStage; count: number };
 export type CountPoint = { label: string; count: number };
@@ -11,9 +11,7 @@ export type AnalyticsDto = {
     totalApplicants: number;
     applicantsLast30Days: number;
     shortlisted: number;
-    interviews: number;
     hired: number;
-    upcomingInterviews: number;
     inOfferStage: number;
   };
   funnel: FunnelPoint[];
@@ -28,12 +26,6 @@ export type JobAnalyticsDto = {
   applicantsOverTime: Array<{ date: string; count: number }>;
   topLocations: CountPoint[];
   screeningScoreDistribution: CountPoint[];
-  assessments: {
-    totalSent: number;
-    completed: number;
-    avgScore: number | null;
-    completionRate: number | null;
-  };
   sources: SourcePoint[];
 };
 
@@ -147,22 +139,6 @@ export type SourceQualityRow = {
 
 export type SourceQualityDto = {
   sources: SourceQualityRow[];
-};
-
-export type InterviewScoreAnalyticsDto = {
-  aiScores: {
-    distribution: CountPoint[];
-    avgOverall: number | null;
-    avgCommunication: number | null;
-    avgTechnical: number | null;
-    avgConfidence: number | null;
-    avgProblemSolving: number | null;
-    totalCompleted: number;
-  };
-  feedbackRatings: {
-    distribution: Array<{ rating: InterviewFeedbackRating; count: number }>;
-    total: number;
-  };
 };
 
 export type RejectionDistributionDto = {

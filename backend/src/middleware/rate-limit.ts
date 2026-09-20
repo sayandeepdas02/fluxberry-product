@@ -40,5 +40,3 @@ export const authLimiter = make({ windowMs: 15 * 60_000, max: 30, message: 'Too 
 export const publicApplyLimiter = make({ windowMs: 60_000, max: 10, message: 'Too many applications from this network', prefix: 'apply' });
 export const uploadLimiter = make({ windowMs: 60_000, max: 20, prefix: 'upload' });
 export const aiLimiter = make({ windowMs: 60_000, max: 20, message: 'AI is busy, try again shortly', prefix: 'ai' });
-export const assessmentLimiter = make({ windowMs: 60_000, max: 60, prefix: 'assessment' });
-export const codingRunLimiter = make({ windowMs: 60_000, max: 20, message: 'Slow down — too many runs', prefix: 'coding' });

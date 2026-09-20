@@ -3,10 +3,7 @@
 import { FileText, Paperclip, Video } from 'lucide-react';
 import { fetchAnswerFileUrl } from '@/hooks/use-candidates';
 import type { CandidateDetailState } from '@/hooks/use-candidate-detail';
-import { SendAssessmentDialog } from '@/components/candidates/send-assessment-dialog';
 import { ResumeViewerDialog } from '@/components/candidates/resume-viewer-dialog';
-import { InterviewCard } from '@/components/candidates/interview-card';
-import { InterviewsPanel } from '@/components/candidates/interviews-panel';
 import { WorkflowRunCard } from '@/components/candidates/workflow-run-card';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,7 +11,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { StageBadge } from '@/components/candidates/stage-badge';
 import { LabelPicker, LabelChips } from '@/components/candidates/label-picker';
-import { Badge } from '@/components/ui/badge';
 import { ScreeningCard } from '@/components/candidates/screening-card';
 import { Timeline } from '@/components/candidates/timeline';
 import { MessageThread } from '@/components/candidates/message-thread';
@@ -24,10 +20,9 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 /**
  * Candidate profile content — header, screening, details, skills, messages,
- * next action, assessments, interviews, and timeline. Excludes the "Move to
- * stage"/Shortlist/Reject action bar (see `CandidateActionBar`), so it can be
- * rendered as a plain scrollable body without a footer competing for the
- * same scroll region.
+ * and timeline. Excludes the "Move to stage"/Shortlist/Reject action bar
+ * (see `CandidateActionBar`), so it can be rendered as a plain scrollable
+ * body without a footer competing for the same scroll region.
  */
 export function CandidateDetailBody({ state }: { state: CandidateDetailState }) {
   const {
@@ -40,17 +35,9 @@ export function CandidateDetailBody({ state }: { state: CandidateDetailState }) 
     detail,
     timeline,
     form,
-    assessments,
-    interviews,
-    sendInterview,
-    aiInterviewEnabled,
-    assessmentsEnabled,
     rescreen,
-    sendOpen,
-    setSendOpen,
     resumeOpen,
     setResumeOpen,
-    setInterviewDialogOpen,
   } = state;
 
   if (isLoading || !profile) return <Skeleton className="h-96 w-full" />;
@@ -173,80 +160,6 @@ export function CandidateDetailBody({ state }: { state: CandidateDetailState }) 
 
         <div className="space-y-6">
           <h2 className="sr-only">Actions</h2>
-          <Card>
-            <CardHeader><CardTitle>Next action</CardTitle></CardHeader>
-            <CardContent className="space-y-3">
-              {assessmentsEnabled && (
-                <Button className="w-full" onClick={() => setSendOpen(true)} disabled={!activeApp}>
-                  Send assessment
-                </Button>
-              )}
-              {aiInterviewEnabled && (
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  disabled={!activeApp || sendInterview.isPending}
-                  loading={sendInterview.isPending}
-                  onClick={() =>
-                    activeApp &&
-                    sendInterview.mutate(
-                      { applicationId: activeApp.id, input: { expiresInHours: 168 } },
-                      {
-                        onSuccess: () => toast.success('AI interview sent'),
-                        onError: (e) => toast.error(e instanceof Error ? e.message : 'Could not send'),
-                      },
-                    )
-                  }
-                >
-                  Send AI interview
-                </Button>
-              )}
-            </CardContent>
-          </Card>
-
-          {assessmentsEnabled && (assessments.data?.length ?? 0) > 0 && (
-            <Card>
-              <CardHeader><CardTitle>Assessments</CardTitle></CardHeader>
-              <CardContent className="space-y-3">
-                {assessments.data!.map((ca) => {
-                  const cases = ca.codingResults?.reduce(
-                    (acc, r) => ({ passed: acc.passed + r.passed, total: acc.total + r.total }),
-                    { passed: 0, total: 0 },
-                  );
-                  return (
-                    <div key={ca.id} className="flex items-center justify-between text-sm">
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="truncate font-medium">{ca.assessmentName}</span>
-                          {ca.type === 'CODING' && <Badge variant="outline">Coding</Badge>}
-                        </div>
-                        <div className="text-xs capitalize text-muted-foreground">
-                          {ca.status === 'GRADING' ? 'grading…' : ca.status.toLowerCase()}
-                          {cases && cases.total > 0 && ca.status === 'COMPLETED' ? ` · ${cases.passed}/${cases.total} cases` : ''}
-                        </div>
-                      </div>
-                      {ca.status === 'COMPLETED' ? (
-                        <span className="font-semibold tabular-nums">{ca.score}%</span>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">—</span>
-                      )}
-                    </div>
-                  );
-                })}
-              </CardContent>
-            </Card>
-          )}
-
-          {(interviews.data?.length ?? 0) > 0 && <InterviewCard interviews={interviews.data!} />}
-
-          {activeApp && (
-            <InterviewsPanel
-              applicationId={activeApp.id}
-              candidateName={candidate.name}
-              candidateEmail={candidate.email}
-              onDialogOpenChange={setInterviewDialogOpen}
-            />
-          )}
 
           {activeApp && <WorkflowRunCard applicationId={activeApp.id} />}
 
@@ -259,9 +172,6 @@ export function CandidateDetailBody({ state }: { state: CandidateDetailState }) 
         </div>
       </div>
 
-      {activeApp && (
-        <SendAssessmentDialog applicationId={activeApp.id} open={sendOpen} onOpenChange={setSendOpen} />
-      )}
       <ResumeViewerDialog
         candidateId={candidateId}
         candidateName={candidate.name}

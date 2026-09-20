@@ -1,11 +1,7 @@
 import { candidateRepository } from '../../repositories/candidate.repository';
 import { gdprRequestRepository } from '../../repositories/gdpr-request.repository';
 import { ApplicationModel } from '../../models/application.model';
-import { CandidateAssessmentModel } from '../../models/candidate-assessment.model';
-import { InterviewModel } from '../../models/interview.model';
-import { ScheduledInterviewModel } from '../../models/scheduled-interview.model';
 import { MessageModel } from '../../models/message.model';
-import { InterviewFeedbackModel } from '../../models/interview-feedback.model';
 import { getStorageProvider } from '../../integrations';
 import { eventBus } from '../../events/event-bus';
 import { auditService } from '../../services/audit.service';
@@ -41,14 +37,7 @@ export const anonymizeCandidateHandler: JobHandler = async (payload, ctx) => {
     const applicationIds = (
       await ApplicationModel.find({ candidateId }).select('_id').lean()
     ).map((a) => a._id);
-    const [assessmentCount, interviewCount, scheduledInterviewCount, messageCount, feedbackCount] =
-      await Promise.all([
-        CandidateAssessmentModel.countDocuments({ candidateId }),
-        InterviewModel.countDocuments({ candidateId }),
-        ScheduledInterviewModel.countDocuments({ candidateId }),
-        MessageModel.countDocuments({ applicationId: { $in: applicationIds } }),
-        InterviewFeedbackModel.countDocuments({ applicationId: { $in: applicationIds } }),
-      ]);
+    const messageCount = await MessageModel.countDocuments({ applicationId: { $in: applicationIds } });
 
     if (candidate.resume?.storageKey) {
       await getStorageProvider().delete(candidate.resume.storageKey);
@@ -90,11 +79,7 @@ export const anonymizeCandidateHandler: JobHandler = async (payload, ctx) => {
       actorLabel: 'system',
       payload: {
         applicationCount: applicationIds.length,
-        assessmentCount,
-        interviewCount,
-        scheduledInterviewCount,
         messageCount,
-        feedbackCount,
       },
     });
 

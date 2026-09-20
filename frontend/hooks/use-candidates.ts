@@ -11,7 +11,6 @@ import type {
   ApplicationAnswersDto,
   CandidateDto,
   BulkActionInput,
-  CandidateAssessmentStatus,
 } from '@/lib/shared';
 import { api } from '@/lib/api-client';
 import { useWorkspace } from '@/components/providers/workspace-provider';
@@ -20,7 +19,6 @@ export interface CandidateFilters {
   jobId?: string;
   stage?: string;
   labelId?: string;
-  assessmentStatus?: CandidateAssessmentStatus;
   minScore?: number;
   search?: string;
   page?: number;

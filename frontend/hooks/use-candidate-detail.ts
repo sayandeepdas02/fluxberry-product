@@ -12,9 +12,6 @@ import {
 } from '@/hooks/use-candidates';
 import { useApplicationForm } from '@/hooks/use-form';
 import { useJobStages } from '@/hooks/use-jobs';
-import { useApplicationAssessments } from '@/hooks/use-assessments';
-import { useApplicationInterviews, useSendInterview } from '@/hooks/use-interview';
-import { useFeature } from '@/hooks/use-features';
 import { useHotkey } from '@/hooks/use-hotkey';
 import { toast } from '@/components/ui/sonner';
 import { stageLabel } from '@/lib/labels';
@@ -39,7 +36,6 @@ export function useCandidateDetail(
   const { data: profile, isLoading } = useCandidateProfile(candidateId);
   const [rejectOpen, setRejectOpen] = useState(false);
   const [sendOpen, setSendOpen] = useState(false);
-  const [interviewDialogOpen, setInterviewDialogOpen] = useState(false);
   const [resumeOpen, setResumeOpen] = useState(false);
   const [selectedApplicationId, setSelectedApplicationId] = useState<string | undefined>(undefined);
 
@@ -49,11 +45,6 @@ export function useCandidateDetail(
   const timeline = useApplicationTimeline(activeApp?.id ?? '');
   const form = useApplicationForm(activeApp?.jobId ?? '');
   const jobStages = useJobStages(activeApp?.jobId ?? '');
-  const assessments = useApplicationAssessments(activeApp?.id ?? '');
-  const interviews = useApplicationInterviews(activeApp?.id ?? '');
-  const sendInterview = useSendInterview();
-  const aiInterviewEnabled = useFeature('AI_INTERVIEW');
-  const assessmentsEnabled = useFeature('ASSESSMENTS');
   const shortlist = useShortlist();
   const reject = useReject();
   const moveStage = useMoveStage();
@@ -65,7 +56,7 @@ export function useCandidateDetail(
   // Select trigger or dialog button doesn't count, so without this a keypress
   // meant for an open dialog (e.g. typeahead in the reject-reason select) can
   // still fire a panel-level shortcut behind it.
-  const dialogOpen = rejectOpen || sendOpen || interviewDialogOpen || resumeOpen;
+  const dialogOpen = rejectOpen || sendOpen || resumeOpen;
 
   useHotkey('s', () => {
     if (canShortlist) {
@@ -95,11 +86,6 @@ export function useCandidateDetail(
     timeline,
     form,
     jobStages,
-    assessments,
-    interviews,
-    sendInterview,
-    aiInterviewEnabled,
-    assessmentsEnabled,
     shortlist,
     reject,
     moveStage,
@@ -110,8 +96,6 @@ export function useCandidateDetail(
     setRejectOpen,
     sendOpen,
     setSendOpen,
-    interviewDialogOpen,
-    setInterviewDialogOpen,
     resumeOpen,
     setResumeOpen,
     doMove,

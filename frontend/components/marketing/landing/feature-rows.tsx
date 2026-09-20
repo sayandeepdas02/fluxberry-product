@@ -2,8 +2,6 @@ import { Section } from '../frame';
 import { CrossMark } from '../pixel-icons';
 import {
   ScreeningMockup,
-  AssessmentMockup,
-  InterviewMockup,
   WorkflowMockup,
 } from '../mockups';
 
@@ -20,21 +18,9 @@ const rows = [
     media: <ScreeningMockup />,
   },
   {
-    id: 'assessments',
-    title: 'Assessments that grade themselves',
-    body: 'Send skills tests, short answers or a coding exercise. Objective questions and code are graded automatically; the rest lands ready for review.',
-    media: <AssessmentMockup />,
-  },
-  {
-    id: 'interviews',
-    title: 'Interviews booked, synced and scored',
-    body: 'Share your availability, let candidates pick a slot, and get the event on Google Calendar. Structured feedback is waiting when the call ends.',
-    media: <InterviewMockup />,
-  },
-  {
     id: 'workflows',
     title: 'The pipeline moves without you',
-    body: 'Set the rules once: when a candidate reaches a stage, Fluxberry sends the email, triggers the assessment, or advances them for you.',
+    body: 'Set the rules once: when a candidate reaches a stage, Fluxberry sends the email or advances them for you.',
     media: <WorkflowMockup />,
   },
 ];

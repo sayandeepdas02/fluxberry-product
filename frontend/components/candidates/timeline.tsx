@@ -23,12 +23,6 @@ function describe(e: TimelineEntryDto): string {
       return 'Hired';
     case 'candidate.stage.changed':
       return m.to ? `Moved to ${STAGE_LABELS[m.to as ApplicationStage] ?? m.to}` : 'Stage changed';
-    case 'assessment.sent':
-      return 'Assessment sent';
-    case 'assessment.completed':
-      return `Assessment completed${m.score != null ? ` · ${m.score}%` : ''}`;
-    case 'interview.completed':
-      return 'Interview completed';
     default:
       return e.type;
   }

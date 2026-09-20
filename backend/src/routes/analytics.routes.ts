@@ -50,15 +50,6 @@ analyticsRouter.get(
 );
 
 analyticsRouter.get(
-  '/analytics/advanced/interview-scores',
-  authenticate,
-  resolveWorkspace,
-  requireWorkspace,
-  requirePlanFeature('ADVANCED_ANALYTICS'),
-  analyticsController.getInterviewScoreAnalytics,
-);
-
-analyticsRouter.get(
   '/analytics/advanced/rejection-reasons',
   authenticate,
   resolveWorkspace,

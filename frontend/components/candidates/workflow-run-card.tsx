@@ -10,12 +10,9 @@ const NODE_LABELS: Record<WorkflowNodeType, string> = {
   APPLICATION_RECEIVED: 'Application received',
   AI_SCREEN: 'AI screening',
   CONDITION: 'Condition',
-  SEND_ASSESSMENT: 'Send assessment',
   WAIT: 'Wait',
   MOVE_STAGE: 'Move stage',
   SEND_EMAIL: 'Send email',
-  CODING_ASSESSMENT: 'Coding assessment',
-  AI_INTERVIEW: 'AI interview',
 };
 
 function StepIcon({ status }: { status: WorkflowStepStatus }) {

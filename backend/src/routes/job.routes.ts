@@ -4,7 +4,6 @@ import {
   resolveWorkspace,
   requireWorkspace,
   requireRole,
-  requireFeature,
   requireJobAccess,
   requirePlanFeature,
 } from '../middleware/auth';
@@ -14,8 +13,6 @@ import { jobController } from '../controllers/job.controller';
 import { analyticsController } from '../controllers/analytics.controller';
 import { formController } from '../controllers/form.controller';
 import { workflowController } from '../controllers/workflow.controller';
-import { interviewController } from '../controllers/interview.controller';
-import { assessmentController } from '../controllers/assessment.controller';
 import {
   createJobSchema,
   updateJobSchema,
@@ -26,7 +23,6 @@ import {
   setLinkedInPostedSchema,
   upsertFormSchema,
   upsertWorkflowSchema,
-  upsertInterviewConfigSchema,
   upsertPipelineStagesSchema,
 } from '../shared';
 
@@ -96,9 +92,6 @@ jobRouter.get(
   analyticsController.getFunnelBenchmark,
 );
 
-// Per-job assessment status across all candidates.
-jobRouter.get('/jobs/:jobId/assessments', requireJobAccess, assessmentController.listForJob);
-
 // Application form (one per job).
 jobRouter.get('/jobs/:jobId/form', requireJobAccess, formController.get);
 jobRouter.patch(
@@ -119,13 +112,3 @@ jobRouter.put(
   workflowController.save,
 );
 
-// AI interview configuration (one per job).
-jobRouter.get('/jobs/:jobId/interview-config', requireJobAccess, interviewController.getConfig);
-jobRouter.put(
-  '/jobs/:jobId/interview-config',
-  requireJobAccess,
-  requireRole('recruiter'),
-  requireFeature('AI_INTERVIEW'),
-  validateBody(upsertInterviewConfigSchema),
-  interviewController.updateConfig,
-);

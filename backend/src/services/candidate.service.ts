@@ -98,10 +98,6 @@ export const candidateService = {
       { $lookup: { from: 'jobs', localField: 'jobId', foreignField: '_id', as: 'job' } },
       { $unwind: '$job' },
       { $lookup: { from: 'labels', localField: 'labelIds', foreignField: '_id', as: 'labels' } },
-      ...(query.assessmentStatus ? [
-        { $lookup: { from: 'candidate_assessments', localField: '_id', foreignField: 'applicationId', as: '_ca' } },
-        { $match: { '_ca.status': query.assessmentStatus } },
-      ] : []),
       ...(Object.keys(postMatch).length ? [{ $match: postMatch }] : []),
       { $sort: { [sortField]: sortDir, _id: -1 } },
       {
@@ -279,14 +275,12 @@ export const candidateService = {
 };
 
 function emptyCounts(): JobFunnelCounts {
-  return { applicants: 0, screening: 0, shortlisted: 0, assessment: 0, interview: 0, offer: 0, hired: 0, rejected: 0 };
+  return { applicants: 0, screening: 0, shortlisted: 0, offer: 0, hired: 0, rejected: 0 };
 }
 
 function applyStageCount(c: JobFunnelCounts, stage: string, n: number) {
   switch (stage) {
     case 'SCREENING': c.screening += n; c.shortlisted += n; break;
-    case 'ASSESSMENT': c.assessment += n; break;
-    case 'INTERVIEW': c.interview += n; break;
     case 'OFFER': c.offer += n; break;
     case 'HIRED': c.hired += n; break;
     case 'REJECTED': c.rejected += n; break;

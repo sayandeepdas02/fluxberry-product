@@ -6,8 +6,6 @@ import {
   Home,
   Briefcase,
   Users,
-  ClipboardCheck,
-  Library,
   BarChart3,
   Megaphone,
   Settings,
@@ -33,8 +31,6 @@ const NAV = [
   { href: '/app', label: 'Home', icon: Home, exact: true },
   { href: '/app/jobs', label: 'Jobs', icon: Briefcase },
   { href: '/app/candidates', label: 'Candidates', icon: Users },
-  { href: '/app/assessments', label: 'Assessments', icon: ClipboardCheck, flag: 'ASSESSMENTS' as const },
-  { href: '/app/questions', label: 'Question Bank', icon: Library, flag: 'QUESTION_BANK' as const },
   { href: '/app/analytics', label: 'Analytics', icon: BarChart3 },
   { href: '/app/referrals', label: 'Referrals', icon: Gift },
 ];

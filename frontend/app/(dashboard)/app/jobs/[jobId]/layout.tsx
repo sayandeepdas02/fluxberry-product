@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useParams, usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, Briefcase, Link2, Pause, Play, XCircle, Copy } from 'lucide-react';
 import { useJob, usePublishJob, useSetJobStatus, useCloneJob } from '@/hooks/use-jobs';
-import { useFeature } from '@/hooks/use-features';
 import { useWorkspace } from '@/components/providers/workspace-provider';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -29,8 +28,6 @@ export default function JobDetailLayout({ children }: { children: React.ReactNod
   const publishJob = usePublishJob();
   const setStatus = useSetJobStatus();
   const cloneJob = useCloneJob();
-  const aiInterview = useFeature('AI_INTERVIEW');
-  const assessmentsEnabled = useFeature('ASSESSMENTS');
   const [publishConfirmOpen, setPublishConfirmOpen] = useState(false);
 
   // The job-creation flow redirects here with ?published=1 after a first publish
@@ -71,8 +68,6 @@ export default function JobDetailLayout({ children }: { children: React.ReactNod
     { href: `${base}/candidates`, label: 'Candidates' },
     { href: `${base}/form`, label: 'Application form' },
     { href: `${base}/stages`, label: 'Pipeline' },
-    ...(assessmentsEnabled ? [{ href: `${base}/assessments`, label: 'Assessments' }] : []),
-    ...(aiInterview ? [{ href: `${base}/interview`, label: 'AI Interview' }] : []),
     { href: `${base}/workflow`, label: 'Workflow' },
     { href: `${base}/analytics`, label: 'Analytics' },
     { href: `${base}/settings`, label: 'Settings' },

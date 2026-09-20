@@ -2,8 +2,6 @@ import { Schema, model, models, type InferSchemaType, type Model } from 'mongoos
 
 const NOTIFICATION_TYPES = [
   'new_candidate',
-  'assessment_completed',
-  'interview_completed',
   'candidate_hired',
   'screening_completed',
   'new_message',

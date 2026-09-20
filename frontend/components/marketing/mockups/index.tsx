@@ -3,8 +3,6 @@ import {
   CalendarClock,
   CheckCircle2,
   Circle,
-  Code2,
-  FileText,
   Mail,
   GitBranch,
   ArrowRight,
@@ -162,82 +160,6 @@ export function ScreeningMockup() {
         <Sparkles className="size-3.5 shrink-0 text-berry-600" />
         Summary and score are suggestions — a human always makes the call.
       </div>
-    </Surface>
-  );
-}
-
-/* ------------------------------------------------------------------ assessments */
-
-const questions = [
-  { icon: Code2, label: 'Coding · Reverse a linked list', state: 'Auto-graded', score: 100 },
-  { icon: FileText, label: 'Short answer · Debugging approach', state: 'Reviewed', score: 80 },
-  { icon: CheckCircle2, label: 'Multiple choice · CSS specificity', state: 'Auto-graded', score: 75 },
-];
-
-export function AssessmentMockup() {
-  return (
-    <Surface>
-      <Panel className="divide-y divide-ink-line">
-        <div className="flex items-center justify-between px-4 py-3">
-          <span className="text-[13px] font-medium text-ink">Frontend screen · 3 questions</span>
-          <span className="font-mono text-[11px] text-berry-700">85%</span>
-        </div>
-        {questions.map(({ icon: Icon, label, state, score }) => (
-          <div key={label} className="flex items-center gap-3 px-4 py-3">
-            <Icon className="size-4 shrink-0 text-ink-400" />
-            <span className="flex min-w-0 flex-1 flex-col">
-              <span className="truncate text-[12px] text-ink">{label}</span>
-              <span className="text-[11px] text-ink-400">{state}</span>
-            </span>
-            <span className="w-16 shrink-0">
-              <span className="block h-1 w-full bg-ink-100">
-                <span className="block h-1 bg-berry-500" style={{ width: `${score}%` }} />
-              </span>
-            </span>
-            <span className="w-8 shrink-0 text-right font-mono text-[11px] text-ink-500">{score}</span>
-          </div>
-        ))}
-      </Panel>
-    </Surface>
-  );
-}
-
-/* -------------------------------------------------------------------- interviews */
-
-const slots = ['Tue 10:00', 'Tue 14:30', 'Wed 09:00', 'Wed 11:30', 'Thu 16:00', 'Fri 13:00'];
-
-export function InterviewMockup() {
-  return (
-    <Surface>
-      <Panel className="p-4">
-        <div className="flex items-center gap-2">
-          <CalendarClock className="size-4 text-berry-600" />
-          <span className="text-[13px] font-medium text-ink">Technical interview · 45 min</span>
-        </div>
-        <div className="mt-3 grid grid-cols-3 gap-2">
-          {slots.map((slot, i) => (
-            <span
-              key={slot}
-              className={cn(
-                'border px-2 py-1.5 text-center font-mono text-[11px]',
-                i === 3
-                  ? 'border-berry-600 bg-berry-50 text-berry-700'
-                  : 'border-ink-200 bg-white text-ink-500',
-              )}
-            >
-              {slot}
-            </span>
-          ))}
-        </div>
-      </Panel>
-
-      <Panel className="flex items-center gap-3 px-4 py-3">
-        <span className="size-2 shrink-0 bg-berry-500" />
-        <span className="flex min-w-0 flex-col">
-          <span className="truncate text-[12px] text-ink">Invite sent · added to Google Calendar</span>
-          <span className="truncate text-[11px] text-ink-400">Scorecard opens when the call ends</span>
-        </span>
-      </Panel>
     </Surface>
   );
 }

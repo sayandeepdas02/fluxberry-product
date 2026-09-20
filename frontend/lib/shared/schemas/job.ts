@@ -145,8 +145,6 @@ export type JobFunnelCounts = {
   applicants: number;
   screening: number;
   shortlisted: number;
-  assessment: number;
-  interview: number;
   offer: number;
   hired: number;
   rejected: number;

@@ -5,18 +5,18 @@ import type {
   ApplicationStatus,
   Difficulty,
   FormQuestionType,
-  CandidateAssessmentStatus,
   FeatureFlag,
   PipelineStage,
 } from '@/lib/shared';
 
 export const FEATURE_FLAG_LABELS: Record<FeatureFlag, string> = {
-  CODING_ASSESSMENT: 'Coding assessments',
-  AI_INTERVIEW: 'AI voice interviews',
   WORKFLOW_AUTOMATION: 'Workflow automation',
   ADVANCED_ANALYTICS: 'Advanced analytics',
-  ASSESSMENTS: 'Assessments',
-  QUESTION_BANK: 'Question bank',
+  AV_SCANNING: 'AV scanning',
+  OUTBOUND_WEBHOOKS: 'Outbound webhooks',
+  GDPR_TOOLS: 'GDPR tools',
+  OFFER_MANAGEMENT: 'Offer management',
+  BULK_IMPORT: 'Bulk import',
 };
 
 export const FORM_QUESTION_TYPE_LABELS: Record<FormQuestionType, string> = {
@@ -87,13 +87,4 @@ export const DIFFICULTY_LABELS: Record<Difficulty, string> = {
   EASY: 'Easy',
   MEDIUM: 'Medium',
   HARD: 'Hard',
-};
-
-export const ASSESSMENT_STATUS_LABELS: Record<CandidateAssessmentStatus, string> = {
-  INVITED: 'Invited',
-  STARTED: 'Started',
-  GRADING: 'Grading',
-  COMPLETED: 'Completed',
-  EXPIRED: 'Expired',
-  CANCELLED: 'Cancelled',
 };

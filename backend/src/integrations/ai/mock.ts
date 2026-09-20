@@ -7,8 +7,6 @@ import type {
   ResumeParseResult,
   ScreeningInput,
   ScreeningReasoning,
-  InterviewEvalInput,
-  InterviewEvaluation,
   ProviderMeta,
 } from './types';
 import { SCORE_DIMENSION_LABELS } from '../../shared';
@@ -21,15 +19,6 @@ const KNOWN_SKILLS = [
   'tailwind', 'css', 'html', 'figma', 'product design', 'ux', 'ui', 'system design',
   'data structures', 'algorithms', 'machine learning', 'llm', 'ci/cd',
 ];
-
-function hash(s: string): number {
-  let h = 2166136261;
-  for (let i = 0; i < s.length; i++) {
-    h ^= s.charCodeAt(i);
-    h = Math.imul(h, 16777619);
-  }
-  return Math.abs(h);
-}
 
 const meta = (v: string): ProviderMeta => ({ provider: 'mock', model: 'mock', promptVersion: v });
 
@@ -132,21 +121,6 @@ ${preferred.length ? preferred.map((s) => `- Familiarity with ${s}`).join('\n') 
     };
   }
 
-  async evaluateInterview(input: InterviewEvalInput): Promise<InterviewEvaluation> {
-    const seed = hash(input.transcript) % 30;
-    const base = 6 + (seed % 3);
-    return {
-      communicationScore: base + 0.5,
-      technicalScore: base,
-      confidenceScore: base - 0.5,
-      problemSolvingScore: base + 0.3,
-      overallScore: base + 0.1,
-      summary: `Solid interview for ${input.jobTitle}. Communicates clearly and reasons through problems.`,
-      strengths: ['Clear communication', 'Structured problem solving'],
-      concerns: ['Could go deeper on system design'],
-      meta: meta('interview-v1'),
-    };
-  }
 }
 
 function deriveSkillsFromTitle(title: string): string[] {

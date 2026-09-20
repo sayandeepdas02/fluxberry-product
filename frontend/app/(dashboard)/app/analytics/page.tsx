@@ -11,7 +11,6 @@ import {
   useStageDwellTimes,
   useOfferMetrics,
   useSourceQuality,
-  useInterviewScoreAnalytics,
   useRejectionDistribution,
   useJobFillRates,
   type CohortRange,
@@ -28,7 +27,7 @@ import { PlanUpgradeModal } from '@/components/billing/plan-upgrade-modal';
 import { REASON_LABELS } from '@/components/candidates/reject-dialog';
 import { STAGE_LABELS } from '@/lib/labels';
 import { cn } from '@/lib/utils';
-import { PIPELINE_STAGES, type InterviewFeedbackRating } from '@/lib/shared';
+import { PIPELINE_STAGES } from '@/lib/shared';
 
 const CHART_COLOR = 'hsl(var(--primary))';
 
@@ -36,16 +35,7 @@ const CHART_COLOR = 'hsl(var(--primary))';
 const STAGE_COLORS: Record<string, string> = {
   APPLIED: 'hsl(330, 81%, 60%)', // primary/pink
   SCREENING: 'hsl(220, 70%, 50%)', // blue
-  ASSESSMENT: 'hsl(270, 60%, 55%)', // purple
-  INTERVIEW: 'hsl(40, 80%, 55%)', // amber
   OFFER: 'hsl(150, 60%, 45%)', // green
-};
-
-const FEEDBACK_RATING_LABELS: Record<InterviewFeedbackRating, string> = {
-  STRONG_NO: 'Strong No',
-  NO: 'No',
-  YES: 'Yes',
-  STRONG_YES: 'Strong Yes',
 };
 
 function caseTitle(s: string): string {
@@ -102,7 +92,6 @@ export default function AnalyticsPage() {
         <MetricCard label="Applicants" value={m.totalApplicants} />
         <MetricCard label="Last 30 days" value={m.applicantsLast30Days} />
         <MetricCard label="In offer stage" value={m.inOfferStage} />
-        <MetricCard label="Upcoming interviews" value={m.upcomingInterviews} />
         <MetricCard label="Shortlisted" value={m.shortlisted} />
         <MetricCard label="Hired" value={m.hired} />
         <MetricCard
@@ -508,7 +497,6 @@ function AdvancedAnalyticsV2Section() {
   const [upgradeOpen, setUpgradeOpen] = useState(false);
 
   const sourceQuality = useSourceQuality();
-  const interviewScores = useInterviewScoreAnalytics();
   const rejectionDistribution = useRejectionDistribution();
   const jobFillRates = useJobFillRates();
 
@@ -516,7 +504,6 @@ function AdvancedAnalyticsV2Section() {
 
   const upgradeFlag =
     getPlanUpgradeFlag(sourceQuality.error) ??
-    getPlanUpgradeFlag(interviewScores.error) ??
     getPlanUpgradeFlag(rejectionDistribution.error) ??
     getPlanUpgradeFlag(jobFillRates.error);
 
@@ -532,7 +519,7 @@ function AdvancedAnalyticsV2Section() {
           <CardContent className="flex flex-col items-center gap-3 py-10 text-center">
             <Sparkles className="size-8 text-primary" />
             <p className="text-sm text-muted-foreground">
-              Source quality, interview insights, rejection reasons, and job fill rates are available on the Pro plan.
+              Source quality, rejection reasons, and job fill rates are available on the Pro plan.
             </p>
             <PlanUpgradeModal open={upgradeOpen} onOpenChange={setUpgradeOpen} flag={upgradeFlag} />
             <button className="text-sm font-medium text-primary underline" onClick={() => setUpgradeOpen(true)}>
@@ -576,43 +563,6 @@ function AdvancedAnalyticsV2Section() {
                 </Table>
               ) : (
                 <p className="text-sm text-muted-foreground">No source data yet.</p>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader><CardTitle>Interview insights</CardTitle></CardHeader>
-            <CardContent>
-              {interviewScores.isLoading ? (
-                <Skeleton className="h-40 w-full" />
-              ) : interviewScores.data ? (
-                <div className="grid gap-6 lg:grid-cols-2">
-                  <div>
-                    <h4 className="text-subtle-title mb-3">AI interview scores</h4>
-                    {interviewScores.data.aiScores.distribution.length ? (
-                      <SimpleBarChart
-                        items={interviewScores.data.aiScores.distribution.map((d) => ({ label: d.label, value: d.count }))}
-                      />
-                    ) : (
-                      <p className="text-sm text-muted-foreground">No completed AI interviews yet.</p>
-                    )}
-                  </div>
-                  <div>
-                    <h4 className="text-subtle-title mb-3">Interviewer feedback</h4>
-                    {interviewScores.data.feedbackRatings.distribution.length ? (
-                      <SimpleBarChart
-                        items={interviewScores.data.feedbackRatings.distribution.map((d) => ({
-                          label: FEEDBACK_RATING_LABELS[d.rating],
-                          value: d.count,
-                        }))}
-                      />
-                    ) : (
-                      <p className="text-sm text-muted-foreground">No feedback submitted yet.</p>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">No interview data yet.</p>
               )}
             </CardContent>
           </Card>

@@ -1,25 +1,19 @@
 import {
   Sparkles,
-  ClipboardCheck,
-  CalendarClock,
   GitBranch,
   BarChart3,
   Share2,
   Users,
-  Code2,
-  Mic,
+  Mail,
 } from 'lucide-react';
 import { Section, H2Split, PanelHeader, Sup } from '../frame';
 import { Kicker, TextLink } from '../bits';
 
-/** Nine capabilities that exist in the product today — nothing aspirational. */
+/** Capabilities that exist in the product today — nothing aspirational. */
 const capabilities = [
   { icon: Sparkles, label: 'AI screening' },
-  { icon: ClipboardCheck, label: 'Assessments' },
-  { icon: Code2, label: 'Coding tests' },
-  { icon: CalendarClock, label: 'Scheduling' },
-  { icon: Mic, label: 'AI interviews' },
   { icon: GitBranch, label: 'Workflows' },
+  { icon: Mail, label: 'Email automation' },
   { icon: Users, label: 'Referrals' },
   { icon: Share2, label: 'Careers page' },
   { icon: BarChart3, label: 'Analytics' },
@@ -32,7 +26,7 @@ export function ContextSection() {
         <Kicker>One workspace</Kicker>
         <H2Split lead="Every applicant." muted="One clear pipeline." />
         <p className="my-6 max-w-[370px] text-mk-body text-ink-600">
-          Screening, assessments, interviews, referrals and your job board all sit in one place, so
+          Screening, referrals and your job board all sit in one place, so
           nothing about a candidate lives in someone&apos;s inbox.
         </p>
         <TextLink href="/signup">Create your workspace</TextLink>

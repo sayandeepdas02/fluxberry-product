@@ -63,23 +63,6 @@ export interface ScreeningReasoning {
   meta: ProviderMeta;
 }
 
-export interface InterviewEvalInput {
-  transcript: string;
-  jobTitle: string;
-}
-
-export interface InterviewEvaluation {
-  communicationScore: number;
-  technicalScore: number;
-  confidenceScore: number;
-  problemSolvingScore: number;
-  overallScore: number;
-  summary: string;
-  strengths: string[];
-  concerns: string[];
-  meta: ProviderMeta;
-}
-
 /**
  * Provider-agnostic AI surface (spec §127). Core services depend only on this;
  * concrete providers (Anthropic/OpenAI/Mock) are chosen by config.
@@ -89,5 +72,4 @@ export interface AIProvider {
   generateJobDescription(input: JdGenInput): Promise<JdGenResult>;
   parseResume(input: ResumeParseInput): Promise<ResumeParseResult>;
   screenCandidate(input: ScreeningInput): Promise<ScreeningReasoning>;
-  evaluateInterview(input: InterviewEvalInput): Promise<InterviewEvaluation>;
 }

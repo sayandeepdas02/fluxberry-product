@@ -2,11 +2,7 @@ import { candidateRepository } from '../../repositories/candidate.repository';
 import { gdprRequestRepository } from '../../repositories/gdpr-request.repository';
 import { CandidateModel } from '../../models/candidate.model';
 import { ApplicationModel } from '../../models/application.model';
-import { CandidateAssessmentModel } from '../../models/candidate-assessment.model';
-import { InterviewModel } from '../../models/interview.model';
-import { ScheduledInterviewModel } from '../../models/scheduled-interview.model';
 import { MessageModel } from '../../models/message.model';
-import { InterviewFeedbackModel } from '../../models/interview-feedback.model';
 import { ScreeningResultModel } from '../../models/screening-result.model';
 import { getStorageProvider } from '../../integrations';
 import { eventBus } from '../../events/event-bus';
@@ -66,10 +62,6 @@ export const deleteCandidateHandler: JobHandler = async (payload, ctx) => {
 
     await Promise.all([
       MessageModel.deleteMany({ applicationId: { $in: applicationIds } }),
-      InterviewFeedbackModel.deleteMany({ applicationId: { $in: applicationIds } }),
-      ScheduledInterviewModel.deleteMany({ candidateId }),
-      InterviewModel.deleteMany({ candidateId }),
-      CandidateAssessmentModel.deleteMany({ candidateId }),
       ScreeningResultModel.deleteMany({ candidateId }),
     ]);
     await ApplicationModel.deleteMany({ candidateId });

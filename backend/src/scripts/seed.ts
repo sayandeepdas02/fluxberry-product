@@ -5,24 +5,19 @@ import { WorkspaceModel } from '../models/workspace.model';
 import { WorkspaceMemberModel } from '../models/workspace-member.model';
 import { JobModel } from '../models/job.model';
 import { ApplicationFormModel } from '../models/application-form.model';
-import { QuestionModel } from '../models/question.model';
-import { AssessmentModel } from '../models/assessment.model';
 import { CandidateModel } from '../models/candidate.model';
 import { ApplicationModel } from '../models/application.model';
 import { EventModel } from '../models/event.model';
 import { computeScreeningScore } from '../services/scoring.engine';
 import { shortId } from '../utils/ids';
 import { slugify } from '../utils/slug';
-import { SEED_QUESTIONS } from './seed-questions';
 import { logger } from '../utils/logger';
-
-const OPT = ['a', 'b', 'c', 'd'] as const;
 
 async function wipe() {
   const collections = [
     'users', 'workspaces', 'workspace_members', 'jobs', 'application_forms',
-    'candidates', 'applications', 'application_answers', 'questions', 'assessments',
-    'candidate_assessments', 'screening_results', 'workflows', 'workflow_runs',
+    'candidates', 'applications', 'application_answers',
+    'screening_results', 'workflows', 'workflow_runs',
     'workflow_steps', 'events', 'audit_logs', 'jobs_queue', 'notifications',
   ];
   for (const name of collections) {
@@ -57,33 +52,6 @@ async function main() {
   const ws = await WorkspaceModel.create({ name: 'Acme', slug: 'acme', plan: 'FREE', createdBy: user._id });
   await WorkspaceMemberModel.create({ workspaceId: ws._id, userId: user._id, role: 'owner' });
   const workspaceId = ws._id;
-
-  // Questions
-  const questions = await QuestionModel.insertMany(
-    SEED_QUESTIONS.map((q) => ({
-      workspaceId,
-      type: 'MCQ',
-      questionText: q.question,
-      options: q.options.map((text, i) => ({ id: OPT[i], text })),
-      correctAnswer: OPT[q.correct],
-      difficulty: q.difficulty,
-      category: q.category,
-      skills: q.skills,
-      tags: [],
-      createdBy: user._id,
-    })),
-  );
-  const byCategory = (cats: string[]) => questions.filter((q) => cats.includes(q.category));
-
-  // Assessments
-  const mkAssessment = (name: string, cats: string[], minutes: number) =>
-    AssessmentModel.create({
-      workspaceId, name, type: 'MCQ', durationMinutes: minutes, status: 'PUBLISHED', createdBy: user._id,
-      questions: byCategory(cats).slice(0, 8).map((q, i) => ({ questionId: q._id, points: 1, sortOrder: i })),
-    });
-  await mkAssessment('Backend Fundamentals', ['Backend', 'Node.js', 'SQL', 'PostgreSQL'], 30);
-  await mkAssessment('JavaScript Fundamentals', ['JavaScript', 'TypeScript', 'React'], 25);
-  await mkAssessment('DSA Screening', ['Data Structures', 'Algorithms'], 40);
 
   // Jobs
   const jobDefs = [
@@ -124,15 +92,15 @@ async function main() {
 
   // Candidates + applications (varied fit → varied scores)
   const candDefs = [
-    { name: 'Rahul Sharma', loc: 'Bangalore', exp: 4, salary: 2500000, skills: ['Node.js', 'PostgreSQL', 'AWS', 'Docker'], job: 0, stage: 'INTERVIEW' },
-    { name: 'Priya Nair', loc: 'Bangalore', exp: 5, salary: 2800000, skills: ['Node.js', 'PostgreSQL', 'Kafka', 'AWS'], job: 0, stage: 'ASSESSMENT' },
+    { name: 'Rahul Sharma', loc: 'Bangalore', exp: 4, salary: 2500000, skills: ['Node.js', 'PostgreSQL', 'AWS', 'Docker'], job: 0, stage: 'SHORTLISTED' },
+    { name: 'Priya Nair', loc: 'Bangalore', exp: 5, salary: 2800000, skills: ['Node.js', 'PostgreSQL', 'Kafka', 'AWS'], job: 0, stage: 'SHORTLISTED' },
     { name: 'Arjun Mehta', loc: 'Remote', exp: 2, salary: 1600000, skills: ['JavaScript', 'React'], job: 0, stage: 'SCREENING' },
     { name: 'Sara Khan', loc: 'Mumbai', exp: 3, salary: 2200000, skills: ['Node.js', 'MongoDB'], job: 0, stage: 'APPLIED' },
     { name: 'Vikram Rao', loc: 'Bangalore', exp: 6, salary: 3200000, skills: ['Node.js', 'PostgreSQL', 'AWS', 'Kafka', 'Docker'], job: 0, stage: 'OFFER' },
-    { name: 'Meera Iyer', loc: 'Remote', exp: 4, salary: 2100000, skills: ['Figma', 'Product design', 'UX', 'UI'], job: 1, stage: 'INTERVIEW' },
+    { name: 'Meera Iyer', loc: 'Remote', exp: 4, salary: 2100000, skills: ['Figma', 'Product design', 'UX', 'UI'], job: 1, stage: 'SHORTLISTED' },
     { name: 'Dev Patel', loc: 'Remote', exp: 3, salary: 1900000, skills: ['Figma', 'UX'], job: 1, stage: 'SCREENING' },
     { name: 'Ananya Gupta', loc: 'Delhi', exp: 2, salary: 1700000, skills: ['Sketch'], job: 1, stage: 'APPLIED' },
-    { name: 'Karan Singh', loc: 'Bangalore', exp: 5, salary: 3000000, skills: ['React', 'Node.js', 'TypeScript', 'AWS'], job: 2, stage: 'ASSESSMENT' },
+    { name: 'Karan Singh', loc: 'Bangalore', exp: 5, salary: 3000000, skills: ['React', 'Node.js', 'TypeScript', 'AWS'], job: 2, stage: 'SHORTLISTED' },
     { name: 'Neha Verma', loc: 'Bangalore', exp: 7, salary: 3800000, skills: ['React', 'Node.js', 'TypeScript', 'PostgreSQL', 'AWS'], job: 2, stage: 'HIRED' },
     { name: 'Rohan Das', loc: 'Pune', exp: 3, salary: 2400000, skills: ['React', 'JavaScript'], job: 2, stage: 'REJECTED' },
     { name: 'Ishita Roy', loc: 'Bangalore', exp: 4, salary: 2600000, skills: ['React', 'Node.js', 'TypeScript'], job: 2, stage: 'APPLIED' },
@@ -172,7 +140,7 @@ async function main() {
     count++;
   }
 
-  logger.info({ workspace: 'Acme', questions: questions.length, jobs: jobs.length, candidates: count }, 'Seed complete');
+  logger.info({ workspace: 'Acme', jobs: jobs.length, candidates: count }, 'Seed complete');
   logger.info('Log in locally with email: demo@fluxberry.dev (dev test-token path, no password needed)');
   await disconnectDatabase();
 }

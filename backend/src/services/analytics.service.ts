@@ -12,20 +12,15 @@ import type {
   StageDwellTimeDto,
   OfferMetricsDto,
   SourceQualityDto,
-  InterviewScoreAnalyticsDto,
   RejectionDistributionDto,
   JobFillRateDto,
-  InterviewFeedbackRating,
   RejectionReason,
 } from '../shared';
-import { PIPELINE_STAGES, CANDIDATE_SOURCES, REJECTION_REASONS, INTERVIEW_FEEDBACK_RATINGS } from '../shared';
+import { PIPELINE_STAGES, CANDIDATE_SOURCES, REJECTION_REASONS } from '../shared';
 import { ApplicationModel } from '../models/application.model';
 import { JobModel } from '../models/job.model';
 import { CandidateModel } from '../models/candidate.model';
-import { ScheduledInterviewModel } from '../models/scheduled-interview.model';
 import { OfferModel } from '../models/offer.model';
-import { InterviewModel } from '../models/interview.model';
-import { InterviewFeedbackModel } from '../models/interview-feedback.model';
 import { EventModel } from '../models/event.model';
 import { AnalyticsCacheModel } from '../models/analytics-cache.model';
 import { applyJobAccessFilter, bypassesJobAccess, jobAccessClause } from '../utils/job-access';
@@ -153,7 +148,6 @@ export const analyticsService = {
       salaryRows,
       sourceRows,
       hireTimes,
-      upcomingInterviews,
     ] = await Promise.all([
       JobModel.countDocuments(applyJobAccessFilter({ workspaceId: wsId, status: { $in: ['PUBLISHED', 'PAUSED'] } }, auth, 'restrictedTo')),
       ApplicationModel.aggregate([
@@ -181,7 +175,6 @@ export const analyticsService = {
       ApplicationModel.find(applyJobAccessFilter({ workspaceId: wsId, status: 'HIRED' }, auth, 'jobRestrictedTo'))
         .select('appliedAt updatedAt')
         .lean(),
-      ScheduledInterviewModel.countDocuments({ workspaceId: wsId, start: { $gte: new Date() } }),
     ]);
     const salaryDocs = salaryRows as Array<{ expectedSalary: number }>;
 
@@ -222,9 +215,7 @@ export const analyticsService = {
         totalApplicants,
         applicantsLast30Days: last30,
         shortlisted,
-        interviews: countFor('INTERVIEW'),
         hired,
-        upcomingInterviews,
         inOfferStage: countFor('OFFER'),
       },
       funnel,
@@ -240,7 +231,7 @@ export const analyticsService = {
     const jId = new Types.ObjectId(jobId);
     const since30 = new Date(Date.now() - 30 * 24 * 3600_000);
 
-    const [stageRows, timeRows, locationRows, scoreRows, assessmentRows, sourceRows] = await Promise.all([
+    const [stageRows, timeRows, locationRows, scoreRows, sourceRows] = await Promise.all([
       ApplicationModel.aggregate([
         { $match: { workspaceId: wsId, jobId: jId } },
         { $group: { _id: '$stage', count: { $sum: 1 } } },
@@ -266,17 +257,6 @@ export const analyticsService = {
       ]),
       ApplicationModel.aggregate([
         { $match: { workspaceId: wsId, jobId: jId } },
-        { $lookup: { from: 'candidate_assessments', localField: '_id', foreignField: 'applicationId', as: 'ca' } },
-        { $unwind: { path: '$ca', preserveNullAndEmptyArrays: true } },
-        { $group: {
-          _id: null,
-          totalSent: { $sum: { $cond: [{ $ifNull: ['$ca._id', false] }, 1, 0] } },
-          completed: { $sum: { $cond: [{ $eq: ['$ca.status', 'COMPLETED'] }, 1, 0] } },
-          totalScore: { $sum: { $cond: [{ $eq: ['$ca.status', 'COMPLETED'] }, { $ifNull: ['$ca.score', 0] }, 0] } },
-        } },
-      ]),
-      ApplicationModel.aggregate([
-        { $match: { workspaceId: wsId, jobId: jId } },
         { $group: { _id: '$source', count: { $sum: 1 } } },
       ]),
     ]);
@@ -294,18 +274,11 @@ export const analyticsService = {
       .map((source) => ({ source: source as CandidateSource, count: srcCount.get(source) ?? 0 }))
       .filter((s) => s.count > 0);
 
-    const agg = assessmentRows[0] as any;
-    const totalSent = agg?.totalSent ?? 0;
-    const completed = agg?.completed ?? 0;
-    const avgScore = completed > 0 ? Math.round((agg.totalScore / completed) * 10) / 10 : null;
-    const completionRate = totalSent > 0 ? Math.round((completed / totalSent) * 100) : null;
-
     return {
       funnel,
       applicantsOverTime: timeRows.map((r: any) => ({ date: r._id as string, count: r.count })),
       topLocations: locationRows.map((r: any) => ({ label: r._id as string, count: r.count })),
       screeningScoreDistribution,
-      assessments: { totalSent, completed, avgScore, completionRate },
       sources,
     };
   },
@@ -641,15 +614,6 @@ export const analyticsService = {
   },
 
   // ---- Phase 2: Advanced analytics (PRO-gated via requirePlanFeature('ADVANCED_ANALYTICS')) ----
-  //
-  // NOTE: These endpoints require `requirePlanFeature('ADVANCED_ANALYTICS')` which
-  // is effectively admin-level access.  Some methods (sourceQuality, rejectionDistribution,
-  // jobFillRates) already apply `applyJobAccessFilter` for restricted recruiters;
-  // interviewScoreAnalytics does not yet — it aggregates workspace-wide.  If per-job
-  // scoping is needed there, add the same filter pattern.  For V1 this is acceptable
-  // because the PRO gate limits access to workspace admins.
-
-  // Note: job-access filtering is not applied to interviewScoreAnalytics — these endpoints require ADVANCED_ANALYTICS (admin-level access).
 
   /** Per-source volume/quality: total applicants, shortlist/hire rate, avg screening score. */
   async computeSourceQuality(workspaceId: string, auth: AuthContext): Promise<SourceQualityDto> {
@@ -689,77 +653,6 @@ export const analyticsService = {
       }).filter((s) => s.total > 0);
 
       return { sources };
-    });
-  },
-
-  // Note: job-access filtering is not applied — these endpoints require ADVANCED_ANALYTICS (admin-level access).
-  /** AI interview score distribution/averages, plus human feedback rating breakdown. */
-  async computeInterviewScoreAnalytics(workspaceId: string, auth: AuthContext): Promise<InterviewScoreAnalyticsDto> {
-    return withCache(workspaceId, 'interview-scores', auth, async () => {
-      const wsId = new Types.ObjectId(workspaceId);
-
-      const [bucketRows, avgRows, feedbackRows] = await Promise.all([
-        InterviewModel.aggregate([
-          { $match: { workspaceId: wsId, status: 'COMPLETED', 'evaluation.overallScore': { $ne: null } } },
-          {
-            $bucket: {
-              groupBy: '$evaluation.overallScore',
-              boundaries: [0, 3, 5, 7, 9, 11],
-              default: 'Other',
-              output: { count: { $sum: 1 } },
-            },
-          },
-        ]),
-        InterviewModel.aggregate([
-          { $match: { workspaceId: wsId, status: 'COMPLETED', 'evaluation.overallScore': { $ne: null } } },
-          {
-            $group: {
-              _id: null,
-              totalCompleted: { $sum: 1 },
-              avgOverall: { $avg: '$evaluation.overallScore' },
-              avgCommunication: { $avg: '$evaluation.communicationScore' },
-              avgTechnical: { $avg: '$evaluation.technicalScore' },
-              avgConfidence: { $avg: '$evaluation.confidenceScore' },
-              avgProblemSolving: { $avg: '$evaluation.problemSolvingScore' },
-            },
-          },
-        ]),
-        InterviewFeedbackModel.aggregate([
-          { $match: { workspaceId: wsId } },
-          { $group: { _id: '$rating', count: { $sum: 1 } } },
-        ]),
-      ]);
-
-      const bucketLabels: Record<string, string> = { '0': '0–2', '3': '3–4', '5': '5–6', '7': '7–8', '9': '9–10' };
-      const distribution = bucketRows
-        .filter((r: any) => r._id !== 'Other')
-        .map((r: any) => ({ label: bucketLabels[String(r._id)] ?? String(r._id), count: r.count }));
-
-      const avg = avgRows[0] as any;
-      const round1 = (n: number | null | undefined) => (n != null ? Math.round(n * 10) / 10 : null);
-
-      const feedbackCount = new Map<string, number>(feedbackRows.map((r: any) => [r._id as string, r.count]));
-      const feedbackDistribution = INTERVIEW_FEEDBACK_RATINGS.map((rating) => ({
-        rating: rating as InterviewFeedbackRating,
-        count: feedbackCount.get(rating) ?? 0,
-      }));
-      const totalFeedback = feedbackRows.reduce((s: number, r: any) => s + r.count, 0);
-
-      return {
-        aiScores: {
-          distribution,
-          avgOverall: round1(avg?.avgOverall),
-          avgCommunication: round1(avg?.avgCommunication),
-          avgTechnical: round1(avg?.avgTechnical),
-          avgConfidence: round1(avg?.avgConfidence),
-          avgProblemSolving: round1(avg?.avgProblemSolving),
-          totalCompleted: avg?.totalCompleted ?? 0,
-        },
-        feedbackRatings: {
-          distribution: feedbackDistribution,
-          total: totalFeedback,
-        },
-      };
     });
   },
 

@@ -11,7 +11,6 @@ import type {
   StageDwellTimeDto,
   OfferMetricsDto,
   SourceQualityDto,
-  InterviewScoreAnalyticsDto,
   RejectionDistributionDto,
   JobFillRateDto,
 } from '@/lib/shared';
@@ -113,17 +112,6 @@ export function useSourceQuality() {
   return useQuery({
     queryKey: ['analytics', currentWorkspace.id, 'source-quality'],
     queryFn: () => api.get<SourceQualityDto>('/api/v1/analytics/advanced/source-quality'),
-    enabled: advancedAnalytics,
-    retry: false,
-  });
-}
-
-export function useInterviewScoreAnalytics() {
-  const { currentWorkspace } = useWorkspace();
-  const advancedAnalytics = useFeature('ADVANCED_ANALYTICS');
-  return useQuery({
-    queryKey: ['analytics', currentWorkspace.id, 'interview-scores'],
-    queryFn: () => api.get<InterviewScoreAnalyticsDto>('/api/v1/analytics/advanced/interview-scores'),
     enabled: advancedAnalytics,
     retry: false,
   });

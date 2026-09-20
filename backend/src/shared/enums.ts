@@ -48,8 +48,6 @@ export type ApplicationStatus = (typeof APPLICATION_STATUSES)[number];
 export const APPLICATION_STAGES = [
   'APPLIED',
   'SCREENING',
-  'ASSESSMENT',
-  'INTERVIEW',
   'OFFER',
   'HIRED',
   'REJECTED',
@@ -60,8 +58,6 @@ export type ApplicationStage = (typeof APPLICATION_STAGES)[number];
 export const PIPELINE_STAGES = [
   'APPLIED',
   'SCREENING',
-  'ASSESSMENT',
-  'INTERVIEW',
   'OFFER',
   'HIRED',
 ] as const;
@@ -108,56 +104,12 @@ export type MultipleChoiceVariant = (typeof MULTIPLE_CHOICE_VARIANTS)[number];
 export const OTHER_LINK_PLATFORMS = ['TWITTER', 'INSTAGRAM', 'GITHUB', 'YOUTUBE', 'ANY'] as const;
 export type OtherLinkPlatform = (typeof OTHER_LINK_PLATFORMS)[number];
 
-/** Question bank question types. */
-export const QUESTION_TYPES = ['MCQ', 'CODING'] as const;
-export type QuestionType = (typeof QUESTION_TYPES)[number];
-
 export const DIFFICULTIES = ['EASY', 'MEDIUM', 'HARD'] as const;
 export type Difficulty = (typeof DIFFICULTIES)[number];
-
-export const ASSESSMENT_TYPES = ['MCQ', 'CODING', 'AI_INTERVIEW'] as const;
-export type AssessmentType = (typeof ASSESSMENT_TYPES)[number];
-
-export const ASSESSMENT_STATUSES = ['DRAFT', 'PUBLISHED', 'ARCHIVED'] as const;
-export type AssessmentStatus = (typeof ASSESSMENT_STATUSES)[number];
-
-export const CANDIDATE_ASSESSMENT_STATUSES = [
-  'INVITED',
-  'STARTED',
-  // Coding assessments submit asynchronously: the candidate has submitted and
-  // we are waiting on Judge0 to finish grading before a final score exists.
-  'GRADING',
-  'COMPLETED',
-  'EXPIRED',
-  'CANCELLED',
-] as const;
-export type CandidateAssessmentStatus = (typeof CANDIDATE_ASSESSMENT_STATUSES)[number];
-
-export const INTERVIEW_TYPES = ['AI_VOICE', 'AI_VIDEO'] as const;
-export type InterviewType = (typeof INTERVIEW_TYPES)[number];
-
-/** A manually-scheduled human interview's location. */
-export const SCHEDULED_INTERVIEW_LOCATION_TYPES = ['ONLINE', 'IN_PERSON'] as const;
-export type ScheduledInterviewLocationType = (typeof SCHEDULED_INTERVIEW_LOCATION_TYPES)[number];
 
 /** Who created the scheduled interview record's calendar event. */
 export const CALENDAR_PROVIDERS = ['GOOGLE', 'MOCK'] as const;
 export type CalendarProviderName = (typeof CALENDAR_PROVIDERS)[number];
-
-/** Overall rating scale for post-interview feedback (spec: binary.so parity). */
-export const INTERVIEW_FEEDBACK_RATINGS = ['STRONG_NO', 'NO', 'YES', 'STRONG_YES'] as const;
-export type InterviewFeedbackRating = (typeof INTERVIEW_FEEDBACK_RATINGS)[number];
-
-export const INTERVIEW_STATUSES = [
-  'INVITED', // link sent, candidate hasn't joined
-  'STARTED', // candidate opened the interview
-  'IN_PROGRESS', // voice call is live
-  'COMPLETED', // call finished, transcript captured/evaluated
-  'EXPIRED', // link lapsed before completion
-  'FAILED', // provider/call error
-  'CANCELLED',
-] as const;
-export type InterviewStatus = (typeof INTERVIEW_STATUSES)[number];
 
 /** Generic async processing status used by resume parsing & screening. */
 export const PROCESSING_STATUSES = ['PENDING', 'PROCESSING', 'COMPLETED', 'FAILED'] as const;
@@ -187,13 +139,9 @@ export const WORKFLOW_NODE_TYPES = [
   'APPLICATION_RECEIVED',
   'AI_SCREEN',
   'CONDITION',
-  'SEND_ASSESSMENT',
   'WAIT',
   'MOVE_STAGE',
   'SEND_EMAIL',
-  // Feature-flagged, scaffolded:
-  'CODING_ASSESSMENT',
-  'AI_INTERVIEW',
 ] as const;
 export type WorkflowNodeType = (typeof WORKFLOW_NODE_TYPES)[number];
 
@@ -225,8 +173,6 @@ export type ConditionOperator = (typeof CONDITION_OPERATORS)[number];
 /** Fields a workflow CONDITION node may reference (safe allow-list, no eval). */
 export const CONDITION_FIELDS = [
   'screening_score',
-  'assessment_score',
-  'interview_score',
   'years_experience',
   'expected_salary',
   'location',
@@ -243,8 +189,6 @@ export const JOB_QUEUE_TYPES = [
   'GENERATE_JOB_DESCRIPTION',
   'SEND_EMAIL',
   'RUN_WORKFLOW',
-  'PROCESS_ASSESSMENT',
-  'PROCESS_INTERVIEW',
   'AGGREGATE_ANALYTICS',
   'PROCESS_BILLING_WEBHOOK',
   'LINK_REFERRAL_APPLICATION',
@@ -288,15 +232,6 @@ export const EVENT_TYPES = [
   'candidate.deletion.requested',
   'candidate.anonymized',
   'candidate.deleted',
-  'assessment.created',
-  'assessment.sent',
-  'assessment.started',
-  'assessment.completed',
-  'interview.created',
-  'interview.started',
-  'interview.completed',
-  'interview.scheduled',
-  'interview.feedback.added',
   'offer.created',
   'offer.sent',
   'offer.accepted',

@@ -7,15 +7,12 @@ import type {
   ResumeParseResult,
   ScreeningInput,
   ScreeningReasoning,
-  InterviewEvalInput,
-  InterviewEvaluation,
   ProviderMeta,
 } from './types';
 import {
   jobDescriptionPrompt,
   resumeParsingPrompt,
   candidateScreeningPrompt,
-  interviewEvaluationPrompt,
   type PromptSpec,
 } from './prompts';
 import { extractJson, clampScore, asStringArray } from './util';
@@ -63,21 +60,6 @@ export abstract class BaseLLMProvider implements AIProvider {
     };
   }
 
-  async evaluateInterview(input: InterviewEvalInput): Promise<InterviewEvaluation> {
-    const spec = interviewEvaluationPrompt(input);
-    const json = extractJson<any>(await this.complete(spec, 1200));
-    return {
-      communicationScore: clampScore(json.communicationScore),
-      technicalScore: clampScore(json.technicalScore),
-      confidenceScore: clampScore(json.confidenceScore),
-      problemSolvingScore: clampScore(json.problemSolvingScore),
-      overallScore: clampScore(json.overallScore),
-      summary: String(json.summary ?? '').trim(),
-      strengths: asStringArray(json.strengths),
-      concerns: asStringArray(json.concerns),
-      meta: this.meta(spec.version),
-    };
-  }
 }
 
 function normalizeReqs(r: any): StructuredRequirements {

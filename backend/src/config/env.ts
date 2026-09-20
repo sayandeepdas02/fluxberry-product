@@ -79,16 +79,6 @@ const envSchema = z.object({
   STORAGE_SECRET_KEY: z.string().optional().default(''),
   STORAGE_PUBLIC_URL: z.string().optional().default(''),
 
-  JUDGE0_URL: z.string().optional().default(''),
-  JUDGE0_API_KEY: z.string().optional().default(''),
-  /**
-   * How the Judge0 key is sent: 'token' → X-Auth-Token (self-hosted, default),
-   * 'rapidapi' → X-RapidAPI-Key + X-RapidAPI-Host, 'bearer' → Authorization: Bearer.
-   */
-  JUDGE0_AUTH_MODE: z.enum(['token', 'rapidapi', 'bearer']).default('token'),
-  /** Required only when JUDGE0_AUTH_MODE=rapidapi (the X-RapidAPI-Host value). */
-  JUDGE0_RAPIDAPI_HOST: z.string().optional().default(''),
-
   /**
    * Google Calendar OAuth (for the "Schedule interview" feature). Blank ->
    * a realistic mock calendar adapter activates: interviews are recorded
@@ -98,19 +88,6 @@ const envSchema = z.object({
   GOOGLE_CLIENT_SECRET: z.string().optional().default(''),
   /** Must exactly match an authorized redirect URI on the Google OAuth client. */
   GOOGLE_CALENDAR_REDIRECT_URI: z.string().optional().default(''),
-
-  INTERVIEW_PROVIDER: z.string().default('mock'),
-  INTERVIEW_PROVIDER_API_KEY: z.string().optional().default(''),
-  BOLNA_API_BASE: z.string().default('https://api.bolna.ai'),
-  /**
-   * Bolna's browser web-call session-mint endpoint. Documented as a PLACEHOLDER
-   * in the beta docs — confirm the exact path when web-call access is granted.
-   */
-  BOLNA_WEBCALL_SESSION_URL: z.string().optional().default(''),
-  /** Unguessable secret embedded in the Bolna webhook URL (Bolna does not sign). */
-  BOLNA_WEBHOOK_SECRET: z.string().optional().default(''),
-  BOLNA_LLM_MODEL: z.string().optional().default('gpt-4o-mini'),
-  BOLNA_VOICE_ID: z.string().optional().default(''),
 
   REDIS_URL: z.string().optional().default(''),
   SENTRY_RELEASE: z.string().optional().default(''),
@@ -126,12 +103,8 @@ const envSchema = z.object({
   POSTHOG_KEY: z.string().optional().default(''),
   POSTHOG_HOST: z.string().default('https://us.i.posthog.com'),
 
-  FEATURE_CODING_ASSESSMENT: bool(DEFAULT_FEATURE_FLAGS.CODING_ASSESSMENT),
-  FEATURE_AI_INTERVIEW: bool(DEFAULT_FEATURE_FLAGS.AI_INTERVIEW),
   FEATURE_WORKFLOW_AUTOMATION: bool(DEFAULT_FEATURE_FLAGS.WORKFLOW_AUTOMATION),
   FEATURE_ADVANCED_ANALYTICS: bool(DEFAULT_FEATURE_FLAGS.ADVANCED_ANALYTICS),
-  FEATURE_ASSESSMENTS: bool(DEFAULT_FEATURE_FLAGS.ASSESSMENTS),
-  FEATURE_QUESTION_BANK: bool(DEFAULT_FEATURE_FLAGS.QUESTION_BANK),
   FEATURE_AV_SCANNING: bool(DEFAULT_FEATURE_FLAGS.AV_SCANNING),
   FEATURE_OUTBOUND_WEBHOOKS: bool(DEFAULT_FEATURE_FLAGS.OUTBOUND_WEBHOOKS),
   FEATURE_GDPR_TOOLS: bool(DEFAULT_FEATURE_FLAGS.GDPR_TOOLS),
@@ -166,12 +139,8 @@ if (e.NODE_ENV === 'production' && !e.CAREERS_PREVIEW_SECRET) {
 }
 
 const features: FeatureFlagState = {
-  CODING_ASSESSMENT: e.FEATURE_CODING_ASSESSMENT,
-  AI_INTERVIEW: e.FEATURE_AI_INTERVIEW,
   WORKFLOW_AUTOMATION: e.FEATURE_WORKFLOW_AUTOMATION,
   ADVANCED_ANALYTICS: e.FEATURE_ADVANCED_ANALYTICS,
-  ASSESSMENTS: e.FEATURE_ASSESSMENTS,
-  QUESTION_BANK: e.FEATURE_QUESTION_BANK,
   AV_SCANNING: e.FEATURE_AV_SCANNING,
   OUTBOUND_WEBHOOKS: e.FEATURE_OUTBOUND_WEBHOOKS,
   GDPR_TOOLS: e.FEATURE_GDPR_TOOLS,
@@ -226,21 +195,6 @@ export const config = {
       accessKey: e.STORAGE_ACCESS_KEY,
       secretKey: e.STORAGE_SECRET_KEY,
       publicUrl: e.STORAGE_PUBLIC_URL,
-    },
-    judge0: {
-      url: e.JUDGE0_URL,
-      apiKey: e.JUDGE0_API_KEY,
-      authMode: e.JUDGE0_AUTH_MODE,
-      rapidApiHost: e.JUDGE0_RAPIDAPI_HOST,
-    },
-    interview: {
-      provider: e.INTERVIEW_PROVIDER,
-      apiKey: e.INTERVIEW_PROVIDER_API_KEY,
-      apiBase: e.BOLNA_API_BASE,
-      webCallSessionUrl: e.BOLNA_WEBCALL_SESSION_URL,
-      webhookSecret: e.BOLNA_WEBHOOK_SECRET,
-      llmModel: e.BOLNA_LLM_MODEL,
-      voiceId: e.BOLNA_VOICE_ID,
     },
     calendar: {
       clientId: e.GOOGLE_CLIENT_ID,

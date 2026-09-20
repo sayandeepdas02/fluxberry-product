@@ -65,7 +65,6 @@ const jobSchema = new Schema(
     restrictedTo: { type: [Schema.Types.ObjectId], ref: 'User', default: [] },
     applicationFormId: { type: Schema.Types.ObjectId, ref: 'ApplicationForm', default: null },
     workflowId: { type: Schema.Types.ObjectId, ref: 'Workflow', default: null },
-    interviewConfigId: { type: Schema.Types.ObjectId, ref: 'AiInterviewConfig', default: null },
     // AI generation provenance (spec §16, §152)
     rawGenerationPrompt: { type: String, default: null },
     generatedDescription: { type: String, default: null },

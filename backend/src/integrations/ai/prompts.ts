@@ -1,4 +1,4 @@
-import type { JdGenInput, ResumeParseInput, ScreeningInput, InterviewEvalInput } from './types';
+import type { JdGenInput, ResumeParseInput, ScreeningInput } from './types';
 
 export interface PromptSpec {
   system: string;
@@ -112,21 +112,3 @@ Return ONLY JSON:
   };
 }
 
-export function interviewEvaluationPrompt(input: InterviewEvalInput): PromptSpec {
-  return {
-    version: 'interview-v1',
-    system: `${FAIRNESS}\nYou evaluate an interview transcript on job-relevant dimensions only.`,
-    user: `Evaluate this interview for the role "${input.jobTitle}". Return ONLY JSON:
-{
-  "communicationScore": number, "technicalScore": number, "confidenceScore": number,
-  "problemSolvingScore": number, "overallScore": number,
-  "summary": "", "strengths": ["..."], "concerns": ["..."]
-}
-All scores are 0-10.
-
-TRANSCRIPT:
-"""
-${input.transcript.slice(0, 15000)}
-"""`,
-  };
-}

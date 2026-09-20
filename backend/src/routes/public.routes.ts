@@ -5,7 +5,7 @@ import { messageController } from '../controllers/message.controller';
 import { referralController } from '../controllers/referral.controller';
 import { offerController } from '../controllers/offer.controller';
 import { applicationUpload } from '../middleware/upload';
-import { publicApplyLimiter, uploadLimiter, assessmentLimiter, codingRunLimiter } from '../middleware/rate-limit';
+import { publicApplyLimiter, uploadLimiter } from '../middleware/rate-limit';
 import { validateBody } from '../middleware/validate';
 import { offerDecisionSchema } from '../shared';
 
@@ -33,30 +33,9 @@ publicRouter.get('/public/referrals/:code', referralController.resolvePublic);
 publicRouter.get('/public/careers/:slug', careersController.publicGet);
 publicRouter.get('/public/careers/:slug/jobs', careersController.publicJobs);
 
-// Candidate assessment (token-gated, no account needed).
-publicRouter.get('/public/assessments/:token', publicController.getAssessment);
-publicRouter.post('/public/assessments/:token/start', assessmentLimiter, publicController.startAssessment);
-publicRouter.post('/public/assessments/:token/answer', assessmentLimiter, publicController.autosaveAnswer);
-publicRouter.post('/public/assessments/:token/run', codingRunLimiter, publicController.runCode);
-publicRouter.post('/public/assessments/:token/submit', assessmentLimiter, publicController.submitAssessment);
-
-// Candidate AI interview (token-gated, no account needed).
-publicRouter.get('/public/interviews/:token', publicController.getInterview);
-publicRouter.post('/public/interviews/:token/session', assessmentLimiter, publicController.interviewSession);
-publicRouter.post('/public/interviews/:token/complete', assessmentLimiter, publicController.completeInterview);
-
-// Interviewer access link — "link that only interviewer can access" (token-gated,
-// no Fluxberry account needed; binary.so parity).
-publicRouter.get('/public/interview-access/:token', publicController.getInterviewerAccess);
-publicRouter.post('/public/interview-access/:token', assessmentLimiter, publicController.submitInterviewerFeedback);
-
-// Bolna call webhook — unauthenticated but gated by an unguessable URL secret.
-// (Bolna does not sign webhooks; we re-fetch the execution by id before trusting it.)
-publicRouter.post('/webhooks/bolna/:secret', publicController.bolnaWebhook);
-
 // Public offer view + candidate response (token-gated, no account needed).
 publicRouter.get('/public/offers/:token', offerController.getByToken);
-publicRouter.post('/public/offers/:token/respond', assessmentLimiter, validateBody(offerDecisionSchema), offerController.respond);
+publicRouter.post('/public/offers/:token/respond', publicApplyLimiter, validateBody(offerDecisionSchema), offerController.respond);
 
 // Inbound candidate email replies — provider-agnostic, gated by an unguessable
 // URL secret. Whichever inbound email vendor is configured should be set up to

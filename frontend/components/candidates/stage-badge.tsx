@@ -5,8 +5,6 @@ import { stageLabel } from '@/lib/labels';
 const VARIANT: Record<ApplicationStage, 'muted' | 'primary' | 'warning' | 'success' | 'destructive'> = {
   APPLIED: 'muted',
   SCREENING: 'primary',
-  ASSESSMENT: 'primary',
-  INTERVIEW: 'warning',
   OFFER: 'success',
   HIRED: 'success',
   REJECTED: 'destructive',

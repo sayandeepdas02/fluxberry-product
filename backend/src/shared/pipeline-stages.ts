@@ -2,12 +2,10 @@ import { APPLICATION_STAGES } from './enums';
 import type { ApplicationStage } from './enums';
 import type { PipelineStage } from './schemas/pipeline-stage';
 
-/** Labels for the 7 built-in stages — single source of truth for both apps. */
+/** Labels for the built-in stages — single source of truth for both apps. */
 export const SYSTEM_STAGE_LABELS: Record<ApplicationStage, string> = {
   APPLIED: 'Applied',
   SCREENING: 'Screening',
-  ASSESSMENT: 'Assessment',
-  INTERVIEW: 'Interview',
   OFFER: 'Offer',
   HIRED: 'Hired',
   REJECTED: 'Rejected',

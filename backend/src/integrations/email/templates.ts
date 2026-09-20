@@ -33,37 +33,6 @@ export const emailTemplates = {
     };
   },
 
-  assessmentInvitation(p: {
-    candidateName: string;
-    jobTitle: string;
-    assessmentName: string;
-    link: string;
-    durationMinutes: number;
-  }): TemplateResult {
-    return {
-      subject: `Next step: ${p.assessmentName}`,
-      html: layout(
-        `<p>Hi ${escape(p.candidateName)},</p>
-         <p>You've been invited to complete <strong>${escape(p.assessmentName)}</strong> for the ${escape(p.jobTitle)} role. It takes about ${p.durationMinutes} minutes.</p>
-         <p style="margin:20px 0">${button(p.link, 'Start assessment')}</p>
-         <p style="color:#8a93a2;font-size:13px">Or paste this link into your browser:<br>${escape(p.link)}</p>`,
-      ),
-      text: `Hi ${p.candidateName}, you've been invited to complete ${p.assessmentName} (${p.durationMinutes} min). Start here: ${p.link}`,
-    };
-  },
-
-  assessmentReminder(p: { candidateName: string; assessmentName: string; link: string }): TemplateResult {
-    return {
-      subject: `Reminder: ${p.assessmentName}`,
-      html: layout(
-        `<p>Hi ${escape(p.candidateName)},</p>
-         <p>Just a reminder to complete <strong>${escape(p.assessmentName)}</strong>.</p>
-         <p style="margin:20px 0">${button(p.link, 'Complete assessment')}</p>`,
-      ),
-      text: `Reminder: complete ${p.assessmentName} here: ${p.link}`,
-    };
-  },
-
   candidateAdvanced(p: { candidateName: string; jobTitle: string; stage: string }): TemplateResult {
     return {
       subject: `Update on your application — ${p.jobTitle}`,
@@ -107,41 +76,6 @@ export const emailTemplates = {
          <p>Congratulations! We're thrilled to confirm that you've been hired for the <strong>${escape(p.jobTitle)}</strong> position at ${escape(p.companyName)}. We'll be in touch with next steps soon.</p>`,
       ),
       text: `Hi ${p.candidateName}, congratulations! You've been hired for ${p.jobTitle} at ${p.companyName}. We'll be in touch with next steps.`,
-    };
-  },
-
-  interviewReminder(p: {
-    recipientType: 'CANDIDATE' | 'INTERVIEWER';
-    recipientName: string;
-    candidateName: string;
-    jobTitle: string;
-    companyName: string;
-    whenLabel: string;
-    whereLine: string;
-    accessLink?: string;
-  }): TemplateResult {
-    if (p.recipientType === 'CANDIDATE') {
-      return {
-        subject: `Reminder: your interview for ${p.jobTitle} is tomorrow`,
-        html: layout(
-          `<p>Hi ${escape(p.recipientName)},</p>
-           <p>Just a reminder — your interview for <strong>${escape(p.jobTitle)}</strong> at ${escape(p.companyName)} is tomorrow.</p>
-           <p>When: ${escape(p.whenLabel)}</p>
-           ${p.whereLine ? `<p>${escape(p.whereLine)}</p>` : ''}`,
-        ),
-        text: `Hi ${p.recipientName}, reminder: your interview for ${p.jobTitle} at ${p.companyName} is tomorrow. When: ${p.whenLabel}. ${p.whereLine}`,
-      };
-    }
-    return {
-      subject: `Reminder: interview with ${p.candidateName} tomorrow`,
-      html: layout(
-        `<p>Hi ${escape(p.recipientName)},</p>
-         <p>Reminder — your interview with <strong>${escape(p.candidateName)}</strong> for ${escape(p.jobTitle)} is tomorrow.</p>
-         <p>When: ${escape(p.whenLabel)}</p>
-         ${p.whereLine ? `<p>${escape(p.whereLine)}</p>` : ''}
-         ${p.accessLink ? `<p style="margin:20px 0">${button(p.accessLink, 'View candidate & feedback form')}</p>` : ''}`,
-      ),
-      text: `Hi ${p.recipientName}, reminder: interview with ${p.candidateName} for ${p.jobTitle} is tomorrow. When: ${p.whenLabel}. ${p.whereLine}${p.accessLink ? ` Details: ${p.accessLink}` : ''}`,
     };
   },
 

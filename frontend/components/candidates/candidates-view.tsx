@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Search, Users, LayoutGrid, Table as TableIcon, X } from 'lucide-react';
-import type { CandidateAssessmentStatus, PipelineStage } from '@/lib/shared';
-import { CANDIDATE_ASSESSMENT_STATUSES, defaultPipelineStages } from '@/lib/shared';
+import type { PipelineStage } from '@/lib/shared';
+import { defaultPipelineStages } from '@/lib/shared';
 import { useCandidates, useMoveStage, useBulkAction, useShortlist, useReject } from '@/hooks/use-candidates';
 import { useJobs, useJobStages } from '@/hooks/use-jobs';
 import { useLabels } from '@/hooks/use-labels';
@@ -19,14 +19,12 @@ import { CandidateBoard } from './candidate-board';
 import { RejectDialog } from './reject-dialog';
 import { toast } from '@/components/ui/sonner';
 import { cn } from '@/lib/utils';
-import { ASSESSMENT_STATUS_LABELS } from '@/lib/labels';
 
 export function CandidatesView({ jobId: fixedJobId }: { jobId?: string }) {
   const [view, setView] = useState<'table' | 'board'>('table');
   const [jobId, setJobId] = useState<string | undefined>(fixedJobId);
   const [stage, setStage] = useState<string | undefined>();
   const [labelId, setLabelId] = useState<string | undefined>();
-  const [assessmentStatus, setAssessmentStatus] = useState<CandidateAssessmentStatus | undefined>();
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -41,14 +39,13 @@ export function CandidatesView({ jobId: fixedJobId }: { jobId?: string }) {
   }, [searchInput]);
 
   // Clear selection when filters change.
-  useEffect(() => { setSelectedIds(new Set()); }, [jobId, stage, labelId, assessmentStatus, search]);
+  useEffect(() => { setSelectedIds(new Set()); }, [jobId, stage, labelId, search]);
 
   const effectiveJobId = fixedJobId ?? jobId;
   const { data, isLoading } = useCandidates({
     jobId: effectiveJobId,
     stage,
     labelId,
-    assessmentStatus,
     search: search || undefined,
     limit: view === 'board' ? 100 : 50,
     sort: 'appliedAt',
@@ -153,17 +150,6 @@ export function CandidatesView({ jobId: fixedJobId }: { jobId?: string }) {
             </SelectContent>
           </Select>
         )}
-        <Select value={assessmentStatus ?? 'all'} onValueChange={(v) => setAssessmentStatus(v === 'all' ? undefined : v as CandidateAssessmentStatus)}>
-          <SelectTrigger className="h-9 w-44">
-            <SelectValue placeholder="Assessment status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Any assessment</SelectItem>
-            {CANDIDATE_ASSESSMENT_STATUSES.map((s) => (
-              <SelectItem key={s} value={s}>{ASSESSMENT_STATUS_LABELS[s]}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
         <div className="relative flex-1 sm:max-w-xs">
           <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input

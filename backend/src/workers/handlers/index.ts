@@ -20,8 +20,6 @@ import { parseResumeHandler } from './parse-resume';
 import { screenCandidateHandler } from './screen-candidate';
 import { sendEmailHandler } from './send-email';
 import { runWorkflowHandler } from './run-workflow';
-import { gradeCodingHandler } from './grade-coding';
-import { evaluateInterviewHandler } from './evaluate-interview';
 import { aggregateAnalyticsHandler } from './aggregate-analytics';
 import { processBillingWebhookHandler } from './process-billing-webhook';
 import { linkReferralApplicationHandler } from './link-referral-application';
@@ -38,8 +36,6 @@ export const handlers: Partial<Record<JobQueueType, JobHandler>> = {
   SCREEN_CANDIDATE: screenCandidateHandler,
   SEND_EMAIL: sendEmailHandler,
   RUN_WORKFLOW: runWorkflowHandler,
-  PROCESS_ASSESSMENT: gradeCodingHandler,
-  PROCESS_INTERVIEW: evaluateInterviewHandler,
   AGGREGATE_ANALYTICS: aggregateAnalyticsHandler,
   PROCESS_BILLING_WEBHOOK: processBillingWebhookHandler,
   LINK_REFERRAL_APPLICATION: linkReferralApplicationHandler,
