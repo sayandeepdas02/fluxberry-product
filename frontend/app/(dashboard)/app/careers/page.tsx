@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { ExternalLink, Plus, Trash2, Copy, Check, Loader2 } from 'lucide-react';
+import { ExternalLink, Plus, Trash2, Copy, Loader2, User } from 'lucide-react';
 import type { CareersPageDto } from '@fluxberry/shared';
 import { useCareers, useUpdateCareers, useSetCareersSlug, checkCareersSlug } from '@/hooks/use-careers';
+import { api } from '@/lib/api-client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -13,9 +14,15 @@ import { Switch } from '@/components/ui/switch';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/components/ui/sonner';
 import { publicConfig } from '@/lib/config';
-import { cn } from '@/lib/utils';
+import { cn, initials } from '@/lib/utils';
 
 type SlugStatus = 'idle' | 'checking' | 'available' | 'taken' | 'invalid' | 'current';
+
+type SaveableFields = Pick<CareersPageDto, 'headline' | 'tagline' | 'about' | 'links' | 'team' | 'jobs'>;
+
+function pickSaveable(c: CareersPageDto): SaveableFields {
+  return { headline: c.headline, tagline: c.tagline, about: c.about, links: c.links, team: c.team, jobs: c.jobs };
+}
 
 export default function CareersBuilderPage() {
   const { data: careers, isLoading } = useCareers();
@@ -23,14 +30,19 @@ export default function CareersBuilderPage() {
   const setSlug = useSetCareersSlug();
 
   const [config, setConfig] = useState<CareersPageDto | null>(null);
+  const [savedSnapshot, setSavedSnapshot] = useState<string>('');
   const [slugInput, setSlugInput] = useState('');
   const [slugStatus, setSlugStatus] = useState<SlugStatus>('idle');
   const debounce = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const avatarFileRef = useRef<HTMLInputElement>(null);
+  const pendingAvatarIdx = useRef<number>(-1);
+  const [uploadingAvatarIdx, setUploadingAvatarIdx] = useState<number | null>(null);
 
   useEffect(() => {
     if (careers && !config) {
       setConfig(careers);
       setSlugInput(careers.slug ?? '');
+      setSavedSnapshot(JSON.stringify(pickSaveable(careers)));
     }
   }, [careers, config]);
 
@@ -55,6 +67,7 @@ export default function CareersBuilderPage() {
   if (isLoading || !config) return <Skeleton className="h-96 w-full" />;
 
   const set = (patch: Partial<CareersPageDto>) => setConfig((c) => (c ? { ...c, ...patch } : c));
+  const isDirty = JSON.stringify(pickSaveable(config)) !== savedSnapshot;
   const publicUrl = config.slug ? `${publicConfig.appUrl}/${config.slug}/careers` : null;
   const embedCode = config.slug
     ? `<iframe src="${publicConfig.appUrl}/${config.slug}/careers/embed" width="100%" height="640" style="border:0" title="Open roles"></iframe>`
@@ -70,8 +83,37 @@ export default function CareersBuilderPage() {
         team: config.team,
         jobs: config.jobs,
       },
-      { onSuccess: () => toast.success('Your careers page changes are saved') },
+      {
+        onSuccess: (saved) => {
+          toast.success('Your careers page changes are saved');
+          setSavedSnapshot(JSON.stringify(pickSaveable(saved)));
+        },
+      },
     );
+  };
+
+  const onAvatarFile = async (idx: number, file: File | null) => {
+    if (!file) return;
+    if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
+      toast.error('Please upload a PNG, JPEG, or WEBP image');
+      return;
+    }
+    if (file.size > 1024 * 1024) {
+      toast.error('Avatar must be under 1MB');
+      return;
+    }
+    setUploadingAvatarIdx(idx);
+    try {
+      const fd = new FormData();
+      fd.set('avatar', file);
+      const result = await api.post<{ url: string }>(`/api/v1/careers/avatar`, fd);
+      setConfig((c) => c ? { ...c, team: { ...c.team, members: c.team.members.map((m, j) => j === idx ? { ...m, avatarUrl: result.url } : m) } } : c);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Could not upload avatar');
+    } finally {
+      setUploadingAvatarIdx(null);
+      if (avatarFileRef.current) avatarFileRef.current.value = '';
+    }
   };
 
   const togglePublish = (v: boolean) => {
@@ -166,15 +208,40 @@ export default function CareersBuilderPage() {
       </SectionCard>
 
       <SectionCard title="Team" enabled={config.team.enabled} onToggle={(v) => set({ team: { ...config.team, enabled: v } })}>
+        <input
+          ref={avatarFileRef}
+          type="file"
+          accept="image/png,image/jpeg,image/webp"
+          className="hidden"
+          onChange={(e) => onAvatarFile(pendingAvatarIdx.current, e.target.files?.[0] ?? null)}
+        />
         <div className="space-y-2">
           {config.team.members.map((m, i) => (
-            <div key={i} className="flex gap-2">
-              <Input placeholder="Name" value={m.name} onChange={(e) => set({ team: { ...config.team, members: config.team.members.map((x, j) => j === i ? { ...x, name: e.target.value } : x) } })} className="max-w-[160px]" />
+            <div key={i} className="flex items-center gap-2">
+              <button
+                type="button"
+                title="Upload avatar"
+                disabled={uploadingAvatarIdx === i}
+                onClick={() => { pendingAvatarIdx.current = i; avatarFileRef.current?.click(); }}
+                className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-dashed border-input bg-muted text-muted-foreground transition-colors hover:border-primary hover:text-foreground disabled:opacity-50"
+              >
+                {uploadingAvatarIdx === i ? (
+                  <Loader2 className="size-3.5 animate-spin" />
+                ) : m.avatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={m.avatarUrl} alt={m.name} className="size-9 object-cover" />
+                ) : m.name ? (
+                  <span className="text-[10px] font-medium">{initials(m.name)}</span>
+                ) : (
+                  <User className="size-3.5" />
+                )}
+              </button>
+              <Input placeholder="Name" value={m.name} onChange={(e) => set({ team: { ...config.team, members: config.team.members.map((x, j) => j === i ? { ...x, name: e.target.value } : x) } })} className="max-w-[150px]" />
               <Input placeholder="Role" value={m.role ?? ''} onChange={(e) => set({ team: { ...config.team, members: config.team.members.map((x, j) => j === i ? { ...x, role: e.target.value } : x) } })} />
-              <Button variant="ghost" size="icon" onClick={() => set({ team: { ...config.team, members: config.team.members.filter((_, j) => j !== i) } })}><Trash2 className="size-4" /></Button>
+              <Button variant="ghost" size="icon" disabled={uploadingAvatarIdx !== null} onClick={() => set({ team: { ...config.team, members: config.team.members.filter((_, j) => j !== i) } })}><Trash2 className="size-4" /></Button>
             </div>
           ))}
-          <Button variant="ghost" size="sm" onClick={() => set({ team: { ...config.team, members: [...config.team.members, { name: '', role: '' }] } })}><Plus className="size-4" /> Add member</Button>
+          <Button variant="ghost" size="sm" disabled={uploadingAvatarIdx !== null} onClick={() => set({ team: { ...config.team, members: [...config.team.members, { name: '', role: '', avatarUrl: '' }] } })}><Plus className="size-4" /> Add member</Button>
         </div>
       </SectionCard>
 
@@ -192,7 +259,8 @@ export default function CareersBuilderPage() {
         )}
       </SectionCard>
 
-      <div className="flex justify-end">
+      <div className="flex items-center justify-end gap-3">
+        {isDirty && <span className="text-xs text-muted-foreground">Unsaved changes</span>}
         <Button onClick={saveConfig} loading={update.isPending}>Save changes</Button>
       </div>
     </div>

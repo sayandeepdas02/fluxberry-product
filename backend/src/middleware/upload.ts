@@ -70,3 +70,13 @@ export const bulkImportUpload = multer({
     cb(null, allowed.includes(file.mimetype));
   },
 }).single('file');
+
+/** In-memory single-file avatar upload, 1MB cap, PNG/JPEG/WEBP only. */
+export const avatarUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 1 * 1024 * 1024, files: 1 },
+  fileFilter: (_req, file, cb) => {
+    if (ALLOWED_IMAGE_MIME.has(file.mimetype)) cb(null, true);
+    else cb(unsupportedMediaType('Please upload a PNG, JPEG, or WEBP image') as unknown as null, false);
+  },
+}).single('avatar');

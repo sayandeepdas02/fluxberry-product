@@ -1,9 +1,12 @@
+import crypto from 'crypto';
 import type { CareersPageDto, UpdateCareersInput, PublicCareersDto } from '@fluxberry/shared';
 import { careersRepository } from '../repositories/careers.repository';
 import { workspaceRepository } from '../repositories/workspace.repository';
 import { toCareersPageDto, toPublicJob } from '../serializers/careers.serializer';
 import { auditService } from './audit.service';
 import { conflict, notFound } from '../utils/errors';
+import { getStorageProvider } from '../integrations';
+import { assertValidImage } from '../utils/file-validation';
 
 export const careersService = {
   async getForWorkspace(workspaceId: string): Promise<CareersPageDto> {
@@ -54,6 +57,17 @@ export const careersService = {
     }
     await auditService.log({ workspaceId, userId: actorId, action: 'careers.slug_set', resourceType: 'workspace', resourceId: workspaceId, metadata: { slug } });
     return { slug };
+  },
+
+  async uploadAvatar(
+    workspaceId: string,
+    file: { buffer: Buffer; originalname: string; mimetype: string },
+  ): Promise<{ url: string }> {
+    const ext = assertValidImage(file.buffer);
+    const key = `careers-avatars/${workspaceId}/${crypto.randomBytes(8).toString('hex')}.${ext}`;
+    const storage = getStorageProvider();
+    const fileRef = await storage.upload({ key, body: file.buffer, contentType: file.mimetype, fileName: file.originalname });
+    return { url: storage.getPublicUrl(fileRef.storageKey) };
   },
 
   async getPublicCareers(careersSlug: string): Promise<PublicCareersDto> {
