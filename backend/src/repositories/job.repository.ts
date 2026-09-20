@@ -22,6 +22,8 @@ export const jobRepository = {
 
   findBySlug: (workspaceId: string, slug: string) => JobModel.findOne({ workspaceId, slug }),
 
+  findByTitle: (workspaceId: string, title: string) => JobModel.findOne({ workspaceId, title }).lean(),
+
   slugExists: async (workspaceId: string, slug: string) =>
     (await JobModel.exists({ workspaceId, slug })) != null,
 

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { ApplicationStage, CandidateSource } from '../enums';
+import type { ApplicationStage, CandidateSource, InterviewFeedbackRating, RejectionReason } from '../enums';
 
 export type FunnelPoint = { stage: ApplicationStage; count: number };
 export type CountPoint = { label: string; count: number };
@@ -13,6 +13,8 @@ export type AnalyticsDto = {
     shortlisted: number;
     interviews: number;
     hired: number;
+    upcomingInterviews: number;
+    inOfferStage: number;
   };
   funnel: FunnelPoint[];
   byLocation: CountPoint[];
@@ -93,4 +95,92 @@ export type FunnelBenchmarkPoint = {
 
 export type FunnelBenchmarkDto = {
   points: FunnelBenchmarkPoint[];
+};
+
+// ---- Phase 1: Pipeline Health, Stage Dwell Times, Offer Metrics ----
+
+export type PipelineHealthStage = {
+  stage: ApplicationStage;
+  active: number;
+  completed: number;
+  passthroughRate: number | null;
+};
+
+export type PipelineHealthDto = {
+  stages: PipelineHealthStage[];
+  totalApplications: number;
+};
+
+export type StageDwellPoint = {
+  stage: string;
+  medianDays: number | null;
+  p75Days: number | null;
+  count: number;
+};
+
+export type StageDwellTimeDto = {
+  stages: StageDwellPoint[];
+};
+
+export type OfferMetricsDto = {
+  totalSent: number;
+  accepted: number;
+  declined: number;
+  expired: number;
+  rescinded: number;
+  pending: number;
+  acceptanceRate: number | null;
+  avgResponseDays: number | null;
+};
+
+// ---- Phase 2: Advanced analytics (PRO-gated) ----
+
+export type SourceQualityRow = {
+  source: CandidateSource;
+  total: number;
+  shortlisted: number;
+  hired: number;
+  hireRate: number | null;
+  shortlistRate: number | null;
+  avgScreeningScore: number | null;
+};
+
+export type SourceQualityDto = {
+  sources: SourceQualityRow[];
+};
+
+export type InterviewScoreAnalyticsDto = {
+  aiScores: {
+    distribution: CountPoint[];
+    avgOverall: number | null;
+    avgCommunication: number | null;
+    avgTechnical: number | null;
+    avgConfidence: number | null;
+    avgProblemSolving: number | null;
+    totalCompleted: number;
+  };
+  feedbackRatings: {
+    distribution: Array<{ rating: InterviewFeedbackRating; count: number }>;
+    total: number;
+  };
+};
+
+export type RejectionDistributionDto = {
+  reasons: Array<{ reason: RejectionReason; count: number }>;
+  totalRejected: number;
+  withReason: number;
+  withoutReason: number;
+};
+
+export type JobFillRateRow = {
+  jobId: string;
+  title: string;
+  openings: number;
+  hired: number;
+  fillRate: number;
+  timeToFillDays: number | null;
+};
+
+export type JobFillRateDto = {
+  jobs: JobFillRateRow[];
 };

@@ -28,6 +28,12 @@ export const careersController = {
     ok(res, await careersService.setSlug(req.auth!.workspaceId!, req.auth!.user.id, body.slug));
   }),
 
+  uploadAvatar: asyncHandler(async (req, res) => {
+    const file = req.file;
+    if (!file) { res.status(400).json({ message: 'No file uploaded' }); return; }
+    ok(res, await careersService.uploadAvatar(req.auth!.workspaceId!, file));
+  }),
+
   uploadCoverImage: asyncHandler(async (req, res) => {
     if (!req.file) throw badRequest('No image file provided');
     ok(res, await careersService.uploadCoverImage(req.auth!.workspaceId!, {

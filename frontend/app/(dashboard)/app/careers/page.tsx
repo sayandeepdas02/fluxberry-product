@@ -17,7 +17,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import {
-  ExternalLink, Plus, Trash2, Copy, Loader2, Eye,
+  ExternalLink, Plus, Trash2, Copy, Loader2, Eye, User,
   ChevronUp, ChevronDown, GripVertical, ImagePlus, X,
 } from 'lucide-react';
 import { SECTION_KEYS } from '@fluxberry/shared';
@@ -26,6 +26,7 @@ import {
   useCareers, useUpdateCareers, useSetCareersSlug,
   useGeneratePreviewToken, useUploadCoverImage, checkCareersSlug,
 } from '@/hooks/use-careers';
+import { api } from '@/lib/api-client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -36,7 +37,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/components/ui/sonner';
 import { EmojiPicker } from '@/components/careers/emoji-picker';
 import { publicConfig } from '@/lib/config';
-import { cn } from '@/lib/utils';
+import { cn, initials } from '@/lib/utils';
 
 type SlugStatus = 'idle' | 'checking' | 'available' | 'taken' | 'invalid' | 'current';
 
@@ -48,14 +49,6 @@ let _counter = 0;
 function uid() { return `_${++_counter}_${Math.random().toString(36).slice(2, 8)}`; }
 function withIds<T>(items: T[]): (T & { _id: string })[] { return items.map((it) => ({ ...it, _id: uid() })); }
 function stripIds<T extends { _id: string }>(items: T[]): Omit<T, '_id'>[] { return items.map(({ _id, ...rest }) => rest as Omit<T, '_id'>); }
-
-const SECTION_LABELS: Record<SectionKey, string> = {
-  about: 'About',
-  links: 'Links',
-  team: 'Team',
-  jobs: 'Job openings',
-  benefits: 'Benefits & Perks',
-};
 
 export default function CareersBuilderPage() {
   const { data: careers, isLoading } = useCareers();
@@ -74,6 +67,9 @@ export default function CareersBuilderPage() {
   const [benefits, setBenefits] = useState<IdBenefit[]>([]);
 
   const coverInputRef = useRef<HTMLInputElement>(null);
+  const avatarFileRef = useRef<HTMLInputElement>(null);
+  const pendingAvatarIdx = useRef<number>(-1);
+  const [uploadingAvatarIdx, setUploadingAvatarIdx] = useState<number | null>(null);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
@@ -139,6 +135,30 @@ export default function CareersBuilderPage() {
     );
   };
 
+  const onAvatarFile = async (idx: number, file: File | null) => {
+    if (!file) return;
+    if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
+      toast.error('Please upload a PNG, JPEG, or WEBP image');
+      return;
+    }
+    if (file.size > 1024 * 1024) {
+      toast.error('Avatar must be under 1MB');
+      return;
+    }
+    setUploadingAvatarIdx(idx);
+    try {
+      const fd = new FormData();
+      fd.set('avatar', file);
+      const result = await api.post<{ url: string }>(`/api/v1/careers/avatar`, fd);
+      setMembers((prev) => prev.map((m, j) => j === idx ? { ...m, avatarUrl: result.url } : m));
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Could not upload avatar');
+    } finally {
+      setUploadingAvatarIdx(null);
+      if (avatarFileRef.current) avatarFileRef.current.value = '';
+    }
+  };
+
   const togglePublish = (v: boolean) => {
     set({ published: v });
     update.mutate({ published: v }, {
@@ -162,7 +182,6 @@ export default function CareersBuilderPage() {
     });
   };
 
-  // --- Section reordering ---
   const moveSection = (key: SectionKey, dir: -1 | 1) => {
     const order = [...config.sectionOrder];
     const idx = order.indexOf(key);
@@ -173,38 +192,24 @@ export default function CareersBuilderPage() {
     set({ sectionOrder: order });
   };
 
-  // --- DnD for links ---
   const onDragEndLinks = (e: DragEndEvent) => {
     const { active, over } = e;
     if (!over || active.id === over.id) return;
-    setLinks((prev) => {
-      const from = prev.findIndex((l) => l._id === active.id);
-      const to = prev.findIndex((l) => l._id === over.id);
-      return arrayMove(prev, from, to);
-    });
+    setLinks((prev) => arrayMove(prev, prev.findIndex((l) => l._id === active.id), prev.findIndex((l) => l._id === over.id)));
   };
 
   const onDragEndMembers = (e: DragEndEvent) => {
     const { active, over } = e;
     if (!over || active.id === over.id) return;
-    setMembers((prev) => {
-      const from = prev.findIndex((m) => m._id === active.id);
-      const to = prev.findIndex((m) => m._id === over.id);
-      return arrayMove(prev, from, to);
-    });
+    setMembers((prev) => arrayMove(prev, prev.findIndex((m) => m._id === active.id), prev.findIndex((m) => m._id === over.id)));
   };
 
   const onDragEndBenefits = (e: DragEndEvent) => {
     const { active, over } = e;
     if (!over || active.id === over.id) return;
-    setBenefits((prev) => {
-      const from = prev.findIndex((b) => b._id === active.id);
-      const to = prev.findIndex((b) => b._id === over.id);
-      return arrayMove(prev, from, to);
-    });
+    setBenefits((prev) => arrayMove(prev, prev.findIndex((b) => b._id === active.id), prev.findIndex((b) => b._id === over.id)));
   };
 
-  // --- Cover image upload ---
   const handleCoverUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -218,14 +223,12 @@ export default function CareersBuilderPage() {
 
   const removeCover = () => set({ coverImageUrl: null });
 
-  // --- Ensure benefits key in sectionOrder when toggling on ---
   const toggleBenefits = (v: boolean) => {
     const order = [...config.sectionOrder];
     if (v && !order.includes('benefits')) order.push('benefits');
     set({ benefits: { ...config.benefits, enabled: v }, sectionOrder: order });
   };
 
-  // --- Section renderers ---
   const sectionRenderers: Record<SectionKey, React.ReactNode> = {
     about: (
       <SectionCard
@@ -278,20 +281,45 @@ export default function CareersBuilderPage() {
         onMoveUp={() => moveSection('team', -1)}
         onMoveDown={() => moveSection('team', 1)}
       >
+        <input
+          ref={avatarFileRef}
+          type="file"
+          accept="image/png,image/jpeg,image/webp"
+          className="hidden"
+          onChange={(e) => onAvatarFile(pendingAvatarIdx.current, e.target.files?.[0] ?? null)}
+        />
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEndMembers}>
           <SortableContext items={members.map((m) => m._id)} strategy={verticalListSortingStrategy}>
             <div className="space-y-2">
               {members.map((m, i) => (
                 <SortableRow key={m._id} id={m._id}>
-                  <Input placeholder="Name" value={m.name} onChange={(e) => setMembers((prev) => prev.map((x, j) => j === i ? { ...x, name: e.target.value } : x))} className="max-w-[160px]" />
+                  <button
+                    type="button"
+                    title="Upload avatar"
+                    disabled={uploadingAvatarIdx === i}
+                    onClick={() => { pendingAvatarIdx.current = i; avatarFileRef.current?.click(); }}
+                    className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-dashed border-input bg-muted text-muted-foreground transition-colors hover:border-primary hover:text-foreground disabled:opacity-50"
+                  >
+                    {uploadingAvatarIdx === i ? (
+                      <Loader2 className="size-3.5 animate-spin" />
+                    ) : m.avatarUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={m.avatarUrl} alt={m.name} className="size-9 object-cover" />
+                    ) : m.name ? (
+                      <span className="text-[10px] font-medium">{initials(m.name)}</span>
+                    ) : (
+                      <User className="size-3.5" />
+                    )}
+                  </button>
+                  <Input placeholder="Name" value={m.name} onChange={(e) => setMembers((prev) => prev.map((x, j) => j === i ? { ...x, name: e.target.value } : x))} className="max-w-[150px]" />
                   <Input placeholder="Role" value={m.role ?? ''} onChange={(e) => setMembers((prev) => prev.map((x, j) => j === i ? { ...x, role: e.target.value } : x))} />
-                  <Button variant="ghost" size="icon" onClick={() => setMembers((prev) => prev.filter((_, j) => j !== i))}><Trash2 className="size-4" /></Button>
+                  <Button variant="ghost" size="icon" disabled={uploadingAvatarIdx !== null} onClick={() => setMembers((prev) => prev.filter((_, j) => j !== i))}><Trash2 className="size-4" /></Button>
                 </SortableRow>
               ))}
             </div>
           </SortableContext>
         </DndContext>
-        <Button variant="ghost" size="sm" className="mt-2" onClick={() => setMembers((prev) => [...prev, { _id: uid(), name: '', role: '' }])}><Plus className="size-4" /> Add member</Button>
+        <Button variant="ghost" size="sm" className="mt-2" disabled={uploadingAvatarIdx !== null} onClick={() => setMembers((prev) => [...prev, { _id: uid(), name: '', role: '', avatarUrl: '' }])}><Plus className="size-4" /> Add member</Button>
       </SectionCard>
     ),
 
@@ -421,11 +449,7 @@ export default function CareersBuilderPage() {
             <div className="relative overflow-hidden rounded-lg">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={config.coverImageUrl} alt="Cover" className="h-36 w-full object-cover" />
-              <Button
-                variant="outline" size="icon"
-                className="absolute right-2 top-2 bg-background/80"
-                onClick={removeCover}
-              >
+              <Button variant="outline" size="icon" className="absolute right-2 top-2 bg-background/80" onClick={removeCover}>
                 <X className="size-4" />
               </Button>
             </div>
@@ -479,7 +503,7 @@ export default function CareersBuilderPage() {
         </CardContent>
       </Card>
 
-      {/* Dynamic sections — render ordered keys, then any missing keys so new sections are always reachable */}
+      {/* Dynamic sections */}
       {[...config.sectionOrder, ...SECTION_KEYS.filter((k) => !config.sectionOrder.includes(k))]
         .map((key) => sectionRenderers[key])}
 
@@ -489,8 +513,6 @@ export default function CareersBuilderPage() {
     </div>
   );
 }
-
-// --- Helper components ---
 
 function SlugState({ status }: { status: SlugStatus }) {
   if (status === 'checking') return <Loader2 className="size-4 animate-spin text-muted-foreground" />;
@@ -513,16 +535,10 @@ function SectionCard({
       <CardHeader className="flex-row items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="flex flex-col">
-            <button
-              type="button" disabled={!canMoveUp} onClick={onMoveUp}
-              className="text-muted-foreground/50 hover:text-foreground disabled:opacity-30"
-            >
+            <button type="button" disabled={!canMoveUp} onClick={onMoveUp} className="text-muted-foreground/50 hover:text-foreground disabled:opacity-30">
               <ChevronUp className="size-4" />
             </button>
-            <button
-              type="button" disabled={!canMoveDown} onClick={onMoveDown}
-              className="text-muted-foreground/50 hover:text-foreground disabled:opacity-30"
-            >
+            <button type="button" disabled={!canMoveDown} onClick={onMoveDown} className="text-muted-foreground/50 hover:text-foreground disabled:opacity-30">
               <ChevronDown className="size-4" />
             </button>
           </div>
@@ -547,11 +563,11 @@ function SortableRow({ id, children }: { id: string; children: React.ReactNode }
     <div
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
-      className={cn('flex gap-2', isDragging && 'z-10 opacity-90')}
+      className={cn('flex items-center gap-2', isDragging && 'z-10 opacity-90')}
     >
       <button
         type="button" {...attributes} {...listeners}
-        className="mt-2 cursor-grab touch-none text-muted-foreground/40 hover:text-muted-foreground active:cursor-grabbing"
+        className="cursor-grab touch-none text-muted-foreground/40 hover:text-muted-foreground active:cursor-grabbing"
         aria-label="Drag to reorder"
       >
         <GripVertical className="size-4" />

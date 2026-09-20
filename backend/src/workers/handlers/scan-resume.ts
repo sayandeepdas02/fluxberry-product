@@ -20,10 +20,13 @@ export const scanResumeHandler: JobHandler = async (payload, ctx) => {
   const scanner = getAvScanProvider();
   const result = await scanner.scan(buffer);
 
+  const scannedStorageKey = candidate.resume.storageKey;
+
   if (result.clean) {
     await candidateRepository.update(candidateId, {
       avScanStatus: 'CLEAN',
       avScannedAt: new Date(),
+      avScannedStorageKey: scannedStorageKey,
     });
 
     await jobQueue.enqueue(
@@ -36,6 +39,7 @@ export const scanResumeHandler: JobHandler = async (payload, ctx) => {
       avScanStatus: 'INFECTED',
       avScanDetails: result.signature ?? 'unknown',
       avScannedAt: new Date(),
+      avScannedStorageKey: scannedStorageKey,
       resumeStatus: 'FAILED',
       parseError: 'Resume file flagged as malicious',
     });

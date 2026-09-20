@@ -7,10 +7,15 @@ import { getRedisClient } from '../config/redis';
 function buildStore(prefix: string): RedisStore | undefined {
   const client = getRedisClient();
   if (!client) return undefined;
-  return new RedisStore({
-    sendCommand: (...args: string[]) => client.call(args[0], ...args.slice(1)) as any,
-    prefix: `rl:${prefix}:`,
-  });
+  try {
+    if ((client as any).status !== 'ready' && (client as any).status !== 'connect') return undefined;
+    return new RedisStore({
+      sendCommand: (...args: string[]) => client.call(args[0], ...args.slice(1)) as any,
+      prefix: `rl:${prefix}:`,
+    });
+  } catch {
+    return undefined;
+  }
 }
 
 function make(options: { windowMs: number; max: number; message?: string; prefix: string }): RequestHandler {

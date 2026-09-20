@@ -40,8 +40,8 @@ export function CareersJobs({
                 {salary ? ` · ${salary}` : ''}
               </div>
             </div>
-            <span className="shrink-0 text-sm font-medium" style={accentColor ? { color: accentColor } : undefined}>
-              View →
+            <span className="shrink-0 text-sm font-medium text-primary" style={accentColor ? { color: accentColor } : undefined}>
+              Apply →
             </span>
           </a>
         );

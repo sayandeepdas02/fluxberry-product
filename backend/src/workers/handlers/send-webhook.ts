@@ -42,6 +42,7 @@ export const sendWebhookHandler: JobHandler = async (payload, ctx) => {
         'X-Fluxberry-Delivery': deliveryId,
       },
       body,
+      redirect: 'manual',
       signal: AbortSignal.timeout(10_000),
     });
 

@@ -6,6 +6,8 @@ import { toCareersPageDto, toPublicJob } from '../serializers/careers.serializer
 import { auditService } from './audit.service';
 import { conflict, notFound } from '../utils/errors';
 import { config } from '../config/env';
+import { getStorageProvider } from '../integrations';
+import { assertValidImage } from '../utils/file-validation';
 
 export const careersService = {
   async getForWorkspace(workspaceId: string): Promise<CareersPageDto> {
@@ -83,12 +85,21 @@ export const careersService = {
     }
   },
 
+  async uploadAvatar(
+    workspaceId: string,
+    file: { buffer: Buffer; originalname: string; mimetype: string },
+  ): Promise<{ url: string }> {
+    const ext = assertValidImage(file.buffer);
+    const key = `careers-avatars/${workspaceId}/${crypto.randomBytes(8).toString('hex')}.${ext}`;
+    const storage = getStorageProvider();
+    const fileRef = await storage.upload({ key, body: file.buffer, contentType: file.mimetype, fileName: file.originalname });
+    return { url: storage.getPublicUrl(fileRef.storageKey) };
+  },
+
   async uploadCoverImage(
     workspaceId: string,
     file: { buffer: Buffer; originalname: string; mimetype: string },
   ): Promise<CareersPageDto> {
-    const { assertValidImage } = await import('../utils/file-validation');
-    const { getStorageProvider } = await import('../integrations/storage');
     const ext = assertValidImage(file.buffer);
     const key = `careers-covers/${workspaceId}/${crypto.randomBytes(8).toString('hex')}.${ext}`;
     const storage = getStorageProvider();
