@@ -55,6 +55,6 @@ export const careersController = {
 
   publicJobs: asyncHandler(async (req, res) => {
     const data = await careersService.getPublicCareers(req.params.slug);
-    ok(res, { company: data.company, heading: data.jobs.heading, openings: data.openings });
+    ok(res, { company: data.company, heading: data.jobs.heading, openings: data.openings, accentColor: data.accentColor });
   }),
 };

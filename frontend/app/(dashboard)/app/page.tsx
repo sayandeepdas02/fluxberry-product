@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
 import { Plus, Briefcase } from 'lucide-react';
-import { useWorkspace } from '@/components/providers/workspace-provider';
 import { useJobs } from '@/hooks/use-jobs';
 import { useCandidates } from '@/hooks/use-candidates';
 import { Button } from '@/components/ui/button';
@@ -16,17 +15,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { JobStatusBadge } from '@/components/jobs/job-status-badge';
 import { ScoreBadge } from '@/components/candidates/score-badge';
 
-function greeting(): string {
-  const h = new Date().getHours();
-  if (h < 12) return 'Good morning';
-  if (h < 18) return 'Good afternoon';
-  return 'Good evening';
-}
-
 export default function HomePage() {
   const router = useRouter();
-  const { user } = useWorkspace();
-  const firstName = user.name.split(' ')[0];
   const { data: jobs, isLoading } = useJobs({ status: 'all' });
   const { data: recent } = useCandidates({ limit: 5, sort: 'appliedAt', order: 'desc' });
 
@@ -46,7 +36,7 @@ export default function HomePage() {
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
-        <h1 className="text-page-title">{greeting()}, {firstName}</h1>
+        <h1 className="text-page-title">Welcome to Fluxberry</h1>
         <Button asChild>
           <Link href="/app/jobs/new"><Plus className="size-4" /> Create job</Link>
         </Button>

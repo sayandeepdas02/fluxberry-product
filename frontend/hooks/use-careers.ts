@@ -30,25 +30,6 @@ export function useSetCareersSlug() {
   });
 }
 
-export function useGeneratePreviewToken() {
-  return useMutation({
-    mutationFn: () => api.post<{ token: string; expiresAt: number }>('/api/v1/careers/preview-token'),
-  });
-}
-
-export function useUploadCoverImage() {
-  const { currentWorkspace } = useWorkspace();
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (file: File) => {
-      const fd = new FormData();
-      fd.append('coverImage', file);
-      return api.post<CareersPageDto>('/api/v1/careers/cover-image', fd);
-    },
-    onSuccess: (page) => queryClient.setQueryData(['careers', currentWorkspace.id], page),
-  });
-}
-
 export function checkCareersSlug(slug: string): Promise<{ available: boolean; reason?: string }> {
   return api.get<{ available: boolean; reason?: string }>(
     `/api/v1/careers/slug-available?slug=${encodeURIComponent(slug)}`,
