@@ -1,8 +1,5 @@
 import { z } from 'zod';
-import {
-  CANDIDATE_SOURCES,
-  CANDIDATE_ASSESSMENT_STATUSES,
-} from '../enums';
+import { CANDIDATE_SOURCES } from '../enums';
 import { paginationQuerySchema } from '../common';
 import type { FileRef } from '../common';
 import type { ApplicationDto, ScreeningResultDto } from './application';
@@ -78,7 +75,6 @@ export const candidateListQuerySchema = paginationQuerySchema.extend({
   maxExpectedSalary: z.coerce.number().int().nonnegative().optional(),
   minExperience: z.coerce.number().int().min(0).optional(),
   source: z.enum(CANDIDATE_SOURCES).optional(),
-  assessmentStatus: z.enum(CANDIDATE_ASSESSMENT_STATUSES).optional(),
   search: z.string().trim().optional(),
   sort: z
     .enum(['appliedAt', 'score', 'name', 'expectedSalary'])

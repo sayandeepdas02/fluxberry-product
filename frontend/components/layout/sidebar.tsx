@@ -16,7 +16,6 @@ import {
 } from 'lucide-react';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
-import { useFeatures } from '@/hooks/use-features';
 import { WorkspaceSwitcher } from './workspace-switcher';
 import {
   DropdownMenu,
@@ -37,7 +36,6 @@ const NAV = [
 
 export function Sidebar() {
   const pathname = usePathname();
-  const features = useFeatures();
   const isActive = (href: string, exact?: boolean) =>
     exact ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
 
@@ -46,7 +44,7 @@ export function Sidebar() {
       <WorkspaceSwitcher />
 
       <nav className="mt-6 flex flex-1 flex-col gap-0.5">
-        {NAV.filter((item) => !item.flag || features[item.flag]).map((item) => {
+        {NAV.map((item) => {
           const active = isActive(item.href, item.exact);
           const Icon = item.icon;
           return (

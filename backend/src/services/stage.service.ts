@@ -95,7 +95,7 @@ export const stageService = {
     });
 
     // Send candidate notification email for meaningful stage transitions (fire-and-forget).
-    const NOTIFY_STAGES = new Set(['SCREENING', 'ASSESSMENT', 'INTERVIEW', 'OFFER', 'HIRED', 'REJECTED']);
+    const NOTIFY_STAGES = new Set(['SCREENING', 'OFFER', 'HIRED', 'REJECTED']);
     if (NOTIFY_STAGES.has(targetStage)) {
       void (async () => {
         try {

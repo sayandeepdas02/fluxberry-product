@@ -30,7 +30,7 @@ import type { AuthContext } from '../types/auth-context';
 const CACHE_TTL_MS = 15 * 60 * 1000;
 
 /** Stages that count as "the applicant progressed past initial application". */
-const SHORTLISTED_STAGES = ['SCREENING', 'ASSESSMENT', 'INTERVIEW', 'OFFER', 'HIRED'];
+const SHORTLISTED_STAGES = ['SCREENING', 'OFFER', 'HIRED'];
 
 /**
  * Same cache pattern as `analyticsService.compute`, generalized for the newer
@@ -183,7 +183,7 @@ export const analyticsService = {
     const countFor = (stage: ApplicationStage) => stageCount.get(stage) ?? 0;
 
     const funnel = PIPELINE_STAGES.map((stage) => ({ stage, count: countFor(stage) }));
-    const shortlisted = ['SCREENING', 'ASSESSMENT', 'INTERVIEW', 'OFFER', 'HIRED'].reduce(
+    const shortlisted = ['SCREENING', 'OFFER', 'HIRED'].reduce(
       (s, st) => s + countFor(st as ApplicationStage),
       0,
     );
@@ -311,7 +311,7 @@ export const analyticsService = {
     const totalApplicants = stageRows.reduce((s: number, r: any) => s + r.count, 0);
     const countFor = (stage: ApplicationStage) => stageCount.get(stage) ?? 0;
     const funnel = PIPELINE_STAGES.map((stage) => ({ stage, count: countFor(stage) }));
-    const shortlisted = ['SCREENING', 'ASSESSMENT', 'INTERVIEW', 'OFFER', 'HIRED'].reduce(
+    const shortlisted = ['SCREENING', 'OFFER', 'HIRED'].reduce(
       (s, st) => s + countFor(st as ApplicationStage),
       0,
     );
@@ -432,7 +432,7 @@ export const analyticsService = {
    * A job's cumulative stage-reach vs. the same metric across the whole
    * workspace — each rate is "% of applicants who reached this stage or
    * further" (see FunnelBenchmarkPoint). An application currently sitting at
-   * OFFER has necessarily already passed SCREENING/ASSESSMENT/INTERVIEW, so
+   * OFFER has necessarily already passed SCREENING, so
    * it counts toward those buckets too. The one thing we can't reconstruct
    * without a stage-history log is *where* a REJECTED (or custom-stage)
    * application actually got to — those only count toward APPLIED, the one

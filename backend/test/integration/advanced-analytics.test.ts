@@ -95,7 +95,7 @@ describe('advanced analytics tier (integration)', () => {
     const application = await ApplicationModel.findOne({ workspaceId, jobId }).lean();
     await ws(request(app).post(`/api/v1/applications/${application!._id}/stage`).send({ stage: 'OFFER' }) as any);
     const benchmarkAfterMove = await ws(request(app).get(`/api/v1/jobs/${jobId}/analytics/benchmark`) as any);
-    for (const stage of ['APPLIED', 'SCREENING', 'ASSESSMENT', 'INTERVIEW', 'OFFER']) {
+    for (const stage of ['APPLIED', 'SCREENING', 'OFFER']) {
       expect(rateFor(benchmarkAfterMove.body.data.points, stage).jobRate).toBe(100);
     }
     expect(rateFor(benchmarkAfterMove.body.data.points, 'HIRED').jobRate).toBe(0);

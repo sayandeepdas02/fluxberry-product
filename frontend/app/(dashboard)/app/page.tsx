@@ -25,11 +25,10 @@ export default function HomePage() {
       const c = j.counts;
       acc.applicants += c?.applicants ?? 0;
       acc.shortlisted += c?.shortlisted ?? 0;
-      acc.interviews += c?.interview ?? 0;
       acc.hired += c?.hired ?? 0;
       return acc;
     },
-    { applicants: 0, shortlisted: 0, interviews: 0, hired: 0 },
+    { applicants: 0, shortlisted: 0, hired: 0 },
   );
   const activeJobs = (jobs ?? []).filter((j) => j.status === 'PUBLISHED' || j.status === 'PAUSED');
 
@@ -57,7 +56,6 @@ export default function HomePage() {
             <MetricCard label="Active jobs" value={activeJobs.length} />
             <MetricCard label="Applicants" value={totals.applicants} />
             <MetricCard label="Shortlisted" value={totals.shortlisted} />
-            <MetricCard label="Interviews" value={totals.interviews} />
             <MetricCard label="Hired" value={totals.hired} />
           </div>
 

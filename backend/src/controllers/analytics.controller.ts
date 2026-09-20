@@ -48,10 +48,6 @@ export const analyticsController = {
     ok(res, await analyticsService.computeSourceQuality(req.auth!.workspaceId!, req.auth!));
   }),
 
-  getInterviewScoreAnalytics: asyncHandler(async (req, res) => {
-    ok(res, await analyticsService.computeInterviewScoreAnalytics(req.auth!.workspaceId!, req.auth!));
-  }),
-
   getRejectionDistribution: asyncHandler(async (req, res) => {
     ok(res, await analyticsService.computeRejectionDistribution(req.auth!.workspaceId!, req.auth!));
   }),

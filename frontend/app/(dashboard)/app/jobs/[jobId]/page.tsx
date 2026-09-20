@@ -22,7 +22,6 @@ export default function JobOverviewPage() {
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <MetricCard label="Applicants" value={c?.applicants ?? 0} />
         <MetricCard label="Shortlisted" value={c?.shortlisted ?? 0} />
-        <MetricCard label="Interviews" value={c?.interview ?? 0} />
         <MetricCard label="Hired" value={c?.hired ?? 0} />
       </div>
 
