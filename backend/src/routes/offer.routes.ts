@@ -14,7 +14,7 @@ offerRouter.post(
   validateBody(createOfferSchema),
   offerController.create,
 );
-offerRouter.get('/applications/:applicationId/offers', ...guard, offerController.listForApplication);
+offerRouter.get('/applications/:applicationId/offers', ...guard, requireRole('recruiter'), offerController.listForApplication);
 
 offerRouter.post('/offers/:offerId/send', ...guard, requireRole('recruiter'), offerController.send);
 offerRouter.post('/offers/:offerId/rescind', ...guard, requireRole('admin'), offerController.rescind);

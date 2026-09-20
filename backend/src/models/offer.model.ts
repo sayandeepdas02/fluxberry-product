@@ -25,7 +25,7 @@ const offerSchema = new Schema(
     compensation: { type: compensationSchema, required: true },
     note: { type: String, default: null },
     /** Unguessable public token (not derived from a DB id) — set when the offer is sent. */
-    token: { type: String, default: null },
+    token: { type: String },
     expiresAt: { type: Date, required: true },
     sentAt: { type: Date, default: null },
     respondedAt: { type: Date, default: null },
@@ -38,6 +38,11 @@ const offerSchema = new Schema(
 offerSchema.index({ applicationId: 1 });
 offerSchema.index({ token: 1 }, { unique: true, sparse: true });
 offerSchema.index({ workspaceId: 1, status: 1 });
+/** Prevent two concurrent DRAFT/SENT offers for the same application. */
+offerSchema.index(
+  { applicationId: 1 },
+  { unique: true, partialFilterExpression: { status: { $in: ['DRAFT', 'SENT'] } } },
+);
 
 export type OfferDoc = InferSchemaType<typeof offerSchema>;
 export const OfferModel = (models.Offer as Model<OfferDoc>) || model<OfferDoc>('Offer', offerSchema);

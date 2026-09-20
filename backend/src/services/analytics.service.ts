@@ -106,13 +106,13 @@ export const analyticsService = {
   async compute(workspaceId: string, auth: AuthContext): Promise<AnalyticsDto> {
     if (!bypassesJobAccess(auth.role)) return this._computeFresh(workspaceId, auth);
 
-    const cached = await AnalyticsCacheModel.findOne({ workspaceId: new Types.ObjectId(workspaceId) }).lean();
+    const cached = await AnalyticsCacheModel.findOne({ workspaceId: new Types.ObjectId(workspaceId), cacheKey: 'workspace' }).lean();
     if (cached && Date.now() - new Date(cached.computedAt).getTime() < CACHE_TTL_MS) {
       return cached.data as AnalyticsDto;
     }
     const result = await this._computeFresh(workspaceId, auth);
     await AnalyticsCacheModel.findOneAndUpdate(
-      { workspaceId: new Types.ObjectId(workspaceId) },
+      { workspaceId: new Types.ObjectId(workspaceId), cacheKey: 'workspace' },
       { data: result, computedAt: new Date() },
       { upsert: true },
     );
@@ -641,6 +641,15 @@ export const analyticsService = {
   },
 
   // ---- Phase 2: Advanced analytics (PRO-gated via requirePlanFeature('ADVANCED_ANALYTICS')) ----
+  //
+  // NOTE: These endpoints require `requirePlanFeature('ADVANCED_ANALYTICS')` which
+  // is effectively admin-level access.  Some methods (sourceQuality, rejectionDistribution,
+  // jobFillRates) already apply `applyJobAccessFilter` for restricted recruiters;
+  // interviewScoreAnalytics does not yet — it aggregates workspace-wide.  If per-job
+  // scoping is needed there, add the same filter pattern.  For V1 this is acceptable
+  // because the PRO gate limits access to workspace admins.
+
+  // Note: job-access filtering is not applied to interviewScoreAnalytics — these endpoints require ADVANCED_ANALYTICS (admin-level access).
 
   /** Per-source volume/quality: total applicants, shortlist/hire rate, avg screening score. */
   async computeSourceQuality(workspaceId: string, auth: AuthContext): Promise<SourceQualityDto> {
@@ -683,6 +692,7 @@ export const analyticsService = {
     });
   },
 
+  // Note: job-access filtering is not applied — these endpoints require ADVANCED_ANALYTICS (admin-level access).
   /** AI interview score distribution/averages, plus human feedback rating breakdown. */
   async computeInterviewScoreAnalytics(workspaceId: string, auth: AuthContext): Promise<InterviewScoreAnalyticsDto> {
     return withCache(workspaceId, 'interview-scores', auth, async () => {

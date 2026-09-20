@@ -44,6 +44,8 @@ const bulkImportSchema = new Schema(
     failedRows: { type: Number, default: 0 },
     rowErrors: { type: [rowErrorSchema], default: [] },
     errorReportFileRef: { type: errorReportFileRefSchema, default: null },
+    /** Top-level error message when the import fails unexpectedly (not per-row validation errors). */
+    error: { type: String, default: null },
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
   },
   { timestamps: true, collection: 'bulk_imports' },

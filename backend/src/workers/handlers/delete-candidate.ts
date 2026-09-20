@@ -27,13 +27,31 @@ export const deleteCandidateHandler: JobHandler = async (payload, ctx) => {
 
   const candidate = await candidateRepository.findById(candidateId);
   if (!candidate) {
-    ctx.logger.warn('candidate not found — skipping deletion');
+    ctx.logger.warn('candidate already deleted — completing finalization');
+    // Even though the candidate is gone (likely a retry), still attempt to
+    // complete the GDPR request, publish the event, and write the audit log
+    // so downstream consumers stay consistent.
     if (gdprRequestId) {
       await gdprRequestRepository.update(gdprRequestId, {
         status: 'COMPLETED',
         completedAt: new Date(),
       });
     }
+    await eventBus.publish({
+      workspaceId,
+      type: 'candidate.deleted',
+      entityType: 'candidate',
+      entityId: candidateId,
+      actorLabel: 'system',
+      payload: { applicationCount: 0, retryFinalization: true },
+    });
+    await auditService.log({
+      workspaceId,
+      action: 'gdpr.deleted',
+      resourceType: 'candidate',
+      resourceId: candidateId,
+      metadata: { gdprRequestId, retryFinalization: true },
+    });
     return;
   }
 

@@ -18,4 +18,12 @@ export const workspaceRepository = {
     WorkspaceModel.findByIdAndUpdate(id, { careersSlug }, { new: true }),
 
   findByClerkOrgId: (clerkOrgId: string) => WorkspaceModel.findOne({ clerkOrgId }),
+
+  /** Atomically set clerkOrgId on a workspace matched by slug, only if it hasn't been claimed yet. */
+  claimBySlug: (slug: string, clerkOrgId: string) =>
+    WorkspaceModel.findOneAndUpdate(
+      { slug, clerkOrgId: null },
+      { clerkOrgId },
+      { new: true },
+    ),
 };

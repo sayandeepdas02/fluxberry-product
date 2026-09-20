@@ -38,10 +38,15 @@ export async function getAccessToken(): Promise<string | null> {
     const test = window.localStorage.getItem(STORAGE_KEYS.testToken);
     if (test) return test;
   }
-  // Try Clerk first if available
-  if (typeof window !== 'undefined' && (window as any).Clerk?.session) {
-    const token = await (window as any).Clerk.session.getToken();
-    if (token) return token;
+  // Try Clerk first if available — capture the session ref once to avoid a
+  // TOCTOU race where Clerk is still loading and `session` becomes defined
+  // between the guard check and the getToken() call (or vice-versa).
+  if (typeof window !== 'undefined') {
+    const clerkSession = (window as any).Clerk?.session;
+    if (clerkSession) {
+      const token = await clerkSession.getToken();
+      if (token) return token;
+    }
   }
   // Fall back to Supabase
   const supabase = getSupabaseClient();

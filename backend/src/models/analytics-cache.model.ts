@@ -10,6 +10,9 @@ const analyticsCacheSchema = new Schema(
   { timestamps: false, collection: 'analytics_cache' },
 );
 
+// MIGRATION: The unique index changed from { workspaceId: 1 } to { workspaceId: 1, cacheKey: 1 }.
+// On first deploy, run `db.analytics_cache.dropIndexes()` (or `db.analytics_cache.drop()`) to
+// remove the old unique index. Old documents without `cacheKey` will conflict otherwise.
 analyticsCacheSchema.index({ workspaceId: 1, cacheKey: 1 }, { unique: true });
 
 export type AnalyticsCacheDoc = InferSchemaType<typeof analyticsCacheSchema>;

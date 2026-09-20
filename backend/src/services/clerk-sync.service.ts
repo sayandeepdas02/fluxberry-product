@@ -61,14 +61,15 @@ export const clerkSyncService = {
     const existing = await workspaceRepository.findByClerkOrgId(data.id);
     if (existing) return; // already associated
 
-    // Try to find a workspace by slug and backfill the clerkOrgId.
-    const workspace = await workspaceRepository.findBySlug(data.slug);
-    if (workspace) {
-      await workspaceRepository.update(String(workspace._id), { clerkOrgId: data.id });
-      logger.info({ clerkOrgId: data.id, workspaceId: String(workspace._id) }, 'backfilled clerkOrgId on workspace via organization.created');
+    // Atomically claim the workspace by slug — findOneAndUpdate with
+    // { slug, clerkOrgId: null } prevents two concurrent events from
+    // both reading the same unclaimed workspace and overwriting each other.
+    const claimed = await workspaceRepository.claimBySlug(data.slug, data.id);
+    if (claimed) {
+      logger.info({ clerkOrgId: data.id, workspaceId: String(claimed._id) }, 'backfilled clerkOrgId on workspace via organization.created');
       return;
     }
-    logger.warn({ clerkOrgId: data.id, slug: data.slug }, 'organization.created: no matching workspace found by slug');
+    logger.warn({ clerkOrgId: data.id, slug: data.slug }, 'organization.created: no matching workspace found by slug (or already claimed)');
   },
 
   /** `user.created` / `user.updated` — upsert the Mongo User by clerkId. */
@@ -112,10 +113,9 @@ export const clerkSyncService = {
   async syncMembershipCreated(data: OrganizationMembershipJSON): Promise<void> {
     let workspace = await workspaceRepository.findByClerkOrgId(data.organization.id);
     if (!workspace) {
-      // Try to find by slug and backfill clerkOrgId for workspaces created before Clerk integration.
-      workspace = await workspaceRepository.findBySlug(data.organization.slug);
+      // Try to atomically claim by slug for workspaces created before Clerk integration.
+      workspace = await workspaceRepository.claimBySlug(data.organization.slug, data.organization.id);
       if (workspace) {
-        await workspaceRepository.update(String(workspace._id), { clerkOrgId: data.organization.id });
         logger.info({ clerkOrgId: data.organization.id, workspaceId: String(workspace._id) }, 'backfilled clerkOrgId on workspace via membership webhook');
       } else {
         logger.warn({ clerkOrgId: data.organization.id }, 'clerk org membership webhook: no matching workspace');

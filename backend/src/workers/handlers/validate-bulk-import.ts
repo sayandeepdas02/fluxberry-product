@@ -15,33 +15,42 @@ export const validateBulkImportHandler: JobHandler = async (payload, ctx) => {
     return;
   }
 
-  const columnMapping = (bulkImport.columnMapping ?? {}) as BulkImportColumnMapping;
-  const entityType = bulkImport.entityType as BulkImportEntityType;
+  try {
+    const columnMapping = (bulkImport.columnMapping ?? {}) as BulkImportColumnMapping;
+    const entityType = bulkImport.entityType as BulkImportEntityType;
 
-  const storage = getStorageProvider();
-  const buffer = await storage.download(bulkImport.fileRef.storageKey);
-  const rows = parseCsv(buffer.toString('utf8'));
+    const storage = getStorageProvider();
+    const buffer = await storage.download(bulkImport.fileRef.storageKey);
+    const rows = parseCsv(buffer.toString('utf8'));
 
-  let validRows = 0;
-  let invalidRows = 0;
-  const rowErrors: { rowIndex: number; errors: string[] }[] = [];
+    let validRows = 0;
+    let invalidRows = 0;
+    const rowErrors: { rowIndex: number; errors: string[] }[] = [];
 
-  rows.forEach((row, i) => {
-    const mapped = applyMapping(row, columnMapping);
-    const errors = validateRow(entityType, mapped);
-    if (errors.length) {
-      invalidRows += 1;
-      if (rowErrors.length < MAX_ROW_ERRORS) rowErrors.push({ rowIndex: i + 1, errors });
-    } else {
-      validRows += 1;
-    }
-  });
+    rows.forEach((row, i) => {
+      const mapped = applyMapping(row, columnMapping);
+      const errors = validateRow(entityType, mapped);
+      if (errors.length) {
+        invalidRows += 1;
+        if (rowErrors.length < MAX_ROW_ERRORS) rowErrors.push({ rowIndex: i + 1, errors });
+      } else {
+        validRows += 1;
+      }
+    });
 
-  await bulkImportRepository.update(importId, {
-    totalRows: rows.length,
-    validRows,
-    invalidRows,
-    rowErrors,
-    status: rows.length === 0 ? 'FAILED' : 'VALIDATED',
-  });
+    await bulkImportRepository.update(importId, {
+      totalRows: rows.length,
+      validRows,
+      invalidRows,
+      rowErrors,
+      status: rows.length === 0 ? 'FAILED' : 'VALIDATED',
+    });
+  } catch (err) {
+    ctx.logger.error({ importId, err }, 'validate-bulk-import: unexpected error');
+    await bulkImportRepository.update(importId, {
+      status: 'FAILED',
+      error: (err as Error).message?.slice(0, 1000) ?? String(err),
+    });
+    throw err;
+  }
 };
