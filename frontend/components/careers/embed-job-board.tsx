@@ -103,7 +103,7 @@ export function EmbedJobBoard({ company, openings, appUrl, accentColor }: Props)
 
       {/* Open Positions heading */}
       <h2 style={{ fontSize: 22, fontWeight: 700, margin: '0 0 16px' }}>
-        Open Positions ({openings.length})
+        Open Positions ({filtered.length})
       </h2>
 
       {/* Filters */}
@@ -113,6 +113,7 @@ export function EmbedJobBoard({ company, openings, appUrl, accentColor }: Props)
             <select
               value={dept}
               onChange={(e) => setDept(e.target.value)}
+              aria-label="Filter by department"
               style={selectStyle}
             >
               <option value="">Department</option>
@@ -125,6 +126,7 @@ export function EmbedJobBoard({ company, openings, appUrl, accentColor }: Props)
             <select
               value={loc}
               onChange={(e) => setLoc(e.target.value)}
+              aria-label="Filter by location"
               style={selectStyle}
             >
               <option value="">Location</option>
@@ -137,6 +139,7 @@ export function EmbedJobBoard({ company, openings, appUrl, accentColor }: Props)
             <select
               value={mode}
               onChange={(e) => setMode(e.target.value)}
+              aria-label="Filter by location type"
               style={selectStyle}
             >
               <option value="">Location Type</option>
@@ -151,7 +154,9 @@ export function EmbedJobBoard({ company, openings, appUrl, accentColor }: Props)
       {/* Job listings */}
       {filtered.length === 0 ? (
         <p style={{ color: '#6b7280', fontSize: 14, padding: '32px 0', textAlign: 'center' }}>
-          No open positions right now — check back soon.
+          {openings.length === 0
+            ? 'No open positions right now — check back soon.'
+            : 'No positions match the selected filters.'}
         </p>
       ) : (
         <div>

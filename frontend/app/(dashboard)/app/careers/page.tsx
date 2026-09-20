@@ -5,6 +5,7 @@ import { Copy, ExternalLink, Loader2 } from 'lucide-react';
 import {
   useCareers, useUpdateCareers, useSetCareersSlug, checkCareersSlug,
 } from '@/hooks/use-careers';
+import { useWorkspace } from '@/components/providers/workspace-provider';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,6 +17,7 @@ import { publicConfig } from '@/lib/config';
 type SlugStatus = 'idle' | 'checking' | 'available' | 'taken' | 'invalid' | 'current';
 
 export default function CareersEmbedPage() {
+  const { currentWorkspace } = useWorkspace();
   const { data: careers, isLoading } = useCareers();
   const update = useUpdateCareers();
   const setSlugMut = useSetCareersSlug();
@@ -25,19 +27,19 @@ export default function CareersEmbedPage() {
   const [published, setPublished] = useState(false);
   const [accentColor, setAccentColor] = useState<string | null>(null);
   const debounce = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  const [initialized, setInitialized] = useState(false);
+  const [initializedFor, setInitializedFor] = useState<string | null>(null);
 
   useEffect(() => {
-    if (careers && !initialized) {
+    if (careers && initializedFor !== currentWorkspace.id) {
       setSlug(careers.slug ?? '');
       setPublished(careers.published);
       setAccentColor(careers.accentColor);
-      setInitialized(true);
+      setInitializedFor(currentWorkspace.id);
     }
-  }, [careers, initialized]);
+  }, [careers, initializedFor, currentWorkspace.id]);
 
   useEffect(() => {
-    if (!initialized || !careers) return;
+    if (!initializedFor || !careers) return;
     const s = slug.trim().toLowerCase();
     if (!s) return setSlugStatus('idle');
     if (s === careers.slug) return setSlugStatus('current');
@@ -52,7 +54,7 @@ export default function CareersEmbedPage() {
       }
     }, 400);
     return () => clearTimeout(debounce.current);
-  }, [slug, initialized, careers]);
+  }, [slug, initializedFor, careers]);
 
   if (isLoading || !careers) return <Skeleton className="h-96 w-full" />;
 
@@ -157,7 +159,12 @@ export default function CareersEmbedPage() {
               <Button
                 variant="outline"
                 size="icon"
-                onClick={() => { navigator.clipboard.writeText(embedCode); toast.success('Embed code copied'); }}
+                aria-label="Copy embed code"
+                onClick={() => {
+                  navigator.clipboard.writeText(embedCode)
+                    .then(() => toast.success('Embed code copied'))
+                    .catch(() => toast.error('Could not copy embed code'));
+                }}
               >
                 <Copy className="size-4" />
               </Button>
@@ -175,12 +182,14 @@ export default function CareersEmbedPage() {
               type="color"
               value={accentColor ?? '#7c3aed'}
               onChange={(e) => setAccentColor(e.target.value)}
+              aria-label="Brand color picker"
               className="h-10 w-10 cursor-pointer rounded border-0 bg-transparent"
             />
             <Input
               value={accentColor ?? ''}
               onChange={(e) => setAccentColor(e.target.value || null)}
               placeholder="#7c3aed"
+              aria-label="Brand color hex value"
               className="max-w-[120px] font-mono text-sm"
             />
             {accentColor && (
