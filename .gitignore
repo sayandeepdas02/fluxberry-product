@@ -42,3 +42,6 @@ npm-debug.log*
 # vercel / railway local linking
 .vercel
 .railway
+
+# local reference clones (not part of the project)
+chanhdai.com-main/
