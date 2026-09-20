@@ -1,5 +1,5 @@
-import type { ApplicationDto, RejectionReason, PipelineStage } from '@fluxberry/shared';
-import { defaultPipelineStages } from '@fluxberry/shared';
+import type { ApplicationDto, RejectionReason, PipelineStage } from '../shared';
+import { defaultPipelineStages } from '../shared';
 import { applicationRepository } from '../repositories/application.repository';
 import { CandidateModel } from '../models/candidate.model';
 import { JobModel } from '../models/job.model';
@@ -13,7 +13,7 @@ import { notFound, badRequest } from '../utils/errors';
 import { logger } from '../utils/logger';
 import { trackEvent } from '../integrations/posthog';
 import { notificationService } from './notification.service';
-import type { EventType } from '@fluxberry/shared';
+import type { EventType } from '../shared';
 
 interface Actor {
   userId: string;

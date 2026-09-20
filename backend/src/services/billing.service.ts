@@ -1,5 +1,5 @@
-import type { WorkspacePlan, BillingStatusDto, BillingSubscriptionStatus } from '@fluxberry/shared';
-import { PLAN_FEATURES } from '@fluxberry/shared';
+import type { WorkspacePlan, BillingStatusDto, BillingSubscriptionStatus } from '../shared';
+import { PLAN_FEATURES } from '../shared';
 import { getBillingProvider } from '../integrations';
 import type { BillingWebhookEvent } from '../integrations/dodo/types';
 import { workspaceRepository } from '../repositories/workspace.repository';

@@ -1,4 +1,4 @@
-import type { LabelDto } from '@fluxberry/shared';
+import type { LabelDto } from '../shared';
 
 export function toLabelDto(l: any): LabelDto {
   return {

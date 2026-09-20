@@ -1,4 +1,4 @@
-import type { Condition } from '@fluxberry/shared';
+import type { Condition } from '../shared';
 
 export type WorkflowContext = Record<string, unknown>;
 

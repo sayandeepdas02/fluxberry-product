@@ -14,7 +14,7 @@ import type {
   InterviewScoreAnalyticsDto,
   RejectionDistributionDto,
   JobFillRateDto,
-} from '@fluxberry/shared';
+} from '@/lib/shared';
 import { api } from '@/lib/api-client';
 import { useWorkspace } from '@/components/providers/workspace-provider';
 import { useFeature } from './use-features';

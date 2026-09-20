@@ -1,5 +1,5 @@
 import { Schema, model, models, type InferSchemaType, type Model } from 'mongoose';
-import { EVENT_TYPES } from '@fluxberry/shared';
+import { EVENT_TYPES } from '../shared';
 
 const statsSchema = new Schema(
   {

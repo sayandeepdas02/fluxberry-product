@@ -1,5 +1,5 @@
 import Papa from 'papaparse';
-import type { BulkImportColumnMapping, BulkImportEntityType, EmploymentType, WorkMode } from '@fluxberry/shared';
+import type { BulkImportColumnMapping, BulkImportEntityType, EmploymentType, WorkMode } from '../../shared';
 import { bulkImportRepository } from '../../repositories/bulk-import.repository';
 import { jobRepository } from '../../repositories/job.repository';
 import { getStorageProvider } from '../../integrations';

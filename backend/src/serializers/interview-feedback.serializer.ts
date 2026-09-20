@@ -1,4 +1,4 @@
-import type { InterviewFeedbackDto } from '@fluxberry/shared';
+import type { InterviewFeedbackDto } from '../shared';
 
 export function toInterviewFeedbackDto(f: any): InterviewFeedbackDto {
   return {

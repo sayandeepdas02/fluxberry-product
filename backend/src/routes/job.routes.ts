@@ -28,7 +28,7 @@ import {
   upsertWorkflowSchema,
   upsertInterviewConfigSchema,
   upsertPipelineStagesSchema,
-} from '@fluxberry/shared';
+} from '../shared';
 
 export const jobRouter = Router();
 

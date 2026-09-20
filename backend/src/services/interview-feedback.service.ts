@@ -1,4 +1,4 @@
-import type { CreateInterviewFeedbackInput, InterviewFeedbackDto } from '@fluxberry/shared';
+import type { CreateInterviewFeedbackInput, InterviewFeedbackDto } from '../shared';
 import { interviewFeedbackRepository } from '../repositories/interview-feedback.repository';
 import { applicationRepository } from '../repositories/application.repository';
 import { toInterviewFeedbackDto } from '../serializers/interview-feedback.serializer';

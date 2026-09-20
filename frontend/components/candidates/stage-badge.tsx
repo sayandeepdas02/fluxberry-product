@@ -1,4 +1,4 @@
-import type { ApplicationStage, PipelineStage } from '@fluxberry/shared';
+import type { ApplicationStage, PipelineStage } from '@/lib/shared';
 import { Badge } from '@/components/ui/badge';
 import { stageLabel } from '@/lib/labels';
 

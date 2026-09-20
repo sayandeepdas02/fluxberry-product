@@ -8,8 +8,8 @@ import type {
   JobListQuery,
   JobStatus,
   PipelineStage,
-} from '@fluxberry/shared';
-import { APPLICATION_STAGES, defaultPipelineStages } from '@fluxberry/shared';
+} from '../shared';
+import { APPLICATION_STAGES, defaultPipelineStages } from '../shared';
 import { jobRepository } from '../repositories/job.repository';
 import { applicationRepository } from '../repositories/application.repository';
 import { memberRepository } from '../repositories/member.repository';

@@ -8,7 +8,7 @@ import type {
   CandidateAssessmentDto,
   SendAssessmentInput,
   JobAssessmentRowDto,
-} from '@fluxberry/shared';
+} from '@/lib/shared';
 import { api } from '@/lib/api-client';
 import { useWorkspace } from '@/components/providers/workspace-provider';
 

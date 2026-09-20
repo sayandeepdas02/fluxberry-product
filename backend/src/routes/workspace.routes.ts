@@ -10,7 +10,7 @@ import {
   inviteMemberSchema,
   updateMemberRoleSchema,
   onboardingSchema,
-} from '@fluxberry/shared';
+} from '../shared';
 
 export const workspaceRouter = Router();
 

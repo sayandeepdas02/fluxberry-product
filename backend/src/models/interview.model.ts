@@ -1,5 +1,5 @@
 import { Schema, model, models, type InferSchemaType, type Model } from 'mongoose';
-import { INTERVIEW_STATUSES } from '@fluxberry/shared';
+import { INTERVIEW_STATUSES } from '../shared';
 
 /** AI evaluation of the transcript (mirrors the screeningResult sub-doc). */
 const evaluationSchema = new Schema(

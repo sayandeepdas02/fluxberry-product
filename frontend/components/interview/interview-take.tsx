@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { CheckCircle2, Loader2, Mic, PhoneOff } from 'lucide-react';
-import type { PublicInterviewDto, InterviewSessionDto } from '@fluxberry/shared';
+import type { PublicInterviewDto, InterviewSessionDto } from '@/lib/shared';
 import { api } from '@/lib/api-client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';

@@ -1,5 +1,5 @@
 import { Schema, model, models, type InferSchemaType, type Model } from 'mongoose';
-import { INTERVIEW_FEEDBACK_RATINGS } from '@fluxberry/shared';
+import { INTERVIEW_FEEDBACK_RATINGS } from '../shared';
 
 /** "Add feedback" — binary.so parity: Title, Overall rating, Additional notes. */
 const interviewFeedbackSchema = new Schema(

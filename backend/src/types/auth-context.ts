@@ -1,4 +1,4 @@
-import type { Role } from '@fluxberry/shared';
+import type { Role } from '../shared';
 
 export interface AuthUser {
   id: string; // Mongo user _id

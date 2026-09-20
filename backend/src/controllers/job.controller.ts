@@ -9,7 +9,7 @@ import type {
   JobStatusInput,
   UpsertPipelineStagesInput,
   SetLinkedInPostedInput,
-} from '@fluxberry/shared';
+} from '../shared';
 
 export const jobController = {
   create: asyncHandler(async (req, res) => {

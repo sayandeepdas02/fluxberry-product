@@ -3,7 +3,7 @@ import {
   SCORE_DIMENSIONS,
   type ScoreBreakdown,
   type ScoreDimension,
-} from '@fluxberry/shared';
+} from '../shared';
 
 export interface ScoringInput {
   job: {

@@ -1,8 +1,8 @@
 'use client';
 
 import { Check, Minus, Sparkles } from 'lucide-react';
-import type { ScreeningResultDto } from '@fluxberry/shared';
-import { SCORE_DIMENSION_LABELS, SCORE_DIMENSIONS } from '@fluxberry/shared';
+import type { ScreeningResultDto } from '@/lib/shared';
+import { SCORE_DIMENSION_LABELS, SCORE_DIMENSIONS } from '@/lib/shared';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
 import { Button } from '@/components/ui/button';

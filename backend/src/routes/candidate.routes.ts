@@ -24,7 +24,7 @@ import {
   sendMessageSchema,
   createScheduledInterviewSchema,
   createInterviewFeedbackSchema,
-} from '@fluxberry/shared';
+} from '../shared';
 
 export const candidateRouter = Router();
 

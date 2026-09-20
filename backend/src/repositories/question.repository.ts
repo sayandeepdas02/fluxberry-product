@@ -1,6 +1,6 @@
 import type { FilterQuery } from 'mongoose';
 import { QuestionModel, type QuestionDoc } from '../models/question.model';
-import type { QuestionListQuery } from '@fluxberry/shared';
+import type { QuestionListQuery } from '../shared';
 
 function escapeRegex(s: string) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');

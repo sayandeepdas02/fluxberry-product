@@ -1,4 +1,4 @@
-import type { CandidateDto } from '@fluxberry/shared';
+import type { CandidateDto } from '../shared';
 
 export function toCandidateDto(c: any): CandidateDto {
   return {

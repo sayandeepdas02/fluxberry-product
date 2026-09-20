@@ -28,7 +28,7 @@ import { PlanUpgradeModal } from '@/components/billing/plan-upgrade-modal';
 import { REASON_LABELS } from '@/components/candidates/reject-dialog';
 import { STAGE_LABELS } from '@/lib/labels';
 import { cn } from '@/lib/utils';
-import { PIPELINE_STAGES, type InterviewFeedbackRating } from '@fluxberry/shared';
+import { PIPELINE_STAGES, type InterviewFeedbackRating } from '@/lib/shared';
 
 const CHART_COLOR = 'hsl(var(--primary))';
 

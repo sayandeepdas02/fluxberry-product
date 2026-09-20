@@ -4,7 +4,7 @@ import {
   WORKFLOW_STATUSES,
   WORKFLOW_RUN_STATUSES,
   WORKFLOW_STEP_STATUSES,
-} from '@fluxberry/shared';
+} from '../shared';
 
 const nodeSchema = new Schema(
   {

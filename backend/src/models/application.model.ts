@@ -3,7 +3,7 @@ import {
   APPLICATION_STATUSES,
   CANDIDATE_SOURCES,
   PROCESSING_STATUSES,
-} from '@fluxberry/shared';
+} from '../shared';
 
 /** Current (active) screening result; full history lives in screening_results. */
 const screeningResultSchema = new Schema(

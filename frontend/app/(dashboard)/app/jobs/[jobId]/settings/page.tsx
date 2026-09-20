@@ -10,7 +10,7 @@ import {
   type WorkMode,
   type UpdateJobInput,
   type WorkspaceMemberDto,
-} from '@fluxberry/shared';
+} from '@/lib/shared';
 import { Linkedin } from 'lucide-react';
 import { useJob, useUpdateJob, useUpdateJobAccess, useSetJobStatus, useSetLinkedInPosted } from '@/hooks/use-jobs';
 import { useWorkspace } from '@/components/providers/workspace-provider';
@@ -29,7 +29,7 @@ import { toast } from '@/components/ui/sonner';
 import { EMPLOYMENT_LABELS, WORK_MODE_LABELS } from '@/lib/labels';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { cn, initials } from '@/lib/utils';
-import type { JobDto } from '@fluxberry/shared';
+import type { JobDto } from '@/lib/shared';
 
 const numOrUndef = (v: string) => (v.trim() === '' ? undefined : Number(v));
 

@@ -13,7 +13,7 @@ import type {
   BulkActionInput,
   CreateScheduledInterviewInput,
   CreateInterviewFeedbackInput,
-} from '@fluxberry/shared';
+} from '../shared';
 
 function actor(req: any) {
   return { userId: req.auth.user.id, label: req.auth.user.name };

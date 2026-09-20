@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { XCircle, ThumbsDown, ThumbsUp, Star } from 'lucide-react';
-import type { InterviewFeedbackRating } from '@fluxberry/shared';
+import type { InterviewFeedbackRating } from '@/lib/shared';
 import { useCreateInterviewFeedback } from '@/hooks/use-interview-feedback';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';

@@ -1,7 +1,7 @@
 'use client';
 
 import { format } from 'date-fns';
-import type { TimelineEntryDto, ApplicationStage } from '@fluxberry/shared';
+import type { TimelineEntryDto, ApplicationStage } from '@/lib/shared';
 import { STAGE_LABELS } from '@/lib/labels';
 
 function describe(e: TimelineEntryDto): string {

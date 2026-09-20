@@ -1,5 +1,5 @@
 import { Schema, model, models, type InferSchemaType, type Model } from 'mongoose';
-import { CANDIDATE_ASSESSMENT_STATUSES } from '@fluxberry/shared';
+import { CANDIDATE_ASSESSMENT_STATUSES } from '../shared';
 
 /** Per-test-case outcome recorded after Judge0 grades a coding submission. */
 const codingCaseResultSchema = new Schema(

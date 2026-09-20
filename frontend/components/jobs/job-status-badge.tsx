@@ -1,4 +1,4 @@
-import type { JobStatus } from '@fluxberry/shared';
+import type { JobStatus } from '@/lib/shared';
 import { Badge } from '@/components/ui/badge';
 
 const MAP: Record<JobStatus, { label: string; variant: 'success' | 'muted' | 'warning' | 'primary' }> = {

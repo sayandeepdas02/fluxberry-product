@@ -1,6 +1,6 @@
 import { asyncHandler, ok } from '../utils/http';
 import { careersService } from '../services/careers.service';
-import { careersSlugSchema, setCareersSlugSchema, type UpdateCareersInput } from '@fluxberry/shared';
+import { careersSlugSchema, setCareersSlugSchema, type UpdateCareersInput } from '../shared';
 import { badRequest } from '../utils/errors';
 
 export const careersController = {

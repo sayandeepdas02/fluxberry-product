@@ -5,7 +5,7 @@ import {
   DeleteObjectCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import type { FileRef } from '@fluxberry/shared';
+import type { FileRef } from '../../shared';
 import type { DownloadUrlOptions, StorageProvider, UploadInput } from './types';
 import { config } from '../../config/env';
 

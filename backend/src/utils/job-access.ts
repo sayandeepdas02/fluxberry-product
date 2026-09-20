@@ -1,6 +1,6 @@
 import { Types } from 'mongoose';
-import type { Role } from '@fluxberry/shared';
-import { ROLE_RANK } from '@fluxberry/shared';
+import type { Role } from '../shared';
+import { ROLE_RANK } from '../shared';
 import type { AuthContext } from '../types/auth-context';
 
 /** Owner/admin always see every job — only recruiter/viewer are ever scoped by `restrictedTo`. */

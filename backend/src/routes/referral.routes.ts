@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { authenticate, resolveWorkspace, requireWorkspace, requireRole } from '../middleware/auth';
 import { validateBody } from '../middleware/validate';
 import { referralController } from '../controllers/referral.controller';
-import { createReferralSchema, updateReferralRewardSchema } from '@fluxberry/shared';
+import { createReferralSchema, updateReferralRewardSchema } from '../shared';
 
 export const referralRouter = Router();
 

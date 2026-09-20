@@ -1,6 +1,6 @@
 import Papa from 'papaparse';
-import { EMPLOYMENT_TYPES, WORK_MODES } from '@fluxberry/shared';
-import type { BulkImportColumnMapping, BulkImportEntityType } from '@fluxberry/shared';
+import { EMPLOYMENT_TYPES, WORK_MODES } from '../../shared';
+import type { BulkImportColumnMapping, BulkImportEntityType } from '../../shared';
 
 /** Shared CSV parsing/mapping/validation used by both the validate and process bulk-import workers. */
 

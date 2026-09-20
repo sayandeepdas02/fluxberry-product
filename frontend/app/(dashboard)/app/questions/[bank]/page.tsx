@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useParams, notFound } from 'next/navigation';
 import { Plus, Search, ArrowLeft, Pencil, Trash2, ListChecks, Code2 } from 'lucide-react';
-import { DIFFICULTIES, type QuestionDto, type Difficulty, type QuestionType } from '@fluxberry/shared';
+import { DIFFICULTIES, type QuestionDto, type Difficulty, type QuestionType } from '@/lib/shared';
 import { useQuestions, useArchiveQuestion } from '@/hooks/use-questions';
 import { useFeature } from '@/hooks/use-features';
 import { QuestionDialog } from '@/components/questions/question-dialog';

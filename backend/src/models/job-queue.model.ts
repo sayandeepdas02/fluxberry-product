@@ -1,5 +1,5 @@
 import { Schema, model, models, type InferSchemaType, type Model } from 'mongoose';
-import { JOB_QUEUE_TYPES, JOB_QUEUE_STATUSES } from '@fluxberry/shared';
+import { JOB_QUEUE_TYPES, JOB_QUEUE_STATUSES } from '../shared';
 
 /**
  * MongoDB-backed durable job queue (spec: DO NOT ADD REDIS INITIALLY).

@@ -10,7 +10,7 @@ import {
   type PublicQuestionDto,
   type RunCodeResult,
   type SubmitAssessmentResult,
-} from '@fluxberry/shared';
+} from '@/lib/shared';
 import { api } from '@/lib/api-client';
 import { useFeature } from '@/hooks/use-features';
 import { Button } from '@/components/ui/button';

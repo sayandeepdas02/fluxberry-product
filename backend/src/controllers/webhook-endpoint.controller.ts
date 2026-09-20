@@ -1,6 +1,6 @@
 import { asyncHandler, ok, created } from '../utils/http';
 import { webhookEndpointService } from '../services/webhook-endpoint.service';
-import type { CreateWebhookEndpointInput, UpdateWebhookEndpointInput } from '@fluxberry/shared';
+import type { CreateWebhookEndpointInput, UpdateWebhookEndpointInput } from '../shared';
 
 export const webhookEndpointController = {
   list: asyncHandler(async (req, res) => {

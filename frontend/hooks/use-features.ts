@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { DEFAULT_FEATURE_FLAGS, type FeatureFlagState } from '@fluxberry/shared';
+import { DEFAULT_FEATURE_FLAGS, type FeatureFlagState } from '@/lib/shared';
 import { api } from '@/lib/api-client';
 
 type MetaDto = { appName: string; features: FeatureFlagState; env: string };

@@ -2,7 +2,7 @@ import {
   CODING_DEFAULT_CPU_TIME_LIMIT,
   CODING_DEFAULT_MEMORY_LIMIT,
   codingLanguageById,
-} from '@fluxberry/shared';
+} from '../../shared';
 import { config } from '../../config/env';
 import { logger } from '../../utils/logger';
 import { providerError } from '../../utils/errors';

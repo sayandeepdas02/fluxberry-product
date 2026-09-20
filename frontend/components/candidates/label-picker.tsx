@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Tag, Plus, Check } from 'lucide-react';
-import type { LabelDto } from '@fluxberry/shared';
+import type { LabelDto } from '@/lib/shared';
 import { useLabels, useCreateLabel, useSetApplicationLabels } from '@/hooks/use-labels';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';

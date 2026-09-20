@@ -9,7 +9,7 @@ import type {
   WorkspaceInviteDto,
   PublicInviteDto,
   AcceptInviteResultDto,
-} from '@fluxberry/shared';
+} from '../shared';
 import crypto from 'node:crypto';
 import { workspaceRepository } from '../repositories/workspace.repository';
 import { memberRepository } from '../repositories/member.repository';

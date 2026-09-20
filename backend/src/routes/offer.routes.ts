@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { authenticate, resolveWorkspace, requireWorkspace, requireRole, requireFeature } from '../middleware/auth';
 import { validateBody } from '../middleware/validate';
 import { offerController } from '../controllers/offer.controller';
-import { createOfferSchema } from '@fluxberry/shared';
+import { createOfferSchema } from '../shared';
 
 export const offerRouter = Router();
 const guard = [authenticate, resolveWorkspace, requireWorkspace, requireFeature('OFFER_MANAGEMENT')];

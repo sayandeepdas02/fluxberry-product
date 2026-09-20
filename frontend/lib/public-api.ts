@@ -1,4 +1,4 @@
-import type { PublicJobDto, FormQuestion, PublicCareersDto, PublicCareersJob } from '@fluxberry/shared';
+import type { PublicJobDto, FormQuestion, PublicCareersDto, PublicCareersJob } from '@/lib/shared';
 import { publicConfig } from './config';
 
 export interface PublicJobPayload {

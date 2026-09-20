@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import type { SessionDto } from '@fluxberry/shared';
+import type { SessionDto } from '@/lib/shared';
 import { api } from '@/lib/api-client';
 
 /** Loads the current session (user + workspaces). Returns null data when logged out. */

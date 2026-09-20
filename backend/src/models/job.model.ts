@@ -1,5 +1,5 @@
 import { Schema, model, models, type InferSchemaType, type Model } from 'mongoose';
-import { JOB_STATUSES, EMPLOYMENT_TYPES, WORK_MODES } from '@fluxberry/shared';
+import { JOB_STATUSES, EMPLOYMENT_TYPES, WORK_MODES } from '../shared';
 
 const jobSkillSchema = new Schema(
   {

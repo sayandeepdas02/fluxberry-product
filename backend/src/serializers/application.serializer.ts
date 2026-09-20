@@ -1,4 +1,4 @@
-import type { ApplicationDto, ScreeningResultDto, LabelDto } from '@fluxberry/shared';
+import type { ApplicationDto, ScreeningResultDto, LabelDto } from '../shared';
 
 /** `labelIds` may or may not be `.populate()`d — only map entries that actually came back as label docs. */
 function toLabels(labelIds: any): LabelDto[] {

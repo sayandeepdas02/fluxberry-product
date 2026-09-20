@@ -1,4 +1,4 @@
-import type { CreateGdprRequestInput } from '@fluxberry/shared';
+import type { CreateGdprRequestInput } from '../shared';
 import { CandidateModel } from '../models/candidate.model';
 import { candidateRepository } from '../repositories/candidate.repository';
 import { gdprRequestRepository } from '../repositories/gdpr-request.repository';

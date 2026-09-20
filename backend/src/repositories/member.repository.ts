@@ -1,4 +1,4 @@
-import type { Role } from '@fluxberry/shared';
+import type { Role } from '../shared';
 import { WorkspaceMemberModel, type WorkspaceMemberDoc } from '../models/workspace-member.model';
 
 export const memberRepository = {

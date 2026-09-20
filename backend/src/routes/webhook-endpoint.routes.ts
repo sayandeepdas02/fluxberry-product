@@ -8,7 +8,7 @@ import {
 } from '../middleware/auth';
 import { validateBody } from '../middleware/validate';
 import { webhookEndpointController } from '../controllers/webhook-endpoint.controller';
-import { createWebhookEndpointSchema, updateWebhookEndpointSchema } from '@fluxberry/shared';
+import { createWebhookEndpointSchema, updateWebhookEndpointSchema } from '../shared';
 
 export const webhookEndpointRouter = Router();
 

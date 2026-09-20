@@ -1,7 +1,7 @@
 'use client';
 
 import { Check, Clock, X, Minus } from 'lucide-react';
-import type { WorkflowNodeType, WorkflowStepStatus } from '@fluxberry/shared';
+import type { WorkflowNodeType, WorkflowStepStatus } from '@/lib/shared';
 import { useWorkflowRun } from '@/hooks/use-workflow';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';

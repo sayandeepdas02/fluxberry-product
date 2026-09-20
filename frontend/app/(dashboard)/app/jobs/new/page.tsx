@@ -10,7 +10,7 @@ import {
   type WorkMode,
   type StructuredRequirements,
   type CreateJobInput,
-} from '@fluxberry/shared';
+} from '@/lib/shared';
 import { useCreateJob, useUpdateJob, usePublishJob, useJob, generateJd } from '@/hooks/use-jobs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

@@ -1,6 +1,6 @@
 import { asyncHandler, ok } from '../utils/http';
 import { workflowService } from '../services/workflow.service';
-import type { UpsertWorkflowInput } from '@fluxberry/shared';
+import type { UpsertWorkflowInput } from '../shared';
 
 export const workflowController = {
   get: asyncHandler(async (req, res) => {

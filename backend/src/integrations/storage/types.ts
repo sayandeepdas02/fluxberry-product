@@ -1,4 +1,4 @@
-import type { FileRef } from '@fluxberry/shared';
+import type { FileRef } from '../../shared';
 
 export interface UploadInput {
   key: string;

@@ -1,4 +1,4 @@
-import type { JobQueueType } from '@fluxberry/shared';
+import type { JobQueueType } from '../../shared';
 import type { Logger } from '../../utils/logger';
 
 export interface JobContext {

@@ -1,5 +1,5 @@
-import type { ParsedProfile } from '@fluxberry/shared';
-import { SCORING_VERSION } from '@fluxberry/shared';
+import type { ParsedProfile } from '../shared';
+import { SCORING_VERSION } from '../shared';
 import { candidateRepository } from '../repositories/candidate.repository';
 import { applicationRepository } from '../repositories/application.repository';
 import { jobRepository } from '../repositories/job.repository';

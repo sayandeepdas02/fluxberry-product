@@ -1,6 +1,6 @@
 import { asyncHandler, ok, created, noContent } from '../utils/http';
 import { questionService } from '../services/question.service';
-import type { CreateQuestionInput, UpdateQuestionInput, QuestionListQuery } from '@fluxberry/shared';
+import type { CreateQuestionInput, UpdateQuestionInput, QuestionListQuery } from '../shared';
 
 export const questionController = {
   list: asyncHandler(async (req, res) => {

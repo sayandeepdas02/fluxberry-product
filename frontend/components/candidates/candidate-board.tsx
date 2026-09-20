@@ -11,7 +11,7 @@ import {
   type DragEndEvent,
 } from '@dnd-kit/core';
 import { formatDistanceToNow } from 'date-fns';
-import type { CandidateListItemDto, PipelineStage } from '@fluxberry/shared';
+import type { CandidateListItemDto, PipelineStage } from '@/lib/shared';
 import { ScoreBadge } from './score-badge';
 import { cn } from '@/lib/utils';
 

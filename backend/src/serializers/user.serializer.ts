@@ -1,4 +1,4 @@
-import type { UserDto } from '@fluxberry/shared';
+import type { UserDto } from '../shared';
 
 interface UserLike {
   _id: unknown;

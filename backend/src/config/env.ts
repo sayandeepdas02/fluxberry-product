@@ -2,8 +2,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import dotenv from 'dotenv';
 import { z } from 'zod';
-import { DEFAULT_FEATURE_FLAGS } from '@fluxberry/shared';
-import type { FeatureFlagState } from '@fluxberry/shared';
+import { DEFAULT_FEATURE_FLAGS } from '../shared';
+import type { FeatureFlagState } from '../shared';
 
 /**
  * Loads .env from the repo root (and backend/.env if present), then validates.

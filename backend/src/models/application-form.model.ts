@@ -1,5 +1,5 @@
 import { Schema, model, models, type InferSchemaType, type Model } from 'mongoose';
-import { FORM_QUESTION_TYPES, MULTIPLE_CHOICE_VARIANTS, OTHER_LINK_PLATFORMS } from '@fluxberry/shared';
+import { FORM_QUESTION_TYPES, MULTIPLE_CHOICE_VARIANTS, OTHER_LINK_PLATFORMS } from '../shared';
 
 const formOptionSchema = new Schema(
   { id: { type: String, required: true }, label: { type: String, required: true } },

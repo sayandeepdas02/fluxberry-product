@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import dns from 'node:dns/promises';
-import type { CreateWebhookEndpointInput, UpdateWebhookEndpointInput } from '@fluxberry/shared';
+import type { CreateWebhookEndpointInput, UpdateWebhookEndpointInput } from '../shared';
 import { webhookEndpointRepository, webhookDeliveryRepository } from '../repositories/webhook-endpoint.repository';
 import { auditService } from './audit.service';
 import { notFound, badRequest } from '../utils/errors';

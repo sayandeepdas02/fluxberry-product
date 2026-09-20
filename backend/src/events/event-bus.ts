@@ -1,4 +1,4 @@
-import type { EventType } from '@fluxberry/shared';
+import type { EventType } from '../shared';
 import { EventModel } from '../models/event.model';
 import { logger } from '../utils/logger';
 import type { DomainEventInput, EventHandler, PersistedEvent } from './event-types';

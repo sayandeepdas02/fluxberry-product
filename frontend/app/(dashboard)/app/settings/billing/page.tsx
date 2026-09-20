@@ -2,8 +2,8 @@
 
 import { useEffect, useRef } from 'react';
 import { Check, ExternalLink } from 'lucide-react';
-import { WORKSPACE_PLANS, PLAN_FEATURES } from '@fluxberry/shared';
-import type { WorkspacePlan } from '@fluxberry/shared';
+import { WORKSPACE_PLANS, PLAN_FEATURES } from '@/lib/shared';
+import type { WorkspacePlan } from '@/lib/shared';
 import { useWorkspace } from '@/components/providers/workspace-provider';
 import { useBillingStatus, useCreateCheckout, useCreatePortalSession } from '@/hooks/use-billing';
 import { FEATURE_FLAG_LABELS } from '@/lib/labels';

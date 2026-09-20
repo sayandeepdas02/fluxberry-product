@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import type { CalendarConnectionStatusDto, OrganizerAvailabilityDto } from '@fluxberry/shared';
+import type { CalendarConnectionStatusDto, OrganizerAvailabilityDto } from '../shared';
 import { calendarConnectionRepository } from '../repositories/calendar-connection.repository';
 import { resolveConnectionTokens } from './calendar-token-resolver';
 import { getCalendarProvider } from '../integrations';

@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
-import type { JobAssessmentRowDto, CandidateAssessmentStatus } from '@fluxberry/shared';
+import type { JobAssessmentRowDto, CandidateAssessmentStatus } from '@/lib/shared';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';

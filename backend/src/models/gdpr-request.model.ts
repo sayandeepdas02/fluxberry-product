@@ -1,5 +1,5 @@
 import { Schema, model, models, type InferSchemaType, type Model } from 'mongoose';
-import { GDPR_REQUEST_TYPES, GDPR_REQUEST_STATUSES } from '@fluxberry/shared';
+import { GDPR_REQUEST_TYPES, GDPR_REQUEST_STATUSES } from '../shared';
 
 /** An admin-initiated request to anonymize or delete a candidate's data (GDPR erasure). */
 const gdprRequestSchema = new Schema(

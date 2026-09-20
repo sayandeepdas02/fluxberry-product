@@ -1,4 +1,4 @@
-import type { UpsertWorkflowInput, WorkflowDto, WorkflowRunDto } from '@fluxberry/shared';
+import type { UpsertWorkflowInput, WorkflowDto, WorkflowRunDto } from '../shared';
 import { workflowRepository, workflowRunRepository, workflowStepRepository } from '../repositories/workflow.repository';
 import { jobRepository } from '../repositories/job.repository';
 import { toWorkflowDto, toWorkflowRunDto } from '../serializers/workflow.serializer';

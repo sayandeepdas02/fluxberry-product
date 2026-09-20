@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import Papa from 'papaparse';
-import type { BulkImportColumnMapping, BulkImportEntityType } from '@fluxberry/shared';
+import type { BulkImportColumnMapping, BulkImportEntityType } from '../shared';
 import { bulkImportRepository } from '../repositories/bulk-import.repository';
 import { getStorageProvider } from '../integrations';
 import { jobQueue } from '../queue/job-queue';

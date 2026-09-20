@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
 import { UserCheck, UserX } from 'lucide-react';
-import type { CandidateListItemDto, PipelineStage } from '@fluxberry/shared';
+import type { CandidateListItemDto, PipelineStage } from '@/lib/shared';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card } from '@/components/ui/card';
 import { RecordMenu } from '@/components/ui/record-menu';

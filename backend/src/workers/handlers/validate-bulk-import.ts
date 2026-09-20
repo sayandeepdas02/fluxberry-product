@@ -1,4 +1,4 @@
-import type { BulkImportColumnMapping, BulkImportEntityType } from '@fluxberry/shared';
+import type { BulkImportColumnMapping, BulkImportEntityType } from '../../shared';
 import { bulkImportRepository } from '../../repositories/bulk-import.repository';
 import { getStorageProvider } from '../../integrations';
 import { parseCsv, applyMapping, validateRow } from './bulk-import-row.util';

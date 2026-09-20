@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
-import type { BillingSubscriptionStatus, WorkspacePlan } from '@fluxberry/shared';
-import { WORKSPACE_PLANS } from '@fluxberry/shared';
+import type { BillingSubscriptionStatus, WorkspacePlan } from '../../shared';
+import { WORKSPACE_PLANS } from '../../shared';
 import type {
   BillingProvider,
   BillingWebhookEvent,

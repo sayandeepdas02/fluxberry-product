@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { authenticate, resolveWorkspace, requireWorkspace, requireRole } from '../middleware/auth';
 import { validateBody } from '../middleware/validate';
 import { assessmentController } from '../controllers/assessment.controller';
-import { createAssessmentSchema, updateAssessmentSchema, sendAssessmentSchema } from '@fluxberry/shared';
+import { createAssessmentSchema, updateAssessmentSchema, sendAssessmentSchema } from '../shared';
 
 export const assessmentRouter = Router();
 const guard = [authenticate, resolveWorkspace, requireWorkspace];

@@ -6,7 +6,7 @@ import type {
   RunCodeInput,
   RunCodeResult,
   SavedAnswer,
-} from '@fluxberry/shared';
+} from '../shared';
 import { candidateAssessmentRepository, assessmentRepository } from '../repositories/assessment.repository';
 import { questionRepository } from '../repositories/question.repository';
 import { toPublicQuestionDto } from '../serializers/assessment.serializer';

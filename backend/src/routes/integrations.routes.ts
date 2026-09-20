@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { organizerAvailabilityQuerySchema } from '@fluxberry/shared';
+import { organizerAvailabilityQuerySchema } from '../shared';
 import { authenticate, resolveWorkspace, requireWorkspace } from '../middleware/auth';
 import { validateQuery } from '../middleware/validate';
 import { calendarIntegrationController } from '../controllers/calendar-integration.controller';

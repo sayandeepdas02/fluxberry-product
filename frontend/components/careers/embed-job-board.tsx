@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import type { PublicCareersJob } from '@fluxberry/shared';
+import type { PublicCareersJob } from '@/lib/shared';
 import { EMPLOYMENT_LABELS, WORK_MODE_LABELS } from '@/lib/labels';
 import { formatSalary } from '@/lib/utils';
 

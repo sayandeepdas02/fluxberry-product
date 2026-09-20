@@ -1,7 +1,7 @@
 import { asyncHandler, ok, created } from '../utils/http';
 import { gdprService } from '../services/gdpr.service';
 import { gdprRequestRepository } from '../repositories/gdpr-request.repository';
-import type { CreateGdprRequestInput } from '@fluxberry/shared';
+import type { CreateGdprRequestInput } from '../shared';
 
 export const gdprController = {
   create: asyncHandler(async (req, res) => {

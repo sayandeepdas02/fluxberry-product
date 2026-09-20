@@ -1,4 +1,4 @@
-import type { SessionDto, UpdateProfileInput } from '@fluxberry/shared';
+import type { SessionDto, UpdateProfileInput } from '../shared';
 import type { VerifiedIdentity } from '../auth';
 import type { AuthUser } from '../types/auth-context';
 import { userRepository } from '../repositories/user.repository';
@@ -7,7 +7,7 @@ import { workspaceRepository } from '../repositories/workspace.repository';
 import { toUserDto } from '../serializers/user.serializer';
 import { toWorkspaceDto } from '../serializers/workspace.serializer';
 import { notFound } from '../utils/errors';
-import type { Role } from '@fluxberry/shared';
+import type { Role } from '../shared';
 
 export function nameFromEmail(email: string): string {
   return email.split('@')[0].replace(/[._-]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());

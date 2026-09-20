@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Check, Mail, RefreshCw, ShieldCheck, UserMinus, XCircle } from 'lucide-react';
-import type { WorkspaceMemberDto, WorkspaceInviteDto, Role, InviteMemberInput } from '@fluxberry/shared';
+import type { WorkspaceMemberDto, WorkspaceInviteDto, Role, InviteMemberInput } from '@/lib/shared';
 import { useWorkspace } from '@/components/providers/workspace-provider';
 import { api } from '@/lib/api-client';
 import { Button } from '@/components/ui/button';

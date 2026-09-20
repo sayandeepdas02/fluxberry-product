@@ -1,5 +1,5 @@
 import { Schema, model, models, type InferSchemaType, type Model } from 'mongoose';
-import { BULK_IMPORT_STATUSES, BULK_IMPORT_ENTITY_TYPES } from '@fluxberry/shared';
+import { BULK_IMPORT_STATUSES, BULK_IMPORT_ENTITY_TYPES } from '../shared';
 
 /** Object storage pointer (mirrors the shape of shared's fileRefSchema, kept local to avoid a Mixed<->typed mismatch). */
 const fileRefSchema = new Schema(

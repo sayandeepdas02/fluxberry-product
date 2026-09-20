@@ -4,7 +4,7 @@ import type {
   QuestionListQuery,
   QuestionDto,
   Paginated,
-} from '@fluxberry/shared';
+} from '../shared';
 import { questionRepository } from '../repositories/question.repository';
 import { toQuestionDto } from '../serializers/assessment.serializer';
 import { notFound } from '../utils/errors';

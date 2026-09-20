@@ -17,8 +17,8 @@ import type {
   JobFillRateDto,
   InterviewFeedbackRating,
   RejectionReason,
-} from '@fluxberry/shared';
-import { PIPELINE_STAGES, CANDIDATE_SOURCES, REJECTION_REASONS, INTERVIEW_FEEDBACK_RATINGS } from '@fluxberry/shared';
+} from '../shared';
+import { PIPELINE_STAGES, CANDIDATE_SOURCES, REJECTION_REASONS, INTERVIEW_FEEDBACK_RATINGS } from '../shared';
 import { ApplicationModel } from '../models/application.model';
 import { JobModel } from '../models/job.model';
 import { CandidateModel } from '../models/candidate.model';

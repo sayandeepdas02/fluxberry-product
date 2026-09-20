@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import type { PublicApplicationInput, PublicJobDto, FormQuestion } from '@fluxberry/shared';
+import type { PublicApplicationInput, PublicJobDto, FormQuestion } from '../shared';
 import { workspaceRepository } from '../repositories/workspace.repository';
 import { jobRepository } from '../repositories/job.repository';
 import { candidateRepository } from '../repositories/candidate.repository';

@@ -7,7 +7,7 @@ import { offerController } from '../controllers/offer.controller';
 import { applicationUpload } from '../middleware/upload';
 import { publicApplyLimiter, uploadLimiter, assessmentLimiter, codingRunLimiter } from '../middleware/rate-limit';
 import { validateBody } from '../middleware/validate';
-import { offerDecisionSchema } from '@fluxberry/shared';
+import { offerDecisionSchema } from '../shared';
 
 /** Candidate-facing endpoints — no auth, clearly isolated (spec §60, §77). */
 export const publicRouter = Router();

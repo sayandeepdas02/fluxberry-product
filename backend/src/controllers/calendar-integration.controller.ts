@@ -1,4 +1,4 @@
-import type { OrganizerAvailabilityQuery } from '@fluxberry/shared';
+import type { OrganizerAvailabilityQuery } from '../shared';
 import { asyncHandler, ok } from '../utils/http';
 import { calendarConnectionService } from '../services/calendar-connection.service';
 import { config } from '../config/env';

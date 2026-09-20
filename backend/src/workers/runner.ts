@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import * as Sentry from '@sentry/node';
-import type { JobQueueType } from '@fluxberry/shared';
+import type { JobQueueType } from '../shared';
 import { claimNextJob, completeJob, failJob, recoverStuckJobs } from '../queue/job-queue';
 import { config } from '../config/env';
 import { logger } from '../utils/logger';
