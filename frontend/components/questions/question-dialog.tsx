@@ -11,7 +11,7 @@ import {
   type CreateQuestionInput,
   type Difficulty,
   type QuestionType,
-} from '@fluxberry/shared';
+} from '@/lib/shared';
 
 // Monaco Editor loaded dynamically to avoid SSR bundle size issues.
 const MonacoEditor = dynamic(() => import('@monaco-editor/react'), {

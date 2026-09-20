@@ -1,4 +1,4 @@
-import type { CreateCheckoutInput } from '@fluxberry/shared';
+import type { CreateCheckoutInput } from '../shared';
 import { asyncHandler, ok } from '../utils/http';
 import { billingService } from '../services/billing.service';
 

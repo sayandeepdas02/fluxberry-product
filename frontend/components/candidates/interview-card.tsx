@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { ChevronDown, Mic } from 'lucide-react';
-import type { InterviewDto } from '@fluxberry/shared';
+import type { InterviewDto } from '@/lib/shared';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';

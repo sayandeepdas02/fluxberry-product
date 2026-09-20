@@ -1,7 +1,7 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { ScheduledInterviewDto, CreateScheduledInterviewInput } from '@fluxberry/shared';
+import type { ScheduledInterviewDto, CreateScheduledInterviewInput } from '@/lib/shared';
 import { api } from '@/lib/api-client';
 import { useWorkspace } from '@/components/providers/workspace-provider';
 

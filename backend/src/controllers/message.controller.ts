@@ -1,6 +1,6 @@
 import { asyncHandler, ok, created } from '../utils/http';
 import { messageService } from '../services/message.service';
-import type { SendMessageInput } from '@fluxberry/shared';
+import type { SendMessageInput } from '../shared';
 
 export const messageController = {
   list: asyncHandler(async (req, res) => {

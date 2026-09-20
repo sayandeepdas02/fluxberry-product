@@ -1,7 +1,7 @@
 import { asyncHandler, ok, created } from '../utils/http';
 import { interviewConfigService } from '../services/interview-config.service';
 import { interviewService } from '../services/interview.service';
-import type { UpsertInterviewConfigInput, SendInterviewInput } from '@fluxberry/shared';
+import type { UpsertInterviewConfigInput, SendInterviewInput } from '../shared';
 
 export const interviewController = {
   // ---- Recruiter: per-job interview configuration ----

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { REJECTION_REASONS, type RejectionReason } from '@fluxberry/shared';
+import { REJECTION_REASONS, type RejectionReason } from '@/lib/shared';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Field } from '@/components/ui/field';

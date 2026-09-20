@@ -1,4 +1,4 @@
-import type { AiInterviewConfigDto, InterviewDto, InterviewEvaluationDto } from '@fluxberry/shared';
+import type { AiInterviewConfigDto, InterviewDto, InterviewEvaluationDto } from '../shared';
 
 export function toAiInterviewConfigDto(c: any): AiInterviewConfigDto {
   return {

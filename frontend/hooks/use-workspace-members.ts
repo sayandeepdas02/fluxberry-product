@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import type { WorkspaceMemberDto } from '@fluxberry/shared';
+import type { WorkspaceMemberDto } from '@/lib/shared';
 import { api } from '@/lib/api-client';
 import { useWorkspace } from '@/components/providers/workspace-provider';
 

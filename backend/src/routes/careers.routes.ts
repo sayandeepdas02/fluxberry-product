@@ -4,7 +4,7 @@ import { validateBody } from '../middleware/validate';
 import { avatarUpload, coverImageUpload } from '../middleware/upload';
 import { uploadLimiter } from '../middleware/rate-limit';
 import { careersController } from '../controllers/careers.controller';
-import { updateCareersSchema } from '@fluxberry/shared';
+import { updateCareersSchema } from '../shared';
 
 export const careersRouter = Router();
 const guard = [authenticate, resolveWorkspace, requireWorkspace];

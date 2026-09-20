@@ -1,4 +1,4 @@
-import type { WorkspacePlan, BillingSubscriptionStatus } from '@fluxberry/shared';
+import type { WorkspacePlan, BillingSubscriptionStatus } from '../../shared';
 
 export interface CheckoutSessionInput {
   workspaceId: string;

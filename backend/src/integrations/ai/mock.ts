@@ -1,4 +1,4 @@
-import type { ParsedProfile } from '@fluxberry/shared';
+import type { ParsedProfile } from '../../shared';
 import type {
   AIProvider,
   JdGenInput,
@@ -11,7 +11,7 @@ import type {
   InterviewEvaluation,
   ProviderMeta,
 } from './types';
-import { SCORE_DIMENSION_LABELS } from '@fluxberry/shared';
+import { SCORE_DIMENSION_LABELS } from '../../shared';
 
 const KNOWN_SKILLS = [
   'javascript', 'typescript', 'react', 'next.js', 'node.js', 'express', 'python',

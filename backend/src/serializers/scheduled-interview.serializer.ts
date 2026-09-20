@@ -1,4 +1,4 @@
-import type { ScheduledInterviewDto, ScheduledInterviewInterviewerDto } from '@fluxberry/shared';
+import type { ScheduledInterviewDto, ScheduledInterviewInterviewerDto } from '../shared';
 
 function toInterviewer(i: any): ScheduledInterviewInterviewerDto {
   return {

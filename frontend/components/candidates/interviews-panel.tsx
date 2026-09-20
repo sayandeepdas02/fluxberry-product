@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { CalendarPlus, Plus, Calendar, MapPin, Video, Trash2, XCircle, ThumbsDown, ThumbsUp, Star } from 'lucide-react';
-import type { InterviewFeedbackRating } from '@fluxberry/shared';
+import type { InterviewFeedbackRating } from '@/lib/shared';
 import { useScheduledInterviews, useDeleteScheduledInterview } from '@/hooks/use-scheduled-interviews';
 import { useInterviewFeedback } from '@/hooks/use-interview-feedback';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';

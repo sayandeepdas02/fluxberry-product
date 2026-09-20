@@ -9,7 +9,7 @@ import type {
   GenerateJdResult,
   JobStatus,
   PipelineStage,
-} from '@fluxberry/shared';
+} from '@/lib/shared';
 import { api } from '@/lib/api-client';
 import { useWorkspace } from '@/components/providers/workspace-provider';
 

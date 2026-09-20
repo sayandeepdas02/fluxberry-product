@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Search, Users, LayoutGrid, Table as TableIcon, X } from 'lucide-react';
-import type { CandidateAssessmentStatus, PipelineStage } from '@fluxberry/shared';
-import { CANDIDATE_ASSESSMENT_STATUSES, defaultPipelineStages } from '@fluxberry/shared';
+import type { CandidateAssessmentStatus, PipelineStage } from '@/lib/shared';
+import { CANDIDATE_ASSESSMENT_STATUSES, defaultPipelineStages } from '@/lib/shared';
 import { useCandidates, useMoveStage, useBulkAction, useShortlist, useReject } from '@/hooks/use-candidates';
 import { useJobs, useJobStages } from '@/hooks/use-jobs';
 import { useLabels } from '@/hooks/use-labels';

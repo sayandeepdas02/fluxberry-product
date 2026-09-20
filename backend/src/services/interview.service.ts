@@ -1,5 +1,5 @@
-import type { InterviewDto, PublicInterviewDto, InterviewSessionDto, SendInterviewInput } from '@fluxberry/shared';
-import { SCORING_VERSION } from '@fluxberry/shared';
+import type { InterviewDto, PublicInterviewDto, InterviewSessionDto, SendInterviewInput } from '../shared';
+import { SCORING_VERSION } from '../shared';
 import { InterviewModel } from '../models/interview.model';
 import { AiInterviewConfigModel } from '../models/ai-interview-config.model';
 import { applicationRepository } from '../repositories/application.repository';

@@ -12,7 +12,7 @@ import type {
   CandidateDto,
   BulkActionInput,
   CandidateAssessmentStatus,
-} from '@fluxberry/shared';
+} from '@/lib/shared';
 import { api } from '@/lib/api-client';
 import { useWorkspace } from '@/components/providers/workspace-provider';
 

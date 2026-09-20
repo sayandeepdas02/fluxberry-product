@@ -1,7 +1,7 @@
 import type { WebhookEvent } from '@clerk/backend';
 import type { OrganizationJSON, OrganizationMembershipJSON, UserJSON } from '@clerk/backend';
-import type { Role } from '@fluxberry/shared';
-import { ROLES } from '@fluxberry/shared';
+import type { Role } from '../shared';
+import { ROLES } from '../shared';
 import { userRepository } from '../repositories/user.repository';
 import { memberRepository } from '../repositories/member.repository';
 import { workspaceRepository } from '../repositories/workspace.repository';

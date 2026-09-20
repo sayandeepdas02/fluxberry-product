@@ -4,7 +4,7 @@ import { authService } from '../services/auth.service';
 import { mintTestToken } from '../auth';
 import { config } from '../config/env';
 import { notFound } from '../utils/errors';
-import type { UpdateProfileInput } from '@fluxberry/shared';
+import type { UpdateProfileInput } from '../shared';
 
 export const authController = {
   me: asyncHandler(async (req, res) => {

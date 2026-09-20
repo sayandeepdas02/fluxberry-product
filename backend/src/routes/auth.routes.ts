@@ -3,7 +3,7 @@ import { authenticate } from '../middleware/auth';
 import { validateBody } from '../middleware/validate';
 import { authLimiter } from '../middleware/rate-limit';
 import { authController } from '../controllers/auth.controller';
-import { updateProfileSchema } from '@fluxberry/shared';
+import { updateProfileSchema } from '../shared';
 
 export const authRouter = Router();
 

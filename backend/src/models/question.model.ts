@@ -1,5 +1,5 @@
 import { Schema, model, models, type InferSchemaType, type Model } from 'mongoose';
-import { QUESTION_TYPES, DIFFICULTIES } from '@fluxberry/shared';
+import { QUESTION_TYPES, DIFFICULTIES } from '../shared';
 
 const optionSchema = new Schema(
   { id: { type: String, required: true }, text: { type: String, required: true } },

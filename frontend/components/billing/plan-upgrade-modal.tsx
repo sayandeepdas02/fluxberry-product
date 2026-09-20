@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Sparkles } from 'lucide-react';
-import type { FeatureFlag } from '@fluxberry/shared';
+import type { FeatureFlag } from '@/lib/shared';
 import { FEATURE_FLAG_LABELS } from '@/lib/labels';
 import {
   Dialog,

@@ -1,4 +1,4 @@
-import type { Role, WorkspaceDto, WorkspaceMemberDto, WorkspacePlan } from '@fluxberry/shared';
+import type { Role, WorkspaceDto, WorkspaceMemberDto, WorkspacePlan } from '../shared';
 
 interface WorkspaceLike {
   _id: unknown;

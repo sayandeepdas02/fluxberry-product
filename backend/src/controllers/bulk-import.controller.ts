@@ -1,8 +1,8 @@
 import { asyncHandler, ok, created } from '../utils/http';
 import { bulkImportService } from '../services/bulk-import.service';
 import { badRequest } from '../utils/errors';
-import { BULK_IMPORT_ENTITY_TYPES } from '@fluxberry/shared';
-import type { BulkImportColumnMapping, BulkImportEntityType } from '@fluxberry/shared';
+import { BULK_IMPORT_ENTITY_TYPES } from '../shared';
+import type { BulkImportColumnMapping, BulkImportEntityType } from '../shared';
 
 function assertEntityType(value: unknown): BulkImportEntityType {
   if (typeof value !== 'string' || !(BULK_IMPORT_ENTITY_TYPES as readonly string[]).includes(value)) {

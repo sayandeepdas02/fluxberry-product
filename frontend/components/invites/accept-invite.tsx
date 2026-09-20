@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import type { PublicInviteDto, AcceptInviteResultDto } from '@fluxberry/shared';
+import type { PublicInviteDto, AcceptInviteResultDto } from '@/lib/shared';
 import { api, setWorkspaceId } from '@/lib/api-client';
 import { useSession } from '@/hooks/use-session';
 import { signOut } from '@/lib/auth-actions';

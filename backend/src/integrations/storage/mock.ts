@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { Router } from 'express';
-import type { FileRef } from '@fluxberry/shared';
+import type { FileRef } from '../../shared';
 import type { DownloadUrlOptions, StorageProvider, UploadInput } from './types';
 import { config } from '../../config/env';
 import { notFound, forbidden } from '../../utils/errors';

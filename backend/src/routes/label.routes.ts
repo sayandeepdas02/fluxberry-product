@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { authenticate, resolveWorkspace, requireWorkspace, requireRole } from '../middleware/auth';
 import { validateBody } from '../middleware/validate';
 import { labelController } from '../controllers/label.controller';
-import { createLabelSchema, updateLabelSchema } from '@fluxberry/shared';
+import { createLabelSchema, updateLabelSchema } from '../shared';
 
 export const labelRouter = Router();
 

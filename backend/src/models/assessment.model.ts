@@ -1,5 +1,5 @@
 import { Schema, model, models, type InferSchemaType, type Model } from 'mongoose';
-import { ASSESSMENT_TYPES, ASSESSMENT_STATUSES } from '@fluxberry/shared';
+import { ASSESSMENT_TYPES, ASSESSMENT_STATUSES } from '../shared';
 
 const assessmentQuestionRefSchema = new Schema(
   {

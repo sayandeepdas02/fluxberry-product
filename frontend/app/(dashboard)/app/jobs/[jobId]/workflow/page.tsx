@@ -11,7 +11,7 @@ import {
   type ConditionField,
   type ConditionOperator,
   type PipelineStage,
-} from '@fluxberry/shared';
+} from '@/lib/shared';
 import { useWorkflow, useSaveWorkflow } from '@/hooks/use-workflow';
 import { useAssessments } from '@/hooks/use-assessments';
 import { useJobStages } from '@/hooks/use-jobs';

@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { authenticate, resolveWorkspace, requireWorkspace, requireRole } from '../middleware/auth';
 import { validateBody } from '../middleware/validate';
 import { billingController } from '../controllers/billing.controller';
-import { createCheckoutSchema } from '@fluxberry/shared';
+import { createCheckoutSchema } from '../shared';
 
 export const billingRouter = Router();
 

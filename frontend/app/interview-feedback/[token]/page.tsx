@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { format } from 'date-fns';
 import { Calendar, MapPin, Video, CheckCircle2, XCircle, ThumbsDown, ThumbsUp, Star } from 'lucide-react';
-import type { InterviewerAccessDto, InterviewFeedbackRating } from '@fluxberry/shared';
+import type { InterviewerAccessDto, InterviewFeedbackRating } from '@/lib/shared';
 import { fetchInterviewerAccess, submitInterviewerFeedback } from '@/hooks/use-interview-feedback';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';

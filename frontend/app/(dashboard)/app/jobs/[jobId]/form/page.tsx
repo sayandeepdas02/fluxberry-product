@@ -44,7 +44,7 @@ import {
   type FormQuestionType,
   type MultipleChoiceVariant,
   type OtherLinkPlatform,
-} from '@fluxberry/shared';
+} from '@/lib/shared';
 import { useApplicationForm, useUpdateForm } from '@/hooks/use-form';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';

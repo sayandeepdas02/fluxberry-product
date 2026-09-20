@@ -7,7 +7,7 @@ import type {
   AssessmentDto,
   CandidateAssessmentDto,
   JobAssessmentRowDto,
-} from '@fluxberry/shared';
+} from '../shared';
 import { assessmentRepository, candidateAssessmentRepository } from '../repositories/assessment.repository';
 import { applicationRepository } from '../repositories/application.repository';
 import { candidateRepository } from '../repositories/candidate.repository';

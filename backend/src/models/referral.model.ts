@@ -1,5 +1,5 @@
 import { Schema, model, models, type InferSchemaType, type Model } from 'mongoose';
-import { REFERRAL_REWARD_STATUSES } from '@fluxberry/shared';
+import { REFERRAL_REWARD_STATUSES } from '../shared';
 
 const referralSchema = new Schema(
   {

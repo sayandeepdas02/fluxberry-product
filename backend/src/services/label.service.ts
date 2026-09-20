@@ -1,4 +1,4 @@
-import type { CreateLabelInput, UpdateLabelInput, LabelDto } from '@fluxberry/shared';
+import type { CreateLabelInput, UpdateLabelInput, LabelDto } from '../shared';
 import { labelRepository } from '../repositories/label.repository';
 import { applicationRepository } from '../repositories/application.repository';
 import { ApplicationModel } from '../models/application.model';

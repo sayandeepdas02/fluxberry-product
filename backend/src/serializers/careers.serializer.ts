@@ -1,4 +1,4 @@
-import type { CareersPageDto, PublicCareersJob, SectionKey } from '@fluxberry/shared';
+import type { CareersPageDto, PublicCareersJob, SectionKey } from '../shared';
 
 const DEFAULT_SECTION_ORDER: SectionKey[] = ['about', 'links', 'team', 'jobs'];
 

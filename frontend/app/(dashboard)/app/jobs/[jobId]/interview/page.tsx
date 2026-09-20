@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Plus, Trash2, GripVertical } from 'lucide-react';
-import { INTERVIEW_TONES, type InterviewTone, type UpsertInterviewConfigInput } from '@fluxberry/shared';
+import { INTERVIEW_TONES, type InterviewTone, type UpsertInterviewConfigInput } from '@/lib/shared';
 import { useInterviewConfig, useSaveInterviewConfig } from '@/hooks/use-interview';
 import { useFeature } from '@/hooks/use-features';
 import { Button } from '@/components/ui/button';

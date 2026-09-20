@@ -1,4 +1,4 @@
-import type { SendMessageInput, MessageDto } from '@fluxberry/shared';
+import type { SendMessageInput, MessageDto } from '../shared';
 import { messageRepository } from '../repositories/message.repository';
 import { applicationRepository } from '../repositories/application.repository';
 import { CandidateModel } from '../models/candidate.model';

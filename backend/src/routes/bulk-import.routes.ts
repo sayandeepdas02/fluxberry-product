@@ -10,7 +10,7 @@ import { validateBody } from '../middleware/validate';
 import { bulkImportUpload } from '../middleware/upload';
 import { uploadLimiter } from '../middleware/rate-limit';
 import { bulkImportController } from '../controllers/bulk-import.controller';
-import { bulkImportColumnMappingSchema } from '@fluxberry/shared';
+import { bulkImportColumnMappingSchema } from '../shared';
 
 export const bulkImportRouter = Router();
 

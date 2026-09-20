@@ -1,5 +1,5 @@
 import { Schema, model, models, type InferSchemaType, type Model } from 'mongoose';
-import { SCHEDULED_INTERVIEW_LOCATION_TYPES, CALENDAR_PROVIDERS, FEEDBACK_FORM_TEMPLATES } from '@fluxberry/shared';
+import { SCHEDULED_INTERVIEW_LOCATION_TYPES, CALENDAR_PROVIDERS, FEEDBACK_FORM_TEMPLATES } from '../shared';
 
 const interviewerSchema = new Schema(
   {

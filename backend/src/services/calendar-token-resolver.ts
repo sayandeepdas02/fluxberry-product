@@ -1,4 +1,4 @@
-import type { CalendarProviderName } from '@fluxberry/shared';
+import type { CalendarProviderName } from '../shared';
 import { calendarConnectionRepository } from '../repositories/calendar-connection.repository';
 import { getCalendarProvider } from '../integrations';
 import type { CalendarTokens } from '../integrations/calendar/types';

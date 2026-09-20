@@ -1,4 +1,4 @@
-import type { StructuredRequirements, ParsedProfile } from '@fluxberry/shared';
+import type { StructuredRequirements, ParsedProfile } from '../../shared';
 import type {
   AIProvider,
   JdGenInput,

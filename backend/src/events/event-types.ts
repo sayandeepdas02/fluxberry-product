@@ -1,5 +1,5 @@
 import type { Types } from 'mongoose';
-import type { EventType } from '@fluxberry/shared';
+import type { EventType } from '../shared';
 
 export type IdLike = string | Types.ObjectId;
 

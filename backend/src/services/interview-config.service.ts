@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import type { AiInterviewConfigDto, UpsertInterviewConfigInput } from '@fluxberry/shared';
+import type { AiInterviewConfigDto, UpsertInterviewConfigInput } from '../shared';
 import { AiInterviewConfigModel } from '../models/ai-interview-config.model';
 import { jobRepository } from '../repositories/job.repository';
 import { getInterviewProvider } from '../integrations';

@@ -1,5 +1,5 @@
 import { Schema, model, models, type InferSchemaType, type Model } from 'mongoose';
-import { OFFER_STATUSES } from '@fluxberry/shared';
+import { OFFER_STATUSES } from '../shared';
 
 /** Compensation details attached to an offer. */
 const compensationSchema = new Schema(

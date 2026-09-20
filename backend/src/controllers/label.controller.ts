@@ -1,6 +1,6 @@
 import { asyncHandler, ok, created, noContent } from '../utils/http';
 import { labelService } from '../services/label.service';
-import type { CreateLabelInput, UpdateLabelInput, SetApplicationLabelsInput } from '@fluxberry/shared';
+import type { CreateLabelInput, UpdateLabelInput, SetApplicationLabelsInput } from '../shared';
 
 export const labelController = {
   list: asyncHandler(async (req, res) => {

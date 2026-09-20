@@ -1,5 +1,5 @@
-import type { JobDto, JobFunnelCounts, PublicJobDto } from '@fluxberry/shared';
-import { defaultPipelineStages } from '@fluxberry/shared';
+import type { JobDto, JobFunnelCounts, PublicJobDto } from '../shared';
+import { defaultPipelineStages } from '../shared';
 
 function linkedInStatus(j: any): { status: 'NOT_POSTED' | 'POSTED' | 'CLOSED'; postedAt: string | null } {
   if (!j.linkedInPostedAt) return { status: 'NOT_POSTED', postedAt: null };

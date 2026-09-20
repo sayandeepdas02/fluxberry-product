@@ -1,6 +1,6 @@
 import { BillingEventModel } from '../models/billing-event.model';
 import { WorkspaceModel } from '../models/workspace.model';
-import type { WorkspacePlan, BillingSubscriptionStatus } from '@fluxberry/shared';
+import type { WorkspacePlan, BillingSubscriptionStatus } from '../shared';
 
 export interface ApplySubscriptionInput {
   /** Omit to leave the workspace's current plan untouched (e.g. a past_due status update). */

@@ -1,4 +1,4 @@
-import type { ApplicationFormDto, FormQuestion } from '@fluxberry/shared';
+import type { ApplicationFormDto, FormQuestion } from '../shared';
 
 export function toFormDto(f: any): ApplicationFormDto {
   return {

@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { Gift, Copy } from 'lucide-react';
-import { ROLE_RANK } from '@fluxberry/shared';
-import type { ReferralDto } from '@fluxberry/shared';
+import { ROLE_RANK } from '@/lib/shared';
+import type { ReferralDto } from '@/lib/shared';
 import { useJobs } from '@/hooks/use-jobs';
 import { useMyReferrals, useCreateReferral, useWorkspaceReferrals, useUpdateReferralReward } from '@/hooks/use-referrals';
 import { useWorkspace } from '@/components/providers/workspace-provider';

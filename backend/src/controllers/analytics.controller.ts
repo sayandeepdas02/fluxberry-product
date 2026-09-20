@@ -1,6 +1,6 @@
 import { asyncHandler, ok } from '../utils/http';
 import { analyticsService } from '../services/analytics.service';
-import type { CohortComparisonQuery } from '@fluxberry/shared';
+import type { CohortComparisonQuery } from '../shared';
 
 export const analyticsController = {
   get: asyncHandler(async (req, res) => {

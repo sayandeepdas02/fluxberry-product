@@ -1,7 +1,7 @@
 import { connectDatabase, disconnectDatabase } from '../config/db';
 import '../models'; // register all models
 import { ApplicationFormModel } from '../models/application-form.model';
-import { DEFAULT_FORM_FIELDS } from '@fluxberry/shared';
+import { DEFAULT_FORM_FIELDS } from '../shared';
 import { shortId } from '../utils/ids';
 import { logger } from '../utils/logger';
 

@@ -1,4 +1,4 @@
-import { SYSTEM_STAGE_LABELS } from '@fluxberry/shared';
+import { SYSTEM_STAGE_LABELS } from '@/lib/shared';
 import type {
   EmploymentType,
   WorkMode,
@@ -8,7 +8,7 @@ import type {
   CandidateAssessmentStatus,
   FeatureFlag,
   PipelineStage,
-} from '@fluxberry/shared';
+} from '@/lib/shared';
 
 export const FEATURE_FLAG_LABELS: Record<FeatureFlag, string> = {
   CODING_ASSESSMENT: 'Coding assessments',

@@ -1,4 +1,4 @@
-import type { Difficulty } from '@fluxberry/shared';
+import type { Difficulty } from '../shared';
 
 export interface SeedQuestion {
   category: string;

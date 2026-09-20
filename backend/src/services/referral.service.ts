@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import type { CreateReferralInput, UpdateReferralRewardInput, ReferralDto } from '@fluxberry/shared';
+import type { CreateReferralInput, UpdateReferralRewardInput, ReferralDto } from '../shared';
 import { config } from '../config/env';
 import { referralRepository } from '../repositories/referral.repository';
 import { jobRepository } from '../repositories/job.repository';

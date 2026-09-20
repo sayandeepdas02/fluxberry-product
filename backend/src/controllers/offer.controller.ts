@@ -1,6 +1,6 @@
 import { asyncHandler, ok, created } from '../utils/http';
 import { offerService } from '../services/offer.service';
-import type { CreateOfferInput } from '@fluxberry/shared';
+import type { CreateOfferInput } from '../shared';
 
 function actor(req: any) {
   return { userId: req.auth.user.id, label: req.auth.user.name };

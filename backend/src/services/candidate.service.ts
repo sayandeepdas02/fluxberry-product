@@ -8,7 +8,7 @@ import type {
   TimelineEntryDto,
   JobFunnelCounts,
   ApplicationAnswersDto,
-} from '@fluxberry/shared';
+} from '../shared';
 import { candidateRepository } from '../repositories/candidate.repository';
 import { applicationRepository, answersRepository } from '../repositories/application.repository';
 import { CandidateModel } from '../models/candidate.model';

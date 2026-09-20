@@ -5,7 +5,7 @@ import type {
   SubmitInterviewFeedbackInput,
   InterviewFeedbackDto,
   CalendarProviderName,
-} from '@fluxberry/shared';
+} from '../shared';
 import { scheduledInterviewRepository } from '../repositories/scheduled-interview.repository';
 import { calendarConnectionRepository } from '../repositories/calendar-connection.repository';
 import { resolveConnectionTokens } from './calendar-token-resolver';

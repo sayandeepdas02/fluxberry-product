@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import type { SessionDto, UserDto, WorkspaceDto } from '@fluxberry/shared';
+import type { SessionDto, UserDto, WorkspaceDto } from '@/lib/shared';
 import { getWorkspaceId, setWorkspaceId } from '@/lib/api-client';
 
 interface WorkspaceContextValue {

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Check } from 'lucide-react';
-import type { AssessmentDto, AssessmentType } from '@fluxberry/shared';
+import type { AssessmentDto, AssessmentType } from '@/lib/shared';
 import { useQuestions } from '@/hooks/use-questions';
 import { useCreateAssessment, useUpdateAssessment, usePublishAssessment } from '@/hooks/use-assessments';
 import { useFeature } from '@/hooks/use-features';

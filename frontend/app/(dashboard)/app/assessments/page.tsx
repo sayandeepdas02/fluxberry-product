@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Plus, ClipboardCheck, Trash2 } from 'lucide-react';
-import type { AssessmentDto } from '@fluxberry/shared';
+import type { AssessmentDto } from '@/lib/shared';
 import { useAssessments, useDeleteAssessment } from '@/hooks/use-assessments';
 import { useFeature } from '@/hooks/use-features';
 import { Button } from '@/components/ui/button';

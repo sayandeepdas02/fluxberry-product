@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import type { CareersPageDto, UpdateCareersInput, PublicCareersDto } from '@fluxberry/shared';
+import type { CareersPageDto, UpdateCareersInput, PublicCareersDto } from '../shared';
 import { careersRepository } from '../repositories/careers.repository';
 import { workspaceRepository } from '../repositories/workspace.repository';
 import { toCareersPageDto, toPublicJob } from '../serializers/careers.serializer';

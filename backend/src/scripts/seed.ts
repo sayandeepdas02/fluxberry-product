@@ -1,5 +1,5 @@
 import { connectDatabase, disconnectDatabase, mongoose } from '../config/db';
-import { DEFAULT_FORM_FIELDS } from '@fluxberry/shared';
+import { DEFAULT_FORM_FIELDS } from '../shared';
 import { UserModel } from '../models/user.model';
 import { WorkspaceModel } from '../models/workspace.model';
 import { WorkspaceMemberModel } from '../models/workspace-member.model';

@@ -1,4 +1,4 @@
-import type { OfferDto, OfferCompensationDto, PublicOfferDto } from '@fluxberry/shared';
+import type { OfferDto, OfferCompensationDto, PublicOfferDto } from '../shared';
 
 function toCompensationDto(c: any): OfferCompensationDto {
   return {

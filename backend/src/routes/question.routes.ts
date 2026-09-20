@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { authenticate, resolveWorkspace, requireWorkspace, requireRole } from '../middleware/auth';
 import { validateBody, validateQuery } from '../middleware/validate';
 import { questionController } from '../controllers/question.controller';
-import { createQuestionSchema, updateQuestionSchema, questionListQuerySchema } from '@fluxberry/shared';
+import { createQuestionSchema, updateQuestionSchema, questionListQuerySchema } from '../shared';
 
 export const questionRouter = Router();
 questionRouter.use('/questions', authenticate, resolveWorkspace, requireWorkspace);

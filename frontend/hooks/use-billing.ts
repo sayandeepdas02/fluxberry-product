@@ -1,7 +1,7 @@
 'use client';
 
 import { useMutation, useQuery } from '@tanstack/react-query';
-import type { BillingStatusDto, CreateCheckoutInput } from '@fluxberry/shared';
+import type { BillingStatusDto, CreateCheckoutInput } from '@/lib/shared';
 import { api } from '@/lib/api-client';
 import { useWorkspace } from '@/components/providers/workspace-provider';
 

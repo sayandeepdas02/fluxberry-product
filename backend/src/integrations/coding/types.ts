@@ -1,4 +1,4 @@
-import type { ExecutionStatusValue } from '@fluxberry/shared';
+import type { ExecutionStatusValue } from '../../shared';
 
 export interface CodeTestCase {
   input: string;

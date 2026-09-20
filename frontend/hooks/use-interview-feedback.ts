@@ -6,7 +6,7 @@ import type {
   CreateInterviewFeedbackInput,
   InterviewerAccessDto,
   SubmitInterviewFeedbackInput,
-} from '@fluxberry/shared';
+} from '@/lib/shared';
 import { api } from '@/lib/api-client';
 import { useWorkspace } from '@/components/providers/workspace-provider';
 

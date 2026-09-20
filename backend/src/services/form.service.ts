@@ -1,4 +1,4 @@
-import { DEFAULT_FORM_FIELDS, type ApplicationFormDto, type FormQuestion } from '@fluxberry/shared';
+import { DEFAULT_FORM_FIELDS, type ApplicationFormDto, type FormQuestion } from '../shared';
 import { formRepository } from '../repositories/form.repository';
 import { jobRepository } from '../repositories/job.repository';
 import { toFormDto } from '../serializers/form.serializer';

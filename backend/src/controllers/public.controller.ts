@@ -10,7 +10,7 @@ import {
   submitAssessmentSchema,
   runCodeSchema,
   submitInterviewFeedbackSchema,
-} from '@fluxberry/shared';
+} from '../shared';
 
 export const publicController = {
   getInvite: asyncHandler(async (req, res) => {

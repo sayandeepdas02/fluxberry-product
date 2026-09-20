@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { Users, MapPin, AlignLeft, X, Info } from 'lucide-react';
-import type { InterviewerInput, ScheduledInterviewLocationType } from '@fluxberry/shared';
+import type { InterviewerInput, ScheduledInterviewLocationType } from '@/lib/shared';
 import { useCreateScheduledInterview } from '@/hooks/use-scheduled-interviews';
 import { useWorkspaceMembers } from '@/hooks/use-workspace-members';
 import { useCalendarConnectionStatus, useConnectCalendar } from '@/hooks/use-calendar-integration';

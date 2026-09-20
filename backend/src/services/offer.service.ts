@@ -1,4 +1,4 @@
-import type { CreateOfferInput, OfferDto, OfferDecisionInput, PublicOfferDto } from '@fluxberry/shared';
+import type { CreateOfferInput, OfferDto, OfferDecisionInput, PublicOfferDto } from '../shared';
 import { offerRepository } from '../repositories/offer.repository';
 import { applicationRepository } from '../repositories/application.repository';
 import { candidateRepository } from '../repositories/candidate.repository';

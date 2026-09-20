@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { authenticate, resolveWorkspace, requireWorkspace, requireRole, requirePlanFeature } from '../middleware/auth';
 import { validateQuery } from '../middleware/validate';
 import { analyticsController } from '../controllers/analytics.controller';
-import { cohortComparisonQuerySchema } from '@fluxberry/shared';
+import { cohortComparisonQuerySchema } from '../shared';
 
 export const analyticsRouter = Router();
 

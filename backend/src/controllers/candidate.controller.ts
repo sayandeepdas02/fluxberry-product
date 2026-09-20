@@ -1,6 +1,6 @@
 import { asyncHandler, ok, requestOrigin, requestDisposition } from '../utils/http';
 import { candidateService } from '../services/candidate.service';
-import type { CandidateListQuery } from '@fluxberry/shared';
+import type { CandidateListQuery } from '../shared';
 
 export const candidateController = {
   list: asyncHandler(async (req, res) => {

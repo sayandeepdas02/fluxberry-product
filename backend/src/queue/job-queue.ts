@@ -1,4 +1,4 @@
-import type { JobQueueType } from '@fluxberry/shared';
+import type { JobQueueType } from '../shared';
 import { JobQueueModel, type JobQueueDoc } from '../models/job-queue.model';
 import { config } from '../config/env';
 import { logger } from '../utils/logger';

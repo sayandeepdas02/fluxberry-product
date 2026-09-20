@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { authenticate, resolveWorkspace, requireWorkspace, requireRole, requirePlanFeature } from '../middleware/auth';
 import { validateBody } from '../middleware/validate';
 import { gdprController } from '../controllers/gdpr.controller';
-import { createGdprRequestSchema } from '@fluxberry/shared';
+import { createGdprRequestSchema } from '../shared';
 
 export const gdprRouter = Router();
 

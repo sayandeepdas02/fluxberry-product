@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Plus, Trash2, ArrowUp, ArrowDown, Lock } from 'lucide-react';
-import type { PipelineStage } from '@fluxberry/shared';
+import type { PipelineStage } from '@/lib/shared';
 import { useJobStages, useUpdateJobStages } from '@/hooks/use-jobs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

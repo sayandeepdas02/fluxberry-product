@@ -13,8 +13,8 @@ import { jobQueue } from '../queue/job-queue';
 import { emailTemplates } from '../integrations';
 import { logger } from '../utils/logger';
 import { config } from '../config/env';
-import type { PipelineStage } from '@fluxberry/shared';
-import { defaultPipelineStages } from '@fluxberry/shared';
+import type { PipelineStage } from '../shared';
+import { defaultPipelineStages } from '../shared';
 
 const MAX_STEPS_PER_RUN = 100;
 

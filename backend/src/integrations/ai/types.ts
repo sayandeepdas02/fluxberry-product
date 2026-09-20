@@ -1,4 +1,4 @@
-import type { StructuredRequirements, ParsedProfile, ScoreBreakdown } from '@fluxberry/shared';
+import type { StructuredRequirements, ParsedProfile, ScoreBreakdown } from '../../shared';
 
 export interface ProviderMeta {
   provider: string;

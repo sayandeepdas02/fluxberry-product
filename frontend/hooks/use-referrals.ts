@@ -1,7 +1,7 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { ReferralDto, CreateReferralInput, UpdateReferralRewardInput } from '@fluxberry/shared';
+import type { ReferralDto, CreateReferralInput, UpdateReferralRewardInput } from '@/lib/shared';
 import { api } from '@/lib/api-client';
 import { useWorkspace } from '@/components/providers/workspace-provider';
 

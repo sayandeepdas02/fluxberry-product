@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { CheckCircle2, Upload, Video } from 'lucide-react';
-import { CANDIDATE_SOURCES, type FormQuestion, type CandidateSource } from '@fluxberry/shared';
+import { CANDIDATE_SOURCES, type FormQuestion, type CandidateSource } from '@/lib/shared';
 import { api, ApiError } from '@/lib/api-client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

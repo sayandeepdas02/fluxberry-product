@@ -1,4 +1,4 @@
-import type { WorkflowDto, WorkflowRunDto, WorkflowStepDto } from '@fluxberry/shared';
+import type { WorkflowDto, WorkflowRunDto, WorkflowStepDto } from '../shared';
 
 export function toWorkflowDto(w: any): WorkflowDto {
   return {

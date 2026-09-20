@@ -1,5 +1,5 @@
 import { Schema, model, models, type InferSchemaType, type Model } from 'mongoose';
-import { CALENDAR_PROVIDERS } from '@fluxberry/shared';
+import { CALENDAR_PROVIDERS } from '../shared';
 
 /** One recruiter's connected calendar (Settings > Integrations, spec: interview scheduling). */
 const calendarConnectionSchema = new Schema(

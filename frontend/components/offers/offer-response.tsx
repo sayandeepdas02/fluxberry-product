@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { CheckCircle2, Clock, PartyPopper, XCircle } from 'lucide-react';
-import type { PublicOfferDto } from '@fluxberry/shared';
+import type { PublicOfferDto } from '@/lib/shared';
 import { api, ApiError } from '@/lib/api-client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';

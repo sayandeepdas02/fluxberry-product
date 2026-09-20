@@ -1,5 +1,5 @@
 import { Schema, model, models, type InferSchemaType, type Model } from 'mongoose';
-import { PROCESSING_STATUSES, AV_SCAN_STATUSES, GDPR_STATUSES } from '@fluxberry/shared';
+import { PROCESSING_STATUSES, AV_SCAN_STATUSES, GDPR_STATUSES } from '../shared';
 
 const resumeSchema = new Schema(
   {

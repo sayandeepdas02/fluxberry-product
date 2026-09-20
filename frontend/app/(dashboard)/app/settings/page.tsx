@@ -3,7 +3,7 @@
 import { useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Upload } from 'lucide-react';
-import type { WorkspaceDto } from '@fluxberry/shared';
+import type { WorkspaceDto } from '@/lib/shared';
 import { useWorkspace } from '@/components/providers/workspace-provider';
 import { api } from '@/lib/api-client';
 import { Button } from '@/components/ui/button';

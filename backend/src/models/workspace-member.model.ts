@@ -1,5 +1,5 @@
 import { Schema, model, models, type InferSchemaType, type Model } from 'mongoose';
-import { ROLES } from '@fluxberry/shared';
+import { ROLES } from '../shared';
 
 const workspaceMemberSchema = new Schema(
   {

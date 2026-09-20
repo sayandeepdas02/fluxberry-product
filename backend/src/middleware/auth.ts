@@ -1,6 +1,6 @@
 import type { RequestHandler } from 'express';
-import type { Role, FeatureFlag, WorkspacePlan } from '@fluxberry/shared';
-import { ROLE_RANK, planIncludesFeature } from '@fluxberry/shared';
+import type { Role, FeatureFlag, WorkspacePlan } from '../shared';
+import { ROLE_RANK, planIncludesFeature } from '../shared';
 import * as Sentry from '@sentry/node';
 import { authService } from '../services/auth.service';
 import { memberRepository } from '../repositories/member.repository';

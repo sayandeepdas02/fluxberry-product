@@ -1,5 +1,5 @@
 import { Schema, model, models, type InferSchemaType, type Model } from 'mongoose';
-import { WORKSPACE_PLANS, BILLING_SUBSCRIPTION_STATUSES } from '@fluxberry/shared';
+import { WORKSPACE_PLANS, BILLING_SUBSCRIPTION_STATUSES } from '../shared';
 
 const billingSchema = new Schema(
   {

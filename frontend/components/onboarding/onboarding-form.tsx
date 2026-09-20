@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
-import type { WorkspaceDto } from '@fluxberry/shared';
+import type { WorkspaceDto } from '@/lib/shared';
 import { useSession } from '@/hooks/use-session';
 import { api, setWorkspaceId } from '@/lib/api-client';
 import { publicConfig } from '@/lib/config';

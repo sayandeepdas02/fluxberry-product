@@ -1,6 +1,6 @@
 import { asyncHandler, ok, created } from '../utils/http';
 import { referralService } from '../services/referral.service';
-import type { CreateReferralInput, UpdateReferralRewardInput } from '@fluxberry/shared';
+import type { CreateReferralInput, UpdateReferralRewardInput } from '../shared';
 
 export const referralController = {
   listMine: asyncHandler(async (req, res) => {

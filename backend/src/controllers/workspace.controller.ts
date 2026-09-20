@@ -7,7 +7,7 @@ import type {
   InviteMemberInput,
   UpdateMemberRoleInput,
   OnboardingInput,
-} from '@fluxberry/shared';
+} from '../shared';
 
 export const workspaceInviteController = {
   list: asyncHandler(async (req, res) => {

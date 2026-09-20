@@ -6,7 +6,7 @@ import type {
   CandidateAssessmentDto,
   CodingSpec,
   CodingQuestionResult,
-} from '@fluxberry/shared';
+} from '../shared';
 
 function toCodingSpec(c: any): CodingSpec | null {
   if (!c) return null;
