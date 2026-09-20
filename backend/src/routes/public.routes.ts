@@ -3,8 +3,11 @@ import { publicController } from '../controllers/public.controller';
 import { careersController } from '../controllers/careers.controller';
 import { messageController } from '../controllers/message.controller';
 import { referralController } from '../controllers/referral.controller';
+import { offerController } from '../controllers/offer.controller';
 import { applicationUpload } from '../middleware/upload';
 import { publicApplyLimiter, uploadLimiter, assessmentLimiter, codingRunLimiter } from '../middleware/rate-limit';
+import { validateBody } from '../middleware/validate';
+import { offerDecisionSchema } from '@fluxberry/shared';
 
 /** Candidate-facing endpoints — no auth, clearly isolated (spec §60, §77). */
 export const publicRouter = Router();
@@ -50,6 +53,10 @@ publicRouter.post('/public/interview-access/:token', assessmentLimiter, publicCo
 // Bolna call webhook — unauthenticated but gated by an unguessable URL secret.
 // (Bolna does not sign webhooks; we re-fetch the execution by id before trusting it.)
 publicRouter.post('/webhooks/bolna/:secret', publicController.bolnaWebhook);
+
+// Public offer view + candidate response (token-gated, no account needed).
+publicRouter.get('/public/offers/:token', offerController.getByToken);
+publicRouter.post('/public/offers/:token/respond', assessmentLimiter, validateBody(offerDecisionSchema), offerController.respond);
 
 // Inbound candidate email replies — provider-agnostic, gated by an unguessable
 // URL secret. Whichever inbound email vendor is configured should be set up to

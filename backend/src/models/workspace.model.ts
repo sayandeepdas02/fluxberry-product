@@ -22,11 +22,13 @@ const workspaceSchema = new Schema(
     plan: { type: String, enum: WORKSPACE_PLANS, default: 'FREE' },
     billing: { type: billingSchema, default: () => ({}) },
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    clerkOrgId: { type: String, default: null },
   },
   { timestamps: true, collection: 'workspaces' },
 );
 
 workspaceSchema.index({ careersSlug: 1 }, { unique: true, partialFilterExpression: { careersSlug: { $type: 'string' } } });
+workspaceSchema.index({ clerkOrgId: 1 }, { unique: true, sparse: true });
 
 export type WorkspaceDoc = InferSchemaType<typeof workspaceSchema>;
 export const WorkspaceModel =

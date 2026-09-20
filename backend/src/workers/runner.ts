@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import * as Sentry from '@sentry/node';
 import type { JobQueueType } from '@fluxberry/shared';
 import { claimNextJob, completeJob, failJob, recoverStuckJobs } from '../queue/job-queue';
 import { config } from '../config/env';
@@ -35,6 +36,7 @@ export async function processOnce(): Promise<boolean> {
     await completeJob(job.id, result);
     log.debug('job completed');
   } catch (err) {
+    Sentry.captureException(err, { tags: { jobType: job.type, jobId: job.id } });
     const outcome = await failJob(job, err as Error);
     log.warn({ outcome, err }, 'job failed');
   }

@@ -29,3 +29,7 @@ export * from './schemas/job-access';
 export * from './schemas/label';
 export * from './schemas/message';
 export * from './schemas/referral';
+export * from './schemas/webhook';
+export * from './schemas/gdpr';
+export * from './schemas/offer';
+export * from './schemas/bulk-import';

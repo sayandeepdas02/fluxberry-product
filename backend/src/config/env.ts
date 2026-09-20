@@ -112,6 +112,16 @@ const envSchema = z.object({
   BOLNA_LLM_MODEL: z.string().optional().default('gpt-4o-mini'),
   BOLNA_VOICE_ID: z.string().optional().default(''),
 
+  REDIS_URL: z.string().optional().default(''),
+  SENTRY_RELEASE: z.string().optional().default(''),
+  SENTRY_ENVIRONMENT: z.string().optional().default(''),
+  AUTH_PROVIDER: z.enum(['supabase', 'clerk']).default('supabase'),
+  CLERK_SECRET_KEY: z.string().optional().default(''),
+  CLERK_PUBLISHABLE_KEY: z.string().optional().default(''),
+  CLERK_WEBHOOK_SECRET: z.string().optional().default(''),
+  CLAMD_HOST: z.string().optional().default(''),
+  CLAMD_PORT: z.coerce.number().int().default(3310),
+
   SENTRY_DSN: z.string().optional().default(''),
   POSTHOG_KEY: z.string().optional().default(''),
   POSTHOG_HOST: z.string().default('https://us.i.posthog.com'),
@@ -122,6 +132,11 @@ const envSchema = z.object({
   FEATURE_ADVANCED_ANALYTICS: bool(DEFAULT_FEATURE_FLAGS.ADVANCED_ANALYTICS),
   FEATURE_ASSESSMENTS: bool(DEFAULT_FEATURE_FLAGS.ASSESSMENTS),
   FEATURE_QUESTION_BANK: bool(DEFAULT_FEATURE_FLAGS.QUESTION_BANK),
+  FEATURE_AV_SCANNING: bool(DEFAULT_FEATURE_FLAGS.AV_SCANNING),
+  FEATURE_OUTBOUND_WEBHOOKS: bool(DEFAULT_FEATURE_FLAGS.OUTBOUND_WEBHOOKS),
+  FEATURE_GDPR_TOOLS: bool(DEFAULT_FEATURE_FLAGS.GDPR_TOOLS),
+  FEATURE_OFFER_MANAGEMENT: bool(DEFAULT_FEATURE_FLAGS.OFFER_MANAGEMENT),
+  FEATURE_BULK_IMPORT: bool(DEFAULT_FEATURE_FLAGS.BULK_IMPORT),
 
   WORKER_POLL_INTERVAL_MS: z.coerce.number().int().default(1500),
   WORKER_MAX_ATTEMPTS: z.coerce.number().int().default(4),
@@ -146,6 +161,11 @@ const features: FeatureFlagState = {
   ADVANCED_ANALYTICS: e.FEATURE_ADVANCED_ANALYTICS,
   ASSESSMENTS: e.FEATURE_ASSESSMENTS,
   QUESTION_BANK: e.FEATURE_QUESTION_BANK,
+  AV_SCANNING: e.FEATURE_AV_SCANNING,
+  OUTBOUND_WEBHOOKS: e.FEATURE_OUTBOUND_WEBHOOKS,
+  GDPR_TOOLS: e.FEATURE_GDPR_TOOLS,
+  OFFER_MANAGEMENT: e.FEATURE_OFFER_MANAGEMENT,
+  BULK_IMPORT: e.FEATURE_BULK_IMPORT,
 };
 
 export const config = {
@@ -163,12 +183,18 @@ export const config = {
 
   mongoUri: e.MONGODB_URI,
 
+  redis: { url: e.REDIS_URL || '' },
+
   auth: {
     supabaseUrl: e.SUPABASE_URL,
     supabaseJwtSecret: e.SUPABASE_JWT_SECRET,
     allowTestTokens: e.AUTH_ALLOW_TEST_TOKENS,
     testTokenSecret: e.AUTH_TEST_TOKEN_SECRET,
     bypassEnabled: e.AUTH_BYPASS_ENABLED,
+    authProvider: e.AUTH_PROVIDER,
+    clerkSecretKey: e.CLERK_SECRET_KEY,
+    clerkPublishableKey: e.CLERK_PUBLISHABLE_KEY,
+    clerkWebhookSecret: e.CLERK_WEBHOOK_SECRET,
   },
 
   providers: {
@@ -210,10 +236,13 @@ export const config = {
       clientSecret: e.GOOGLE_CLIENT_SECRET,
       redirectUri: e.GOOGLE_CALENDAR_REDIRECT_URI || `${e.PUBLIC_API_URL || `http://localhost:${e.PORT}`}/api/v1/integrations/google-calendar/callback`,
     },
+    avScan: { host: e.CLAMD_HOST || '', port: e.CLAMD_PORT },
   },
 
   observability: {
     sentryDsn: e.SENTRY_DSN,
+    sentryRelease: e.SENTRY_RELEASE || undefined,
+    sentryEnvironment: e.SENTRY_ENVIRONMENT || undefined,
     posthogKey: e.POSTHOG_KEY,
     posthogHost: e.POSTHOG_HOST,
   },

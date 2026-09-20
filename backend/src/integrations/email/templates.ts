@@ -86,6 +86,30 @@ export const emailTemplates = {
     };
   },
 
+  offerSent(p: { candidateName: string; jobTitle: string; companyName: string; offerLink: string }): TemplateResult {
+    return {
+      subject: `You have an offer — ${p.jobTitle}`,
+      html: layout(
+        `<p>Hi ${escape(p.candidateName)},</p>
+         <p>Great news! ${escape(p.companyName)} has extended an offer for the <strong>${escape(p.jobTitle)}</strong> role.</p>
+         <p style="margin:20px 0">${button(p.offerLink, 'View offer')}</p>
+         <p style="color:#8a93a2;font-size:13px">Or paste this link into your browser:<br>${escape(p.offerLink)}</p>`,
+      ),
+      text: `Hi ${p.candidateName}, ${p.companyName} has extended an offer for ${p.jobTitle}. View it here: ${p.offerLink}`,
+    };
+  },
+
+  candidateHired(p: { candidateName: string; jobTitle: string; companyName: string }): TemplateResult {
+    return {
+      subject: `Welcome aboard — ${p.jobTitle}`,
+      html: layout(
+        `<p>Hi ${escape(p.candidateName)},</p>
+         <p>Congratulations! We're thrilled to confirm that you've been hired for the <strong>${escape(p.jobTitle)}</strong> position at ${escape(p.companyName)}. We'll be in touch with next steps soon.</p>`,
+      ),
+      text: `Hi ${p.candidateName}, congratulations! You've been hired for ${p.jobTitle} at ${p.companyName}. We'll be in touch with next steps.`,
+    };
+  },
+
   interviewReminder(p: {
     recipientType: 'CANDIDATE' | 'INTERVIEWER';
     recipientName: string;

@@ -8,6 +8,8 @@ export const publicConfig = {
   allowTestTokens: (process.env.NEXT_PUBLIC_AUTH_ALLOW_TEST_TOKENS ?? 'true') === 'true',
   posthogKey: process.env.NEXT_PUBLIC_POSTHOG_KEY ?? '',
   posthogHost: process.env.NEXT_PUBLIC_POSTHOG_HOST ?? 'https://us.i.posthog.com',
+  clerkPublishableKey: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || '',
+  hasClerk: Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY),
 };
 
 /** Whether real Supabase auth is configured; otherwise the dev test-token path is used. */

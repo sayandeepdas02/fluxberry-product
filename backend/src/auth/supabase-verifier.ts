@@ -30,6 +30,7 @@ export class SupabaseVerifier implements AuthTokenVerifier {
       providerId: decoded.sub,
       email: decoded.email,
       name: decoded.user_metadata?.name ?? decoded.user_metadata?.full_name,
+      provider: 'supabase',
     };
   }
 }

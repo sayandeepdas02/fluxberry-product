@@ -14,6 +14,7 @@ import { jobQueue } from '../queue/job-queue';
 import { workflowEngine } from './workflow-engine.service';
 import { referralService } from './referral.service';
 import { notFound, badRequest, conflict } from '../utils/errors';
+import { config } from '../config/env';
 import { logger } from '../utils/logger';
 import { trackEvent } from '../integrations/posthog';
 
@@ -100,6 +101,7 @@ export const applicationService = {
       resume: fileRef,
       resumeStatus: 'PENDING',
       parseError: null,
+      ...(config.features.AV_SCANNING ? { avScanStatus: 'PENDING', avScanDetails: null, avScannedAt: null } : {}),
     });
 
     // 3. Create the application (unique index enforces one per job+candidate).
@@ -175,10 +177,11 @@ export const applicationService = {
       actorLabel: 'candidate',
       payload: { jobId, source: effectiveSource },
     });
+    const resumeJobType = config.features.AV_SCANNING ? 'SCAN_RESUME' : 'PARSE_RESUME';
     await jobQueue.enqueue(
-      'PARSE_RESUME',
+      resumeJobType,
       { workspaceId, candidateId: String(candidate._id), applicationId: String(application._id) },
-      { idempotencyKey: `parse:${application._id}` },
+      { idempotencyKey: `${resumeJobType.toLowerCase()}:${application._id}` },
     );
 
     // Kick off the job's workflow (if one is active).

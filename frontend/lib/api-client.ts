@@ -32,12 +32,18 @@ export function getPlanUpgradeFlag(err: unknown): string | undefined {
   return undefined;
 }
 
-/** Current access token: dev test-token (if set) else the Supabase session token. */
+/** Current access token: dev test-token (if set), then Clerk (if available), else Supabase session token. */
 export async function getAccessToken(): Promise<string | null> {
   if (typeof window !== 'undefined') {
     const test = window.localStorage.getItem(STORAGE_KEYS.testToken);
     if (test) return test;
   }
+  // Try Clerk first if available
+  if (typeof window !== 'undefined' && (window as any).Clerk?.session) {
+    const token = await (window as any).Clerk.session.getToken();
+    if (token) return token;
+  }
+  // Fall back to Supabase
   const supabase = getSupabaseClient();
   if (!supabase) return null;
   const { data } = await supabase.auth.getSession();

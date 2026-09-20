@@ -27,6 +27,6 @@ export class TestTokenVerifier implements AuthTokenVerifier {
     if (decoded.kind !== 'test' || !decoded.sub || !decoded.email) {
       throw unauthorized('Invalid token');
     }
-    return { providerId: decoded.sub, email: decoded.email, name: decoded.name };
+    return { providerId: decoded.sub, email: decoded.email, name: decoded.name, provider: 'test' };
   }
 }
