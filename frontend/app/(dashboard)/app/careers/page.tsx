@@ -20,6 +20,7 @@ import {
   ExternalLink, Plus, Trash2, Copy, Loader2, Eye,
   ChevronUp, ChevronDown, GripVertical, ImagePlus, X,
 } from 'lucide-react';
+import { SECTION_KEYS } from '@fluxberry/shared';
 import type { CareersPageDto, CareersLink, CareersTeamMember, CareersBenefit, SectionKey } from '@fluxberry/shared';
 import {
   useCareers, useUpdateCareers, useSetCareersSlug,
@@ -113,6 +114,11 @@ export default function CareersBuilderPage() {
     : '';
 
   const saveConfig = () => {
+    const color = config.accentColor;
+    if (color && !/^#[0-9a-fA-F]{6}$/.test(color)) {
+      toast.error('Brand color must be a valid hex code like #7c3aed');
+      return;
+    }
     update.mutate(
       {
         headline: config.headline,
@@ -123,11 +129,12 @@ export default function CareersBuilderPage() {
         jobs: config.jobs,
         benefits: { enabled: config.benefits.enabled, items: stripIds(benefits) as CareersBenefit[] },
         sectionOrder: config.sectionOrder,
-        accentColor: config.accentColor,
+        accentColor: color || null,
         coverImageUrl: config.coverImageUrl,
       },
       {
         onSuccess: () => toast.success('Your careers page changes are saved'),
+        onError: () => toast.error('Could not save changes — please try again'),
       },
     );
   };
@@ -472,8 +479,9 @@ export default function CareersBuilderPage() {
         </CardContent>
       </Card>
 
-      {/* Dynamic sections */}
-      {config.sectionOrder.map((key) => sectionRenderers[key])}
+      {/* Dynamic sections — render ordered keys, then any missing keys so new sections are always reachable */}
+      {[...config.sectionOrder, ...SECTION_KEYS.filter((k) => !config.sectionOrder.includes(k))]
+        .map((key) => sectionRenderers[key])}
 
       <div className="flex justify-end">
         <Button onClick={saveConfig} loading={update.isPending}>Save changes</Button>

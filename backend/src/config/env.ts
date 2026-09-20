@@ -138,7 +138,7 @@ const envSchema = z.object({
   FEATURE_OFFER_MANAGEMENT: bool(DEFAULT_FEATURE_FLAGS.OFFER_MANAGEMENT),
   FEATURE_BULK_IMPORT: bool(DEFAULT_FEATURE_FLAGS.BULK_IMPORT),
 
-  CAREERS_PREVIEW_SECRET: z.string().default('dev-preview-secret-change-me'),
+  CAREERS_PREVIEW_SECRET: z.string().optional().default(''),
 
   WORKER_POLL_INTERVAL_MS: z.coerce.number().int().default(1500),
   WORKER_MAX_ATTEMPTS: z.coerce.number().int().default(4),
@@ -155,6 +155,12 @@ if (!parsed.success) {
   process.exit(1);
 }
 const e = parsed.data;
+
+if (e.NODE_ENV === 'production' && !e.CAREERS_PREVIEW_SECRET) {
+  // eslint-disable-next-line no-console
+  console.error('CAREERS_PREVIEW_SECRET must be set in production');
+  process.exit(1);
+}
 
 const features: FeatureFlagState = {
   CODING_ASSESSMENT: e.FEATURE_CODING_ASSESSMENT,
@@ -241,7 +247,7 @@ export const config = {
     avScan: { host: e.CLAMD_HOST || '', port: e.CLAMD_PORT },
   },
 
-  careersPreviewSecret: e.CAREERS_PREVIEW_SECRET,
+  careersPreviewSecret: e.CAREERS_PREVIEW_SECRET || 'dev-preview-secret',
 
   observability: {
     sentryDsn: e.SENTRY_DSN,
