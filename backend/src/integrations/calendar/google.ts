@@ -3,10 +3,18 @@ import { google } from 'googleapis';
 import { OAuth2Client } from 'google-auth-library';
 import { config } from '../../config/env';
 import { badRequest } from '../../utils/errors';
-import type { CalendarProvider, CalendarTokens, CalendarEventInput, CalendarEventResult } from './types';
+import type {
+  CalendarProvider,
+  CalendarTokens,
+  CalendarEventInput,
+  CalendarEventResult,
+  CalendarFreeBusyQuery,
+  CalendarBusyBlock,
+} from './types';
 
 const SCOPES = [
   'https://www.googleapis.com/auth/calendar.events',
+  'https://www.googleapis.com/auth/calendar.events.freebusy',
   'https://www.googleapis.com/auth/userinfo.email',
 ];
 
@@ -86,5 +94,22 @@ export class GoogleCalendarProvider implements CalendarProvider {
     oauth2Client.setCredentials({ access_token: tokens.accessToken, refresh_token: tokens.refreshToken ?? undefined });
     const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
     await calendar.events.delete({ calendarId: 'primary', eventId, sendUpdates: 'all' });
+  }
+
+  async getFreeBusy(tokens: CalendarTokens, query: CalendarFreeBusyQuery): Promise<CalendarBusyBlock[]> {
+    const oauth2Client = client();
+    oauth2Client.setCredentials({ access_token: tokens.accessToken, refresh_token: tokens.refreshToken ?? undefined });
+    const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
+    const { data } = await calendar.freebusy.query({
+      requestBody: {
+        timeMin: query.timeMin.toISOString(),
+        timeMax: query.timeMax.toISOString(),
+        items: [{ id: 'primary' }],
+      },
+    });
+    const busy = data.calendars?.primary?.busy ?? [];
+    return busy
+      .filter((b): b is { start: string; end: string } => Boolean(b.start && b.end))
+      .map((b) => ({ start: new Date(b.start), end: new Date(b.end) }));
   }
 }

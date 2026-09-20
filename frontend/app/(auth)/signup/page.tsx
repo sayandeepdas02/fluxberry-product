@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Field } from '@/components/ui/field';
 import { AuthHeading, authButtonClass, authInputClass } from '@/components/marketing/auth-shell';
 import { toast } from '@/components/ui/sonner';
-import { signUp } from '@/lib/auth-actions';
+import { signUp, safeNextPath } from '@/lib/auth-actions';
 import { hasSupabase } from '@/lib/config';
 
 const schema = z.object({
@@ -23,14 +23,25 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 export default function SignupPage() {
+  return (
+    <Suspense fallback={null}>
+      <SignupForm />
+    </Suspense>
+  );
+}
+
+function SignupForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const next = safeNextPath(searchParams.get('next'));
+  const prefillEmail = searchParams.get('email') ?? '';
   const queryClient = useQueryClient();
   const [submitting, setSubmitting] = useState(false);
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<FormValues>({ resolver: zodResolver(schema) });
+  } = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: { email: prefillEmail } });
 
   const onSubmit = async (values: FormValues) => {
     setSubmitting(true);
@@ -39,6 +50,7 @@ export default function SignupPage() {
         name: values.name,
         email: values.email,
         password: values.password ?? '',
+        redirectTo: next ? `${window.location.origin}${next}` : undefined,
       });
       if (needsEmailConfirm) {
         toast.success('Check your email to confirm your account.');
@@ -46,7 +58,7 @@ export default function SignupPage() {
         return;
       }
       await queryClient.invalidateQueries({ queryKey: ['session'] });
-      router.replace('/onboarding');
+      router.replace(next ?? '/onboarding');
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Could not sign up');
       setSubmitting(false);

@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Field } from '@/components/ui/field';
 import { AuthHeading, authButtonClass, authInputClass } from '@/components/marketing/auth-shell';
 import { toast } from '@/components/ui/sonner';
-import { signIn } from '@/lib/auth-actions';
+import { signIn, safeNextPath } from '@/lib/auth-actions';
 import { hasSupabase } from '@/lib/config';
 
 const schema = z.object({
@@ -22,21 +22,32 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginForm />
+    </Suspense>
+  );
+}
+
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const next = safeNextPath(searchParams.get('next'));
+  const prefillEmail = searchParams.get('email') ?? '';
   const queryClient = useQueryClient();
   const [submitting, setSubmitting] = useState(false);
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<FormValues>({ resolver: zodResolver(schema) });
+  } = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: { email: prefillEmail } });
 
   const onSubmit = async (values: FormValues) => {
     setSubmitting(true);
     try {
       await signIn({ email: values.email, password: values.password ?? '' });
       await queryClient.invalidateQueries({ queryKey: ['session'] });
-      router.replace('/app');
+      router.replace(next ?? '/app');
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Could not sign in');
       setSubmitting(false);

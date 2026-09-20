@@ -3,6 +3,7 @@ import { applicationService } from '../services/application.service';
 import { candidateAssessmentService } from '../services/candidate-assessment.service';
 import { interviewService } from '../services/interview.service';
 import { scheduledInterviewService } from '../services/scheduled-interview.service';
+import { workspaceService } from '../services/workspace.service';
 import {
   publicApplicationSchema,
   autosaveAnswerSchema,
@@ -12,6 +13,10 @@ import {
 } from '@fluxberry/shared';
 
 export const publicController = {
+  getInvite: asyncHandler(async (req, res) => {
+    ok(res, await workspaceService.getInviteByToken(req.params.token));
+  }),
+
   getJob: asyncHandler(async (req, res) => {
     const data = await applicationService.getPublicJob(req.params.workspaceSlug, req.params.jobSlug);
     ok(res, data);

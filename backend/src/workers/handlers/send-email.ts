@@ -1,8 +1,9 @@
 import { getEmailProvider } from '../../integrations';
 import { CandidateAssessmentModel } from '../../models/candidate-assessment.model';
+import { ScheduledInterviewModel } from '../../models/scheduled-interview.model';
 import type { JobHandler } from './index';
 
-export const sendEmailHandler: JobHandler = async (payload) => {
+export const sendEmailHandler: JobHandler = async (payload, ctx) => {
   // Conditional send: skip if the referenced entity no longer meets the required status.
   if (payload.conditionCheck?.type === 'candidate_assessment_status') {
     const ca = await CandidateAssessmentModel.findById(payload.conditionCheck.candidateAssessmentId)
@@ -12,6 +13,12 @@ export const sendEmailHandler: JobHandler = async (payload) => {
     if (!ca || !allowed.includes(ca.status as string)) return;
   }
 
+  // Interview reminder: skip if the interview was cancelled (hard-deleted) before this fired.
+  if (payload.conditionCheck?.type === 'scheduled_interview_active') {
+    const exists = await ScheduledInterviewModel.exists({ _id: payload.conditionCheck.scheduledInterviewId });
+    if (!exists) return;
+  }
+
   await getEmailProvider().send({
     to: payload.to,
     subject: payload.subject,
@@ -19,5 +26,8 @@ export const sendEmailHandler: JobHandler = async (payload) => {
     text: payload.text,
     from: payload.from,
     replyTo: payload.replyTo,
+    // Forwarded to the provider (e.g. Resend's Idempotency-Key header) so a
+    // queue retry after an already-accepted send can't double-deliver.
+    idempotencyKey: ctx.idempotencyKey,
   });
 };

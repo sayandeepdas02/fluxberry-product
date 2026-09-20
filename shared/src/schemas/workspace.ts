@@ -54,6 +54,34 @@ export type WorkspaceMemberDto = {
   createdAt: string;
 };
 
+export type WorkspaceInviteStatus = 'PENDING' | 'ACCEPTED' | 'REVOKED' | 'EXPIRED';
+
+export type WorkspaceInviteDto = {
+  id: string;
+  email: string;
+  role: Role;
+  status: WorkspaceInviteStatus;
+  invitedBy: Pick<UserDto, 'id' | 'name'>;
+  createdAt: string;
+  expiresAt: string;
+};
+
+/** What the public accept-invite page renders — display-safe only, no token/ids. */
+export type PublicInviteDto = {
+  email: string;
+  role: Role;
+  status: WorkspaceInviteStatus;
+  workspaceName: string;
+  workspaceLogoUrl?: string | null;
+  inviterName: string;
+  expiresAt: string;
+};
+
+export type AcceptInviteResultDto = {
+  member: WorkspaceMemberDto;
+  workspace: Pick<WorkspaceDto, 'id' | 'name' | 'slug'>;
+};
+
 /** Returned by GET /auth/me — everything the shell needs to boot. */
 export type SessionDto = {
   user: UserDto;

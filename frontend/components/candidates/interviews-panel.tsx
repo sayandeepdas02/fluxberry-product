@@ -56,7 +56,7 @@ export function InterviewsPanel({
           <div className="flex flex-col items-center gap-3 py-6 text-center">
             <CalendarPlus className="size-8 text-muted-foreground/50" />
             <p className="text-sm text-muted-foreground">No interviews yet</p>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Button variant="outline" size="sm" onClick={() => setFeedbackOpen(true)}>
                 <Plus className="size-4" /> Add feedback
               </Button>
