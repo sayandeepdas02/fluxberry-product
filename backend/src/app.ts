@@ -10,14 +10,24 @@ import { generalLimiter } from './middleware/rate-limit';
 import { mockStorageRouter } from './integrations';
 import { apiRouter } from './routes';
 import { billingController } from './controllers/billing.controller';
+import { clerkWebhookController } from './controllers/clerk-webhook.controller';
 import { config } from './config/env';
+import { pingRedis } from './config/redis';
 import { logger } from './utils/logger';
 
 if (config.observability?.sentryDsn && !config.isTest) {
   Sentry.init({
     dsn: config.observability.sentryDsn,
-    environment: config.nodeEnv,
+    environment: config.observability.sentryEnvironment ?? config.nodeEnv,
+    release: config.observability.sentryRelease,
     tracesSampleRate: 0.1,
+    beforeSend(event) {
+      if (event.request?.headers) {
+        delete event.request.headers['authorization'];
+        delete event.request.headers['cookie'];
+      }
+      return event;
+    },
   });
 }
 
@@ -56,6 +66,11 @@ export function createApp() {
     express.raw({ type: 'application/json', limit: '1mb' }),
     billingController.webhook,
   );
+  app.post(
+    '/api/v1/webhooks/clerk',
+    express.raw({ type: 'application/json', limit: '1mb' }),
+    clerkWebhookController.webhook,
+  );
 
   app.use(express.json({ limit: '1mb' }));
   app.use(express.urlencoded({ extended: true }));
@@ -64,8 +79,12 @@ export function createApp() {
   // Signed mock-storage file serving (no-op in prod / with real S3).
   app.use(mockStorageRouter);
 
-  app.get('/health', (_req, res) => {
-    res.json({ success: true, data: { status: 'ok', app: config.appName } });
+  app.get('/health', async (_req, res) => {
+    const redis = config.redis.url ? await pingRedis() : undefined;
+    res.json({
+      success: true,
+      data: { status: 'ok', app: config.appName, ...(redis !== undefined && { redis: redis ? 'ok' : 'down' }) },
+    });
   });
 
   app.use('/api/v1', apiRouter);

@@ -61,3 +61,12 @@ export const logoUpload = multer({
     else cb(unsupportedMediaType('Please upload a PNG, JPEG, or WEBP image') as unknown as null, false);
   },
 }).single('logo');
+
+export const bulkImportUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    const allowed = ['text/csv', 'application/vnd.ms-excel'];
+    cb(null, allowed.includes(file.mimetype));
+  },
+}).single('file');

@@ -7,11 +7,13 @@ const userSchema = new Schema(
     avatarUrl: { type: String, default: null },
     /** Identity from the auth provider (Supabase user id). */
     supabaseId: { type: String, default: null },
+    clerkId: { type: String, default: null },
   },
   { timestamps: true, collection: 'users' },
 );
 
 userSchema.index({ supabaseId: 1 }, { unique: true, sparse: true });
+userSchema.index({ clerkId: 1 }, { unique: true, sparse: true });
 
 export type UserDoc = InferSchemaType<typeof userSchema>;
 export const UserModel = (models.User as Model<UserDoc>) || model<UserDoc>('User', userSchema);

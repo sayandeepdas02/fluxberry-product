@@ -95,7 +95,7 @@ export const stageService = {
     });
 
     // Send candidate notification email for meaningful stage transitions (fire-and-forget).
-    const NOTIFY_STAGES = new Set(['SCREENING', 'ASSESSMENT', 'INTERVIEW', 'OFFER', 'REJECTED']);
+    const NOTIFY_STAGES = new Set(['SCREENING', 'ASSESSMENT', 'INTERVIEW', 'OFFER', 'HIRED', 'REJECTED']);
     if (NOTIFY_STAGES.has(targetStage)) {
       void (async () => {
         try {
@@ -108,6 +108,12 @@ export const stageService = {
           let tmpl: { subject: string; html: string; text: string };
           if (targetStage === 'REJECTED') {
             tmpl = emailTemplates.candidateRejected({
+              candidateName: cand.name,
+              jobTitle: job.title,
+              companyName: workspace?.name ?? '',
+            });
+          } else if (targetStage === 'HIRED') {
+            tmpl = emailTemplates.candidateHired({
               candidateName: cand.name,
               jobTitle: job.title,
               companyName: workspace?.name ?? '',

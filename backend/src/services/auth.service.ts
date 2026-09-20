@@ -9,7 +9,7 @@ import { toWorkspaceDto } from '../serializers/workspace.serializer';
 import { notFound } from '../utils/errors';
 import type { Role } from '@fluxberry/shared';
 
-function nameFromEmail(email: string): string {
+export function nameFromEmail(email: string): string {
   return email.split('@')[0].replace(/[._-]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
@@ -19,29 +19,48 @@ export const authService = {
    * collection (spec: user data lives in Mongo, not the auth provider).
    */
   async ensureUser(identity: VerifiedIdentity): Promise<AuthUser> {
-    let user = await userRepository.findBySupabaseId(identity.providerId);
+    let user;
 
+    // Try provider-specific lookup first.
+    if (identity.provider === 'clerk' && identity.providerId) {
+      user = await userRepository.findByClerkId(identity.providerId);
+    }
+    if (!user && identity.provider === 'supabase' && identity.providerId) {
+      user = await userRepository.findBySupabaseId(identity.providerId);
+    }
+
+    // Fallback to email.
     if (!user) {
       user = await userRepository.findByEmail(identity.email);
-      if (user) {
-        if (!user.supabaseId) {
-          user.supabaseId = identity.providerId;
-          await user.save();
+    }
+
+    if (user) {
+      // Backfill missing provider IDs so future lookups are fast.
+      if (identity.provider === 'clerk' && identity.providerId && !user.clerkId) {
+        user.clerkId = identity.providerId;
+        await user.save();
+      }
+      if (identity.provider === 'supabase' && identity.providerId && !user.supabaseId) {
+        user.supabaseId = identity.providerId;
+        await user.save();
+      }
+    } else {
+      // No existing user — create one.
+      const createPayload: Record<string, unknown> = {
+        email: identity.email,
+        name: identity.name?.trim() || nameFromEmail(identity.email),
+      };
+      if (identity.provider === 'clerk') createPayload.clerkId = identity.providerId;
+      else createPayload.supabaseId = identity.providerId;
+
+      try {
+        user = await userRepository.create(createPayload as any);
+      } catch (err) {
+        // Race: another request created the user first — refetch by email.
+        if (isDup(err)) {
+          user = await userRepository.findByEmail(identity.email);
         }
-      } else {
-        try {
-          user = await userRepository.create({
-            email: identity.email,
-            name: identity.name?.trim() || nameFromEmail(identity.email),
-            supabaseId: identity.providerId,
-          });
-        } catch (err) {
-          // Race: another request created the user first — refetch by email.
-          if (isDup(err)) {
-            user = await userRepository.findByEmail(identity.email);
-          }
-          if (!user) throw err;
-        }
+        if (!user) throw err;
       }
     }
 

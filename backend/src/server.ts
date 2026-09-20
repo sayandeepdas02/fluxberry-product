@@ -1,10 +1,12 @@
 import { createApp } from './app';
 import { connectDatabase, registerShutdown } from './config/db';
 import { config } from './config/env';
+import { registerEventSubscribers } from './events/subscribers';
 import { logger } from './utils/logger';
 
 async function main() {
   await connectDatabase();
+  registerEventSubscribers();
   const app = createApp();
   const server = app.listen(config.port, () => {
     logger.info({ port: config.port, env: config.nodeEnv }, `${config.appName} API listening`);

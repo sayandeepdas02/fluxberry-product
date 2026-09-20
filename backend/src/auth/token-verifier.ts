@@ -3,6 +3,7 @@ export interface VerifiedIdentity {
   providerId: string; // stable id from the auth provider (Supabase `sub`)
   email: string;
   name?: string;
+  provider?: 'supabase' | 'clerk' | 'test';
 }
 
 /**

@@ -14,6 +14,10 @@ import { billingRouter } from './billing.routes';
 import { labelRouter } from './label.routes';
 import { referralRouter } from './referral.routes';
 import { integrationsRouter } from './integrations.routes';
+import { gdprRouter } from './gdpr.routes';
+import { offerRouter } from './offer.routes';
+import { webhookEndpointRouter } from './webhook-endpoint.routes';
+import { bulkImportRouter } from './bulk-import.routes';
 
 /**
  * Versioned API router (/api/v1). Sub-routers are mounted here per slice:
@@ -37,5 +41,9 @@ apiRouter.use(billingRouter);
 apiRouter.use(labelRouter);
 apiRouter.use(referralRouter);
 apiRouter.use(integrationsRouter);
+apiRouter.use(gdprRouter);
+apiRouter.use(offerRouter);
+apiRouter.use(webhookEndpointRouter);
+apiRouter.use(bulkImportRouter);
 
 // Workflow router is registered in Slice 7.

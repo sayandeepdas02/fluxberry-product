@@ -21,4 +21,7 @@ export const memberRepository = {
 
   countByRole: (workspaceId: string, role: Role) =>
     WorkspaceMemberModel.countDocuments({ workspaceId, role }),
+
+  findByClerkMembershipId: (clerkMembershipId: string) =>
+    WorkspaceMemberModel.findOne({ clerkMembershipId }),
 };

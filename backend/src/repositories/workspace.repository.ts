@@ -16,4 +16,6 @@ export const workspaceRepository = {
   },
   setCareersSlug: (id: string, careersSlug: string) =>
     WorkspaceModel.findByIdAndUpdate(id, { careersSlug }, { new: true }),
+
+  findByClerkOrgId: (clerkOrgId: string) => WorkspaceModel.findOne({ clerkOrgId }),
 };

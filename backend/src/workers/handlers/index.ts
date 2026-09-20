@@ -23,8 +23,15 @@ import { evaluateInterviewHandler } from './evaluate-interview';
 import { aggregateAnalyticsHandler } from './aggregate-analytics';
 import { processBillingWebhookHandler } from './process-billing-webhook';
 import { linkReferralApplicationHandler } from './link-referral-application';
+import { scanResumeHandler } from './scan-resume';
+import { sendWebhookHandler } from './send-webhook';
+import { anonymizeCandidateHandler } from './anonymize-candidate';
+import { deleteCandidateHandler } from './delete-candidate';
+import { validateBulkImportHandler } from './validate-bulk-import';
+import { processBulkImportHandler } from './process-bulk-import';
 
 export const handlers: Partial<Record<JobQueueType, JobHandler>> = {
+  SCAN_RESUME: scanResumeHandler,
   PARSE_RESUME: parseResumeHandler,
   SCREEN_CANDIDATE: screenCandidateHandler,
   SEND_EMAIL: sendEmailHandler,
@@ -34,4 +41,9 @@ export const handlers: Partial<Record<JobQueueType, JobHandler>> = {
   AGGREGATE_ANALYTICS: aggregateAnalyticsHandler,
   PROCESS_BILLING_WEBHOOK: processBillingWebhookHandler,
   LINK_REFERRAL_APPLICATION: linkReferralApplicationHandler,
+  SEND_WEBHOOK: sendWebhookHandler,
+  ANONYMIZE_CANDIDATE: anonymizeCandidateHandler,
+  DELETE_CANDIDATE: deleteCandidateHandler,
+  VALIDATE_BULK_IMPORT: validateBulkImportHandler,
+  PROCESS_BULK_IMPORT: processBulkImportHandler,
 };

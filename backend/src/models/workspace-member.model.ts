@@ -6,6 +6,7 @@ const workspaceMemberSchema = new Schema(
     workspaceId: { type: Schema.Types.ObjectId, ref: 'Workspace', required: true },
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     role: { type: String, enum: ROLES, required: true },
+    clerkMembershipId: { type: String, default: null },
   },
   { timestamps: { createdAt: true, updatedAt: false }, collection: 'workspace_members' },
 );

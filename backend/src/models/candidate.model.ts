@@ -1,5 +1,5 @@
 import { Schema, model, models, type InferSchemaType, type Model } from 'mongoose';
-import { PROCESSING_STATUSES } from '@fluxberry/shared';
+import { PROCESSING_STATUSES, AV_SCAN_STATUSES, GDPR_STATUSES } from '@fluxberry/shared';
 
 const resumeSchema = new Schema(
   {
@@ -27,6 +27,14 @@ const candidateSchema = new Schema(
     parseError: { type: String, default: null },
     // Structured resume profile (flexible shape, set by the parser worker).
     parsedProfile: { type: Schema.Types.Mixed, default: null },
+    avScanStatus: { type: String, enum: AV_SCAN_STATUSES, default: 'PENDING' },
+    avScanDetails: { type: String, default: null },
+    avScannedAt: { type: Date, default: null },
+    gdprStatus: { type: String, enum: GDPR_STATUSES, default: 'ACTIVE' },
+    gdprAnonymizedAt: { type: Date, default: null },
+    gdprRequestedAt: { type: Date, default: null },
+    gdprRequestedBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+    gdprDeletionReason: { type: String, default: null },
   },
   { timestamps: true, collection: 'candidates' },
 );

@@ -69,6 +69,9 @@ export const PIPELINE_STAGES = [
 export const REFERRAL_REWARD_STATUSES = ['NONE', 'PENDING', 'PAID'] as const;
 export type ReferralRewardStatus = (typeof REFERRAL_REWARD_STATUSES)[number];
 
+export const OFFER_STATUSES = ['DRAFT', 'SENT', 'ACCEPTED', 'DECLINED', 'EXPIRED', 'RESCINDED'] as const;
+export type OfferStatus = (typeof OFFER_STATUSES)[number];
+
 export const CANDIDATE_SOURCES = [
   'DIRECT',
   'REFERRAL',
@@ -158,6 +161,24 @@ export type InterviewStatus = (typeof INTERVIEW_STATUSES)[number];
 export const PROCESSING_STATUSES = ['PENDING', 'PROCESSING', 'COMPLETED', 'FAILED'] as const;
 export type ProcessingStatus = (typeof PROCESSING_STATUSES)[number];
 
+export const AV_SCAN_STATUSES = ['PENDING', 'CLEAN', 'INFECTED', 'SCAN_FAILED'] as const;
+export type AvScanStatus = (typeof AV_SCAN_STATUSES)[number];
+
+export const GDPR_STATUSES = ['ACTIVE', 'ANONYMIZATION_PENDING', 'ANONYMIZED', 'DELETION_PENDING', 'DELETED'] as const;
+export type GdprStatus = (typeof GDPR_STATUSES)[number];
+
+export const GDPR_REQUEST_TYPES = ['ANONYMIZE', 'DELETE'] as const;
+export type GdprRequestType = (typeof GDPR_REQUEST_TYPES)[number];
+
+export const GDPR_REQUEST_STATUSES = ['PENDING', 'PROCESSING', 'COMPLETED', 'FAILED'] as const;
+export type GdprRequestStatus = (typeof GDPR_REQUEST_STATUSES)[number];
+
+export const BULK_IMPORT_STATUSES = ['UPLOADED', 'VALIDATING', 'VALIDATED', 'PROCESSING', 'COMPLETED', 'FAILED'] as const;
+export type BulkImportStatus = (typeof BULK_IMPORT_STATUSES)[number];
+
+export const BULK_IMPORT_ENTITY_TYPES = ['candidate', 'job'] as const;
+export type BulkImportEntityType = (typeof BULK_IMPORT_ENTITY_TYPES)[number];
+
 // ---- Workflow -------------------------------------------------------------
 
 export const WORKFLOW_NODE_TYPES = [
@@ -214,6 +235,7 @@ export type ConditionField = (typeof CONDITION_FIELDS)[number];
 // ---- Async job queue ------------------------------------------------------
 
 export const JOB_QUEUE_TYPES = [
+  'SCAN_RESUME',
   'PARSE_RESUME',
   'SCREEN_CANDIDATE',
   'GENERATE_JOB_DESCRIPTION',
@@ -224,6 +246,11 @@ export const JOB_QUEUE_TYPES = [
   'AGGREGATE_ANALYTICS',
   'PROCESS_BILLING_WEBHOOK',
   'LINK_REFERRAL_APPLICATION',
+  'SEND_WEBHOOK',
+  'ANONYMIZE_CANDIDATE',
+  'DELETE_CANDIDATE',
+  'VALIDATE_BULK_IMPORT',
+  'PROCESS_BULK_IMPORT',
 ] as const;
 export type JobQueueType = (typeof JOB_QUEUE_TYPES)[number];
 
@@ -249,12 +276,16 @@ export const EVENT_TYPES = [
   'resume.processing.started',
   'resume.processing.completed',
   'resume.processing.failed',
+  'resume.scan.infected',
   'screening.started',
   'screening.completed',
   'candidate.stage.changed',
   'candidate.shortlisted',
   'candidate.rejected',
   'candidate.hired',
+  'candidate.deletion.requested',
+  'candidate.anonymized',
+  'candidate.deleted',
   'assessment.created',
   'assessment.sent',
   'assessment.started',
@@ -264,6 +295,11 @@ export const EVENT_TYPES = [
   'interview.completed',
   'interview.scheduled',
   'interview.feedback.added',
+  'offer.created',
+  'offer.sent',
+  'offer.accepted',
+  'offer.declined',
+  'offer.rescinded',
 ] as const;
 export type EventType = (typeof EVENT_TYPES)[number];
 

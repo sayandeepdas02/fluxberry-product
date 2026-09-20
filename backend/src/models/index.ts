@@ -21,4 +21,9 @@ export { WorkflowModel, WorkflowRunModel, WorkflowStepModel } from './workflow.m
 export { CareersPageModel } from './careers-page.model';
 export { AiInterviewConfigModel } from './ai-interview-config.model';
 export { InterviewModel } from './interview.model';
+export { OfferModel } from './offer.model';
+export { GdprRequestModel } from './gdpr-request.model';
+export { WebhookEndpointModel } from './webhook-endpoint.model';
+export { WebhookDeliveryModel } from './webhook-delivery.model';
+export { BulkImportModel } from './bulk-import.model';
 // Later: JobAnalytics (precomputed) ...

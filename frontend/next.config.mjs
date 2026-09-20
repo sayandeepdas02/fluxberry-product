@@ -1,3 +1,4 @@
+import { withSentryConfig } from '@sentry/nextjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -30,4 +31,15 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+const finalConfig = process.env.NEXT_PUBLIC_SENTRY_DSN
+  ? withSentryConfig(nextConfig, {
+      org: process.env.SENTRY_ORG,
+      project: process.env.SENTRY_PROJECT,
+      silent: !process.env.CI,
+      widenClientFileUpload: true,
+      hideSourceMaps: true,
+      disableLogger: true,
+    })
+  : nextConfig;
+
+export default finalConfig;

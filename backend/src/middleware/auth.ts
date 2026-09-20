@@ -1,6 +1,7 @@
 import type { RequestHandler } from 'express';
 import type { Role, FeatureFlag, WorkspacePlan } from '@fluxberry/shared';
 import { ROLE_RANK, planIncludesFeature } from '@fluxberry/shared';
+import * as Sentry from '@sentry/node';
 import { authService } from '../services/auth.service';
 import { memberRepository } from '../repositories/member.repository';
 import { workspaceRepository } from '../repositories/workspace.repository';
@@ -23,6 +24,7 @@ export const authenticate: RequestHandler = async (req, _res, next) => {
     if (config.auth.bypassEnabled) {
       const user = await authService.ensureUser(DEV_IDENTITY);
       req.auth = { user };
+      Sentry.setUser({ id: user.id, email: user.email });
       return next();
     }
 
@@ -35,6 +37,7 @@ export const authenticate: RequestHandler = async (req, _res, next) => {
     const identity = await getTokenVerifier().verify(token);
     const user = await authService.ensureUser(identity);
     req.auth = { user };
+    Sentry.setUser({ id: user.id, email: user.email });
     next();
   } catch (err) {
     next(err);
@@ -65,6 +68,7 @@ export const resolveWorkspace: RequestHandler = async (req, _res, next) => {
     req.auth!.workspaceId = wsId;
     req.auth!.role = membership.role as Role;
     req.auth!.membershipId = String(membership._id);
+    Sentry.setTag('workspaceId', wsId);
     next();
   } catch (err) {
     next(err);
