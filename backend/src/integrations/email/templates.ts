@@ -110,6 +110,55 @@ export const emailTemplates = {
     };
   },
 
+  interviewReminder(p: {
+    recipientType: 'CANDIDATE' | 'INTERVIEWER';
+    recipientName: string;
+    candidateName: string;
+    jobTitle: string;
+    companyName: string;
+    whenLabel: string;
+    whereLine: string;
+    accessLink?: string;
+  }): TemplateResult {
+    if (p.recipientType === 'CANDIDATE') {
+      return {
+        subject: `Reminder: your interview for ${p.jobTitle} is tomorrow`,
+        html: layout(
+          `<p>Hi ${escape(p.recipientName)},</p>
+           <p>Just a reminder — your interview for <strong>${escape(p.jobTitle)}</strong> at ${escape(p.companyName)} is tomorrow.</p>
+           <p>When: ${escape(p.whenLabel)}</p>
+           ${p.whereLine ? `<p>${escape(p.whereLine)}</p>` : ''}`,
+        ),
+        text: `Hi ${p.recipientName}, reminder: your interview for ${p.jobTitle} at ${p.companyName} is tomorrow. When: ${p.whenLabel}. ${p.whereLine}`,
+      };
+    }
+    return {
+      subject: `Reminder: interview with ${p.candidateName} tomorrow`,
+      html: layout(
+        `<p>Hi ${escape(p.recipientName)},</p>
+         <p>Reminder — your interview with <strong>${escape(p.candidateName)}</strong> for ${escape(p.jobTitle)} is tomorrow.</p>
+         <p>When: ${escape(p.whenLabel)}</p>
+         ${p.whereLine ? `<p>${escape(p.whereLine)}</p>` : ''}
+         ${p.accessLink ? `<p style="margin:20px 0">${button(p.accessLink, 'View candidate & feedback form')}</p>` : ''}`,
+      ),
+      text: `Hi ${p.recipientName}, reminder: interview with ${p.candidateName} for ${p.jobTitle} is tomorrow. When: ${p.whenLabel}. ${p.whereLine}${p.accessLink ? ` Details: ${p.accessLink}` : ''}`,
+    };
+  },
+
+  workspaceInvite(p: { inviterName: string; workspaceName: string; role: string; link: string }): TemplateResult {
+    return {
+      subject: `${p.inviterName} invited you to join ${p.workspaceName} on ${config.appName}`,
+      html: layout(
+        `<p>Hi,</p>
+         <p><strong>${escape(p.inviterName)}</strong> invited you to join <strong>${escape(p.workspaceName)}</strong> as a <strong>${escape(p.role)}</strong> on ${escape(config.appName)}.</p>
+         <p style="margin:20px 0">${button(p.link, 'View invite')}</p>
+         <p style="color:#8a93a2;font-size:13px">Or paste this link into your browser:<br>${escape(p.link)}</p>
+         <p style="color:#8a93a2;font-size:13px">This invite expires in 7 days.</p>`,
+      ),
+      text: `${p.inviterName} invited you to join ${p.workspaceName} as a ${p.role} on ${config.appName}. Accept here: ${p.link}`,
+    };
+  },
+
   custom(p: { subject: string; body: string }): TemplateResult {
     return {
       subject: p.subject,

@@ -1,5 +1,7 @@
 import { Router } from 'express';
+import { organizerAvailabilityQuerySchema } from '@fluxberry/shared';
 import { authenticate, resolveWorkspace, requireWorkspace } from '../middleware/auth';
+import { validateQuery } from '../middleware/validate';
 import { calendarIntegrationController } from '../controllers/calendar-integration.controller';
 
 export const integrationsRouter = Router();
@@ -13,3 +15,8 @@ integrationsRouter.use('/integrations/google-calendar', authenticate, resolveWor
 integrationsRouter.get('/integrations/google-calendar/status', calendarIntegrationController.status);
 integrationsRouter.get('/integrations/google-calendar/connect', calendarIntegrationController.connect);
 integrationsRouter.delete('/integrations/google-calendar', calendarIntegrationController.disconnect);
+integrationsRouter.get(
+  '/integrations/google-calendar/availability',
+  validateQuery(organizerAvailabilityQuerySchema),
+  calendarIntegrationController.availability,
+);

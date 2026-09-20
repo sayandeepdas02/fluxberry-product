@@ -12,6 +12,9 @@ import { offerDecisionSchema } from '@fluxberry/shared';
 /** Candidate-facing endpoints — no auth, clearly isolated (spec §60, §77). */
 export const publicRouter = Router();
 
+// Workspace invite (token-gated, no account needed to view).
+publicRouter.get('/public/invites/:token', publicController.getInvite);
+
 publicRouter.get('/public/jobs/:workspaceSlug/:jobSlug', publicController.getJob);
 
 publicRouter.post(

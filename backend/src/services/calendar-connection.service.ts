@@ -1,9 +1,11 @@
 import crypto from 'node:crypto';
-import type { CalendarConnectionStatusDto } from '@fluxberry/shared';
+import type { CalendarConnectionStatusDto, OrganizerAvailabilityDto } from '@fluxberry/shared';
 import { calendarConnectionRepository } from '../repositories/calendar-connection.repository';
+import { resolveConnectionTokens } from './calendar-token-resolver';
 import { getCalendarProvider } from '../integrations';
 import { config } from '../config/env';
 import { badRequest } from '../utils/errors';
+import { logger } from '../utils/logger';
 
 const STATE_SECRET = config.auth.testTokenSecret + ':calendar-oauth-state';
 
@@ -61,5 +63,27 @@ export const calendarConnectionService = {
 
   async disconnect(workspaceId: string, userId: string): Promise<void> {
     await calendarConnectionRepository.delete(workspaceId, userId);
+  },
+
+  /** Organizer-only busy/free hint for the schedule-interview dialog — never throws, degrades to no data. */
+  async getAvailability(
+    workspaceId: string,
+    userId: string,
+    timeMin: Date,
+    timeMax: Date,
+  ): Promise<OrganizerAvailabilityDto> {
+    if (timeMax.getTime() <= timeMin.getTime()) throw badRequest('timeMax must be after timeMin');
+    if (timeMax.getTime() - timeMin.getTime() > 7 * 24 * 60 * 60 * 1000) throw badRequest('Range too large');
+
+    const resolved = await resolveConnectionTokens(workspaceId, userId);
+    if (!resolved) return { connected: false, busy: [] };
+
+    try {
+      const busy = await getCalendarProvider().getFreeBusy(resolved.tokens, { timeMin, timeMax });
+      return { connected: true, busy: busy.map((b) => ({ start: b.start.toISOString(), end: b.end.toISOString() })) };
+    } catch (err) {
+      logger.warn({ err, workspaceId, userId }, 'organizer free/busy lookup failed; degrading to no busy data');
+      return { connected: true, busy: [] };
+    }
   },
 };

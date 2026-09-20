@@ -8,6 +8,7 @@ import type {
 } from '@fluxberry/shared';
 import { scheduledInterviewRepository } from '../repositories/scheduled-interview.repository';
 import { calendarConnectionRepository } from '../repositories/calendar-connection.repository';
+import { resolveConnectionTokens } from './calendar-token-resolver';
 import { interviewFeedbackRepository } from '../repositories/interview-feedback.repository';
 import { InterviewFeedbackModel } from '../models/interview-feedback.model';
 import { applicationRepository } from '../repositories/application.repository';
@@ -30,26 +31,11 @@ async function resolveTokens(
   workspaceId: string,
   createdBy: string,
 ): Promise<{ tokens: CalendarTokens | null; providerName: CalendarProviderName }> {
+  const existing = await resolveConnectionTokens(workspaceId, createdBy);
+  if (existing) return existing;
+
   const provider = getCalendarProvider();
   const providerName: CalendarProviderName = provider.name === 'google' ? 'GOOGLE' : 'MOCK';
-  const connection = await calendarConnectionRepository.findForUser(workspaceId, createdBy);
-  if (connection) {
-    let tokens: CalendarTokens = {
-      accessToken: connection.accessToken,
-      refreshToken: connection.refreshToken,
-      expiresAt: connection.expiresAt,
-      email: connection.connectedEmail,
-    };
-    if (tokens.expiresAt.getTime() < Date.now() + 60_000 && tokens.refreshToken) {
-      tokens = await provider.refreshAccessToken(tokens.refreshToken);
-      await calendarConnectionRepository.upsert(workspaceId, createdBy, {
-        accessToken: tokens.accessToken,
-        refreshToken: tokens.refreshToken ?? connection.refreshToken,
-        expiresAt: tokens.expiresAt,
-      });
-    }
-    return { tokens, providerName };
-  }
   // The mock provider needs no real connection — it fabricates a usable event either way.
   if (provider.name === 'mock') {
     const tokens = await provider.exchangeCode('mock');
@@ -135,44 +121,105 @@ export const scheduledInterviewService = {
         ? `Where: ${input.locationDetail}`
         : '';
 
-    for (const interviewer of input.interviewers) {
-      const accessLine = accessToken
-        ? `Candidate details & feedback form: ${config.publicAppUrl}/interview-feedback/${accessToken}`
-        : '';
-      const email = emailTemplates.custom({
-        subject: `Interview scheduled: ${candidate.name} — ${job.title}`,
+    // Notifications are best-effort: the interview doc (and calendar event) are
+    // already persisted at this point, so a queue write failure here must not
+    // fail the whole request and leave the dialog showing an error over what
+    // is, from the recruiter's perspective, a successfully scheduled interview.
+    try {
+      for (const interviewer of input.interviewers) {
+        const accessLine = accessToken
+          ? `Candidate details & feedback form: ${config.publicAppUrl}/interview-feedback/${accessToken}`
+          : '';
+        const email = emailTemplates.custom({
+          subject: `Interview scheduled: ${candidate.name} — ${job.title}`,
+          body: [
+            `You've been added as an interviewer for ${candidate.name} (${job.title} at ${workspace.name}).`,
+            `When: ${whenLabel}`,
+            whereLine,
+            accessLine,
+          ]
+            .filter(Boolean)
+            .join('\n\n'),
+        });
+        await jobQueue.enqueue(
+          'SEND_EMAIL',
+          { to: interviewer.email, subject: email.subject, html: email.html, text: email.text },
+          { idempotencyKey: `interview-invite:${doc._id}:${interviewer.email}` },
+        );
+      }
+
+      const candidateEmail = emailTemplates.custom({
+        subject: `Interview scheduled — ${job.title}`,
         body: [
-          `You've been added as an interviewer for ${candidate.name} (${job.title} at ${workspace.name}).`,
+          `Hi ${candidate.name},`,
+          `Your interview for ${job.title} at ${workspace.name} is scheduled.`,
           `When: ${whenLabel}`,
           whereLine,
-          accessLine,
         ]
           .filter(Boolean)
           .join('\n\n'),
       });
       await jobQueue.enqueue(
         'SEND_EMAIL',
-        { to: interviewer.email, subject: email.subject, html: email.html, text: email.text },
-        { idempotencyKey: `interview-invite:${doc._id}:${interviewer.email}` },
+        { to: candidate.email, subject: candidateEmail.subject, html: candidateEmail.html, text: candidateEmail.text },
+        { idempotencyKey: `interview-invite:${doc._id}:candidate` },
+      );
+
+      // 24h-before reminder — skip entirely if there's less than 24h notice (the
+      // invite email just sent already carries the same information).
+      const reminderRunAt = new Date(start.getTime() - 24 * 3600_000);
+      if (reminderRunAt.getTime() > Date.now()) {
+        for (const interviewer of input.interviewers) {
+          const reminder = emailTemplates.interviewReminder({
+            recipientType: 'INTERVIEWER',
+            recipientName: interviewer.name || interviewer.email,
+            candidateName: candidate.name,
+            jobTitle: job.title,
+            companyName: workspace.name,
+            whenLabel,
+            whereLine,
+            accessLink: accessToken ? `${config.publicAppUrl}/interview-feedback/${accessToken}` : undefined,
+          });
+          await jobQueue.enqueue(
+            'SEND_EMAIL',
+            {
+              to: interviewer.email,
+              subject: reminder.subject,
+              html: reminder.html,
+              text: reminder.text,
+              conditionCheck: { type: 'scheduled_interview_active', scheduledInterviewId: String(doc._id) },
+            },
+            { idempotencyKey: `interview-reminder:${doc._id}:${interviewer.email}`, runAt: reminderRunAt },
+          );
+        }
+
+        const candidateReminder = emailTemplates.interviewReminder({
+          recipientType: 'CANDIDATE',
+          recipientName: candidate.name,
+          candidateName: candidate.name,
+          jobTitle: job.title,
+          companyName: workspace.name,
+          whenLabel,
+          whereLine,
+        });
+        await jobQueue.enqueue(
+          'SEND_EMAIL',
+          {
+            to: candidate.email,
+            subject: candidateReminder.subject,
+            html: candidateReminder.html,
+            text: candidateReminder.text,
+            conditionCheck: { type: 'scheduled_interview_active', scheduledInterviewId: String(doc._id) },
+          },
+          { idempotencyKey: `interview-reminder:${doc._id}:candidate`, runAt: reminderRunAt },
+        );
+      }
+    } catch (err) {
+      logger.warn(
+        { err, scheduledInterviewId: String(doc._id) },
+        'failed to enqueue one or more interview notifications; continuing since the interview itself was saved',
       );
     }
-
-    const candidateEmail = emailTemplates.custom({
-      subject: `Interview scheduled — ${job.title}`,
-      body: [
-        `Hi ${candidate.name},`,
-        `Your interview for ${job.title} at ${workspace.name} is scheduled.`,
-        `When: ${whenLabel}`,
-        whereLine,
-      ]
-        .filter(Boolean)
-        .join('\n\n'),
-    });
-    await jobQueue.enqueue(
-      'SEND_EMAIL',
-      { to: candidate.email, subject: candidateEmail.subject, html: candidateEmail.html, text: candidateEmail.text },
-      { idempotencyKey: `interview-invite:${doc._id}:candidate` },
-    );
 
     await eventBus.publish({
       workspaceId,

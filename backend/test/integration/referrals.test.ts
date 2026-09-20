@@ -3,6 +3,8 @@ import request from 'supertest';
 import { createApp } from '../../src/app';
 import { connectDatabase, disconnectDatabase, mongoose } from '../../src/config/db';
 import { ApplicationModel } from '../../src/models/application.model';
+import { mockOutbox } from '../../src/integrations';
+import { processOnce } from '../../src/workers/runner';
 
 const app = createApp();
 const PDF = Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n', 'latin1');
@@ -10,6 +12,24 @@ const PDF = Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Roo
 async function tokenFor(email: string, name?: string) {
   const res = await request(app).post('/api/v1/auth/test-token').send({ email, name });
   return res.body.data.token as string;
+}
+
+/** Invites are pending-until-accepted now — send the invite, pull the token out of
+ * the mock outbox (that's the invitee's email), then accept it as that user. */
+async function inviteAndAccept(
+  asOwner: (r: request.Test) => request.Test,
+  workspaceId: string,
+  email: string,
+  role: string,
+): Promise<void> {
+  await asOwner(request(app).post(`/api/v1/workspaces/${workspaceId}/invites`).send({ email, role }) as any);
+  while (await processOnce()) {
+    /* drain the queue so the invite email actually lands in the mock outbox */
+  }
+  const sent = [...mockOutbox].reverse().find((e) => e.to === email);
+  const token = sent!.text!.match(/\/accept-invite\/(\S+)/)![1];
+  const userToken = await tokenFor(email);
+  await request(app).post(`/api/v1/invites/${token}/accept`).set('Authorization', `Bearer ${userToken}`).send();
 }
 
 beforeAll(async () => {
@@ -34,7 +54,7 @@ describe('employee referrals (integration)', () => {
     const ownerWs = (r: request.Test) => r.set('Authorization', `Bearer ${ownerToken}`).set('X-Workspace-Id', workspaceId);
 
     // A recruiter member who will generate the referral link.
-    await ownerWs(request(app).post(`/api/v1/workspaces/${workspaceId}/members`).send({ email: 'refrecruiter@test.com', role: 'recruiter' }) as any);
+    await inviteAndAccept(ownerWs, workspaceId, 'refrecruiter@test.com', 'recruiter');
     const recruiterToken = await tokenFor('refrecruiter@test.com');
     const recruiterWs = (r: request.Test) => r.set('Authorization', `Bearer ${recruiterToken}`).set('X-Workspace-Id', workspaceId);
 

@@ -3,6 +3,8 @@ import request from 'supertest';
 import { createApp } from '../../src/app';
 import { connectDatabase, disconnectDatabase, mongoose } from '../../src/config/db';
 import { ApplicationModel } from '../../src/models/application.model';
+import { mockOutbox } from '../../src/integrations';
+import { processOnce } from '../../src/workers/runner';
 
 const app = createApp();
 const PDF = Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n', 'latin1');
@@ -10,6 +12,25 @@ const PDF = Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Roo
 async function tokenFor(email: string, name?: string) {
   const res = await request(app).post('/api/v1/auth/test-token').send({ email, name });
   return res.body.data.token as string;
+}
+
+/** Invites are pending-until-accepted now — send the invite, pull the token out of
+ * the mock outbox (that's the invitee's email), then accept it as that user. */
+async function inviteAndAccept(
+  asOwner: (r: request.Test) => request.Test,
+  workspaceId: string,
+  email: string,
+  role: string,
+): Promise<string> {
+  await asOwner(request(app).post(`/api/v1/workspaces/${workspaceId}/invites`).send({ email, role }) as any);
+  while (await processOnce()) {
+    /* drain the queue so the invite email actually lands in the mock outbox */
+  }
+  const sent = [...mockOutbox].reverse().find((e) => e.to === email);
+  const token = sent!.text!.match(/\/accept-invite\/(\S+)/)![1];
+  const userToken = await tokenFor(email);
+  const accept = await request(app).post(`/api/v1/invites/${token}/accept`).set('Authorization', `Bearer ${userToken}`).send();
+  return accept.body.data.member.userId as string;
 }
 
 beforeAll(async () => {
@@ -34,13 +55,8 @@ describe('per-job access control (integration)', () => {
     const asOwner = (r: request.Test) => r.set('Authorization', `Bearer ${ownerToken}`).set('X-Workspace-Id', workspaceId);
 
     // Two recruiters: one will be granted access, one excluded.
-    const invitedIn = await asOwner(
-      request(app).post(`/api/v1/workspaces/${workspaceId}/members`).send({ email: 'in@access.test', role: 'recruiter' }) as any,
-    );
-    const invitedOut = await asOwner(
-      request(app).post(`/api/v1/workspaces/${workspaceId}/members`).send({ email: 'out@access.test', role: 'recruiter' }) as any,
-    );
-    const inUserId = invitedIn.body.data.userId as string;
+    const inUserId = await inviteAndAccept(asOwner, workspaceId, 'in@access.test', 'recruiter');
+    await inviteAndAccept(asOwner, workspaceId, 'out@access.test', 'recruiter');
 
     const inToken = await tokenFor('in@access.test', 'Recruiter In');
     const outToken = await tokenFor('out@access.test', 'Recruiter Out');

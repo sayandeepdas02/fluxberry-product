@@ -31,6 +31,7 @@ export async function processOnce(): Promise<boolean> {
       jobId: job.id,
       attempts: job.attempts ?? 0,
       logger: log,
+      idempotencyKey: job.idempotencyKey ?? undefined,
     });
     await completeJob(job.id, result);
     log.debug('job completed');

@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Check, ShieldCheck, UserMinus } from 'lucide-react';
-import type { WorkspaceMemberDto, Role, InviteMemberInput } from '@fluxberry/shared';
+import { Check, Mail, RefreshCw, ShieldCheck, UserMinus, XCircle } from 'lucide-react';
+import type { WorkspaceMemberDto, WorkspaceInviteDto, Role, InviteMemberInput } from '@fluxberry/shared';
 import { useWorkspace } from '@/components/providers/workspace-provider';
 import { api } from '@/lib/api-client';
 import { Button } from '@/components/ui/button';
@@ -31,6 +31,30 @@ export default function MembersSettingsPage() {
   const { data: members, isLoading } = useQuery({
     queryKey: ['members', wsId],
     queryFn: () => api.get<WorkspaceMemberDto[]>(`/api/v1/workspaces/${wsId}/members`),
+  });
+
+  const { data: invites } = useQuery({
+    queryKey: ['invites', wsId],
+    queryFn: () => api.get<WorkspaceInviteDto[]>(`/api/v1/workspaces/${wsId}/invites`),
+  });
+  const pendingInvites = invites?.filter((i) => i.status === 'PENDING' || i.status === 'EXPIRED') ?? [];
+
+  const resendInvite = useMutation({
+    mutationFn: (id: string) => api.post(`/api/v1/workspaces/${wsId}/invites/${id}/resend`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['invites', wsId] });
+      toast.success('Invite resent');
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : 'Could not resend invite'),
+  });
+
+  const revokeInvite = useMutation({
+    mutationFn: (id: string) => api.del(`/api/v1/workspaces/${wsId}/invites/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['invites', wsId] });
+      toast.success('Invite revoked');
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : 'Could not revoke invite'),
   });
 
   const updateRole = useMutation({
@@ -106,6 +130,50 @@ export default function MembersSettingsPage() {
         ))}
       </Card>
 
+      {pendingInvites.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-muted-foreground">Pending invites</p>
+          <Card className="divide-y divide-border">
+            {pendingInvites.map((inv) => (
+              <div key={inv.id} className="flex items-center gap-3 p-4">
+                <Avatar>
+                  <AvatarFallback>
+                    <Mail className="size-4 text-muted-foreground" />
+                  </AvatarFallback>
+                </Avatar>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-sm font-medium">{inv.email}</div>
+                  <div className="truncate text-xs text-muted-foreground capitalize">
+                    {inv.role} · {inv.status === 'EXPIRED' ? 'Expired' : 'Invited'} by {inv.invitedBy.name}
+                  </div>
+                </div>
+                {canManage ? (
+                  <RecordMenu
+                    actions={[
+                      {
+                        label: 'Resend invite',
+                        icon: <RefreshCw className="size-4" />,
+                        onSelect: () => resendInvite.mutate(inv.id),
+                      },
+                      {
+                        label: 'Revoke invite',
+                        icon: <XCircle className="size-4" />,
+                        variant: 'destructive',
+                        separated: true,
+                        hidden: inv.status === 'EXPIRED',
+                        onSelect: () => revokeInvite.mutate(inv.id),
+                      },
+                    ]}
+                  />
+                ) : (
+                  <span className="text-sm capitalize text-muted-foreground">{inv.status.toLowerCase()}</span>
+                )}
+              </div>
+            ))}
+          </Card>
+        </div>
+      )}
+
       <InviteDialog open={inviteOpen} onOpenChange={setInviteOpen} workspaceId={wsId} />
     </div>
   );
@@ -125,10 +193,10 @@ function InviteDialog({
   const [role, setRole] = useState<InviteMemberInput['role']>('recruiter');
 
   const invite = useMutation({
-    mutationFn: () => api.post(`/api/v1/workspaces/${workspaceId}/members`, { email, role }),
+    mutationFn: () => api.post(`/api/v1/workspaces/${workspaceId}/invites`, { email, role }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['members', workspaceId] });
-      toast.success('Member added — they now have access to this workspace');
+      queryClient.invalidateQueries({ queryKey: ['invites', workspaceId] });
+      toast.success("Invite sent — they'll get access once they accept");
       setEmail('');
       onOpenChange(false);
     },

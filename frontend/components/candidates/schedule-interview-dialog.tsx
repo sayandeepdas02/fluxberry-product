@@ -6,6 +6,7 @@ import type { InterviewerInput, ScheduledInterviewLocationType } from '@fluxberr
 import { useCreateScheduledInterview } from '@/hooks/use-scheduled-interviews';
 import { useWorkspaceMembers } from '@/hooks/use-workspace-members';
 import { useCalendarConnectionStatus, useConnectCalendar } from '@/hooks/use-calendar-integration';
+import { useOrganizerAvailability } from '@/hooks/use-organizer-availability';
 import { useWorkspace } from '@/components/providers/workspace-provider';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -27,6 +28,10 @@ function roundToNextQuarterHour(d: Date): Date {
   const mins = next.getMinutes();
   next.setMinutes(Math.ceil(mins / 15) * 15);
   return next;
+}
+
+function formatTime(iso: string): string {
+  return new Date(iso).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 }
 
 export function ScheduleInterviewDialog({
@@ -61,6 +66,11 @@ export function ScheduleInterviewDialog({
   const [shareCandidateDetails, setShareCandidateDetails] = useState(true);
   const [shareFeedbackForm, setShareFeedbackForm] = useState(true);
   const [sharePastFeedback, setSharePastFeedback] = useState(false);
+
+  const availabilityEnabled = Boolean(calendarStatus?.connected);
+  const { data: availability } = useOrganizerAvailability(start, availabilityEnabled);
+  const busyBlocks = availability?.busy ?? [];
+  const hasConflict = availabilityEnabled && busyBlocks.some((b) => start < new Date(b.end) && end > new Date(b.start));
 
   const setStartDate = (d: Date) => {
     setStart(d);
@@ -129,7 +139,13 @@ export function ScheduleInterviewDialog({
             <TimeSelect value={start} onChange={setStart} />
             <span className="text-muted-foreground">–</span>
             <TimeSelect value={end} onChange={setEnd} />
+            {hasConflict && <span className="text-xs text-amber-600">This overlaps your calendar</span>}
           </div>
+          {availabilityEnabled && busyBlocks.length > 0 && (
+            <p className="text-xs text-muted-foreground">
+              Busy: {busyBlocks.map((b) => `${formatTime(b.start)}–${formatTime(b.end)}`).join(', ')}
+            </p>
+          )}
         </div>
 
         <div className="flex items-start gap-2 border-t border-border pt-4">

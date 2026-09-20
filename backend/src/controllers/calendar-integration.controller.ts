@@ -1,3 +1,4 @@
+import type { OrganizerAvailabilityQuery } from '@fluxberry/shared';
 import { asyncHandler, ok } from '../utils/http';
 import { calendarConnectionService } from '../services/calendar-connection.service';
 import { config } from '../config/env';
@@ -33,5 +34,16 @@ export const calendarIntegrationController = {
   disconnect: asyncHandler(async (req, res) => {
     await calendarConnectionService.disconnect(req.auth!.workspaceId!, req.auth!.user.id);
     ok(res, { disconnected: true });
+  }),
+
+  availability: asyncHandler(async (req, res) => {
+    const { timeMin, timeMax } = req.query as unknown as OrganizerAvailabilityQuery;
+    const result = await calendarConnectionService.getAvailability(
+      req.auth!.workspaceId!,
+      req.auth!.user.id,
+      new Date(timeMin),
+      new Date(timeMax),
+    );
+    ok(res, result);
   }),
 };

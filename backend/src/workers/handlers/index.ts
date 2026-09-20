@@ -5,6 +5,8 @@ export interface JobContext {
   jobId: string;
   attempts: number;
   logger: Logger;
+  /** The job's dedupe key, if any — handlers can forward it as a provider-level idempotency key. */
+  idempotencyKey?: string;
 }
 
 export type JobHandler = (payload: any, ctx: JobContext) => Promise<unknown>;
