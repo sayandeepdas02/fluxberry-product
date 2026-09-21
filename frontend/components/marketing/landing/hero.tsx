@@ -15,8 +15,8 @@ export function Hero({ announcement }: { announcement?: { href: string; title: s
             </AnnouncementPill>
           )}
 
-          <h1 className="mt-4 max-w-[760px] text-balance text-mk-hero text-ink">
-            The #1 AI Native <span className="text-ink-muted">Hiring Platform</span>
+          <h1 className="mt-4 max-w-[760px] text-balance text-mk-hero text-berry-600">
+            The #1 AI Native Hiring Platform
           </h1>
 
           <p className="mt-6 max-w-[480px] text-mk-lead text-ink-500">
