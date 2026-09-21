@@ -9,6 +9,7 @@ export interface ApplySubscriptionInput {
   subscriptionId: string | null;
   subscriptionStatus: BillingSubscriptionStatus;
   currentPeriodEnd: string | null;
+  cancelAtPeriodEnd: boolean;
 }
 
 export const billingRepository = {
@@ -25,6 +26,7 @@ export const billingRepository = {
       'billing.subscriptionId': input.subscriptionId,
       'billing.subscriptionStatus': input.subscriptionStatus,
       'billing.currentPeriodEnd': input.currentPeriodEnd ? new Date(input.currentPeriodEnd) : null,
+      'billing.cancelAtPeriodEnd': input.cancelAtPeriodEnd,
     };
     if (input.plan) set.plan = input.plan;
     return WorkspaceModel.findByIdAndUpdate(workspaceId, set, { new: true });

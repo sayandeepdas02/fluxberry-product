@@ -17,6 +17,7 @@ interface MockSubscriptionRecord {
   plan: WorkspacePlan;
   status: BillingSubscriptionStatus;
   currentPeriodEnd: string;
+  cancelAtPeriodEnd: boolean;
 }
 
 /** In-memory state so dev/tests can drive a full checkout → webhook loop with no network. */
@@ -39,10 +40,6 @@ export class MockBillingProvider implements BillingProvider {
     return { url: `${input.returnUrl}${sep}mockPortal=1` };
   }
 
-  verifyWebhookSignature(): boolean {
-    return true;
-  }
-
   parseWebhookEvent(rawBody: Buffer): BillingWebhookEvent {
     return JSON.parse(rawBody.toString('utf8')) as BillingWebhookEvent;
   }
@@ -56,6 +53,7 @@ export class MockBillingProvider implements BillingProvider {
           plan: sub.plan,
           status: sub.status,
           currentPeriodEnd: sub.currentPeriodEnd,
+          cancelAtPeriodEnd: sub.cancelAtPeriodEnd,
         };
       }
     }
@@ -82,6 +80,7 @@ export function mockCompleteCheckout(sessionId: string): BillingWebhookEvent {
     plan: session.plan,
     status: 'active',
     currentPeriodEnd,
+    cancelAtPeriodEnd: false,
   });
   mockSessions.delete(sessionId);
 
@@ -94,6 +93,7 @@ export function mockCompleteCheckout(sessionId: string): BillingWebhookEvent {
     subscriptionId,
     status: 'active',
     currentPeriodEnd,
+    cancelAtPeriodEnd: false,
     raw: { mock: true, sessionId },
   };
 }
@@ -102,17 +102,18 @@ export function mockCompleteCheckout(sessionId: string): BillingWebhookEvent {
 export function mockCancelSubscription(workspaceId: string): BillingWebhookEvent {
   const sub = mockSubscriptions.get(workspaceId);
   if (!sub) throw new Error(`No mock subscription for workspace: ${workspaceId}`);
-  sub.status = 'canceled';
+  sub.status = 'cancelled';
 
   return {
     id: `mock_evt_${crypto.randomBytes(8).toString('hex')}`,
-    type: 'subscription.canceled',
+    type: 'subscription.cancelled',
     workspaceId,
     plan: null,
     customerId: sub.customerId,
     subscriptionId: sub.subscriptionId,
-    status: 'canceled',
+    status: 'cancelled',
     currentPeriodEnd: sub.currentPeriodEnd,
+    cancelAtPeriodEnd: sub.cancelAtPeriodEnd,
     raw: { mock: true },
   };
 }

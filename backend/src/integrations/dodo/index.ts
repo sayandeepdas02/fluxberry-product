@@ -8,9 +8,9 @@ let instance: BillingProvider | null = null;
 
 function create(): BillingProvider {
   if (config.providers.mockAll) return new MockBillingProvider();
-  const { apiKey, webhookSecret, apiBase, proProductId } = config.providers.billing;
+  const { apiKey, webhookSecret, environment, proProductId } = config.providers.billing;
   if (!apiKey) return new MockBillingProvider();
-  return new DodoBillingProvider(apiKey, webhookSecret, apiBase, proProductId);
+  return new DodoBillingProvider(apiKey, webhookSecret, environment, proProductId);
 }
 
 export function getBillingProvider(): BillingProvider {

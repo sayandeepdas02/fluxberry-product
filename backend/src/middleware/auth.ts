@@ -1,6 +1,6 @@
 import type { RequestHandler } from 'express';
-import type { Role, FeatureFlag, WorkspacePlan } from '../shared';
-import { ROLE_RANK, planIncludesFeature } from '../shared';
+import type { Role, FeatureFlag, WorkspacePlan, BillingSubscriptionStatus } from '../shared';
+import { ROLE_RANK, planIncludesFeature, ACTIVE_BILLING_STATUSES } from '../shared';
 import * as Sentry from '@sentry/node';
 import { authService } from '../services/auth.service';
 import { memberRepository } from '../repositories/member.repository';
@@ -9,7 +9,7 @@ import { jobRepository } from '../repositories/job.repository';
 import { applicationRepository } from '../repositories/application.repository';
 import { getTokenVerifier } from '../auth';
 import { config } from '../config/env';
-import { unauthorized, forbidden, planUpgradeRequired, notFound } from '../utils/errors';
+import { unauthorized, forbidden, planUpgradeRequired, subscriptionRequired, notFound } from '../utils/errors';
 import { isJobAccessible } from '../utils/job-access';
 
 /**
@@ -158,3 +158,27 @@ export function requirePlanFeature(flag: FeatureFlag): RequestHandler {
     }
   };
 }
+
+/**
+ * Hard paywall gate: reject unless the workspace has an active (or
+ * dunning-grace-period) subscription. Fluxberry has no free tier — this is
+ * the single gate almost every product route sits behind. Distinct 403 code
+ * (SUBSCRIPTION_REQUIRED) so the frontend shows a "subscribe to continue"
+ * prompt instead of a generic "forbidden" error.
+ */
+export const requireActiveSubscription: RequestHandler = async (req, _res, next) => {
+  try {
+    if (!req.auth?.workspaceId) return next(forbidden('You do not have access to this workspace'));
+
+    const workspace = await workspaceRepository.findById(req.auth.workspaceId);
+    if (!workspace) return next(notFound('Workspace not found'));
+
+    const status = (workspace.billing?.subscriptionStatus as BillingSubscriptionStatus) ?? 'none';
+    if (!ACTIVE_BILLING_STATUSES.includes(status)) {
+      return next(subscriptionRequired());
+    }
+    next();
+  } catch (err) {
+    next(err);
+  }
+};

@@ -25,8 +25,11 @@ export const billingController = {
    * `req.body` here is a Buffer, not a parsed object.
    */
   webhook: asyncHandler(async (req, res) => {
-    const signature = req.header('x-dodo-signature');
-    await billingService.handleWebhook(req.body as Buffer, signature);
+    await billingService.handleWebhook(req.body as Buffer, {
+      'webhook-id': req.header('webhook-id'),
+      'webhook-signature': req.header('webhook-signature'),
+      'webhook-timestamp': req.header('webhook-timestamp'),
+    });
     ok(res, { received: true });
   }),
 };

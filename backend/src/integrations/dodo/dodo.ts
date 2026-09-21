@@ -1,4 +1,4 @@
-import crypto from 'node:crypto';
+import DodoPayments from 'dodopayments';
 import type { BillingSubscriptionStatus, WorkspacePlan } from '../../shared';
 import { WORKSPACE_PLANS } from '../../shared';
 import type {
@@ -13,125 +13,97 @@ import type {
 import { providerError } from '../../utils/errors';
 
 /**
- * Real Dodo Payments adapter.
- *
- * IMPORTANT: the endpoint paths, request/response payload shapes, and webhook
- * signature scheme below are written against Dodo Payments' publicly documented
- * checkout/subscription/webhook model but have NOT been confirmed against a
- * live account. Before enabling this provider in production, verify every
- * fetch call, field name, and the signature-verification scheme against Dodo's
- * current API reference. Everything around this file — plan gating, webhook
- * idempotency, the worker handler — is fully built against the `BillingProvider`
- * interface and does not need to change once this file is confirmed correct.
+ * Real Dodo Payments adapter, built on the official `dodopayments` SDK so
+ * endpoint paths, payload shapes, and the webhook signature scheme (Standard
+ * Webhooks — see https://standardwebhooks.com/) always match what Dodo
+ * actually serves, rather than a hand-maintained guess.
  */
 export class DodoBillingProvider implements BillingProvider {
   readonly name = 'dodo';
+  private readonly client: DodoPayments;
 
   constructor(
-    private readonly apiKey: string,
-    private readonly webhookSecret: string,
-    private readonly apiBase: string,
+    apiKey: string,
+    webhookSecret: string,
+    environment: 'test_mode' | 'live_mode',
     private readonly proProductId: string,
-  ) {}
+  ) {
+    this.client = new DodoPayments({ bearerToken: apiKey, webhookKey: webhookSecret, environment });
+  }
 
   async createCheckoutSession(input: CheckoutSessionInput): Promise<CheckoutSessionResult> {
-    const res = await fetch(`${this.apiBase}/checkouts`, {
-      method: 'POST',
-      headers: this.headers(),
-      body: JSON.stringify({
-        product_id: this.productIdFor(input.plan),
-        customer: { email: input.customerEmail },
-        success_url: input.successUrl,
-        cancel_url: input.cancelUrl,
-        // Round-tripped by Dodo onto the resulting webhook event so we can map
-        // it back to a workspace without a separate lookup table.
-        metadata: { workspaceId: input.workspaceId, plan: input.plan },
-      }),
+    const session = await this.client.checkoutSessions.create({
+      product_cart: [{ product_id: this.productIdFor(input.plan), quantity: 1 }],
+      customer: { email: input.customerEmail },
+      return_url: input.successUrl,
+      cancel_url: input.cancelUrl,
+      // Round-tripped by Dodo onto the resulting webhook event so we can map
+      // it back to a workspace without a separate lookup table.
+      metadata: { workspaceId: input.workspaceId, plan: input.plan },
     });
-    if (!res.ok) throw providerError(`Dodo checkout session failed: ${res.status}`);
-    const body = (await res.json()) as { id: string; checkout_url: string };
-    return { sessionId: body.id, url: body.checkout_url };
+    if (!session.checkout_url) throw providerError('Dodo checkout session did not return a checkout_url');
+    return { sessionId: session.session_id, url: session.checkout_url };
   }
 
   async createPortalSession(input: PortalSessionInput): Promise<PortalSessionResult> {
-    const res = await fetch(`${this.apiBase}/customers/${input.customerId}/portal`, {
-      method: 'POST',
-      headers: this.headers(),
-      body: JSON.stringify({ return_url: input.returnUrl }),
+    const session = await this.client.customers.customerPortal.create(input.customerId, {
+      return_url: input.returnUrl,
     });
-    if (!res.ok) throw providerError(`Dodo portal session failed: ${res.status}`);
-    const body = (await res.json()) as { url: string };
-    return { url: body.url };
+    return { url: session.link };
   }
 
-  verifyWebhookSignature(rawBody: Buffer, signatureHeader: string | undefined): boolean {
-    if (!signatureHeader) return false;
-    const expected = crypto.createHmac('sha256', this.webhookSecret).update(rawBody).digest('hex');
-    const expectedBuf = Buffer.from(expected);
-    const givenBuf = Buffer.from(signatureHeader);
-    if (expectedBuf.length !== givenBuf.length) return false;
-    try {
-      return crypto.timingSafeEqual(expectedBuf, givenBuf);
-    } catch {
-      return false;
+  parseWebhookEvent(rawBody: Buffer, headers: Record<string, string | undefined>): BillingWebhookEvent {
+    const webhookId = headers['webhook-id'];
+    const webhookSignature = headers['webhook-signature'];
+    const webhookTimestamp = headers['webhook-timestamp'];
+    if (!webhookId || !webhookSignature || !webhookTimestamp) {
+      throw providerError('Missing Dodo webhook signature headers');
     }
-  }
+    // Throws on an invalid/missing signature — the caller (billing.service)
+    // is expected to let that reject the request with a 4xx.
+    const event = this.client.webhooks.unwrap(rawBody.toString('utf8'), {
+      headers: {
+        'webhook-id': webhookId,
+        'webhook-signature': webhookSignature,
+        'webhook-timestamp': webhookTimestamp,
+      },
+    });
 
-  parseWebhookEvent(rawBody: Buffer): BillingWebhookEvent {
-    const body = JSON.parse(rawBody.toString('utf8')) as {
-      id: string;
-      type: string;
-      data?: {
-        metadata?: { workspaceId?: string; plan?: string };
-        customer_id?: string;
-        subscription_id?: string;
-        status?: string;
-        current_period_end?: string;
-      };
-    };
-    const data = body.data ?? {};
-    const metaPlan = data.metadata?.plan;
+    const data = 'data' in event ? (event.data as unknown as Record<string, unknown> | undefined) : undefined;
+    const metadata = (data?.metadata ?? {}) as Record<string, unknown>;
+    const metaPlan = metadata.plan as string | undefined;
     const plan: WorkspacePlan | null = WORKSPACE_PLANS.includes(metaPlan as WorkspacePlan)
       ? (metaPlan as WorkspacePlan)
       : null;
+    const customer = data?.customer as { customer_id?: string } | undefined;
+
     return {
-      id: body.id,
-      type: body.type,
-      workspaceId: data.metadata?.workspaceId ?? null,
+      // The event body has no top-level id of its own — the Standard Webhooks
+      // `webhook-id` header is the idempotency key.
+      id: webhookId,
+      type: event.type,
+      workspaceId: (metadata.workspaceId as string | undefined) ?? null,
       plan,
-      customerId: data.customer_id ?? null,
-      subscriptionId: data.subscription_id ?? null,
-      status: mapDodoStatus(data.status),
-      currentPeriodEnd: data.current_period_end ?? null,
-      raw: body,
+      customerId: customer?.customer_id ?? null,
+      subscriptionId: (data?.subscription_id as string | undefined) ?? null,
+      status: mapDodoStatus(data?.status as string | undefined),
+      currentPeriodEnd: (data?.next_billing_date as string | undefined) ?? null,
+      cancelAtPeriodEnd: Boolean(data?.cancel_at_next_billing_date),
+      raw: event,
     };
   }
 
   async getSubscription(customerId: string): Promise<SubscriptionInfo | null> {
-    const res = await fetch(`${this.apiBase}/customers/${customerId}/subscription`, {
-      headers: this.headers(),
-    });
-    if (res.status === 404) return null;
-    if (!res.ok) throw providerError(`Dodo subscription lookup failed: ${res.status}`);
-    const body = (await res.json()) as {
-      id: string;
-      plan_id: string;
-      status: string;
-      current_period_end?: string;
-    };
+    const page = await this.client.subscriptions.list({ customer_id: customerId });
+    const sub = page.items[0];
+    if (!sub) return null;
     return {
       customerId,
-      subscriptionId: body.id,
-      plan: body.plan_id === this.proProductId ? 'PRO' : 'FREE',
-      status: mapDodoStatus(body.status) ?? 'none',
-      currentPeriodEnd: body.current_period_end ?? null,
-    };
-  }
-
-  private headers(): Record<string, string> {
-    return {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${this.apiKey}`,
+      subscriptionId: sub.subscription_id,
+      plan: sub.product_id === this.proProductId ? 'PRO' : 'FREE',
+      status: mapDodoStatus(sub.status) ?? 'none',
+      currentPeriodEnd: sub.next_billing_date ?? null,
+      cancelAtPeriodEnd: sub.cancel_at_next_billing_date,
     };
   }
 
@@ -143,15 +115,15 @@ export class DodoBillingProvider implements BillingProvider {
 
 function mapDodoStatus(status: string | undefined): BillingSubscriptionStatus | null {
   switch (status) {
+    case 'pending':
     case 'active':
-      return 'active';
-    case 'trialing':
-      return 'trialing';
+    case 'on_hold':
     case 'past_due':
-      return 'past_due';
-    case 'canceled':
+    case 'paused':
     case 'cancelled':
-      return 'canceled';
+    case 'failed':
+    case 'expired':
+      return status;
     default:
       return null;
   }

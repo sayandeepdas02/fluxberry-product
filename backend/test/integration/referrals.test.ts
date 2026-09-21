@@ -5,6 +5,7 @@ import { connectDatabase, disconnectDatabase, mongoose } from '../../src/config/
 import { ApplicationModel } from '../../src/models/application.model';
 import { mockOutbox } from '../../src/integrations';
 import { processOnce } from '../../src/workers/runner';
+import { activateSubscription } from './helpers/activate-subscription';
 
 const app = createApp();
 const PDF = Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n', 'latin1');
@@ -52,6 +53,7 @@ describe('employee referrals (integration)', () => {
     const workspaceId = onboard.body.data.id as string;
     const workspaceSlug = onboard.body.data.slug as string;
     const ownerWs = (r: request.Test) => r.set('Authorization', `Bearer ${ownerToken}`).set('X-Workspace-Id', workspaceId);
+    await activateSubscription(workspaceId);
 
     // A recruiter member who will generate the referral link.
     await inviteAndAccept(ownerWs, workspaceId, 'refrecruiter@test.com', 'recruiter');

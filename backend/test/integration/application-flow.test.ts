@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import { createApp } from '../../src/app';
 import { connectDatabase, disconnectDatabase, mongoose } from '../../src/config/db';
+import { activateSubscription } from './helpers/activate-subscription';
 
 const app = createApp();
 const PDF = Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n', 'latin1');
@@ -39,6 +40,7 @@ describe('core application flow (integration)', () => {
     const workspaceId = onboard.body.data.id as string;
     const slug = onboard.body.data.slug as string;
     const ws = (r: request.Test) => r.set('Authorization', `Bearer ${token}`).set('X-Workspace-Id', workspaceId);
+    await activateSubscription(workspaceId);
 
     // Create + publish a job
     const created = await ws(request(app).post('/api/v1/jobs').send({ title: 'Backend Engineer', skills: [{ name: 'Node.js', required: true }] }) as any);
@@ -88,6 +90,7 @@ describe('core application flow (integration)', () => {
     const workspaceId = onboard.body.data.id as string;
     const slug = onboard.body.data.slug as string;
     const ws = (r: request.Test) => r.set('Authorization', `Bearer ${token}`).set('X-Workspace-Id', workspaceId);
+    await activateSubscription(workspaceId);
 
     const created = await ws(request(app).post('/api/v1/jobs').send({ title: 'Frontend Engineer', skills: [{ name: 'React', required: true }] }) as any);
     const jobId = created.body.data.id as string;

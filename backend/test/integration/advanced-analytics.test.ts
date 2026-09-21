@@ -24,7 +24,7 @@ afterAll(async () => {
 });
 
 describe('advanced analytics tier (integration)', () => {
-  it('gates advanced endpoints behind the ADVANCED_ANALYTICS plan feature, then serves real numbers on PRO', async () => {
+  it('hard-paywalls advanced analytics until the workspace subscribes, then serves real numbers', async () => {
     const ownerToken = await tokenFor('advowner@test.com', 'Adv Owner');
     const onboard = await request(app)
       .post('/api/v1/workspaces/onboarding')
@@ -34,11 +34,6 @@ describe('advanced analytics tier (integration)', () => {
     const workspaceSlug = onboard.body.data.slug as string;
     const ws = (r: request.Test) => r.set('Authorization', `Bearer ${ownerToken}`).set('X-Workspace-Id', workspaceId);
 
-    const job = await ws(request(app).post('/api/v1/jobs').send({ title: 'Advanced Analytics Role' }) as any);
-    const jobId = job.body.data.id as string;
-    const jobSlug = job.body.data.slug as string;
-    await ws(request(app).post(`/api/v1/jobs/${jobId}/publish`) as any);
-
     const today = new Date().toISOString().slice(0, 10);
     const tomorrow = new Date(Date.now() + 86_400_000).toISOString().slice(0, 10);
     // Disjoint ranges: the applicant below lands only in range A, so this
@@ -46,22 +41,24 @@ describe('advanced analytics tier (integration)', () => {
     // implementation that ignores the query params entirely.
     const qs = `aStart=${today}&aEnd=${today}&bStart=${tomorrow}&bEnd=${tomorrow}`;
 
-    // FREE plan: blocked with the distinct upgrade-required code, not a generic 403.
+    // No subscription yet: blocked with the distinct code, not a generic 403.
+    // (Job-scoped routes can't be exercised here — job creation is itself
+    // gated, so there's no jobId to hit /jobs/:jobId/analytics/benchmark with.)
     const blockedCohort = await ws(request(app).get(`/api/v1/analytics/advanced/cohort?${qs}`) as any);
     expect(blockedCohort.status).toBe(403);
-    expect(blockedCohort.body.error.code).toBe('PLAN_UPGRADE_REQUIRED');
-    expect(blockedCohort.body.error.details.flag).toBe('ADVANCED_ANALYTICS');
+    expect(blockedCohort.body.error.code).toBe('SUBSCRIPTION_REQUIRED');
 
     const blockedLeaderboard = await ws(request(app).get('/api/v1/analytics/advanced/leaderboard') as any);
     expect(blockedLeaderboard.status).toBe(403);
-    expect(blockedLeaderboard.body.error.code).toBe('PLAN_UPGRADE_REQUIRED');
+    expect(blockedLeaderboard.body.error.code).toBe('SUBSCRIPTION_REQUIRED');
 
-    const blockedBenchmark = await ws(request(app).get(`/api/v1/jobs/${jobId}/analytics/benchmark`) as any);
-    expect(blockedBenchmark.status).toBe(403);
-    expect(blockedBenchmark.body.error.code).toBe('PLAN_UPGRADE_REQUIRED');
+    // Subscribe the workspace directly (billing flow is covered elsewhere).
+    await WorkspaceModel.findByIdAndUpdate(workspaceId, { plan: 'PRO', 'billing.subscriptionStatus': 'active' });
 
-    // Upgrade the workspace directly (billing flow is covered elsewhere).
-    await WorkspaceModel.findByIdAndUpdate(workspaceId, { plan: 'PRO' });
+    const job = await ws(request(app).post('/api/v1/jobs').send({ title: 'Advanced Analytics Role' }) as any);
+    const jobId = job.body.data.id as string;
+    const jobSlug = job.body.data.slug as string;
+    await ws(request(app).post(`/api/v1/jobs/${jobId}/publish`) as any);
 
     // One applicant, submitted today — falls inside range A only.
     await request(app)

@@ -3,6 +3,7 @@ import {
   authenticate,
   resolveWorkspace,
   requireWorkspace,
+  requireActiveSubscription,
   requireRole,
   requireApplicationJobAccess,
 } from '../middleware/auth';
@@ -22,7 +23,13 @@ import {
 
 export const candidateRouter = Router();
 
-candidateRouter.use(['/candidates', '/applications'], authenticate, resolveWorkspace, requireWorkspace);
+candidateRouter.use(
+  ['/candidates', '/applications'],
+  authenticate,
+  resolveWorkspace,
+  requireWorkspace,
+  requireActiveSubscription,
+);
 
 // Candidates
 candidateRouter.get('/candidates', validateQuery(candidateListQuerySchema), candidateController.list);

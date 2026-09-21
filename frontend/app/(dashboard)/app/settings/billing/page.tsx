@@ -14,7 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/components/ui/sonner';
 
 const PLAN_LABELS: Record<WorkspacePlan, string> = { FREE: 'Free', PRO: 'Pro' };
-const PLAN_PRICE: Record<WorkspacePlan, string> = { FREE: '$0', PRO: '$49/mo' };
+const PLAN_PRICE: Record<WorkspacePlan, string> = { FREE: '$0', PRO: '$40/mo' };
 
 export default function BillingSettingsPage() {
   const { currentWorkspace } = useWorkspace();

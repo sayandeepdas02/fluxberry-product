@@ -68,7 +68,8 @@ const envSchema = z.object({
 
   DODO_API_KEY: z.string().optional().default(''),
   DODO_WEBHOOK_SECRET: z.string().optional().default(''),
-  DODO_API_BASE: z.string().default('https://api.dodopayments.com'),
+  /** Which Dodo host to hit: `test_mode` -> test.dodopayments.com, `live_mode` -> live.dodopayments.com. */
+  DODO_ENVIRONMENT: z.enum(['test_mode', 'live_mode']).default('test_mode'),
   /** Dodo product/price id billed for the PRO plan. */
   DODO_PRO_PRODUCT_ID: z.string().optional().default(''),
 
@@ -183,7 +184,7 @@ export const config = {
     billing: {
       apiKey: e.DODO_API_KEY,
       webhookSecret: e.DODO_WEBHOOK_SECRET,
-      apiBase: e.DODO_API_BASE,
+      environment: e.DODO_ENVIRONMENT,
       proProductId: e.DODO_PRO_PRODUCT_ID,
     },
     storage: {

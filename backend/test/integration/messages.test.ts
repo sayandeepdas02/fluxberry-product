@@ -7,6 +7,7 @@ import { mockOutbox } from '../../src/integrations';
 import { claimNextJob, completeJob } from '../../src/queue/job-queue';
 import { sendEmailHandler } from '../../src/workers/handlers/send-email';
 import { logger } from '../../src/utils/logger';
+import { activateSubscription } from './helpers/activate-subscription';
 
 const app = createApp();
 const PDF = Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n', 'latin1');
@@ -36,6 +37,7 @@ describe('candidate messaging (integration)', () => {
     const workspaceId = onboard.body.data.id as string;
     const slug = onboard.body.data.slug as string;
     const ws = (r: request.Test) => r.set('Authorization', `Bearer ${token}`).set('X-Workspace-Id', workspaceId);
+    await activateSubscription(workspaceId);
 
     const job = await ws(request(app).post('/api/v1/jobs').send({ title: 'Support Lead' }) as any);
     const jobId = job.body.data.id as string;

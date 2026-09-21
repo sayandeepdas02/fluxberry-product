@@ -1,11 +1,17 @@
 import { Router } from 'express';
-import { authenticate, resolveWorkspace, requireWorkspace } from '../middleware/auth';
+import { authenticate, resolveWorkspace, requireWorkspace, requireActiveSubscription } from '../middleware/auth';
 import { asyncHandler, ok } from '../utils/http';
 import { notificationService } from '../services/notification.service';
 
 export const notificationRouter = Router();
 
-notificationRouter.use('/notifications', authenticate, resolveWorkspace, requireWorkspace);
+notificationRouter.use(
+  '/notifications',
+  authenticate,
+  resolveWorkspace,
+  requireWorkspace,
+  requireActiveSubscription,
+);
 
 function actor(req: any) {
   return req.auth!.user.id as string;

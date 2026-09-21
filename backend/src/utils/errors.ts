@@ -9,6 +9,7 @@ export type ErrorCode =
   | 'UNAUTHORIZED'
   | 'FORBIDDEN'
   | 'PLAN_UPGRADE_REQUIRED'
+  | 'SUBSCRIPTION_REQUIRED'
   | 'NOT_FOUND'
   | 'CONFLICT'
   | 'RATE_LIMITED'
@@ -54,6 +55,10 @@ export const forbidden = (message = 'You do not have access to this resource') =
 /** Distinct from a plain 403 so the frontend can show an upgrade prompt instead of a generic error. */
 export const planUpgradeRequired = (flag: string, message = 'This feature requires an upgraded plan') =>
   new AppError('PLAN_UPGRADE_REQUIRED', message, 403, { details: { flag } });
+
+/** Distinct from a plain 403 so the frontend can show a "subscribe to continue" prompt instead of a generic error. */
+export const subscriptionRequired = (message = 'An active subscription is required') =>
+  new AppError('SUBSCRIPTION_REQUIRED', message, 403, { details: { flag: 'SUBSCRIPTION' } });
 
 export const notFound = (message = 'Not found') =>
   new AppError('NOT_FOUND', message, 404);

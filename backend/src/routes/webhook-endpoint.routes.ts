@@ -4,7 +4,7 @@ import {
   resolveWorkspace,
   requireWorkspace,
   requireRole,
-  requirePlanFeature,
+  requireActiveSubscription,
 } from '../middleware/auth';
 import { validateBody } from '../middleware/validate';
 import { webhookEndpointController } from '../controllers/webhook-endpoint.controller';
@@ -12,7 +12,7 @@ import { createWebhookEndpointSchema, updateWebhookEndpointSchema } from '../sha
 
 export const webhookEndpointRouter = Router();
 
-const auth = [authenticate, resolveWorkspace, requireWorkspace, requireRole('admin'), requirePlanFeature('OUTBOUND_WEBHOOKS')];
+const auth = [authenticate, resolveWorkspace, requireWorkspace, requireRole('admin'), requireActiveSubscription];
 
 webhookEndpointRouter.get('/webhook-endpoints', ...auth, webhookEndpointController.list);
 webhookEndpointRouter.post('/webhook-endpoints', ...auth, validateBody(createWebhookEndpointSchema), webhookEndpointController.create);

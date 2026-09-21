@@ -1,5 +1,5 @@
 import type { WorkspacePlan, BillingStatusDto, BillingSubscriptionStatus } from '../shared';
-import { PLAN_FEATURES } from '../shared';
+import { PLAN_FEATURES, ACTIVE_BILLING_STATUSES } from '../shared';
 import { getBillingProvider } from '../integrations';
 import type { BillingWebhookEvent } from '../integrations/dodo/types';
 import { workspaceRepository } from '../repositories/workspace.repository';
@@ -42,16 +42,18 @@ export const billingService = {
   },
 
   /**
-   * Verifies the webhook signature, then hands off to the async worker.
-   * Never mutates the database synchronously here — a slow write must never
-   * cause the provider to see a timeout and retry-storm this endpoint.
+   * Verifies the webhook signature (throws if invalid), then hands off to the
+   * async worker. Never mutates the database synchronously here — a slow
+   * write must never cause the provider to see a timeout and retry-storm
+   * this endpoint.
    */
-  async handleWebhook(rawBody: Buffer, signatureHeader: string | undefined): Promise<void> {
-    const provider = getBillingProvider();
-    if (!provider.verifyWebhookSignature(rawBody, signatureHeader)) {
+  async handleWebhook(rawBody: Buffer, headers: Record<string, string | undefined>): Promise<void> {
+    let event;
+    try {
+      event = getBillingProvider().parseWebhookEvent(rawBody, headers);
+    } catch {
       throw badRequest('Invalid webhook signature');
     }
-    const event = provider.parseWebhookEvent(rawBody);
     await jobQueue.enqueue('PROCESS_BILLING_WEBHOOK', event, {
       idempotencyKey: `dodo-webhook-${event.id}`,
     });
@@ -84,36 +86,28 @@ export const billingService = {
       return;
     }
 
-    if (event.status === 'active' || event.status === 'trialing') {
+    if (event.status && ACTIVE_BILLING_STATUSES.includes(event.status)) {
+      // active, plus Dodo's past_due/on_hold dunning grace period — access
+      // stays unlocked, so keep (or set) the PRO plan.
       await billingRepository.applySubscription(event.workspaceId, {
         plan: event.plan ?? 'PRO',
         customerId: event.customerId,
         subscriptionId: event.subscriptionId,
         subscriptionStatus: event.status,
         currentPeriodEnd: event.currentPeriodEnd,
+        cancelAtPeriodEnd: event.cancelAtPeriodEnd,
       });
       return;
     }
 
-    if (event.status === 'canceled') {
+    if (event.status === 'cancelled' || event.status === 'expired' || event.status === 'failed') {
       await billingRepository.applySubscription(event.workspaceId, {
         plan: 'FREE',
         customerId: event.customerId,
         subscriptionId: event.subscriptionId,
-        subscriptionStatus: 'canceled',
+        subscriptionStatus: event.status,
         currentPeriodEnd: event.currentPeriodEnd,
-      });
-      return;
-    }
-
-    if (event.status === 'past_due') {
-      // Grace period: keep whatever plan the workspace already has — only
-      // record the status so the billing UI can show a "payment failed" banner.
-      await billingRepository.applySubscription(event.workspaceId, {
-        customerId: event.customerId,
-        subscriptionId: event.subscriptionId,
-        subscriptionStatus: 'past_due',
-        currentPeriodEnd: event.currentPeriodEnd,
+        cancelAtPeriodEnd: event.cancelAtPeriodEnd,
       });
       return;
     }

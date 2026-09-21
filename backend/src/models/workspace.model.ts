@@ -7,6 +7,7 @@ const billingSchema = new Schema(
     subscriptionId: { type: String, default: null },
     subscriptionStatus: { type: String, enum: BILLING_SUBSCRIPTION_STATUSES, default: 'none' },
     currentPeriodEnd: { type: Date, default: null },
+    cancelAtPeriodEnd: { type: Boolean, default: false },
   },
   { _id: false },
 );

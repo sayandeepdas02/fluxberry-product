@@ -1,12 +1,12 @@
 import { Router } from 'express';
-import { authenticate, resolveWorkspace, requireWorkspace, requireRole, requirePlanFeature } from '../middleware/auth';
+import { authenticate, resolveWorkspace, requireWorkspace, requireRole, requireActiveSubscription } from '../middleware/auth';
 import { validateBody } from '../middleware/validate';
 import { gdprController } from '../controllers/gdpr.controller';
 import { createGdprRequestSchema } from '../shared';
 
 export const gdprRouter = Router();
 
-const guard = [authenticate, resolveWorkspace, requireWorkspace, requireRole('admin'), requirePlanFeature('GDPR_TOOLS')] as const;
+const guard = [authenticate, resolveWorkspace, requireWorkspace, requireRole('admin'), requireActiveSubscription] as const;
 
 gdprRouter.post(
   '/candidates/:candidateId/gdpr-requests',

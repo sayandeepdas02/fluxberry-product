@@ -18,14 +18,36 @@ export const ROLE_RANK: Record<Role, number> = {
 export const WORKSPACE_PLANS = ['FREE', 'PRO'] as const;
 export type WorkspacePlan = (typeof WORKSPACE_PLANS)[number];
 
+/**
+ * Matches Dodo Payments' actual subscription status vocabulary (see
+ * SubscriptionStatus in the `dodopayments` SDK) plus our own 'none' for a
+ * workspace that has never started a subscription.
+ */
 export const BILLING_SUBSCRIPTION_STATUSES = [
   'none',
-  'trialing',
+  'pending',
   'active',
+  'on_hold',
   'past_due',
-  'canceled',
+  'paused',
+  'cancelled',
+  'failed',
+  'expired',
 ] as const;
 export type BillingSubscriptionStatus = (typeof BILLING_SUBSCRIPTION_STATUSES)[number];
+
+/**
+ * Statuses that keep product access unlocked: `active` obviously, plus
+ * `past_due`/`on_hold` which are Dodo's dunning grace period — a card retry in
+ * progress must not immediately cut off a paying customer (see
+ * SubscriptionActiveWebhookEvent.Data.past_due_ends_at in the SDK: the
+ * subscription only moves to `cancelled` once that grace period actually ends).
+ */
+export const ACTIVE_BILLING_STATUSES: readonly BillingSubscriptionStatus[] = [
+  'active',
+  'past_due',
+  'on_hold',
+];
 
 export const JOB_STATUSES = ['DRAFT', 'PUBLISHED', 'PAUSED', 'CLOSED', 'ARCHIVED'] as const;
 export type JobStatus = (typeof JOB_STATUSES)[number];

@@ -5,6 +5,7 @@ import { connectDatabase, disconnectDatabase, mongoose } from '../../src/config/
 import { ApplicationModel } from '../../src/models/application.model';
 import { mockOutbox } from '../../src/integrations';
 import { processOnce } from '../../src/workers/runner';
+import { activateSubscription } from './helpers/activate-subscription';
 
 const app = createApp();
 const PDF = Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n', 'latin1');
@@ -53,6 +54,7 @@ describe('per-job access control (integration)', () => {
     const workspaceId = onboard.body.data.id as string;
     const slug = onboard.body.data.slug as string;
     const asOwner = (r: request.Test) => r.set('Authorization', `Bearer ${ownerToken}`).set('X-Workspace-Id', workspaceId);
+    await activateSubscription(workspaceId);
 
     // Two recruiters: one will be granted access, one excluded.
     const inUserId = await inviteAndAccept(asOwner, workspaceId, 'in@access.test', 'recruiter');
@@ -130,6 +132,7 @@ describe('per-job access control (integration)', () => {
       .send({ name: 'Owner Two', company: 'Accessco2' });
     const workspaceId = onboard.body.data.id as string;
     const asOwner = (r: request.Test) => r.set('Authorization', `Bearer ${ownerToken}`).set('X-Workspace-Id', workspaceId);
+    await activateSubscription(workspaceId);
 
     const job = await asOwner(request(app).post('/api/v1/jobs').send({ title: 'Another Role' }) as any);
     const jobId = job.body.data.id as string;
