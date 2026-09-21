@@ -336,3 +336,8 @@
     outline-offset: 3px;
   }
 }
+
+@keyframes border-trail-move {
+  from { offset-distance: 0%; }
+  to   { offset-distance: 100%; }
+}
