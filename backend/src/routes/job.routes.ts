@@ -3,6 +3,7 @@ import {
   authenticate,
   resolveWorkspace,
   requireWorkspace,
+  requireActiveSubscription,
   requireRole,
   requireJobAccess,
   requirePlanFeature,
@@ -27,7 +28,7 @@ import {
 export const jobRouter = Router();
 
 // Every job route is workspace-scoped.
-jobRouter.use('/jobs', authenticate, resolveWorkspace, requireWorkspace);
+jobRouter.use('/jobs', authenticate, resolveWorkspace, requireWorkspace, requireActiveSubscription);
 
 jobRouter.get('/jobs', validateQuery(jobListQuerySchema), jobController.list);
 jobRouter.post('/jobs', requireRole('recruiter'), validateBody(createJobSchema), jobController.create);

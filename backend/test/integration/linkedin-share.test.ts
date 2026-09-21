@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import { createApp } from '../../src/app';
 import { connectDatabase, disconnectDatabase, mongoose } from '../../src/config/db';
+import { activateSubscription } from './helpers/activate-subscription';
 
 const app = createApp();
 
@@ -29,6 +30,7 @@ describe('LinkedIn manual share tracking (integration)', () => {
       .send({ name: 'LI Owner', company: 'LIco' });
     const workspaceId = onboard.body.data.id as string;
     const ws = (r: request.Test) => r.set('Authorization', `Bearer ${token}`).set('X-Workspace-Id', workspaceId);
+    await activateSubscription(workspaceId);
 
     const job = await ws(request(app).post('/api/v1/jobs').send({ title: 'LinkedIn Role' }) as any);
     const jobId = job.body.data.id as string;

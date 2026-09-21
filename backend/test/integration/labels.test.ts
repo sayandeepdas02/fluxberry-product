@@ -3,6 +3,7 @@ import request from 'supertest';
 import { createApp } from '../../src/app';
 import { connectDatabase, disconnectDatabase, mongoose } from '../../src/config/db';
 import { ApplicationModel } from '../../src/models/application.model';
+import { activateSubscription } from './helpers/activate-subscription';
 
 const app = createApp();
 const PDF = Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n', 'latin1');
@@ -32,6 +33,7 @@ describe('candidate labels (integration)', () => {
     const workspaceId = onboard.body.data.id as string;
     const slug = onboard.body.data.slug as string;
     const ws = (r: request.Test) => r.set('Authorization', `Bearer ${token}`).set('X-Workspace-Id', workspaceId);
+    await activateSubscription(workspaceId);
 
     // No labels yet.
     const empty = await ws(request(app).get(`/api/v1/workspaces/${workspaceId}/labels`) as any);

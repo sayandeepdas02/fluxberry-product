@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { organizerAvailabilityQuerySchema } from '../shared';
-import { authenticate, resolveWorkspace, requireWorkspace } from '../middleware/auth';
+import { authenticate, resolveWorkspace, requireWorkspace, requireActiveSubscription } from '../middleware/auth';
 import { validateQuery } from '../middleware/validate';
 import { calendarIntegrationController } from '../controllers/calendar-integration.controller';
 
@@ -11,7 +11,13 @@ export const integrationsRouter = Router();
 // authenticated group below so it matches first and never hits that middleware.
 integrationsRouter.get('/integrations/google-calendar/callback', calendarIntegrationController.callback);
 
-integrationsRouter.use('/integrations/google-calendar', authenticate, resolveWorkspace, requireWorkspace);
+integrationsRouter.use(
+  '/integrations/google-calendar',
+  authenticate,
+  resolveWorkspace,
+  requireWorkspace,
+  requireActiveSubscription,
+);
 integrationsRouter.get('/integrations/google-calendar/status', calendarIntegrationController.status);
 integrationsRouter.get('/integrations/google-calendar/connect', calendarIntegrationController.connect);
 integrationsRouter.delete('/integrations/google-calendar', calendarIntegrationController.disconnect);

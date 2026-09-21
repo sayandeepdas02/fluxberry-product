@@ -62,7 +62,7 @@ export interface BillingProvider {
 - `mock.ts`: deterministic checkout URL + in-memory subscription map (mirrors `MockEmailProvider`).
 - `dodo.ts`: real adapter — **flag explicitly**: confirm Dodo Payments' exact endpoint paths/payload/signature scheme against their live docs before finishing this file; keep method signatures fixed regardless so nothing downstream changes once confirmed.
 - `index.ts`: `getBillingProvider()`/`__resetBillingProvider()`, selected via `config.providers.mockAll` then `config.providers.billing.apiKey`.
-- Config additions in `backend/src/config/env.ts`: `DODO_API_KEY`, `DODO_WEBHOOK_SECRET`, `DODO_API_BASE`, `DODO_PRO_PRODUCT_ID` → `config.providers.billing`.
+- Config additions in `backend/src/config/env.ts`: `DODO_API_KEY`, `DODO_WEBHOOK_SECRET`, `DODO_ENVIRONMENT`, `DODO_PRO_PRODUCT_ID` → `config.providers.billing`.
 
 Model changes:
 - `backend/src/models/workspace.model.ts` — add `billing: {customerId, subscriptionId, subscriptionStatus, currentPeriodEnd}`. `plan` (`FREE|PRO`) stays the effective gate, flipped only by the webhook handler.

@@ -68,6 +68,8 @@ describe('billing (integration, mock Dodo)', () => {
     expect(afterUpgrade.body.data.plan).toBe('PRO');
     expect(afterUpgrade.body.data.subscriptionStatus).toBe('active');
     expect(afterUpgrade.body.data.hasBillingAccount).toBe(true);
+    // No billingCycle was sent on checkout — defaults to monthly.
+    expect(afterUpgrade.body.data.billingCycle).toBe('MONTHLY');
 
     // Webhook idempotency: replaying the exact same event must not double-process.
     await billingService.applyWebhookEvent(event);
@@ -84,18 +86,17 @@ describe('billing (integration, mock Dodo)', () => {
     await billingService.applyWebhookEvent(cancelEvent);
     const afterCancel = await WorkspaceModel.findById(workspaceId).lean();
     expect(afterCancel!.plan).toBe('FREE');
-    expect(afterCancel!.billing!.subscriptionStatus).toBe('canceled');
+    expect(afterCancel!.billing!.subscriptionStatus).toBe('cancelled');
   });
 
   it('rejects webhooks with a bad signature and enforces owner-only checkout', async () => {
-    // A malformed/unsigned webhook body is still accepted by the mock provider
-    // (verifyWebhookSignature always returns true in mock mode) but must fail
-    // to parse into a usable event rather than crash the process.
+    // The mock provider doesn't verify a real signature, but a body that
+    // can't even be parsed as JSON must still surface as a 400, not crash.
     const bad = await request(app)
       .post('/api/v1/webhooks/dodo')
       .set('Content-Type', 'application/json')
       .send('not json');
-    expect(bad.status).toBe(500); // JSON.parse throws -> asyncHandler -> error middleware, never a crash
+    expect(bad.status).toBe(400);
 
     const ownerToken = await tokenFor('billingowner2@test.com', 'Owner');
     const onboard = await request(app)
@@ -118,5 +119,63 @@ describe('billing (integration, mock Dodo)', () => {
       .send({ plan: 'PRO' });
     // Only the workspace owner can start a checkout — admins can view/manage billing status but not upgrade the plan.
     expect(res.status).toBe(403);
+  });
+
+  it('hard-paywalls product routes until the subscription is active', async () => {
+    const token = await tokenFor('paywallowner@test.com', 'Paywall Owner');
+    const onboard = await request(app)
+      .post('/api/v1/workspaces/onboarding')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ name: 'Paywall Owner', company: 'Paywallco' });
+    expect(onboard.status).toBe(201);
+    const workspaceId = onboard.body.data.id as string;
+    const ws = (r: request.Test) => r.set('Authorization', `Bearer ${token}`).set('X-Workspace-Id', workspaceId);
+    const createJob = () =>
+      ws(request(app).post('/api/v1/jobs').send({ title: 'Paywall Test Job' }) as any);
+
+    // No subscription yet — locked out of product routes.
+    const beforeSubscribe = await createJob();
+    expect(beforeSubscribe.status).toBe(403);
+    expect(beforeSubscribe.body.error.code).toBe('SUBSCRIPTION_REQUIRED');
+
+    // Subscribe.
+    const checkout = await ws(
+      request(app).post(`/api/v1/workspaces/${workspaceId}/billing/checkout`).send({ plan: 'PRO' }) as any,
+    );
+    const sessionId = new URL(checkout.body.data.url).searchParams.get('mockCheckoutSession')!;
+    await billingService.applyWebhookEvent(mockCompleteCheckout(sessionId));
+
+    // Now unlocked.
+    const afterSubscribe = await createJob();
+    expect(afterSubscribe.status).toBe(201);
+
+    // Cancel — locked out again.
+    await billingService.applyWebhookEvent(mockCancelSubscription(workspaceId));
+    const afterCancel = await createJob();
+    expect(afterCancel.status).toBe(403);
+    expect(afterCancel.body.error.code).toBe('SUBSCRIPTION_REQUIRED');
+  });
+
+  it('supports the annual billing cycle end to end', async () => {
+    const token = await tokenFor('annualowner@test.com', 'Annual Owner');
+    const onboard = await request(app)
+      .post('/api/v1/workspaces/onboarding')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ name: 'Annual Owner', company: 'Annualco' });
+    const workspaceId = onboard.body.data.id as string;
+    const ws = (r: request.Test) => r.set('Authorization', `Bearer ${token}`).set('X-Workspace-Id', workspaceId);
+
+    const checkout = await ws(
+      request(app)
+        .post(`/api/v1/workspaces/${workspaceId}/billing/checkout`)
+        .send({ plan: 'PRO', billingCycle: 'ANNUAL' }) as any,
+    );
+    expect(checkout.status).toBe(200);
+    const sessionId = new URL(checkout.body.data.url).searchParams.get('mockCheckoutSession')!;
+    await billingService.applyWebhookEvent(mockCompleteCheckout(sessionId));
+
+    const status = await ws(request(app).get(`/api/v1/workspaces/${workspaceId}/billing`) as any);
+    expect(status.body.data.plan).toBe('PRO');
+    expect(status.body.data.billingCycle).toBe('ANNUAL');
   });
 });

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authenticate, resolveWorkspace, requireWorkspace, requireRole, requirePlanFeature } from '../middleware/auth';
+import { authenticate, resolveWorkspace, requireWorkspace, requireRole, requireActiveSubscription } from '../middleware/auth';
 import { validateQuery } from '../middleware/validate';
 import { analyticsController } from '../controllers/analytics.controller';
 import { cohortComparisonQuerySchema } from '../shared';
@@ -11,15 +11,16 @@ analyticsRouter.get(
   authenticate,
   resolveWorkspace,
   requireWorkspace,
+  requireActiveSubscription,
   analyticsController.get,
 );
 
-// Phase 1 — no plan gate, same middleware as /analytics.
 analyticsRouter.get(
   '/analytics/pipeline-health',
   authenticate,
   resolveWorkspace,
   requireWorkspace,
+  requireActiveSubscription,
   analyticsController.getPipelineHealth,
 );
 
@@ -28,6 +29,7 @@ analyticsRouter.get(
   authenticate,
   resolveWorkspace,
   requireWorkspace,
+  requireActiveSubscription,
   analyticsController.getStageDwellTimes,
 );
 
@@ -36,16 +38,16 @@ analyticsRouter.get(
   authenticate,
   resolveWorkspace,
   requireWorkspace,
+  requireActiveSubscription,
   analyticsController.getOfferMetrics,
 );
 
-// Phase 2 — PRO-gated advanced analytics.
 analyticsRouter.get(
   '/analytics/advanced/source-quality',
   authenticate,
   resolveWorkspace,
   requireWorkspace,
-  requirePlanFeature('ADVANCED_ANALYTICS'),
+  requireActiveSubscription,
   analyticsController.getSourceQuality,
 );
 
@@ -54,7 +56,7 @@ analyticsRouter.get(
   authenticate,
   resolveWorkspace,
   requireWorkspace,
-  requirePlanFeature('ADVANCED_ANALYTICS'),
+  requireActiveSubscription,
   analyticsController.getRejectionDistribution,
 );
 
@@ -63,17 +65,16 @@ analyticsRouter.get(
   authenticate,
   resolveWorkspace,
   requireWorkspace,
-  requirePlanFeature('ADVANCED_ANALYTICS'),
+  requireActiveSubscription,
   analyticsController.getJobFillRates,
 );
 
-// Advanced analytics tier — the reference call-site for requirePlanFeature (see Phase 1).
 analyticsRouter.get(
   '/analytics/advanced/cohort',
   authenticate,
   resolveWorkspace,
   requireWorkspace,
-  requirePlanFeature('ADVANCED_ANALYTICS'),
+  requireActiveSubscription,
   validateQuery(cohortComparisonQuerySchema),
   analyticsController.getCohortComparison,
 );
@@ -86,6 +87,6 @@ analyticsRouter.get(
   resolveWorkspace,
   requireWorkspace,
   requireRole('admin'),
-  requirePlanFeature('ADVANCED_ANALYTICS'),
+  requireActiveSubscription,
   analyticsController.getLeaderboard,
 );

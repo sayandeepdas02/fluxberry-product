@@ -4,7 +4,7 @@ import {
   resolveWorkspace,
   requireWorkspace,
   requireRole,
-  requirePlanFeature,
+  requireActiveSubscription,
 } from '../middleware/auth';
 import { validateBody } from '../middleware/validate';
 import { bulkImportUpload } from '../middleware/upload';
@@ -19,7 +19,7 @@ const guard = [
   resolveWorkspace,
   requireWorkspace,
   requireRole('recruiter'),
-  requirePlanFeature('BULK_IMPORT'),
+  requireActiveSubscription,
 ] as const;
 
 bulkImportRouter.post('/bulk-imports', ...guard, uploadLimiter, bulkImportUpload, bulkImportController.create);

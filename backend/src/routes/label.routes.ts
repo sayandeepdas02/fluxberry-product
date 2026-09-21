@@ -1,12 +1,18 @@
 import { Router } from 'express';
-import { authenticate, resolveWorkspace, requireWorkspace, requireRole } from '../middleware/auth';
+import {
+  authenticate,
+  resolveWorkspace,
+  requireWorkspace,
+  requireActiveSubscription,
+  requireRole,
+} from '../middleware/auth';
 import { validateBody } from '../middleware/validate';
 import { labelController } from '../controllers/label.controller';
 import { createLabelSchema, updateLabelSchema } from '../shared';
 
 export const labelRouter = Router();
 
-const guard = [authenticate, resolveWorkspace, requireWorkspace] as const;
+const guard = [authenticate, resolveWorkspace, requireWorkspace, requireActiveSubscription] as const;
 
 labelRouter.get('/workspaces/:workspaceId/labels', ...guard, labelController.list);
 labelRouter.post(

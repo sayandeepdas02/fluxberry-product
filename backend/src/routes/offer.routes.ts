@@ -1,11 +1,24 @@
 import { Router } from 'express';
-import { authenticate, resolveWorkspace, requireWorkspace, requireRole, requireFeature } from '../middleware/auth';
+import {
+  authenticate,
+  resolveWorkspace,
+  requireWorkspace,
+  requireActiveSubscription,
+  requireRole,
+  requireFeature,
+} from '../middleware/auth';
 import { validateBody } from '../middleware/validate';
 import { offerController } from '../controllers/offer.controller';
 import { createOfferSchema } from '../shared';
 
 export const offerRouter = Router();
-const guard = [authenticate, resolveWorkspace, requireWorkspace, requireFeature('OFFER_MANAGEMENT')];
+const guard = [
+  authenticate,
+  resolveWorkspace,
+  requireWorkspace,
+  requireActiveSubscription,
+  requireFeature('OFFER_MANAGEMENT'),
+];
 
 offerRouter.post(
   '/applications/:applicationId/offers',

@@ -3,6 +3,7 @@ import request from 'supertest';
 import { createApp } from '../../src/app';
 import { connectDatabase, disconnectDatabase, mongoose } from '../../src/config/db';
 import { ApplicationModel } from '../../src/models/application.model';
+import { activateSubscription } from './helpers/activate-subscription';
 
 const app = createApp();
 const PDF = Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n', 'latin1');
@@ -31,6 +32,7 @@ describe('custom pipeline stages (integration)', () => {
       .send({ name: 'Stages Rec', company: 'Stageco' });
     const workspaceId = onboard.body.data.id as string;
     const ws = (r: request.Test) => r.set('Authorization', `Bearer ${token}`).set('X-Workspace-Id', workspaceId);
+    await activateSubscription(workspaceId);
 
     const job = await ws(request(app).post('/api/v1/jobs').send({ title: 'Designer' }) as any);
     const jobId = job.body.data.id as string;
