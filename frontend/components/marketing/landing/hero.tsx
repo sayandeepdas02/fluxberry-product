@@ -28,7 +28,7 @@ export function Hero({ announcement }: { announcement?: { href: string; title: s
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
             <MkButton href="/sign-up">Get started</MkButton>
             <MkButton href="#screening" variant="secondary">
-              Demo
+              Watch Demo
             </MkButton>
           </div>
         </div>
