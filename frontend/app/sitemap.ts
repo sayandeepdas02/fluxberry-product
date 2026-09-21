@@ -1,12 +1,11 @@
 import type { MetadataRoute } from 'next';
 import { publicConfig } from '@/lib/config';
 import { getAllPosts } from '@/lib/blog';
+import { fetchSitemapEntries } from '@/lib/public-api';
 
-// Dynamic per-workspace careers/job URLs need a public "list published
-// workspaces/jobs" endpoint that doesn't exist yet — ship the marketing URLs now
-// rather than block this on new backend work.
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const posts = getAllPosts();
+  const { careers, jobs } = await fetchSitemapEntries();
 
   return [
     { url: publicConfig.appUrl, changeFrequency: 'monthly', priority: 1 },
@@ -21,6 +20,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly' as const,
       priority: 0.6,
       lastModified: post.date ? new Date(post.date) : undefined,
+    })),
+    ...careers.map((page) => ({
+      url: `${publicConfig.appUrl}/${page.slug}/careers`,
+      changeFrequency: 'weekly' as const,
+      priority: 0.7,
+      lastModified: new Date(page.updatedAt),
+    })),
+    ...jobs.map((job) => ({
+      url: `${publicConfig.appUrl}/apply/${job.workspaceSlug}/${job.jobSlug}`,
+      changeFrequency: 'weekly' as const,
+      priority: 0.7,
+      lastModified: new Date(job.updatedAt),
     })),
   ];
 }

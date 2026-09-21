@@ -20,7 +20,7 @@ const rows = [
   {
     id: 'workflows',
     title: 'The pipeline moves without you',
-    body: 'Set the rules once: when a candidate reaches a stage, Fluxberry sends the email or advances them for you.',
+    body: 'Set the rules once: when a candidate reaches a stage, Fluxberry AI sends the email or advances them for you.',
     media: <WorkflowMockup />,
   },
 ];

@@ -28,7 +28,7 @@ const bool = (def: boolean) =>
     .transform((v) => (v == null || v === '' ? def : v === 'true' || v === '1'));
 
 const envSchema = z.object({
-  APP_NAME: z.string().default('Fluxberry'),
+  APP_NAME: z.string().default('Fluxberry AI'),
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().int().default(4000),
   CORS_ORIGINS: z.string().default('http://localhost:3000'),

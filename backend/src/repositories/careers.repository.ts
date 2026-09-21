@@ -8,4 +8,7 @@ export const careersRepository = {
     CareersPageModel.findOneAndUpdate({ workspaceId }, { $set: patch }, { new: true }),
   publishedJobs: (workspaceId: string) =>
     JobModel.find({ workspaceId, status: 'PUBLISHED' }).sort({ publishedAt: -1 }).lean(),
+
+  /** Every published careers page across every workspace — used to build the public sitemap. */
+  publishedPages: () => CareersPageModel.find({ published: true }).select('workspaceId updatedAt').lean(),
 };
