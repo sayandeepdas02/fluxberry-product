@@ -3,8 +3,8 @@ import { z } from 'zod';
 /**
  * A single pipeline stage, either one of the 7 system defaults (`system: true`)
  * or a workspace/job-defined custom stage. `id` is a stable key referenced by
- * `Application.stage` and workflow `MOVE_STAGE` nodes — it must never change
- * once created (only `label`/`color`/`sortOrder` are mutable for system stages).
+ * `Application.stage` — it must never change once created (only
+ * `label`/`color`/`sortOrder` are mutable for system stages).
  */
 export const pipelineStageSchema = z.object({
   id: z.string().trim().min(1).max(40),

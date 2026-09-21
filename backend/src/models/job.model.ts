@@ -64,7 +64,6 @@ const jobSchema = new Schema(
     /** Empty = visible to every workspace member (today's default); non-empty scopes visibility to these users. */
     restrictedTo: { type: [Schema.Types.ObjectId], ref: 'User', default: [] },
     applicationFormId: { type: Schema.Types.ObjectId, ref: 'ApplicationForm', default: null },
-    workflowId: { type: Schema.Types.ObjectId, ref: 'Workflow', default: null },
     // AI generation provenance (spec §16, §152)
     rawGenerationPrompt: { type: String, default: null },
     generatedDescription: { type: String, default: null },

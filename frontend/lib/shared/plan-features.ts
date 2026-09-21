@@ -9,8 +9,8 @@ import type { FeatureFlag } from './feature-flags';
  * operational kill-switch, it only narrows what a given plan is allowed to use.
  */
 export const PLAN_FEATURES: Record<WorkspacePlan, FeatureFlag[]> = {
-  FREE: ['WORKFLOW_AUTOMATION'],
-  PRO: ['WORKFLOW_AUTOMATION', 'ADVANCED_ANALYTICS', 'GDPR_TOOLS', 'OUTBOUND_WEBHOOKS', 'BULK_IMPORT'],
+  FREE: [],
+  PRO: ['ADVANCED_ANALYTICS', 'GDPR_TOOLS', 'OUTBOUND_WEBHOOKS', 'BULK_IMPORT'],
 };
 
 export function planIncludesFeature(plan: WorkspacePlan, flag: FeatureFlag): boolean {

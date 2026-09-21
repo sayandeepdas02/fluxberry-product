@@ -3,8 +3,6 @@ import request from 'supertest';
 import { createApp } from '../../src/app';
 import { connectDatabase, disconnectDatabase, mongoose } from '../../src/config/db';
 import { ApplicationModel } from '../../src/models/application.model';
-import { workflowRunRepository } from '../../src/repositories/workflow.repository';
-import { workflowEngine } from '../../src/services/workflow-engine.service';
 
 const app = createApp();
 const PDF = Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n', 'latin1');
@@ -101,67 +99,5 @@ describe('custom pipeline stages (integration)', () => {
       request(app).put(`/api/v1/jobs/${jobId}/stages`).send({ stages: withoutApplied }) as any,
     );
     expect(blockedSystemDelete.status).toBe(400);
-  });
-
-  it('a workflow MOVE_STAGE node skips gracefully if its target stage was later deleted', async () => {
-    const token = await tokenFor('stagesrec2@test.com', 'Stages Rec Two');
-    const onboard = await request(app)
-      .post('/api/v1/workspaces/onboarding')
-      .set('Authorization', `Bearer ${token}`)
-      .send({ name: 'Stages Rec Two', company: 'Stageco Two' });
-    const workspaceId = onboard.body.data.id as string;
-    const slug = onboard.body.data.slug as string;
-    const ws = (r: request.Test) => r.set('Authorization', `Bearer ${token}`).set('X-Workspace-Id', workspaceId);
-
-    const job = await ws(request(app).post('/api/v1/jobs').send({ title: 'Ops' }) as any);
-    const jobId = job.body.data.id as string;
-    const jobSlug = job.body.data.slug as string;
-
-    // Add a custom stage, then remove it again (so it's a stale reference).
-    const stages = job.body.data.stages as any[];
-    const withCustom = [...stages, { id: 'CUSTOM_X', label: 'Custom X', sortOrder: 99, system: false, terminal: false }];
-    await ws(request(app).put(`/api/v1/jobs/${jobId}/stages`).send({ stages: withCustom }) as any);
-
-    // A workflow that (once) moves candidates to CUSTOM_X on application.
-    await ws(
-      request(app)
-        .put(`/api/v1/jobs/${jobId}/workflow`)
-        .send({
-          status: 'ACTIVE',
-          nodes: [
-            { id: 'n1', type: 'APPLICATION_RECEIVED', position: { x: 0, y: 0 }, config: {} },
-            { id: 'n2', type: 'MOVE_STAGE', position: { x: 0, y: 0 }, config: { stage: 'CUSTOM_X' } },
-          ],
-          edges: [{ id: 'e1', source: 'n1', target: 'n2' }],
-        }) as any,
-    );
-
-    // Now delete CUSTOM_X before any candidate applies.
-    await ws(request(app).put(`/api/v1/jobs/${jobId}/stages`).send({ stages }) as any);
-    await ws(request(app).post(`/api/v1/jobs/${jobId}/publish`) as any);
-
-    await request(app)
-      .post(`/api/v1/public/jobs/${slug}/${jobSlug}/apply`)
-      .field('name', 'Workflow Candidate')
-      .field('email', 'workflowcand@test.com')
-      .field('answers', '[]')
-      .attach('resume', PDF, { filename: 'resume.pdf', contentType: 'application/pdf' });
-
-    const application = await ApplicationModel.findOne({ workspaceId }).lean();
-    const applicationId = String(application!._id);
-
-    // Drive the workflow run directly (no worker process in tests), same
-    // convention as other async-processing tests (e.g. codingGradingService.grade()).
-    const run = await workflowRunRepository.findByApplication(applicationId);
-    expect(run).toBeTruthy();
-    await workflowEngine.execute(String(run!._id));
-
-    const runAfter = await workflowRunRepository.findByApplication(applicationId);
-    // The run must complete, NOT be marked FAILED — the stale MOVE_STAGE node
-    // was skipped gracefully instead of throwing and failing the whole run.
-    expect(runAfter!.status).toBe('COMPLETED');
-
-    const applicationAfter = await ApplicationModel.findById(applicationId).lean();
-    expect(applicationAfter!.stage).toBe('APPLIED');
   });
 });

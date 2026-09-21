@@ -29,7 +29,7 @@ function statusForStage(stage: string): 'ACTIVE' | 'HIRED' | 'REJECTED' {
 
 /**
  * The ONE place application stages change (spec §95): validate -> update ->
- * event -> (workflow trigger, Slice 7) -> (analytics, Slice 8) -> audit.
+ * event -> (analytics, Slice 8) -> audit.
  * Controllers must never write `stage` directly.
  */
 export const stageService = {

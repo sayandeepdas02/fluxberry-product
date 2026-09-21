@@ -218,8 +218,8 @@ export const offerService = {
     if (!candidate || !job || !workspace) throw notFound('Offer not found');
 
     // No logged-in user makes this call — attribute the resulting stage change /
-    // event to the recruiter who created the offer (mirrors workflow-engine's
-    // "system" actor pattern for actions with no live user).
+    // event to the recruiter who created the offer (a "system" actor, since
+    // there's no live user for this action).
     const systemActor: Actor = { userId: String(offer.createdBy ?? offer.candidateId), label: 'candidate' };
 
     const workspaceId = String(offer.workspaceId);

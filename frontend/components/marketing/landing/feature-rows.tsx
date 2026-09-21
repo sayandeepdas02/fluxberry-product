@@ -1,9 +1,6 @@
 import { Section } from '../frame';
 import { CrossMark } from '../pixel-icons';
-import {
-  ScreeningMockup,
-  WorkflowMockup,
-} from '../mockups';
+import { ScreeningMockup } from '../mockups';
 
 /**
  * Alternating rows of mockup and copy, separated by dashed rules with crosshair
@@ -16,12 +13,6 @@ const rows = [
     title: 'Screening finishes before you open the résumé',
     body: 'Every application is scored against the role and summarised the moment it lands, so you start from a shortlist instead of an inbox.',
     media: <ScreeningMockup />,
-  },
-  {
-    id: 'workflows',
-    title: 'The pipeline moves without you',
-    body: 'Set the rules once: when a candidate reaches a stage, Fluxberry AI sends the email or advances them for you.',
-    media: <WorkflowMockup />,
   },
 ];
 

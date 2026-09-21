@@ -9,7 +9,6 @@ import { extractResumeText } from '../utils/resume-extract';
 import { computeScreeningScore } from './scoring.engine';
 import { eventBus } from '../events/event-bus';
 import { jobQueue } from '../queue/job-queue';
-import { workflowEngine } from './workflow-engine.service';
 import { logger } from '../utils/logger';
 import { notFound } from '../utils/errors';
 
@@ -197,8 +196,6 @@ export const screeningService = {
         candidateId: app.candidateId,
         payload: { score: final.total },
       });
-      // Resume any workflow waiting on AI screening.
-      await workflowEngine.resumeForApplication(payload.applicationId);
       logger.info({ applicationId: payload.applicationId, score: final.total }, 'screening completed');
     } catch (err) {
       await applicationRepository.update(payload.applicationId, { 'screeningResult.status': 'FAILED' });

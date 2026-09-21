@@ -6,7 +6,6 @@ import {
   Menu,
   X,
   Sparkles,
-  GitBranch,
   BarChart3,
   Share2,
   type LucideIcon,
@@ -24,12 +23,6 @@ const productMenu: NavChild[] = [
     description: 'Every applicant scored and summarised on arrival.',
     href: '/#screening',
     icon: Sparkles,
-  },
-  {
-    title: 'Workflows',
-    description: 'Move candidates and send email on stage changes.',
-    href: '/#workflows',
-    icon: GitBranch,
   },
   {
     title: 'Analytics',
@@ -113,7 +106,7 @@ export function SiteHeader() {
               )}
             >
               <span className="block px-2 pb-2 text-xs leading-[18px] text-ink-500">Built for your team</span>
-              <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+              <div className="grid grid-cols-1 gap-x-4 gap-y-1">
                 {productMenu.map(({ title, description, href, icon: Icon }) => (
                   <Link
                     key={title}

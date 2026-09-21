@@ -29,7 +29,6 @@ export function toJobDto(j: any, counts?: JobFunnelCounts): JobDto {
     stages: j.stages && j.stages.length ? j.stages : defaultPipelineStages(),
     restrictedTo: (j.restrictedTo ?? []).map((id: unknown) => String(id)),
     applicationFormId: j.applicationFormId ? String(j.applicationFormId) : null,
-    workflowId: j.workflowId ? String(j.workflowId) : null,
     createdBy: j.createdBy ? String(j.createdBy) : null,
     publishedAt: j.publishedAt ? new Date(j.publishedAt).toISOString() : null,
     closedAt: j.closedAt ? new Date(j.closedAt).toISOString() : null,

@@ -12,7 +12,6 @@ import { aiLimiter } from '../middleware/rate-limit';
 import { jobController } from '../controllers/job.controller';
 import { analyticsController } from '../controllers/analytics.controller';
 import { formController } from '../controllers/form.controller';
-import { workflowController } from '../controllers/workflow.controller';
 import {
   createJobSchema,
   updateJobSchema,
@@ -22,7 +21,6 @@ import {
   jobStatusSchema,
   setLinkedInPostedSchema,
   upsertFormSchema,
-  upsertWorkflowSchema,
   upsertPipelineStagesSchema,
 } from '../shared';
 
@@ -100,15 +98,5 @@ jobRouter.patch(
   requireRole('recruiter'),
   validateBody(upsertFormSchema),
   formController.update,
-);
-
-// Workflow (one per job).
-jobRouter.get('/jobs/:jobId/workflow', requireJobAccess, workflowController.get);
-jobRouter.put(
-  '/jobs/:jobId/workflow',
-  requireJobAccess,
-  requireRole('recruiter'),
-  validateBody(upsertWorkflowSchema),
-  workflowController.save,
 );
 

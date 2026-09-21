@@ -17,8 +17,7 @@ async function wipe() {
   const collections = [
     'users', 'workspaces', 'workspace_members', 'jobs', 'application_forms',
     'candidates', 'applications', 'application_answers',
-    'screening_results', 'workflows', 'workflow_runs',
-    'workflow_steps', 'events', 'audit_logs', 'jobs_queue', 'notifications',
+    'screening_results', 'events', 'audit_logs', 'jobs_queue', 'notifications',
   ];
   for (const name of collections) {
     await mongoose.connection.collection(name).deleteMany({}).catch(() => {});

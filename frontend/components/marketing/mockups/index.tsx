@@ -1,11 +1,7 @@
 import {
   Sparkles,
-  CalendarClock,
   CheckCircle2,
   Circle,
-  Mail,
-  GitBranch,
-  ArrowRight,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -159,43 +155,6 @@ export function ScreeningMockup() {
       <div className="flex items-center gap-2 px-1 text-[11px] text-ink-500">
         <Sparkles className="size-3.5 shrink-0 text-berry-600" />
         Summary and score are suggestions — a human always makes the call.
-      </div>
-    </Surface>
-  );
-}
-
-/* --------------------------------------------------------------------- workflows */
-
-export function WorkflowMockup() {
-  return (
-    <Surface className="items-center">
-      <div className="flex w-full max-w-[340px] flex-col items-stretch gap-0">
-        <Panel className="flex items-center gap-2 px-3 py-2.5">
-          <GitBranch className="size-4 shrink-0 text-berry-600" />
-          <span className="text-[12px] text-ink">
-            When stage becomes <span className="font-medium">Screened</span>
-          </span>
-        </Panel>
-        <span className="mx-auto h-5 w-px bg-[repeating-linear-gradient(to_bottom,#c4c4c4_0_3px,transparent_3px_6px)]" />
-        <Panel className="flex items-center gap-2 px-3 py-2.5">
-          <Sparkles className="size-4 shrink-0 text-ink-400" />
-          <span className="text-[12px] text-ink">
-            If score <span className="font-mono">≥ 80</span>
-          </span>
-        </Panel>
-        <span className="mx-auto h-5 w-px bg-[repeating-linear-gradient(to_bottom,#c4c4c4_0_3px,transparent_3px_6px)]" />
-        <div className="flex flex-col gap-2">
-          <Panel className="flex items-center gap-2 px-3 py-2.5">
-            <Mail className="size-4 shrink-0 text-ink-400" />
-            <span className="text-[12px] text-ink">Send assessment invite</span>
-            <ArrowRight className="ml-auto size-3.5 text-ink-300" />
-          </Panel>
-          <Panel className="flex items-center gap-2 px-3 py-2.5">
-            <CalendarClock className="size-4 shrink-0 text-ink-400" />
-            <span className="text-[12px] text-ink">Move to Interview</span>
-            <ArrowRight className="ml-auto size-3.5 text-ink-300" />
-          </Panel>
-        </div>
       </div>
     </Surface>
   );
