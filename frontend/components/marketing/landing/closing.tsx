@@ -12,7 +12,7 @@ export function ClosingSection() {
         </h2>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <MkButton href="/sign-up">Start for free</MkButton>
-          <MkButton href="/pricing" variant="secondary">
+          <MkButton href="/#pricing" variant="secondary">
             View pricing
           </MkButton>
         </div>

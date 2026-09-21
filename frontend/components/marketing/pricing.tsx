@@ -1,7 +1,5 @@
-import { Check, PlusIcon, ShieldCheckIcon, Star } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { BorderTrail } from '@/components/ui/border-trail';
+import { Check } from 'lucide-react';
+import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Section, SectionIntro } from './frame';
 
@@ -25,158 +23,110 @@ const PRO_FEATURES = [
 
 export function PricingSection() {
   return (
-    <Section id="pricing" className="px-8 py-[88px]">
-      <SectionIntro className="px-0">
-        <div className="flex items-center gap-2">
-          <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-ink-500">Pricing</span>
-        </div>
-        <h2 className="mt-4 max-w-xl text-[clamp(28px,3vw,40px)] font-medium leading-[1.1] tracking-[-0.03em] text-ink">
-          One plan.
+    <Section id="pricing">
+      <SectionIntro className="flex flex-col items-center text-center">
+        <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-ink-400">Pricing</span>
+        <h2 className="mt-4 text-mk-h2 text-ink">
+          Simple plans.
           <br />
-          <span className="text-ink-muted">Pay less when you commit.</span>
+          <span className="text-ink-muted">Everything you need.</span>
         </h2>
-        <p className="mt-4 max-w-lg text-[15px] leading-relaxed text-ink-500">
-          Fluxberry Pro unlocks advanced analytics, bulk import, GDPR tools, and webhooks.
-          Choose monthly for flexibility or annual to save 58%.
+        <p className="mt-4 max-w-[440px] text-mk-body text-ink-500">
+          Start free and upgrade to Pro when you need more. No hidden fees, cancel any time.
         </p>
       </SectionIntro>
 
-      <div className="relative mt-10">
-        {/* faint grid backdrop */}
-        <div
-          className={cn(
-            'pointer-events-none absolute inset-0 z-0',
-            'bg-[linear-gradient(to_right,theme(colors.ink.200)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.ink.200)_1px,transparent_1px)]',
-            'bg-[size:32px_32px]',
-            '[mask-image:radial-gradient(ellipse_at_center,transparent_10%,black)]',
-          )}
-        />
-
-        <div className="relative mx-auto w-full max-w-2xl space-y-2">
-          {/* pricing cards */}
-          <div className="relative grid border bg-background md:grid-cols-2">
-            <PlusIcon className="absolute -left-3 -top-3 size-5.5 text-ink-300" />
-            <PlusIcon className="absolute -right-3 -top-3 size-5.5 text-ink-300" />
-            <PlusIcon className="absolute -bottom-3 -left-3 size-5.5 text-ink-300" />
-            <PlusIcon className="absolute -bottom-3 -right-3 size-5.5 text-ink-300" />
-
-            {/* Monthly */}
-            <div className="w-full px-6 pb-6 pt-5">
-              <div className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-semibold leading-none text-ink">Monthly</h3>
-                </div>
-                <p className="text-sm text-ink-500">Flexible, cancel any time.</p>
-              </div>
-              <div className="mt-8 space-y-4">
-                <div className="flex items-end gap-0.5 text-xl text-ink-400">
-                  <span>$</span>
-                  <span className="-mb-0.5 text-4xl font-extrabold tracking-tighter text-ink md:text-5xl">40</span>
-                  <span>/month</span>
-                </div>
-                <Button className="w-full" variant="outline" asChild>
-                  <a href="/sign-up">Get started</a>
-                </Button>
-              </div>
-            </div>
-
-            {/* Annual */}
-            <div className="relative w-full rounded-lg border px-6 pb-6 pt-5">
-              <BorderTrail
-                style={{
-                  boxShadow:
-                    '0px 0px 60px 30px rgb(255 255 255 / 50%), 0 0 100px 60px rgb(0 0 0 / 50%), 0 0 140px 90px rgb(0 0 0 / 50%)',
-                }}
-                size={100}
-              />
-              <div className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-semibold leading-none text-ink">Annual</h3>
-                  <div className="flex items-center gap-x-1.5">
-                    <span className="text-sm text-ink-400 line-through">$40/mo</span>
-                    <Badge variant="primary">58% off</Badge>
-                  </div>
-                </div>
-                <p className="text-sm text-ink-500">Billed $200/year + priority support.</p>
-              </div>
-              <div className="mt-8 space-y-4">
-                <div className="flex items-end gap-0.5 text-xl text-ink-400">
-                  <span>$</span>
-                  <span className="-mb-0.5 text-4xl font-extrabold tracking-tighter text-ink md:text-5xl">17</span>
-                  <span>/month</span>
-                </div>
-                <Button className="w-full" asChild>
-                  <a href="/sign-up">Get started</a>
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-center gap-x-2 text-sm text-ink-500">
-            <ShieldCheckIcon className="size-4" />
-            <span>All features included — no hidden fees</span>
-          </div>
+      <div className="px-8 pb-16 sm:px-12">
+        <div className="mx-auto grid max-w-3xl grid-cols-1 gap-4 sm:grid-cols-2">
+          <PlanCard
+            name="Free"
+            price="0"
+            period="/ month"
+            description="For small teams just getting started with hiring."
+            features={FREE_FEATURES}
+            cta={{ label: 'Get started', href: '/sign-up', filled: false }}
+          />
+          <PlanCard
+            name="Pro"
+            price="40"
+            period="/ month"
+            pricingNote="or $17 / month billed annually — save 58%"
+            description="For teams that need the full platform unlocked."
+            features={PRO_FEATURES}
+            badge="Most popular"
+            cta={{ label: 'Get started', href: '/sign-up', filled: true }}
+          />
         </div>
-      </div>
-
-      {/* Feature comparison */}
-      <div className="mt-20 grid gap-8 sm:grid-cols-2">
-        <FeatureColumn
-          title="Free"
-          subtitle="Everything you need to start hiring."
-          features={FREE_FEATURES}
-          variant="default"
-        />
-        <FeatureColumn
-          title="Pro"
-          subtitle="Unlock the full platform."
-          features={PRO_FEATURES}
-          variant="pro"
-          annualNote="Annual plan includes priority support."
-        />
       </div>
     </Section>
   );
 }
 
-function FeatureColumn({
-  title,
-  subtitle,
+function PlanCard({
+  name,
+  price,
+  period,
+  pricingNote,
+  description,
   features,
-  variant,
-  annualNote,
+  badge,
+  cta,
 }: {
-  title: string;
-  subtitle: string;
+  name: string;
+  price: string;
+  period: string;
+  pricingNote?: string;
+  description: string;
   features: string[];
-  variant: 'default' | 'pro';
-  annualNote?: string;
+  badge?: string;
+  cta: { label: string; href: string; filled: boolean };
 }) {
   return (
-    <div className={cn('rounded-lg border p-6', variant === 'pro' && 'border-primary/30 bg-primary/5')}>
-      <div className="mb-5">
-        <h3 className="text-base font-semibold text-ink">{title}</h3>
-        <p className="mt-1 text-sm text-ink-500">{subtitle}</p>
+    <div className="flex flex-col rounded-[12px] border border-ink-200 bg-white p-6">
+      <div className="flex items-start justify-between gap-2">
+        <h3 className="text-base font-semibold text-ink">{name}</h3>
+        {badge && (
+          <span className="rounded-full bg-berry-600 px-2.5 py-0.5 text-[11px] font-medium text-white">
+            {badge}
+          </span>
+        )}
       </div>
-      <ul className="space-y-3">
-        {features.map((feature) => (
-          <li key={feature} className="flex items-center gap-2.5 text-sm text-ink-600">
-            <Check
-              className={cn(
-                'size-4 shrink-0',
-                variant === 'pro' ? 'text-primary' : 'text-ink-400',
-              )}
-            />
-            {feature}
+
+      <div className="mt-4 flex items-end gap-1">
+        <span className="mb-1 text-xl text-ink-400">$</span>
+        <span className="text-5xl font-extrabold leading-none tracking-tighter text-ink">{price}</span>
+        <span className="mb-1 text-sm text-ink-400">{period}</span>
+      </div>
+
+      <p className="mt-2 text-sm text-ink-500">{description}</p>
+      {pricingNote && (
+        <p className="mt-1 text-[12px] text-ink-400">{pricingNote}</p>
+      )}
+
+      <div className="my-5 border-t border-ink-line" />
+      <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.08em] text-ink-400">Includes</p>
+
+      <ul className="flex-1 space-y-2.5">
+        {features.map((f) => (
+          <li key={f} className="flex items-center gap-2.5 text-sm text-ink-600">
+            <Check className="size-4 shrink-0 text-berry-600" />
+            {f}
           </li>
         ))}
-        {annualNote && (
-          <li className="flex items-center gap-2.5 text-sm text-ink-500">
-            <Star className="size-4 shrink-0 text-amber-500" />
-            {annualNote}
-          </li>
-        )}
       </ul>
+
+      <Link
+        href={cta.href}
+        className={cn(
+          'mt-6 flex w-full items-center justify-center gap-2 rounded-[8px] py-2.5 text-[14px] font-medium transition-colors',
+          cta.filled
+            ? 'bg-berry-600 text-white hover:bg-berry-700'
+            : 'border border-ink-200 text-ink hover:bg-ink-50',
+        )}
+      >
+        {cta.label}
+        <span aria-hidden>→</span>
+      </Link>
     </div>
   );
 }

@@ -9,7 +9,7 @@ import { MkButton } from './mk-button';
 
 const navLinks = [
   { label: 'Features', href: '/#features' },
-  { label: 'Pricing', href: '/pricing' },
+  { label: 'Pricing', href: '/#pricing' },
   { label: 'Blog', href: '/blog' },
 ];
 
