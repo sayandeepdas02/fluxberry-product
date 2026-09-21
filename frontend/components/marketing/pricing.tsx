@@ -41,6 +41,7 @@ export function PricingSection() {
             price="40"
             period="/ month"
             features={PRO_FEATURES}
+            filled
             cta="/sign-up"
           />
           <BillingCard
@@ -65,6 +66,7 @@ function BillingCard({
   features,
   discount,
   featured = false,
+  filled = false,
   cta,
 }: {
   label: string;
@@ -73,6 +75,7 @@ function BillingCard({
   features: string[];
   discount?: string;
   featured?: boolean;
+  filled?: boolean;
   cta: string;
 }) {
   return (
@@ -128,6 +131,8 @@ function BillingCard({
           'mt-6 flex w-full items-center justify-center gap-2 rounded-[8px] py-2.5 text-[14px] font-medium transition-colors',
           featured
             ? 'bg-white text-berry-600 hover:bg-berry-50'
+            : filled
+            ? 'bg-berry-600 text-white hover:bg-berry-700'
             : 'border border-ink-200 text-ink hover:bg-ink-50',
         )}
       >
