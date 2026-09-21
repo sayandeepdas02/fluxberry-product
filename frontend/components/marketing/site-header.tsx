@@ -62,8 +62,6 @@ export function SiteHeader() {
           {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
         </button>
 
-        <span className="mk-cross mk-cross-bl max-[860px]:hidden" aria-hidden />
-        <span className="mk-cross mk-cross-br max-[860px]:hidden" aria-hidden />
       </div>
 
       {mobileOpen && (
