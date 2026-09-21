@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { publicConfig } from '@/lib/config';
-import { getAllPosts } from '@/lib/blog';
 import { Hero } from '@/components/marketing/landing/hero';
 import { FeaturesSection } from '@/components/marketing/landing/features';
 import { VideoSection } from '@/components/marketing/landing/video';
@@ -29,15 +28,13 @@ const jsonLd = {
 };
 
 export default function LandingPage() {
-  const [latest] = getAllPosts();
-
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
       />
-      <Hero announcement={latest ? { href: `/blog/${latest.slug}`, title: latest.title } : undefined} />
+      <Hero />
       <FeaturesSection />
       <VideoSection />
       <PricingSection />
