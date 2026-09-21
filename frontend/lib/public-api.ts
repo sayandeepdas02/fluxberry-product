@@ -69,3 +69,21 @@ export async function fetchPublicCareersJobs(slug: string): Promise<PublicCareer
   }
 }
 
+export interface SitemapEntries {
+  careers: { slug: string; updatedAt: string }[];
+  jobs: { workspaceSlug: string; jobSlug: string; updatedAt: string }[];
+}
+
+/** Every published careers/job URL, for `app/sitemap.ts`. Empty result on any failure — never blocks the build. */
+export async function fetchSitemapEntries(): Promise<SitemapEntries> {
+  const empty: SitemapEntries = { careers: [], jobs: [] };
+  try {
+    const res = await fetch(`${publicConfig.apiUrl}/api/v1/public/sitemap-entries`, { cache: 'no-store' });
+    if (!res.ok) return empty;
+    const json = await res.json();
+    return json?.success ? (json.data as SitemapEntries) : empty;
+  } catch {
+    return empty;
+  }
+}
+

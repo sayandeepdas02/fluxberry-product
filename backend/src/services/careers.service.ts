@@ -2,6 +2,7 @@ import crypto from 'node:crypto';
 import type { CareersPageDto, UpdateCareersInput, PublicCareersDto } from '../shared';
 import { careersRepository } from '../repositories/careers.repository';
 import { workspaceRepository } from '../repositories/workspace.repository';
+import { jobRepository } from '../repositories/job.repository';
 import { toCareersPageDto, toPublicJob } from '../serializers/careers.serializer';
 import { auditService } from './audit.service';
 import { conflict, notFound } from '../utils/errors';
@@ -138,6 +139,37 @@ export const careersService = {
       coverImageUrl: dto.coverImageUrl,
       openings: dto.jobs.enabled ? jobs.map((j) => toPublicJob(j, workspace.slug)) : [],
     };
+  },
+
+  /**
+   * Flat list of every publicly-indexable careers/job URL, for the frontend's
+   * sitemap.xml — the apply page is reachable independent of the careers page
+   * being published, so published jobs are listed regardless of careers status.
+   */
+  async getSitemapEntries(): Promise<{
+    careers: { slug: string; updatedAt: Date }[];
+    jobs: { workspaceSlug: string; jobSlug: string; updatedAt: Date }[];
+  }> {
+    const [pages, jobs] = await Promise.all([careersRepository.publishedPages(), jobRepository.listAllPublished()]);
+
+    const workspaceIds = [...new Set([...pages, ...jobs].map((doc) => String(doc.workspaceId)))];
+    const workspaces = await workspaceRepository.findByIds(workspaceIds);
+    const byId = new Map(workspaces.map((w) => [String(w._id), w]));
+
+    const careers = pages
+      .map((p) => byId.get(String(p.workspaceId)))
+      .filter((w): w is NonNullable<typeof w> => Boolean(w?.careersSlug))
+      .map((w) => ({ slug: w.careersSlug as string, updatedAt: w.updatedAt as Date }));
+
+    const jobUrls = jobs
+      .map((j) => {
+        const w = byId.get(String(j.workspaceId));
+        if (!w) return null;
+        return { workspaceSlug: w.slug, jobSlug: j.slug, updatedAt: (j.publishedAt ?? j.updatedAt) as Date };
+      })
+      .filter((entry): entry is { workspaceSlug: string; jobSlug: string; updatedAt: Date } => entry != null);
+
+    return { careers, jobs: jobUrls };
   },
 };
 

@@ -14,6 +14,16 @@ const isPublicRoute = createRouteMatcher([
   '/api/v1/public/(.*)',
   '/robots.txt',
   '/sitemap.xml',
+  // Next's dynamic icon/manifest routes serve extensionless URLs (no literal
+  // ".png" in the path), so the matcher's static-file exclusion below doesn't
+  // skip them — without this they'd get Clerk's auth handshake instead of
+  // rendering for anonymous visitors (crawlers, social-share scrapers, browsers).
+  '/icon',
+  '/apple-icon',
+  '/opengraph-image',
+  '/manifest.webmanifest',
+  '/manifest-icon-192.png',
+  '/manifest-icon-512.png',
 ]);
 
 export default clerkMiddleware(async (auth, req) => {

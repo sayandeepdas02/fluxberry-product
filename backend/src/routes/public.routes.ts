@@ -33,6 +33,9 @@ publicRouter.get('/public/referrals/:code', referralController.resolvePublic);
 publicRouter.get('/public/careers/:slug', careersController.publicGet);
 publicRouter.get('/public/careers/:slug/jobs', careersController.publicJobs);
 
+// Flat list of every published careers/job URL, consumed by the frontend's sitemap.xml.
+publicRouter.get('/public/sitemap-entries', careersController.publicSitemapEntries);
+
 // Public offer view + candidate response (token-gated, no account needed).
 publicRouter.get('/public/offers/:token', offerController.getByToken);
 publicRouter.post('/public/offers/:token/respond', publicApplyLimiter, validateBody(offerDecisionSchema), offerController.respond);

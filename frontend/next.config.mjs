@@ -22,6 +22,19 @@ const nextConfig = {
   // workspace symlink to its real path (outside node_modules), which would otherwise
   // apply the React-Refresh loader and inject import.meta into a CJS module.
   eslint: { ignoreDuringBuilds: true },
+  // fluxberry.in (apex) is canonical — both hosts resolve at the DNS/CORS layer today,
+  // which risks duplicate-content indexing. Redirect www to apex at the app level so it
+  // works regardless of hosting provider.
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: 'www.fluxberry.in' }],
+        destination: 'https://fluxberry.in/:path*',
+        permanent: true,
+      },
+    ];
+  },
   webpack: (config, { dev }) => {
     // Dev only: keep webpack from following the workspace symlink so React-Refresh
     // isn't applied to @fluxberry/shared's CJS dist. In prod there's no Refresh, and

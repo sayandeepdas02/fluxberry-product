@@ -6,7 +6,10 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: ['/app', '/sign-in', '/sign-up', '/onboarding'],
+      // /sign-in and /sign-up carry an explicit noindex meta tag instead of a
+      // crawl disallow — Google needs to crawl a URL to see its noindex tag, and
+      // disallow+noindex together can leave a linked URL indexed with no snippet.
+      disallow: ['/app', '/onboarding'],
     },
     sitemap: `${publicConfig.appUrl}/sitemap.xml`,
   };
