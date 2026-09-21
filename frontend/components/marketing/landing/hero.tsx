@@ -16,12 +16,13 @@ export function Hero({ announcement }: { announcement?: { href: string; title: s
           )}
 
           <h1 className="mt-4 max-w-[760px] text-balance text-mk-hero text-ink">
-            Hire faster <span className="text-ink-muted">with less noise.</span>
+            The #1 AI Native <span className="text-ink-muted">Hiring Platform</span>
           </h1>
 
-          <p className="mt-6 max-w-[540px] text-balance text-mk-lead text-ink-500">
-            Fluxberry AI scores every applicant on arrival, moves your pipeline forward automatically,
-            and keeps everything from first application to offer in one place.
+          <p className="mt-6 max-w-[480px] text-mk-lead text-ink-500">
+            Fluxberry AI is an AI Native hiring tool that is fast, simple.
+            <br />
+            Built for founders &amp; hiring managers.
           </p>
 
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
