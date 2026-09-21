@@ -13,15 +13,15 @@ const columns = [
   {
     heading: 'Product',
     links: [
-      { label: 'AI screening', href: '/#screening' },
+      { label: 'Features', href: '/#features' },
+      { label: 'Pricing', href: '/pricing' },
+      { label: 'Demo', href: '/#demo' },
     ],
   },
   {
     heading: 'Resources',
     links: [
       { label: 'Blog', href: '/blog' },
-      { label: 'Analytics', href: '/#analytics' },
-      { label: 'Careers page', href: '/#careers' },
     ],
   },
   {

@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import { publicConfig } from '@/lib/config';
 import { getAllPosts } from '@/lib/blog';
 import { Hero } from '@/components/marketing/landing/hero';
-import { ContextSection } from '@/components/marketing/landing/context';
-import { FeatureRows } from '@/components/marketing/landing/feature-rows';
-import { TrustSection } from '@/components/marketing/landing/trust';
+import { FeaturesSection } from '@/components/marketing/landing/features';
+import { VideoSection } from '@/components/marketing/landing/video';
+import { PricingSection } from '@/components/marketing/pricing';
 import { ClosingSection } from '@/components/marketing/landing/closing';
 
 const title = `${publicConfig.appName} - AI Native Hiring Platform`;
@@ -12,8 +12,6 @@ const description =
   'Fluxberry AI scores every applicant on arrival, runs assessments and interviews, and moves your pipeline forward — the AI-native hiring platform for small teams.';
 
 export const metadata: Metadata = {
-  // `absolute` bypasses the root layout's `%s · Fluxberry AI` template — this
-  // title already states the tagline in full and shouldn't get the suffix appended.
   title: { absolute: title },
   description,
   alternates: { canonical: '/' },
@@ -40,9 +38,9 @@ export default function LandingPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
       />
       <Hero announcement={latest ? { href: `/blog/${latest.slug}`, title: latest.title } : undefined} />
-      <ContextSection />
-      <FeatureRows />
-      <TrustSection />
+      <FeaturesSection />
+      <VideoSection />
+      <PricingSection />
       <ClosingSection />
     </>
   );

@@ -67,14 +67,14 @@ const config: Config = {
          * `ink` is the neutral/hairline ramp the ruled-paper layout is built from.
          */
         berry: {
-          50: '#fdf2f8',
-          100: '#fce7f3',
-          200: '#fbcfe8',
-          400: '#f472b6',
-          500: '#ec4899',
-          600: '#db2777',
-          700: '#be185d',
-          900: '#831843',
+          50: '#f0f4ff',
+          100: '#dde6ff',
+          200: '#b8ccff',
+          400: '#4f78d8',
+          500: '#2955b8',
+          600: '#0e2f7e',
+          700: '#0a2462',
+          900: '#061240',
         },
         ink: {
           DEFAULT: '#202020',
