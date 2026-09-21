@@ -51,6 +51,16 @@ envVarGroups:
         value: production
       - key: POSTHOG_KEY
         sync: false
+      - key: DODO_API_KEY
+        sync: false
+      - key: DODO_WEBHOOK_SECRET
+        sync: false
+      - key: DODO_ENVIRONMENT
+        value: live_mode
+      - key: DODO_PRO_PRODUCT_ID
+        sync: false
+      - key: DODO_PRO_PRODUCT_ID_ANNUAL
+        sync: false
 
 services:
   - type: web
