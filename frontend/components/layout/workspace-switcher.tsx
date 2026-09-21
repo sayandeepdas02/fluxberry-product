@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { CreateWorkspaceDialog } from '@/components/workspace/create-workspace-dialog';
-import { signOut } from '@/lib/auth-actions';
+import { useClerk } from '@clerk/nextjs';
 import { initials, cn } from '@/lib/utils';
 
 export function WorkspaceSwitcher() {
@@ -23,11 +23,13 @@ export function WorkspaceSwitcher() {
   const queryClient = useQueryClient();
   const { workspaces, currentWorkspace, switchWorkspace } = useWorkspace();
   const [createOpen, setCreateOpen] = useState(false);
+  const { signOut } = useClerk();
 
   const logout = async () => {
-    await signOut();
     queryClient.clear();
-    router.replace('/login');
+    window.localStorage.removeItem('fluxberry_test_token');
+    window.localStorage.removeItem('fluxberry_workspace_id');
+    await signOut({ redirectUrl: '/' });
   };
 
   return (

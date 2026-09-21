@@ -14,7 +14,7 @@ export function ClosingSection() {
           <MkButton href="/blog" variant="secondary">
             Read the blog
           </MkButton>
-          <MkButton href="/signup">Start for free</MkButton>
+          <MkButton href="/sign-up">Start for free</MkButton>
         </div>
       </div>
     </Section>

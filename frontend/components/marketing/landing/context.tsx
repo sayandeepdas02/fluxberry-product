@@ -29,7 +29,7 @@ export function ContextSection() {
           Screening, referrals and your job board all sit in one place, so
           nothing about a candidate lives in someone&apos;s inbox.
         </p>
-        <TextLink href="/signup">Create your workspace</TextLink>
+        <TextLink href="/sign-up">Create your workspace</TextLink>
       </div>
 
       <div>

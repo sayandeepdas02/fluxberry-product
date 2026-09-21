@@ -28,9 +28,8 @@ const columns = [
   {
     heading: 'Account',
     links: [
-      { label: 'Log in', href: '/login' },
-      { label: 'Create account', href: '/signup' },
-      { label: 'Forgot password', href: '/forgot-password' },
+      { label: 'Log in', href: '/sign-in' },
+      { label: 'Create account', href: '/sign-up' },
     ],
   },
 ];
@@ -95,7 +94,7 @@ export function SiteFooter() {
               </Link>
             </li>
             <li>
-              <Link href="/signup" className="mk-focus font-mono text-[11px] uppercase tracking-[0.08em] text-ink-400 transition-colors hover:text-ink">
+              <Link href="/sign-up" className="mk-focus font-mono text-[11px] uppercase tracking-[0.08em] text-ink-400 transition-colors hover:text-ink">
                 Get started
               </Link>
             </li>

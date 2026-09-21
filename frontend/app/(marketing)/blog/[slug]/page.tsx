@@ -104,7 +104,7 @@ export default async function BlogPostPage({ params }: Params) {
             See Fluxberry on your own pipeline.
           </h2>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-            <MkButton href="/signup">Start for free</MkButton>
+            <MkButton href="/sign-up">Start for free</MkButton>
             <MkButton href="/blog" variant="secondary">
               Read more
             </MkButton>

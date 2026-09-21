@@ -6,7 +6,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { PublicInviteDto, AcceptInviteResultDto } from '@/lib/shared';
 import { api, setWorkspaceId } from '@/lib/api-client';
 import { useSession } from '@/hooks/use-session';
-import { signOut } from '@/lib/auth-actions';
+import { useClerk } from '@clerk/nextjs';
+import { clearLocalAuthState } from '@/lib/auth-actions';
 import { AuthHeading, authButtonClass } from '@/components/marketing/auth-shell';
 import { Button } from '@/components/ui/button';
 import { PageSpinner } from '@/components/ui/spinner';
@@ -19,6 +20,7 @@ export function AcceptInvite() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [switching, setSwitching] = useState(false);
+  const { signOut } = useClerk();
 
   const {
     data: invite,
@@ -71,7 +73,7 @@ export function AcceptInvite() {
     return (
       <>
         <AuthHeading title="Already accepted" subtitle="This invite has already been accepted." />
-        <Button className={`${authButtonClass} mt-6`} onClick={() => router.push(session ? '/app' : '/login')}>
+        <Button className={`${authButtonClass} mt-6`} onClick={() => router.push(session ? '/app' : '/sign-in')}>
           {session ? 'Go to workspace' : 'Log in'}
         </Button>
       </>
@@ -96,10 +98,10 @@ export function AcceptInvite() {
 
       {!session ? (
         <div className="mt-7 space-y-3">
-          <Button className={authButtonClass} onClick={() => router.push(`/signup${nextParam}`)}>
+          <Button className={authButtonClass} onClick={() => router.push(`/sign-up${nextParam}`)}>
             Create account
           </Button>
-          <Button variant="outline" className="h-[42px] w-full rounded-[7px]" onClick={() => router.push(`/login${nextParam}`)}>
+          <Button variant="outline" className="h-[42px] w-full rounded-[7px]" onClick={() => router.push(`/sign-in${nextParam}`)}>
             Log in
           </Button>
         </div>
@@ -114,9 +116,10 @@ export function AcceptInvite() {
             loading={switching}
             onClick={async () => {
               setSwitching(true);
+              clearLocalAuthState();
               await signOut();
               await queryClient.invalidateQueries({ queryKey: ['session'] });
-              router.push(`/login${nextParam}`);
+              router.push(`/sign-in${nextParam}`);
             }}
           >
             Log out and switch accounts

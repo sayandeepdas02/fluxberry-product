@@ -1,5 +1,4 @@
 import { publicConfig } from './config';
-import { getSupabaseClient } from './supabase/client';
 
 export const STORAGE_KEYS = {
   testToken: 'fluxberry_test_token',
@@ -32,15 +31,12 @@ export function getPlanUpgradeFlag(err: unknown): string | undefined {
   return undefined;
 }
 
-/** Current access token: dev test-token (if set), then Clerk (if available), else Supabase session token. */
+/** Current access token: dev test-token (if set), then Clerk session token. */
 export async function getAccessToken(): Promise<string | null> {
   if (typeof window !== 'undefined') {
     const test = window.localStorage.getItem(STORAGE_KEYS.testToken);
     if (test) return test;
   }
-  // Try Clerk first if available — capture the session ref once to avoid a
-  // TOCTOU race where Clerk is still loading and `session` becomes defined
-  // between the guard check and the getToken() call (or vice-versa).
   if (typeof window !== 'undefined') {
     const clerkSession = (window as any).Clerk?.session;
     if (clerkSession) {
@@ -48,11 +44,7 @@ export async function getAccessToken(): Promise<string | null> {
       if (token) return token;
     }
   }
-  // Fall back to Supabase
-  const supabase = getSupabaseClient();
-  if (!supabase) return null;
-  const { data } = await supabase.auth.getSession();
-  return data.session?.access_token ?? null;
+  return null;
 }
 
 export function getWorkspaceId(): string | null {

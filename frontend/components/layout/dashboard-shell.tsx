@@ -14,7 +14,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (session?.needsOnboarding) router.replace('/onboarding');
-    else if (!isLoading && !session) router.replace('/login');
+    else if (!isLoading && !session) router.replace('/sign-in');
   }, [session, isLoading, router]);
 
   if (isLoading || !session || session.needsOnboarding) return <PageSpinner label="Loading…" />;

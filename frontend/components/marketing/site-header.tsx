@@ -141,10 +141,10 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-2 justify-self-end max-[960px]:hidden">
-          <MkButton href="/login" variant="secondary" size="sm">
+          <MkButton href="/sign-in" variant="secondary" size="sm">
             Log in
           </MkButton>
-          <MkButton href="/signup" size="sm">
+          <MkButton href="/sign-up" size="sm">
             Get started
           </MkButton>
         </div>
@@ -189,10 +189,10 @@ export function SiteHeader() {
             </Link>
           </nav>
           <div className="flex flex-col items-start gap-3 pt-1">
-            <MkButton href="/login" variant="secondary" size="sm" className="w-full">
+            <MkButton href="/sign-in" variant="secondary" size="sm" className="w-full">
               Log in
             </MkButton>
-            <MkButton href="/signup" size="sm" className="w-full">
+            <MkButton href="/sign-up" size="sm" className="w-full">
               Get started
             </MkButton>
           </div>
