@@ -3,18 +3,13 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Section, SectionIntro } from './frame';
 
-const FREE_FEATURES = [
-  '3 active job posts',
+const PRO_FEATURES = [
+  'Unlimited job posts',
   'Unlimited candidates',
   'AI applicant scoring',
   'Custom pipeline stages',
   'Application forms',
   'Team collaboration',
-];
-
-const PRO_FEATURES = [
-  'Everything in Free',
-  'Unlimited job posts',
   'Advanced analytics',
   'Bulk candidate import',
   'GDPR tools',
@@ -32,28 +27,27 @@ export function PricingSection() {
           <span className="text-ink-muted">Everything you need.</span>
         </h2>
         <p className="mt-4 max-w-[440px] text-mk-body text-ink-500">
-          Start free and upgrade to Pro when you need more. No hidden fees, cancel any time.
+          One plan, full access. Choose monthly for flexibility or pay annually to save.
         </p>
       </SectionIntro>
 
       <div className="px-8 pb-16 sm:px-12">
         <div className="mx-auto grid max-w-3xl grid-cols-1 gap-4 sm:grid-cols-2">
-          <PlanCard
-            name="Free"
-            price="0"
-            period="/ month"
-            description="For small teams just getting started with hiring."
-            features={FREE_FEATURES}
-            cta={{ label: 'Get started', href: '/sign-up', filled: false }}
-          />
-          <PlanCard
-            name="Pro"
+          <BillingCard
+            label="Monthly"
             price="40"
             period="/ month"
-            pricingNote="or $17 / month billed annually — save 58%"
-            description="For teams that need the full platform unlocked."
+            note="Flexible, cancel any time."
             features={PRO_FEATURES}
-            badge="Most popular"
+            cta={{ label: 'Get started', href: '/sign-up', filled: false }}
+          />
+          <BillingCard
+            label="Annual"
+            price="200"
+            period="/ year"
+            note="That's just $16.67 / month."
+            features={PRO_FEATURES}
+            badge="Best value"
             cta={{ label: 'Get started', href: '/sign-up', filled: true }}
           />
         </div>
@@ -62,21 +56,19 @@ export function PricingSection() {
   );
 }
 
-function PlanCard({
-  name,
+function BillingCard({
+  label,
   price,
   period,
-  pricingNote,
-  description,
+  note,
   features,
   badge,
   cta,
 }: {
-  name: string;
+  label: string;
   price: string;
   period: string;
-  pricingNote?: string;
-  description: string;
+  note: string;
   features: string[];
   badge?: string;
   cta: { label: string; href: string; filled: boolean };
@@ -84,7 +76,7 @@ function PlanCard({
   return (
     <div className="flex flex-col rounded-[12px] border border-ink-200 bg-white p-6">
       <div className="flex items-start justify-between gap-2">
-        <h3 className="text-base font-semibold text-ink">{name}</h3>
+        <h3 className="text-base font-semibold text-ink">Pro · {label}</h3>
         {badge && (
           <span className="rounded-full bg-berry-600 px-2.5 py-0.5 text-[11px] font-medium text-white">
             {badge}
@@ -98,10 +90,7 @@ function PlanCard({
         <span className="mb-1 text-sm text-ink-400">{period}</span>
       </div>
 
-      <p className="mt-2 text-sm text-ink-500">{description}</p>
-      {pricingNote && (
-        <p className="mt-1 text-[12px] text-ink-400">{pricingNote}</p>
-      )}
+      <p className="mt-2 text-sm text-ink-500">{note}</p>
 
       <div className="my-5 border-t border-ink-line" />
       <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.08em] text-ink-400">Includes</p>
