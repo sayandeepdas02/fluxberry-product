@@ -37,7 +37,6 @@ export function PricingSection() {
             label="Monthly"
             price="40"
             period="/ month"
-            note="Flexible, cancel any time."
             features={PRO_FEATURES}
             cta={{ label: 'Get started', href: '/sign-up', filled: false }}
           />
@@ -45,7 +44,6 @@ export function PricingSection() {
             label="Annual"
             price="200"
             period="/ year"
-            note="That's just $16.67 / month."
             features={PRO_FEATURES}
             badge="Best value"
             cta={{ label: 'Get started', href: '/sign-up', filled: true }}
@@ -60,7 +58,6 @@ function BillingCard({
   label,
   price,
   period,
-  note,
   features,
   badge,
   cta,
@@ -68,7 +65,6 @@ function BillingCard({
   label: string;
   price: string;
   period: string;
-  note: string;
   features: string[];
   badge?: string;
   cta: { label: string; href: string; filled: boolean };
@@ -76,7 +72,7 @@ function BillingCard({
   return (
     <div className="flex flex-col rounded-[12px] border border-ink-200 bg-white p-6">
       <div className="flex items-start justify-between gap-2">
-        <h3 className="text-base font-semibold text-ink">Pro · {label}</h3>
+        <h3 className="text-base font-semibold text-ink">{label}</h3>
         {badge && (
           <span className="rounded-full bg-berry-600 px-2.5 py-0.5 text-[11px] font-medium text-white">
             {badge}
@@ -86,11 +82,9 @@ function BillingCard({
 
       <div className="mt-4 flex items-end gap-1">
         <span className="mb-1 text-xl text-ink-400">$</span>
-        <span className="text-5xl font-extrabold leading-none tracking-tighter text-ink">{price}</span>
+        <span className="text-5xl font-semibold leading-none tracking-tight text-ink">{price}</span>
         <span className="mb-1 text-sm text-ink-400">{period}</span>
       </div>
-
-      <p className="mt-2 text-sm text-ink-500">{note}</p>
 
       <div className="my-5 border-t border-ink-line" />
       <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.08em] text-ink-400">Includes</p>

@@ -7,10 +7,10 @@ export async function GET() {
   return new ImageResponse(
     (
       <div style={{ width: '100%', height: '100%', display: 'flex', flexWrap: 'wrap' }}>
-        <div style={{ width: '50%', height: '50%', background: '#ec4899' }} />
-        <div style={{ width: '50%', height: '50%', background: '#fbcfe8' }} />
-        <div style={{ width: '50%', height: '50%', background: '#fbcfe8' }} />
-        <div style={{ width: '50%', height: '50%', background: '#be185d' }} />
+        <div style={{ width: '50%', height: '50%', background: '#0e2f7e' }} />
+        <div style={{ width: '50%', height: '50%', background: '#b8ccff' }} />
+        <div style={{ width: '50%', height: '50%', background: '#b8ccff' }} />
+        <div style={{ width: '50%', height: '50%', background: '#0a2462' }} />
       </div>
     ),
     { width: 512, height: 512 },
