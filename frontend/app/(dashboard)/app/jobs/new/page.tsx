@@ -12,6 +12,7 @@ import {
   type CreateJobInput,
 } from '@/lib/shared';
 import { useCreateJob, useUpdateJob, usePublishJob, useJob, generateJd } from '@/hooks/use-jobs';
+import { useApplicationFormEditor } from '@/hooks/use-application-form-editor';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -20,9 +21,13 @@ import { Card } from '@/components/ui/card';
 import { Markdown } from '@/components/ui/markdown';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { SkillsInput } from '@/components/jobs/skills-input';
+import { ApplicationFormFields } from '@/components/jobs/application-form-fields';
+import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/components/ui/sonner';
 import { EMPLOYMENT_LABELS, WORK_MODE_LABELS } from '@/lib/labels';
 import { cn } from '@/lib/utils';
+
+type Step = 'details' | 'form';
 
 const numOrUndef = (v: string) => (v.trim() === '' ? undefined : Number(v));
 const DRAFT_ID_KEY = 'fluxberry:new-job-draft-id';
@@ -55,7 +60,10 @@ export default function NewJobPage() {
   const [aiMeta, setAiMeta] = useState<{ provider: string; model: string; promptVersion: string } | null>(null);
   const [generating, setGenerating] = useState(false);
   const [publishing, setPublishing] = useState(false);
+  const [continuing, setContinuing] = useState(false);
   const [saveState, setSaveState] = useState<SaveState>('idle');
+  const [step, setStep] = useState<Step>('details');
+  const formEditor = useApplicationFormEditor(jobId ?? '');
 
   const loadedRef = useRef(false);
   const creatingRef = useRef(false);
@@ -184,10 +192,26 @@ export default function NewJobPage() {
   const saveAndExit = async () => {
     try {
       await flushSave();
+      if (step === 'form' && formEditor.dirty) await formEditor.save({ silent: true });
       toast.success('Your changes are saved as a draft');
       router.push('/app/jobs');
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Could not save your changes');
+    }
+  };
+
+  // Posting a job means deciding what candidates must submit — the application
+  // form step is mandatory, not optional, so "Publish job" only appears after it.
+  const continueToForm = async () => {
+    setContinuing(true);
+    try {
+      const id = await flushSave();
+      if (!id) throw new Error('Add a job title first');
+      setStep('form');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Could not continue');
+    } finally {
+      setContinuing(false);
     }
   };
 
@@ -196,6 +220,7 @@ export default function NewJobPage() {
     try {
       const id = await flushSave();
       if (!id) throw new Error('Add a job title first');
+      if (formEditor.dirty) await formEditor.save({ silent: true });
       await publishJob.mutateAsync(id);
       sessionStorage.removeItem(DRAFT_ID_KEY);
       router.push(`/app/jobs/${id}?published=1`);
@@ -205,7 +230,7 @@ export default function NewJobPage() {
     }
   };
 
-  const canPublish = title.trim().length > 0 && description.trim().length > 0;
+  const canContinue = title.trim().length > 0 && description.trim().length > 0;
 
   return (
     <div className="mx-auto max-w-3xl space-y-6 pb-10">
@@ -217,8 +242,11 @@ export default function NewJobPage() {
           </Button>
           <SaveIndicator state={saveState} />
         </div>
+        <StepIndicator step={step} />
       </div>
 
+      {step === 'details' ? (
+      <>
       <Card className="space-y-5 p-6">
         <input
           value={title}
@@ -299,9 +327,40 @@ export default function NewJobPage() {
       </Card>
 
       <div className="flex items-center justify-end gap-2">
-        <Button variant="outline" onClick={saveAndExit} disabled={publishing}>Save & exit</Button>
-        <Button onClick={publish} loading={publishing} disabled={!canPublish}>Publish job</Button>
+        <Button variant="outline" onClick={saveAndExit} disabled={continuing}>Save & exit</Button>
+        <Button onClick={continueToForm} loading={continuing} disabled={!canContinue}>
+          Continue to application form
+        </Button>
       </div>
+      </>
+      ) : (
+      <>
+      <Card className="space-y-4 p-6 sm:p-8">
+        <div>
+          <h2 className="text-lg font-semibold tracking-tight">Application form</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            This is exactly what candidates will see and fill out when they apply. Defaults are ready to go — add
+            questions of your own if you need more.
+          </p>
+        </div>
+        {formEditor.isLoading ? (
+          <Skeleton className="h-96 w-full" />
+        ) : (
+          <ApplicationFormFields editor={formEditor} />
+        )}
+      </Card>
+
+      <div className="flex items-center justify-between gap-2">
+        <Button variant="ghost" onClick={() => setStep('details')} disabled={publishing}>
+          <ArrowLeft className="size-4" /> Back
+        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={saveAndExit} disabled={publishing}>Save & exit</Button>
+          <Button onClick={publish} loading={publishing} disabled={!canContinue}>Publish job</Button>
+        </div>
+      </div>
+      </>
+      )}
     </div>
   );
 }
@@ -311,6 +370,22 @@ function SaveIndicator({ state }: { state: SaveState }) {
   if (state === 'saving') return <span className="text-xs text-muted-foreground">Saving…</span>;
   if (state === 'error') return <span className="text-xs text-destructive">Couldn&apos;t save — check your connection</span>;
   return <span className="text-xs text-muted-foreground">Saved</span>;
+}
+
+function StepIndicator({ step }: { step: Step }) {
+  const steps: { key: Step; label: string }[] = [
+    { key: 'details', label: '1. Job details' },
+    { key: 'form', label: '2. Application form' },
+  ];
+  return (
+    <div className="flex items-center gap-3 text-xs font-medium">
+      {steps.map((s) => (
+        <span key={s.key} className={cn(s.key === step ? 'text-foreground' : 'text-muted-foreground/50')}>
+          {s.label}
+        </span>
+      ))}
+    </div>
+  );
 }
 
 function PillSelect({

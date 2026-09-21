@@ -7,13 +7,18 @@ import { FeatureRows } from '@/components/marketing/landing/feature-rows';
 import { TrustSection } from '@/components/marketing/landing/trust';
 import { ClosingSection } from '@/components/marketing/landing/closing';
 
+const title = `${publicConfig.appName} - AI Native Hiring Platform`;
 const description =
-  'Fluxberry scores every applicant on arrival, runs assessments and interviews, and moves your pipeline forward — AI-native applicant tracking for small hiring teams.';
+  'Fluxberry AI scores every applicant on arrival, runs assessments and interviews, and moves your pipeline forward — the AI-native hiring platform for small teams.';
 
 export const metadata: Metadata = {
+  // `absolute` bypasses the root layout's `%s · Fluxberry AI` template — this
+  // title already states the tagline in full and shouldn't get the suffix appended.
+  title: { absolute: title },
   description,
   alternates: { canonical: '/' },
-  openGraph: { title: publicConfig.appName, description, type: 'website', url: '/' },
+  openGraph: { title, description, type: 'website', url: '/' },
+  twitter: { card: 'summary_large_image', title, description },
 };
 
 const jsonLd = {
@@ -21,7 +26,7 @@ const jsonLd = {
   '@type': 'SoftwareApplication',
   name: publicConfig.appName,
   applicationCategory: 'BusinessApplication',
-  description: 'A simple, AI-native applicant tracking system.',
+  description: 'AI Native Hiring Platform — AI-native applicant tracking for small hiring teams.',
   offers: { '@type': 'Offer', category: 'SaaS' },
 };
 

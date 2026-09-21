@@ -20,6 +20,7 @@ import { auditService } from './audit.service';
 import { eventBus } from '../events/event-bus';
 import { getAIProvider } from '../integrations';
 import { candidateService } from './candidate.service';
+import { formService } from './form.service';
 import { logger } from '../utils/logger';
 import { JobModel } from '../models/job.model';
 import { ApplicationModel } from '../models/application.model';
@@ -69,6 +70,10 @@ export const jobService = {
         : undefined,
       createdBy: userId as any,
     });
+
+    // Every job gets a default application form from the moment it exists, so
+    // publish() can rely on applicationFormId as a real "form was set up" gate.
+    await formService.getOrCreate(workspaceId, String(job._id));
 
     await auditService.log({
       workspaceId,
@@ -143,6 +148,7 @@ export const jobService = {
   async publish(workspaceId: string, userId: string, id: string): Promise<JobDto> {
     const job = await jobRepository.findInWorkspace(workspaceId, id);
     if (!job) throw notFound('Job not found');
+    if (!job.applicationFormId) throw badRequest('Add an application form before publishing this job');
     const patch: Record<string, unknown> = { status: 'PUBLISHED' };
     if (!job.publishedAt) patch.publishedAt = new Date();
     const updated = await jobRepository.update(id, patch);

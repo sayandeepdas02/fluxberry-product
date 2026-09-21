@@ -1,4 +1,8 @@
+import type { Metadata } from 'next';
 import { SignIn } from '@clerk/nextjs';
+import { noIndexMetadata } from '@/lib/seo';
+
+export const metadata: Metadata = { title: 'Sign in', ...noIndexMetadata };
 
 export default function SignInPage() {
   return (

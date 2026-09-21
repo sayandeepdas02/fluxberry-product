@@ -27,6 +27,10 @@ export const jobRepository = {
   slugExists: async (workspaceId: string, slug: string) =>
     (await JobModel.exists({ workspaceId, slug })) != null,
 
+  /** Every published job across every workspace — used to build the public sitemap. */
+  listAllPublished: () =>
+    JobModel.find({ status: 'PUBLISHED' }).select('workspaceId slug publishedAt updatedAt').lean(),
+
   list: (workspaceId: string, filter: JobListFilter, auth: AuthContext) => {
     let q: FilterQuery<JobDoc> = { workspaceId };
     if (filter.status === 'active') q.status = { $in: ['PUBLISHED', 'PAUSED'] };

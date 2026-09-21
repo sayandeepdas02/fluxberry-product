@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { publicConfig } from '@/lib/config';
 import { Logo } from './logo';
 import { CrossMark } from './pixel-icons';
 
@@ -38,7 +39,7 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
 
       <footer className="border-t border-ink-200 bg-white">
         <div className="mx-auto flex h-14 max-w-[1248px] items-center justify-between px-6 text-mk-meta text-ink-500">
-          <span>© {new Date().getFullYear()} Fluxberry</span>
+          <span>© {new Date().getFullYear()} {publicConfig.appName}</span>
           <Link href="/blog" className="mk-focus transition-colors hover:text-ink">
             Blog
           </Link>

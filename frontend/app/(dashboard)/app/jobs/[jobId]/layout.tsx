@@ -88,7 +88,7 @@ export default function JobDetailLayout({ children }: { children: React.ReactNod
         if (isFirstPublish) setPublishConfirmOpen(true);
         else toast.success('Your job is live and accepting applications');
       },
-      onError: () => toast.error('Could not publish job'),
+      onError: (err) => toast.error(err instanceof Error ? err.message : 'Could not publish job'),
     });
   };
 
