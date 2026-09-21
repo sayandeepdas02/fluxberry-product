@@ -1,5 +1,6 @@
 import { Sparkles, BarChart3, Share2, Users, ShieldCheck, ScrollText } from 'lucide-react';
 import { Section, SectionIntro } from '../frame';
+import { Divider } from '../divider';
 
 const features = [
   {
@@ -36,6 +37,8 @@ const features = [
 
 export function FeaturesSection() {
   return (
+    <>
+    <Divider />
     <Section id="features">
       <SectionIntro className="flex flex-col items-center text-center">
         <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-ink-400">Features</span>
@@ -71,5 +74,6 @@ export function FeaturesSection() {
         ))}
       </div>
     </Section>
+    </>
   );
 }

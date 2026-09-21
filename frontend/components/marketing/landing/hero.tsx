@@ -1,5 +1,4 @@
 import { Frame } from '../frame';
-import { Divider } from '../divider';
 import { MkButton } from '../mk-button';
 import { PipelineMockup } from '../mockups';
 
@@ -27,8 +26,7 @@ export function Hero() {
         </div>
 
         <div className="relative mt-16">
-          <Divider />
-          <figure className="m-0 px-0 pb-0 pt-8 sm:px-10 lg:px-20">
+          <figure className="m-0 px-0 pb-0 sm:px-10 lg:px-20">
             <div className="mk-corners relative">
               <PipelineMockup />
               <span />
