@@ -126,6 +126,13 @@ export function SiteHeader() {
           </div>
 
           <Link
+            href="/pricing"
+            className="mk-focus inline-flex items-center rounded-[6px] px-[15px] py-[9px] text-mk-nav text-ink-600 transition-colors hover:bg-ink-100"
+          >
+            Pricing
+          </Link>
+
+          <Link
             href="/blog"
             className="mk-focus inline-flex items-center rounded-[6px] px-[15px] py-[9px] text-mk-nav text-ink-600 transition-colors hover:bg-ink-100"
           >
@@ -173,6 +180,13 @@ export function SiteHeader() {
                 </Link>
               ))}
             </div>
+            <Link
+              href="/pricing"
+              onClick={() => setMobileOpen(false)}
+              className="mk-focus border-b border-ink-100 py-3 text-[15px] font-medium leading-5 text-ink"
+            >
+              Pricing
+            </Link>
             <Link
               href="/blog"
               onClick={() => setMobileOpen(false)}
