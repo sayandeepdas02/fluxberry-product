@@ -1,6 +1,6 @@
 import DodoPayments from 'dodopayments';
-import type { BillingSubscriptionStatus, WorkspacePlan } from '../../shared';
-import { WORKSPACE_PLANS } from '../../shared';
+import type { BillingSubscriptionStatus, WorkspacePlan, BillingCycle } from '../../shared';
+import { WORKSPACE_PLANS, BILLING_CYCLES } from '../../shared';
 import type {
   BillingProvider,
   BillingWebhookEvent,
@@ -27,19 +27,20 @@ export class DodoBillingProvider implements BillingProvider {
     webhookSecret: string,
     environment: 'test_mode' | 'live_mode',
     private readonly proProductId: string,
+    private readonly proProductIdAnnual: string,
   ) {
     this.client = new DodoPayments({ bearerToken: apiKey, webhookKey: webhookSecret, environment });
   }
 
   async createCheckoutSession(input: CheckoutSessionInput): Promise<CheckoutSessionResult> {
     const session = await this.client.checkoutSessions.create({
-      product_cart: [{ product_id: this.productIdFor(input.plan), quantity: 1 }],
+      product_cart: [{ product_id: this.productIdFor(input.plan, input.billingCycle), quantity: 1 }],
       customer: { email: input.customerEmail },
       return_url: input.successUrl,
       cancel_url: input.cancelUrl,
       // Round-tripped by Dodo onto the resulting webhook event so we can map
       // it back to a workspace without a separate lookup table.
-      metadata: { workspaceId: input.workspaceId, plan: input.plan },
+      metadata: { workspaceId: input.workspaceId, plan: input.plan, billingCycle: input.billingCycle },
     });
     if (!session.checkout_url) throw providerError('Dodo checkout session did not return a checkout_url');
     return { sessionId: session.session_id, url: session.checkout_url };
@@ -75,6 +76,10 @@ export class DodoBillingProvider implements BillingProvider {
     const plan: WorkspacePlan | null = WORKSPACE_PLANS.includes(metaPlan as WorkspacePlan)
       ? (metaPlan as WorkspacePlan)
       : null;
+    const metaBillingCycle = metadata.billingCycle as string | undefined;
+    const billingCycle: BillingCycle | null = BILLING_CYCLES.includes(metaBillingCycle as BillingCycle)
+      ? (metaBillingCycle as BillingCycle)
+      : null;
     const customer = data?.customer as { customer_id?: string } | undefined;
 
     return {
@@ -84,6 +89,7 @@ export class DodoBillingProvider implements BillingProvider {
       type: event.type,
       workspaceId: (metadata.workspaceId as string | undefined) ?? null,
       plan,
+      billingCycle,
       customerId: customer?.customer_id ?? null,
       subscriptionId: (data?.subscription_id as string | undefined) ?? null,
       status: mapDodoStatus(data?.status as string | undefined),
@@ -107,9 +113,9 @@ export class DodoBillingProvider implements BillingProvider {
     };
   }
 
-  private productIdFor(plan: string): string {
-    if (plan === 'PRO') return this.proProductId;
-    throw providerError(`No Dodo product configured for plan: ${plan}`);
+  private productIdFor(plan: string, billingCycle: BillingCycle): string {
+    if (plan !== 'PRO') throw providerError(`No Dodo product configured for plan: ${plan}`);
+    return billingCycle === 'ANNUAL' ? this.proProductIdAnnual : this.proProductId;
   }
 }
 

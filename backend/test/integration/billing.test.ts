@@ -68,6 +68,8 @@ describe('billing (integration, mock Dodo)', () => {
     expect(afterUpgrade.body.data.plan).toBe('PRO');
     expect(afterUpgrade.body.data.subscriptionStatus).toBe('active');
     expect(afterUpgrade.body.data.hasBillingAccount).toBe(true);
+    // No billingCycle was sent on checkout — defaults to monthly.
+    expect(afterUpgrade.body.data.billingCycle).toBe('MONTHLY');
 
     // Webhook idempotency: replaying the exact same event must not double-process.
     await billingService.applyWebhookEvent(event);
@@ -125,6 +127,7 @@ describe('billing (integration, mock Dodo)', () => {
       .post('/api/v1/workspaces/onboarding')
       .set('Authorization', `Bearer ${token}`)
       .send({ name: 'Paywall Owner', company: 'Paywallco' });
+    expect(onboard.status).toBe(201);
     const workspaceId = onboard.body.data.id as string;
     const ws = (r: request.Test) => r.set('Authorization', `Bearer ${token}`).set('X-Workspace-Id', workspaceId);
     const createJob = () =>
@@ -151,5 +154,28 @@ describe('billing (integration, mock Dodo)', () => {
     const afterCancel = await createJob();
     expect(afterCancel.status).toBe(403);
     expect(afterCancel.body.error.code).toBe('SUBSCRIPTION_REQUIRED');
+  });
+
+  it('supports the annual billing cycle end to end', async () => {
+    const token = await tokenFor('annualowner@test.com', 'Annual Owner');
+    const onboard = await request(app)
+      .post('/api/v1/workspaces/onboarding')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ name: 'Annual Owner', company: 'Annualco' });
+    const workspaceId = onboard.body.data.id as string;
+    const ws = (r: request.Test) => r.set('Authorization', `Bearer ${token}`).set('X-Workspace-Id', workspaceId);
+
+    const checkout = await ws(
+      request(app)
+        .post(`/api/v1/workspaces/${workspaceId}/billing/checkout`)
+        .send({ plan: 'PRO', billingCycle: 'ANNUAL' }) as any,
+    );
+    expect(checkout.status).toBe(200);
+    const sessionId = new URL(checkout.body.data.url).searchParams.get('mockCheckoutSession')!;
+    await billingService.applyWebhookEvent(mockCompleteCheckout(sessionId));
+
+    const status = await ws(request(app).get(`/api/v1/workspaces/${workspaceId}/billing`) as any);
+    expect(status.body.data.plan).toBe('PRO');
+    expect(status.body.data.billingCycle).toBe('ANNUAL');
   });
 });

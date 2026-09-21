@@ -1,11 +1,13 @@
 import { Schema, model, models, type InferSchemaType, type Model } from 'mongoose';
-import { WORKSPACE_PLANS, BILLING_SUBSCRIPTION_STATUSES } from '../shared';
+import { WORKSPACE_PLANS, BILLING_SUBSCRIPTION_STATUSES, BILLING_CYCLES } from '../shared';
 
 const billingSchema = new Schema(
   {
     customerId: { type: String, default: null },
     subscriptionId: { type: String, default: null },
     subscriptionStatus: { type: String, enum: BILLING_SUBSCRIPTION_STATUSES, default: 'none' },
+    /** Null until a subscription has actually started — no cycle to speak of on FREE. */
+    billingCycle: { type: String, enum: BILLING_CYCLES, default: null },
     currentPeriodEnd: { type: Date, default: null },
     cancelAtPeriodEnd: { type: Boolean, default: false },
   },

@@ -1,4 +1,4 @@
-import type { WorkspacePlan, BillingStatusDto, BillingSubscriptionStatus } from '../shared';
+import type { WorkspacePlan, BillingStatusDto, BillingSubscriptionStatus, BillingCycle } from '../shared';
 import { PLAN_FEATURES, ACTIVE_BILLING_STATUSES } from '../shared';
 import { getBillingProvider } from '../integrations';
 import type { BillingWebhookEvent } from '../integrations/dodo/types';
@@ -11,7 +11,12 @@ import { badRequest, notFound } from '../utils/errors';
 import { logger } from '../utils/logger';
 
 export const billingService = {
-  async createCheckout(workspaceId: string, userId: string, plan: WorkspacePlan): Promise<{ url: string }> {
+  async createCheckout(
+    workspaceId: string,
+    userId: string,
+    plan: WorkspacePlan,
+    billingCycle: BillingCycle,
+  ): Promise<{ url: string }> {
     const workspace = await workspaceRepository.findById(workspaceId);
     if (!workspace) throw notFound('Workspace not found');
     const user = await userRepository.findById(userId);
@@ -20,6 +25,7 @@ export const billingService = {
     const session = await getBillingProvider().createCheckoutSession({
       workspaceId,
       plan,
+      billingCycle,
       customerEmail: user.email,
       successUrl: `${config.publicAppUrl}/app/settings/billing?checkout=success`,
       cancelUrl: `${config.publicAppUrl}/app/settings/billing?checkout=cancel`,
@@ -91,6 +97,7 @@ export const billingService = {
       // stays unlocked, so keep (or set) the PRO plan.
       await billingRepository.applySubscription(event.workspaceId, {
         plan: event.plan ?? 'PRO',
+        billingCycle: event.billingCycle ?? undefined,
         customerId: event.customerId,
         subscriptionId: event.subscriptionId,
         subscriptionStatus: event.status,
@@ -100,7 +107,13 @@ export const billingService = {
       return;
     }
 
-    if (event.status === 'cancelled' || event.status === 'expired' || event.status === 'failed') {
+    if (
+      event.status === 'pending' ||
+      event.status === 'paused' ||
+      event.status === 'cancelled' ||
+      event.status === 'expired' ||
+      event.status === 'failed'
+    ) {
       await billingRepository.applySubscription(event.workspaceId, {
         plan: 'FREE',
         customerId: event.customerId,
@@ -128,6 +141,7 @@ export const billingService = {
     return {
       plan,
       subscriptionStatus: (workspace.billing?.subscriptionStatus as BillingSubscriptionStatus) ?? 'none',
+      billingCycle: (workspace.billing?.billingCycle as BillingCycle | undefined) ?? null,
       currentPeriodEnd: workspace.billing?.currentPeriodEnd
         ? workspace.billing.currentPeriodEnd.toISOString()
         : null,

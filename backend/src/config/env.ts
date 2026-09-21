@@ -70,8 +70,10 @@ const envSchema = z.object({
   DODO_WEBHOOK_SECRET: z.string().optional().default(''),
   /** Which Dodo host to hit: `test_mode` -> test.dodopayments.com, `live_mode` -> live.dodopayments.com. */
   DODO_ENVIRONMENT: z.enum(['test_mode', 'live_mode']).default('test_mode'),
-  /** Dodo product/price id billed for the PRO plan. */
+  /** Dodo product/price id billed for the PRO plan, monthly cycle ($40/mo). */
   DODO_PRO_PRODUCT_ID: z.string().optional().default(''),
+  /** Dodo product/price id billed for the PRO plan, annual cycle ($200/yr). */
+  DODO_PRO_PRODUCT_ID_ANNUAL: z.string().optional().default(''),
 
   STORAGE_ENDPOINT: z.string().optional().default(''),
   STORAGE_REGION: z.string().default('auto'),
@@ -186,6 +188,7 @@ export const config = {
       webhookSecret: e.DODO_WEBHOOK_SECRET,
       environment: e.DODO_ENVIRONMENT,
       proProductId: e.DODO_PRO_PRODUCT_ID,
+      proProductIdAnnual: e.DODO_PRO_PRODUCT_ID_ANNUAL,
     },
     storage: {
       endpoint: e.STORAGE_ENDPOINT,

@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Check, ExternalLink } from 'lucide-react';
 import { WORKSPACE_PLANS, PLAN_FEATURES } from '@/lib/shared';
-import type { WorkspacePlan } from '@/lib/shared';
+import type { WorkspacePlan, BillingCycle } from '@/lib/shared';
 import { useWorkspace } from '@/components/providers/workspace-provider';
 import { useBillingStatus, useCreateCheckout, useCreatePortalSession } from '@/hooks/use-billing';
 import { FEATURE_FLAG_LABELS } from '@/lib/labels';
+import { BillingCycleToggle } from '@/components/billing/billing-cycle-toggle';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -15,11 +16,13 @@ import { toast } from '@/components/ui/sonner';
 
 const PLAN_LABELS: Record<WorkspacePlan, string> = { FREE: 'Free', PRO: 'Pro' };
 const PLAN_PRICE: Record<WorkspacePlan, string> = { FREE: '$0', PRO: '$40/mo' };
+const CYCLE_LABELS: Record<BillingCycle, string> = { MONTHLY: '$40/mo', ANNUAL: '$200/yr' };
 
 export default function BillingSettingsPage() {
   const { currentWorkspace } = useWorkspace();
   const canManage = currentWorkspace.role === 'owner' || currentWorkspace.role === 'admin';
   const isOwner = currentWorkspace.role === 'owner';
+  const [billingCycle, setBillingCycle] = useState<BillingCycle>('MONTHLY');
 
   const { data: status, isLoading } = useBillingStatus();
   const createCheckout = useCreateCheckout();
@@ -43,7 +46,7 @@ export default function BillingSettingsPage() {
 
   const upgrade = async () => {
     try {
-      const { url } = await createCheckout.mutateAsync({ plan: 'PRO' });
+      const { url } = await createCheckout.mutateAsync({ plan: 'PRO', billingCycle });
       window.location.href = url;
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Could not start checkout');
@@ -75,6 +78,11 @@ export default function BillingSettingsPage() {
                 <Badge variant={status.plan === 'PRO' ? 'primary' : 'muted'} className="text-sm">
                   {PLAN_LABELS[status.plan]}
                 </Badge>
+                {status.plan === 'PRO' && status.billingCycle && (
+                  <span className="text-sm text-muted-foreground">
+                    {status.billingCycle === 'ANNUAL' ? 'Annual' : 'Monthly'} — {CYCLE_LABELS[status.billingCycle]}
+                  </span>
+                )}
                 {status.subscriptionStatus === 'past_due' && (
                   <Badge variant="destructive">Payment failed — update your card</Badge>
                 )}
@@ -85,7 +93,7 @@ export default function BillingSettingsPage() {
                 )}
               </div>
               {canManage && (
-                <div className="flex gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   {status.hasBillingAccount && (
                     <Button variant="outline" loading={createPortal.isPending} onClick={openPortal}>
                       Manage billing
@@ -93,9 +101,12 @@ export default function BillingSettingsPage() {
                     </Button>
                   )}
                   {status.plan === 'FREE' && isOwner && (
-                    <Button loading={createCheckout.isPending} onClick={upgrade}>
-                      Upgrade to Pro
-                    </Button>
+                    <>
+                      <BillingCycleToggle value={billingCycle} onChange={setBillingCycle} />
+                      <Button loading={createCheckout.isPending} onClick={upgrade}>
+                        Upgrade to Pro
+                      </Button>
+                    </>
                   )}
                 </div>
               )}

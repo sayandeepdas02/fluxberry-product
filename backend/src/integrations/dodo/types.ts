@@ -1,8 +1,9 @@
-import type { WorkspacePlan, BillingSubscriptionStatus } from '../../shared';
+import type { WorkspacePlan, BillingSubscriptionStatus, BillingCycle } from '../../shared';
 
 export interface CheckoutSessionInput {
   workspaceId: string;
   plan: WorkspacePlan;
+  billingCycle: BillingCycle;
   customerEmail: string;
   successUrl: string;
   cancelUrl: string;
@@ -39,6 +40,8 @@ export interface BillingWebhookEvent {
   workspaceId: string | null;
   /** The plan the checkout metadata named — null if this event type doesn't carry one (e.g. a cancellation). */
   plan: WorkspacePlan | null;
+  /** The billing cycle the checkout metadata named — null if this event type doesn't carry one. */
+  billingCycle: BillingCycle | null;
   customerId: string | null;
   subscriptionId: string | null;
   status: BillingSubscriptionStatus | null;

@@ -1,10 +1,13 @@
 'use client';
 
+import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { Lock } from 'lucide-react';
 import { ACTIVE_BILLING_STATUSES } from '@/lib/shared';
+import type { BillingCycle } from '@/lib/shared';
 import { useWorkspace } from '@/components/providers/workspace-provider';
 import { useBillingStatus, useCreateCheckout } from '@/hooks/use-billing';
+import { BillingCycleToggle } from '@/components/billing/billing-cycle-toggle';
 import { PageSpinner } from '@/components/ui/spinner';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,12 +22,24 @@ import { toast } from '@/components/ui/sonner';
 export function SubscriptionGate({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { currentWorkspace } = useWorkspace();
-  const { data: status, isLoading } = useBillingStatus();
+  const { data: status, isLoading, isError, refetch } = useBillingStatus();
   const createCheckout = useCreateCheckout();
+  const [billingCycle, setBillingCycle] = useState<BillingCycle>('MONTHLY');
 
   if (pathname.startsWith('/app/settings')) return <>{children}</>;
 
-  if (isLoading || !status) return <PageSpinner label="Loading…" />;
+  if (isLoading) return <PageSpinner label="Loading…" />;
+
+  if (isError || !status) {
+    return (
+      <div className="flex min-h-[70vh] flex-col items-center justify-center gap-3">
+        <p className="text-sm text-muted-foreground">Could not load the subscription status.</p>
+        <Button variant="outline" onClick={() => void refetch()}>
+          Try again
+        </Button>
+      </div>
+    );
+  }
 
   if (ACTIVE_BILLING_STATUSES.includes(status.subscriptionStatus)) return <>{children}</>;
 
@@ -32,7 +47,7 @@ export function SubscriptionGate({ children }: { children: React.ReactNode }) {
 
   const startSubscription = async () => {
     try {
-      const { url } = await createCheckout.mutateAsync({ plan: 'PRO' });
+      const { url } = await createCheckout.mutateAsync({ plan: 'PRO', billingCycle });
       window.location.href = url;
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Could not start checkout');
@@ -48,15 +63,18 @@ export function SubscriptionGate({ children }: { children: React.ReactNode }) {
           </div>
           <CardTitle className="pt-2">Subscribe to Fluxberry Pro</CardTitle>
           <CardDescription>
-            Your workspace doesn&apos;t have an active subscription. Subscribe for $40/mo to unlock jobs,
-            candidates, and everything else in Fluxberry.
+            Your workspace doesn&apos;t have an active subscription. Subscribe to unlock jobs, candidates, and
+            everything else in Fluxberry.
           </CardDescription>
         </CardHeader>
-        <CardContent className="flex justify-center">
+        <CardContent className="flex flex-col items-center gap-3">
           {isOwner ? (
-            <Button loading={createCheckout.isPending} onClick={startSubscription}>
-              Start subscription
-            </Button>
+            <>
+              <BillingCycleToggle value={billingCycle} onChange={setBillingCycle} />
+              <Button loading={createCheckout.isPending} onClick={startSubscription}>
+                Start subscription
+              </Button>
+            </>
           ) : (
             <p className="text-xs text-muted-foreground">
               Only the workspace owner can start a subscription.

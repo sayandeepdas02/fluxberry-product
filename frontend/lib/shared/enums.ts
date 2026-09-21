@@ -47,6 +47,10 @@ export const ACTIVE_BILLING_STATUSES: readonly BillingSubscriptionStatus[] = [
   'on_hold',
 ];
 
+/** How often a PRO subscription bills — same plan, two prices ($40/mo or $200/yr). */
+export const BILLING_CYCLES = ['MONTHLY', 'ANNUAL'] as const;
+export type BillingCycle = (typeof BILLING_CYCLES)[number];
+
 export const JOB_STATUSES = ['DRAFT', 'PUBLISHED', 'PAUSED', 'CLOSED', 'ARCHIVED'] as const;
 export type JobStatus = (typeof JOB_STATUSES)[number];
 

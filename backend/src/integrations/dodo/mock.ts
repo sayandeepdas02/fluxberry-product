@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import type { WorkspacePlan, BillingSubscriptionStatus } from '../../shared';
+import type { WorkspacePlan, BillingSubscriptionStatus, BillingCycle } from '../../shared';
 import type {
   BillingProvider,
   BillingWebhookEvent,
@@ -15,6 +15,7 @@ interface MockSubscriptionRecord {
   customerId: string;
   subscriptionId: string;
   plan: WorkspacePlan;
+  billingCycle: BillingCycle;
   status: BillingSubscriptionStatus;
   currentPeriodEnd: string;
   cancelAtPeriodEnd: boolean;
@@ -22,14 +23,14 @@ interface MockSubscriptionRecord {
 
 /** In-memory state so dev/tests can drive a full checkout → webhook loop with no network. */
 export const mockSubscriptions = new Map<string, MockSubscriptionRecord>(); // keyed by workspaceId
-const mockSessions = new Map<string, { workspaceId: string; plan: WorkspacePlan }>(); // keyed by sessionId
+const mockSessions = new Map<string, { workspaceId: string; plan: WorkspacePlan; billingCycle: BillingCycle }>(); // keyed by sessionId
 
 export class MockBillingProvider implements BillingProvider {
   readonly name = 'mock';
 
   async createCheckoutSession(input: CheckoutSessionInput): Promise<CheckoutSessionResult> {
     const sessionId = `mock_cs_${crypto.randomBytes(8).toString('hex')}`;
-    mockSessions.set(sessionId, { workspaceId: input.workspaceId, plan: input.plan });
+    mockSessions.set(sessionId, { workspaceId: input.workspaceId, plan: input.plan, billingCycle: input.billingCycle });
     const sep = input.successUrl.includes('?') ? '&' : '?';
     logger.info({ sessionId, workspaceId: input.workspaceId }, '[mock billing] checkout session created');
     return { sessionId, url: `${input.successUrl}${sep}mockCheckoutSession=${sessionId}` };
@@ -78,6 +79,7 @@ export function mockCompleteCheckout(sessionId: string): BillingWebhookEvent {
     customerId,
     subscriptionId,
     plan: session.plan,
+    billingCycle: session.billingCycle,
     status: 'active',
     currentPeriodEnd,
     cancelAtPeriodEnd: false,
@@ -89,6 +91,7 @@ export function mockCompleteCheckout(sessionId: string): BillingWebhookEvent {
     type: 'subscription.active',
     workspaceId: session.workspaceId,
     plan: session.plan,
+    billingCycle: session.billingCycle,
     customerId,
     subscriptionId,
     status: 'active',
@@ -109,6 +112,7 @@ export function mockCancelSubscription(workspaceId: string): BillingWebhookEvent
     type: 'subscription.cancelled',
     workspaceId,
     plan: null,
+    billingCycle: null,
     customerId: sub.customerId,
     subscriptionId: sub.subscriptionId,
     status: 'cancelled',

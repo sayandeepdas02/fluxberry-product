@@ -7,10 +7,15 @@ import type { BillingProvider } from './types';
 let instance: BillingProvider | null = null;
 
 function create(): BillingProvider {
+  // MOCK_EXTERNAL_SERVICES is the only switch that may select the mock
+  // provider — an incomplete real config must fail closed, not silently fall
+  // back to a provider whose webhook endpoint accepts unsigned JSON.
   if (config.providers.mockAll) return new MockBillingProvider();
-  const { apiKey, webhookSecret, environment, proProductId } = config.providers.billing;
-  if (!apiKey) return new MockBillingProvider();
-  return new DodoBillingProvider(apiKey, webhookSecret, environment, proProductId);
+  const { apiKey, webhookSecret, environment, proProductId, proProductIdAnnual } = config.providers.billing;
+  if (!apiKey || !webhookSecret || !proProductId) {
+    throw new Error('Dodo billing credentials are incomplete (DODO_API_KEY/DODO_WEBHOOK_SECRET/DODO_PRO_PRODUCT_ID)');
+  }
+  return new DodoBillingProvider(apiKey, webhookSecret, environment, proProductId, proProductIdAnnual);
 }
 
 export function getBillingProvider(): BillingProvider {

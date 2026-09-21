@@ -4,8 +4,8 @@ import { billingService } from '../services/billing.service';
 
 export const billingController = {
   createCheckout: asyncHandler(async (req, res) => {
-    const { plan } = req.body as CreateCheckoutInput;
-    const result = await billingService.createCheckout(req.auth!.workspaceId!, req.auth!.user.id, plan);
+    const { plan, billingCycle } = req.body as CreateCheckoutInput;
+    const result = await billingService.createCheckout(req.auth!.workspaceId!, req.auth!.user.id, plan, billingCycle);
     ok(res, result);
   }),
 
