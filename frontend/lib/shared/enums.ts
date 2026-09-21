@@ -133,53 +133,6 @@ export type BulkImportStatus = (typeof BULK_IMPORT_STATUSES)[number];
 export const BULK_IMPORT_ENTITY_TYPES = ['candidate', 'job'] as const;
 export type BulkImportEntityType = (typeof BULK_IMPORT_ENTITY_TYPES)[number];
 
-// ---- Workflow -------------------------------------------------------------
-
-export const WORKFLOW_NODE_TYPES = [
-  'APPLICATION_RECEIVED',
-  'AI_SCREEN',
-  'CONDITION',
-  'WAIT',
-  'MOVE_STAGE',
-  'SEND_EMAIL',
-] as const;
-export type WorkflowNodeType = (typeof WORKFLOW_NODE_TYPES)[number];
-
-export const WORKFLOW_STATUSES = ['DRAFT', 'ACTIVE', 'PAUSED'] as const;
-export type WorkflowStatus = (typeof WORKFLOW_STATUSES)[number];
-
-export const WORKFLOW_RUN_STATUSES = [
-  'RUNNING',
-  'WAITING',
-  'COMPLETED',
-  'FAILED',
-  'PAUSED',
-  'STOPPED',
-] as const;
-export type WorkflowRunStatus = (typeof WORKFLOW_RUN_STATUSES)[number];
-
-export const WORKFLOW_STEP_STATUSES = [
-  'PENDING',
-  'RUNNING',
-  'COMPLETED',
-  'FAILED',
-  'SKIPPED',
-] as const;
-export type WorkflowStepStatus = (typeof WORKFLOW_STEP_STATUSES)[number];
-
-export const CONDITION_OPERATORS = ['gte', 'lte', 'gt', 'lt', 'eq', 'neq'] as const;
-export type ConditionOperator = (typeof CONDITION_OPERATORS)[number];
-
-/** Fields a workflow CONDITION node may reference (safe allow-list, no eval). */
-export const CONDITION_FIELDS = [
-  'screening_score',
-  'years_experience',
-  'expected_salary',
-  'location',
-  'stage',
-] as const;
-export type ConditionField = (typeof CONDITION_FIELDS)[number];
-
 // ---- Async job queue ------------------------------------------------------
 
 export const JOB_QUEUE_TYPES = [
@@ -188,7 +141,6 @@ export const JOB_QUEUE_TYPES = [
   'SCREEN_CANDIDATE',
   'GENERATE_JOB_DESCRIPTION',
   'SEND_EMAIL',
-  'RUN_WORKFLOW',
   'AGGREGATE_ANALYTICS',
   'PROCESS_BILLING_WEBHOOK',
   'LINK_REFERRAL_APPLICATION',

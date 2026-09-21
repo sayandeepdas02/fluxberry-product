@@ -68,7 +68,6 @@ export default function JobDetailLayout({ children }: { children: React.ReactNod
     { href: `${base}/candidates`, label: 'Candidates' },
     { href: `${base}/form`, label: 'Application form' },
     { href: `${base}/stages`, label: 'Pipeline' },
-    { href: `${base}/workflow`, label: 'Workflow' },
     { href: `${base}/analytics`, label: 'Analytics' },
     { href: `${base}/settings`, label: 'Settings' },
   ];

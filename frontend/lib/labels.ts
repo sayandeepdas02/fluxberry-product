@@ -10,7 +10,6 @@ import type {
 } from '@/lib/shared';
 
 export const FEATURE_FLAG_LABELS: Record<FeatureFlag, string> = {
-  WORKFLOW_AUTOMATION: 'Workflow automation',
   ADVANCED_ANALYTICS: 'Advanced analytics',
   AV_SCANNING: 'AV scanning',
   OUTBOUND_WEBHOOKS: 'Outbound webhooks',

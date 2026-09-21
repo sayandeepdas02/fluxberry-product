@@ -1,6 +1,5 @@
 import {
   Sparkles,
-  GitBranch,
   BarChart3,
   Share2,
   Users,
@@ -12,7 +11,6 @@ import { Kicker, TextLink } from '../bits';
 /** Capabilities that exist in the product today — nothing aspirational. */
 const capabilities = [
   { icon: Sparkles, label: 'AI screening' },
-  { icon: GitBranch, label: 'Workflows' },
   { icon: Mail, label: 'Email automation' },
   { icon: Users, label: 'Referrals' },
   { icon: Share2, label: 'Careers page' },
@@ -44,7 +42,9 @@ export function ContextSection() {
         {/*
          * The 1px gutters are the parent's background showing through a `gap-px`
          * grid of white cells — chanhdai's trick. It gives perfectly even rules
-         * without every cell having to reason about which edges to draw.
+         * without every cell having to reason about which edges to draw. A grid
+         * of 3 needs the trailing row padded out with blank cells, or the
+         * container's own background shows through as a stray colored block.
          */}
         <div className="grid grid-cols-3 gap-px bg-ink-line">
           {capabilities.map(({ icon: Icon, label }) => (
@@ -55,6 +55,9 @@ export function ContextSection() {
               <Icon className="size-[22px] text-berry-600" strokeWidth={1.5} />
               <span>{label}</span>
             </div>
+          ))}
+          {Array.from({ length: (3 - (capabilities.length % 3)) % 3 }).map((_, i) => (
+            <div key={`spacer-${i}`} aria-hidden className="min-h-[104px] bg-white" />
           ))}
         </div>
       </div>

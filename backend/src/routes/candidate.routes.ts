@@ -9,7 +9,6 @@ import {
 import { validateBody, validateQuery } from '../middleware/validate';
 import { candidateController } from '../controllers/candidate.controller';
 import { applicationController } from '../controllers/application.controller';
-import { workflowController } from '../controllers/workflow.controller';
 import { labelController } from '../controllers/label.controller';
 import { messageController } from '../controllers/message.controller';
 import {
@@ -45,7 +44,6 @@ candidateRouter.use('/applications/:applicationId', requireApplicationJobAccess)
 candidateRouter.get('/applications/:applicationId', applicationController.getDetail);
 candidateRouter.get('/applications/:applicationId/answers/:questionId/file-url', applicationController.getAnswerFileUrl);
 candidateRouter.get('/applications/:applicationId/timeline', applicationController.getTimeline);
-candidateRouter.get('/applications/:applicationId/workflow-run', workflowController.getRun);
 candidateRouter.post(
   '/applications/:applicationId/stage',
   requireRole('recruiter'),

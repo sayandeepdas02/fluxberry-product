@@ -4,7 +4,6 @@ import { FileText, Paperclip, Video } from 'lucide-react';
 import { fetchAnswerFileUrl } from '@/hooks/use-candidates';
 import type { CandidateDetailState } from '@/hooks/use-candidate-detail';
 import { ResumeViewerDialog } from '@/components/candidates/resume-viewer-dialog';
-import { WorkflowRunCard } from '@/components/candidates/workflow-run-card';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -160,8 +159,6 @@ export function CandidateDetailBody({ state }: { state: CandidateDetailState }) 
 
         <div className="space-y-6">
           <h2 className="sr-only">Actions</h2>
-
-          {activeApp && <WorkflowRunCard applicationId={activeApp.id} />}
 
           <Card>
             <CardHeader><CardTitle>Timeline</CardTitle></CardHeader>

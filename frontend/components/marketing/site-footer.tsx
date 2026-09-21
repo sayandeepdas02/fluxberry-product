@@ -14,7 +14,6 @@ const columns = [
     heading: 'Product',
     links: [
       { label: 'AI screening', href: '/#screening' },
-      { label: 'Workflows', href: '/#workflows' },
     ],
   },
   {

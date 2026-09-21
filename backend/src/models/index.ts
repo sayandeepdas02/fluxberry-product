@@ -14,7 +14,6 @@ export { ApplicationModel } from './application.model';
 export { ApplicationFormModel } from './application-form.model';
 export { ApplicationAnswersModel } from './application-answers.model';
 export { ScreeningResultModel } from './screening-result.model';
-export { WorkflowModel, WorkflowRunModel, WorkflowStepModel } from './workflow.model';
 export { CareersPageModel } from './careers-page.model';
 export { OfferModel } from './offer.model';
 export { GdprRequestModel } from './gdpr-request.model';

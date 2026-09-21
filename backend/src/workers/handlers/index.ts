@@ -19,7 +19,6 @@ export type JobHandler = (payload: any, ctx: JobContext) => Promise<unknown>;
 import { parseResumeHandler } from './parse-resume';
 import { screenCandidateHandler } from './screen-candidate';
 import { sendEmailHandler } from './send-email';
-import { runWorkflowHandler } from './run-workflow';
 import { aggregateAnalyticsHandler } from './aggregate-analytics';
 import { processBillingWebhookHandler } from './process-billing-webhook';
 import { linkReferralApplicationHandler } from './link-referral-application';
@@ -35,7 +34,6 @@ export const handlers: Partial<Record<JobQueueType, JobHandler>> = {
   PARSE_RESUME: parseResumeHandler,
   SCREEN_CANDIDATE: screenCandidateHandler,
   SEND_EMAIL: sendEmailHandler,
-  RUN_WORKFLOW: runWorkflowHandler,
   AGGREGATE_ANALYTICS: aggregateAnalyticsHandler,
   PROCESS_BILLING_WEBHOOK: processBillingWebhookHandler,
   LINK_REFERRAL_APPLICATION: linkReferralApplicationHandler,

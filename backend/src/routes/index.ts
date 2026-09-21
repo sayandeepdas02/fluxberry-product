@@ -19,7 +19,7 @@ import { bulkImportRouter } from './bulk-import.routes';
 
 /**
  * Versioned API router (/api/v1). Sub-routers are mounted here per slice:
- *   auth, workspaces, jobs, candidates, applications, workflows, analytics, and public/*.
+ *   auth, workspaces, jobs, candidates, applications, analytics, and public/*.
  */
 export const apiRouter = Router();
 
@@ -40,5 +40,3 @@ apiRouter.use(gdprRouter);
 apiRouter.use(offerRouter);
 apiRouter.use(webhookEndpointRouter);
 apiRouter.use(bulkImportRouter);
-
-// Workflow router is registered in Slice 7.

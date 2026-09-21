@@ -24,7 +24,6 @@ import { logger } from '../utils/logger';
 import { JobModel } from '../models/job.model';
 import { ApplicationModel } from '../models/application.model';
 import { ApplicationFormModel } from '../models/application-form.model';
-import { WorkflowModel } from '../models/workflow.model';
 import { trackEvent } from '../integrations/posthog';
 import type { AuthContext } from '../types/auth-context';
 
@@ -263,20 +262,6 @@ export const jobService = {
           questions: form.questions,
         });
         updates.applicationFormId = cloned._id;
-      }
-    }
-
-    if (original.workflowId) {
-      const wf = await WorkflowModel.findById(original.workflowId).lean();
-      if (wf) {
-        const cloned = await WorkflowModel.create({
-          workspaceId,
-          jobId: newJob._id,
-          nodes: wf.nodes,
-          edges: wf.edges,
-          status: 'DRAFT',
-        });
-        updates.workflowId = cloned._id;
       }
     }
 

@@ -13,7 +13,6 @@ export * from './schemas/form';
 export * from './schemas/application';
 export * from './schemas/candidate';
 export * from './schemas/calendar-integration';
-export * from './schemas/workflow';
 export * from './schemas/analytics';
 export * from './schemas/careers';
 export * from './schemas/bulk-action';

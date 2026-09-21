@@ -11,7 +11,6 @@ import { getStorageProvider, emailTemplates } from '../integrations';
 import { assertValidResume } from '../utils/file-validation';
 import { eventBus } from '../events/event-bus';
 import { jobQueue } from '../queue/job-queue';
-import { workflowEngine } from './workflow-engine.service';
 import { referralService } from './referral.service';
 import { notFound, badRequest, conflict } from '../utils/errors';
 import { config } from '../config/env';
@@ -183,9 +182,6 @@ export const applicationService = {
       { workspaceId, candidateId: String(candidate._id), applicationId: String(application._id) },
       { idempotencyKey: `${resumeJobType.toLowerCase()}:${application._id}` },
     );
-
-    // Kick off the job's workflow (if one is active).
-    await workflowEngine.startRunForApplication(workspaceId, jobId, String(application._id));
 
     // Send confirmation email to the candidate (fire-and-forget, never blocks apply response).
     void (async () => {
