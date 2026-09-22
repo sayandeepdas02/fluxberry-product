@@ -83,9 +83,13 @@ export function Sidebar() {
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <span className="ml-auto flex items-center justify-center rounded-full text-muted-foreground/60 hover:text-muted-foreground">
+                    <button
+                      type="button"
+                      aria-label={`Show ${item.label} launch information`}
+                      className="ml-auto flex items-center justify-center rounded-full text-muted-foreground/60 hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
                       <Info className="size-4" />
-                    </span>
+                    </button>
                   </TooltipTrigger>
                   <TooltipContent side="right" align="end">
                     Launching in October 2026
