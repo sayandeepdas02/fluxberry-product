@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
-import { Check, ChevronsUpDown, Plus, LogOut } from 'lucide-react';
+import { Check, ChevronsUpDown, Plus, LogOut, CreditCard } from 'lucide-react';
 import { useWorkspace } from '@/components/providers/workspace-provider';
 import {
   DropdownMenu,
@@ -17,6 +17,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { CreateWorkspaceDialog } from '@/components/workspace/create-workspace-dialog';
 import { useClerk } from '@clerk/nextjs';
 import { initials, cn } from '@/lib/utils';
+import Link from 'next/link';
 
 export function WorkspaceSwitcher() {
   const router = useRouter();
@@ -70,6 +71,11 @@ export function WorkspaceSwitcher() {
             </DropdownMenuItem>
           ))}
           <DropdownMenuSeparator />
+          <DropdownMenuItem asChild>
+            <Link href="/app/pricing">
+              <CreditCard className="size-4" /> Pricing
+            </Link>
+          </DropdownMenuItem>
           <DropdownMenuItem onSelect={() => setCreateOpen(true)}>
             <Plus className="size-4" /> New workspace
           </DropdownMenuItem>
