@@ -104,7 +104,7 @@ export function PipelineMockup() {
 
       <div className="flex items-center gap-2 border-t border-ink-line pt-3 text-[11px] text-ink-500">
         <Sparkles className="size-3.5 text-berry-600" />
-        Screening finished 39 of 39 applicants — ranked, summarised, no manual sifting.
+        Screening finished 39 of 39 applicants. Ranked, summarised, no manual sifting.
       </div>
     </Surface>
   );
@@ -154,7 +154,7 @@ export function ScreeningMockup() {
 
       <div className="flex items-center gap-2 px-1 text-[11px] text-ink-500">
         <Sparkles className="size-3.5 shrink-0 text-berry-600" />
-        Summary and score are suggestions — a human always makes the call.
+        Summary and score are suggestions. A human always makes the call.
       </div>
     </Surface>
   );

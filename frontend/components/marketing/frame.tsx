@@ -33,16 +33,19 @@ export function Section({
   children,
   className,
   id,
+  tabIndex,
 }: {
   children: React.ReactNode;
   className?: string;
   id?: string;
+  tabIndex?: number;
 }) {
   return (
     <section
       id={id}
+      tabIndex={tabIndex}
       className={cn(
-        'mx-auto w-[calc(100%-48px)] max-w-[1200px] scroll-mt-20 border-x border-b border-ink-200 bg-white',
+        'mx-auto w-[calc(100%-48px)] max-w-[1200px] scroll-mt-20 border-x border-b border-berry-200 bg-white',
         className,
       )}
     >

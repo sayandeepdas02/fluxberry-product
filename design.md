@@ -41,7 +41,7 @@ The product has two color worlds that never mix:
 | `--background` | `0 0% 100%` | `222 47% 7%` | Page surface |
 | `--foreground` | `222 47% 11%` | `210 40% 96%` | Body text |
 | `--card` | `0 0% 100%` | `222 47% 9%` | Card/panel surface |
-| `--primary` | `330 81% 60%` | `330 80% 62%` | Brand pink, CTAs, focus rings |
+| `--primary` | `222 80% 27%` | `222 80% 55%` | Brand navy, CTAs, focus rings |
 | `--primary-foreground` | `0 0% 100%` | `0 0% 100%` | Text on primary |
 | `--secondary` | `210 40% 96%` | `217 33% 17%` | Secondary surface, active nav |
 | `--muted` | `210 40% 98%` | `217 33% 15%` | Muted backgrounds |
@@ -52,7 +52,7 @@ The product has two color worlds that never mix:
 | `--warning` | `38 92% 50%` | `38 92% 55%` | Warning states |
 | `--border` | `214 32% 91%` | `217 33% 20%` | All borders |
 | `--input` | `214 32% 91%` | `217 33% 20%` | Input borders |
-| `--ring` | `330 81% 60%` | `330 80% 62%` | Focus ring (matches primary) |
+| `--ring` | `222 80% 27%` | `222 80% 55%` | Focus ring (matches primary) |
 | `--radius` | `0.6rem` | `0.6rem` | Base border-radius |
 
 **Rules:**
@@ -61,18 +61,18 @@ The product has two color worlds that never mix:
 
 #### Marketing Palette
 
-**Berry scale** (brand pink):
+**Berry scale** (brand navy):
 
 | Token | Hex | Usage |
 |---|---|---|
-| `berry-50` | `#fdf2f8` | Kicker backgrounds, subtle fills |
-| `berry-100` | `#fce7f3` | — |
-| `berry-200` | `#fbcfe8` | Blockquote borders, announcement pill tags |
-| `berry-400` | `#f472b6` | — |
-| `berry-500` | `#ec4899` | Logo mark (top-left), list markers |
-| `berry-600` | `#db2777` | CTA button background, auth button, icons |
-| `berry-700` | `#be185d` | CTA button border, link color, micro labels, focus outline |
-| `berry-900` | `#831843` | Link hover |
+| `berry-50` | `#f0f4ff` | Kicker backgrounds, subtle fills |
+| `berry-100` | `#dde6ff` | Dot pattern tint |
+| `berry-200` | `#b8ccff` | Structural lines: rails, section borders, header rule, crosshairs |
+| `berry-400` | `#4f78d8` | Hatch pattern tint |
+| `berry-500` | `#2955b8` | Logo mark accents, list markers |
+| `berry-600` | `#0e2f7e` | Brand color. CTA button background, auth button, icons, hero headline |
+| `berry-700` | `#0a2462` | CTA button border, focus outline |
+| `berry-900` | `#061240` | Dark footer background |
 
 **Ink scale** (neutrals):
 
@@ -91,9 +91,9 @@ The product has two color worlds that never mix:
 | `ink-600` | `#646464` | Body text on marketing pages |
 
 **The two-weight line system is critical:**
-- `ink-200` for structural lines (borders that define sections and rails)
-- `ink-line` for interior lines (the lighter rules between grid cells)
-- Never swap them — it collapses the visual hierarchy.
+- `berry-200` (#b8ccff) for structural lines (frame rails, section borders, header rule, crosshairs)
+- `ink-line` (#f0f0f0) for interior lines (the lighter rules between grid cells)
+- Never swap them. It collapses the visual hierarchy.
 
 ---
 
@@ -167,15 +167,15 @@ The marketing pages use a "ruled notebook" metaphor. Every visual treatment come
 
 ### 3.2 Decorative Marks
 
-**Crosshairs** (`.mk-cross-tl/tr/bl/br`): 8x8px plus-signs at rule intersections. Color: `ink-300`. Built with pseudo-elements positioned to center on the intersection point. Also available as `<CrossMark>` SVG (9x9px, `currentColor`).
+**Crosshairs** (`.mk-cross-tl/tr/bl/br`): 8x8px plus-signs at rule intersections. Color: `berry-200`. Built with pseudo-elements positioned to center on the intersection point. Also available as `<CrossMark>` SVG (9x9px, `currentColor`).
 
-**Corner marks** (`.mk-corners > span`): 8x8px squares with `border: 1px solid ink-300; background: #fff` at each corner of a panel, offset to straddle the border.
+**Corner marks** (`.mk-corners > span`): 8x8px squares with `border: 1px solid berry-200; background: #fff` at each corner of a panel, offset to straddle the border.
 
-**Diagonal hatch** (`.mk-hatch`): `repeating-linear-gradient(315deg, rgb(196 196 196/0.56) 0 1px, transparent 0 50%); background-size: 10px 10px`. Used in divider band gutters.
+**Diagonal hatch** (`.mk-hatch`): `repeating-linear-gradient(315deg, rgb(79 120 216/0.18) 0 1px, transparent 0 50%); background-size: 10px 10px`. Used in divider band gutters.
 
 ### 3.3 Surface Treatments
 
-**Dotted surface** (`.mk-surface`): `bg-[radial-gradient(theme(colors.ink.200)_1px,transparent_1px)]` (resolves to `radial-gradient(#e8e8e8 1px, transparent 1px)`); `background-size: 18px 18px` on `bg-ink-50`. Graph paper texture for mockup panels.
+**Dotted surface** (`.mk-surface`): `border: 1px solid berry-200; bg-[radial-gradient(theme(colors.berry.100)_1px,transparent_1px)]`; `background-size: 18px 18px` on `bg-ink-50`. Graph paper texture for mockup panels.
 
 **Grid background** (`.mk-grid-bg`): 68px grid in `ink-200` at 55% opacity with a radial mask that fades edges. Used behind blog hero and auth pages.
 
@@ -189,11 +189,11 @@ All lines are CSS — no SVG for rules.
 
 | Type | Color | Implementation |
 |---|---|---|
-| Structural border | `ink-200` (#e8e8e8) | `border-ink-200` |
+| Structural border | `berry-200` (#b8ccff) | `border-berry-200` |
 | Interior rule | `ink-line` (#f0f0f0) | `border-ink-line` or gap-px trick |
-| Dashed rule | `ink-300` (#c4c4c4) | `.mk-dash-line`: `repeating-linear-gradient(to right, #c4c4c4 0 4px, transparent 4px 8px)` |
-| Full-bleed dashed | `ink-300` | `.mk-screen-dashed-top/bottom`: pseudo-element, `width: 200vw; left: -100vw` |
-| Vertical dashed | `ink-300` | `bg-[repeating-linear-gradient(to_bottom,#c4c4c4_0_4px,transparent_4px_8px)]` |
+| Dashed rule | `berry-200` (#b8ccff) | `.mk-dash-line`: `repeating-linear-gradient(to right, #b8ccff 0 4px, transparent 4px 8px)` |
+| Full-bleed dashed | `berry-200` | `.mk-screen-dashed-top/bottom`: pseudo-element, `width: 200vw; left: -100vw` |
+| Vertical dashed | `berry-200` | `bg-[repeating-linear-gradient(to_bottom,#b8ccff_0_4px,transparent_4px_8px)]` |
 
 **Full-bleed mechanism** (`.mk-divider`): `position: relative; left: 50%; width: 100vw; transform: translateX(-50%)`.
 
@@ -302,9 +302,11 @@ All 26 components use `cn()` from `lib/utils.ts` for class merging. CVA (class-v
 - `PixelChevronRight`, `PixelChevronDown`, `PixelArrowRight`, `CrossMark`
 
 #### Logo
-- `LogoMark`: 20x20 SVG, 2x2 grid of 9x9 squares (2px gap):
-  - TL: berry-500, TR: berry-200, BL: berry-200, BR: berry-700
+- `LogoMark`: Paper-plane icon rendered as an `<img>` tag (24x24):
+  - variant `"default"`: `/logo-mark.png` (navy plane on white — light backgrounds)
+  - variant `"light"`: `/logo-mark-white.png` (white plane on navy — dark backgrounds)
 - `Logo`: LogoMark + wordmark at `text-[17px] font-semibold tracking-tight text-ink`
+- Favicon: `app/icon.png` (white plane on navy, 1080x1080, browser-scaled)
 
 ---
 
@@ -324,9 +326,9 @@ All 26 components use `cn()` from `lib/utils.ts` for class merging. CVA (class-v
 ### 5.2 Marketing Layout
 
 - **Frame:** max-width 1248px, 24px inline padding
-- **Section:** max-width 1200px (fits inside frame), `border-x border-b border-ink-200 bg-white`
+- **Section:** max-width 1200px (fits inside frame), `border-x border-b border-berry-200 bg-white`
 - **SectionIntro:** `px-6 pb-14 pt-[72px] sm:px-8 lg:px-14`
-- **Header:** `sticky top-0 z-50 border-b border-ink-200 bg-white`, h-16
+- **Header:** `sticky top-0 z-50 border-b border-berry-200 bg-white`, h-16
 - **Footer:** gap-px grid on `bg-ink-line`, `lg:grid-cols-[1.6fr_1fr_1fr_1fr]`
 
 ### 5.3 Auth Shell
@@ -467,9 +469,10 @@ These rules are non-negotiable. Every PR must pass them.
 ### Marketing
 11. **Headings are weight 500.** Never bold on marketing pages.
 12. **Sections have square corners.** Never `rounded-*` on ruled-paper sections.
-13. **Two-weight line system.** `ink-200` for structure, `ink-line` for interior. Never swap.
+13. **Two-weight line system.** `berry-200` for structural lines (rails, section borders, header), `ink-line` for interior rules. Never swap.
 14. **Crosshairs at intersections.** Where a horizontal rule meets a vertical rail, place a crosshair mark.
 15. **Respect scroll motion.** Use `.mk-reveal` for entrance animations. Respect `prefers-reduced-motion`.
+16. **No em dashes.** Never use em dashes (`—`) in any user-visible copy: headings, body text, labels, metadata strings, or UI microcopy. Use a period to start a new sentence, or a comma/colon where a pause is needed.
 16. **Auth inputs use marketing tokens** (`rounded-[7px] border-ink-200`), not dashboard Input component.
 
 ### New Components

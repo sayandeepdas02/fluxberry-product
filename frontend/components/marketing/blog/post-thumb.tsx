@@ -10,7 +10,7 @@ export function PostThumb({ className }: { className?: string }) {
     <div
       className={cn(
         'relative overflow-hidden border border-ink-200 retina:border-[0.5px]',
-        'bg-[radial-gradient(80%_95%_at_14%_16%,#fdf2f8_0%,transparent_62%),linear-gradient(180deg,#fdfdfc_0%,#f2f2f2_100%)]',
+        'bg-[radial-gradient(80%_95%_at_14%_16%,#f0f4ff_0%,transparent_62%),linear-gradient(180deg,#fdfdfc_0%,#f2f2f2_100%)]',
         className,
       )}
       aria-hidden

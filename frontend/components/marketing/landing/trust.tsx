@@ -36,7 +36,7 @@ const items = [
   {
     icon: Database,
     title: 'Your candidate data',
-    body: 'Résumés and candidate records stay yours — exportable, and never sold or handed to a third-party hiring pool.',
+    body: 'Your candidate records are exportable and never sold or handed to a third-party hiring pool.',
   },
 ];
 
@@ -47,7 +47,7 @@ export function TrustSection() {
         <Kicker>Built for trust</Kicker>
         <H2Split lead="Automated where it helps." muted="Accountable where it counts." className="max-w-[940px]" />
         <TextLink href="/sign-up" className="mt-7">
-          Start for free
+          Get started
         </TextLink>
       </SectionIntro>
 
