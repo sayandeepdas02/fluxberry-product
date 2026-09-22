@@ -40,7 +40,6 @@ export function SiteFooter() {
             <p className="mt-[18px] max-w-[240px] text-mk-meta text-white/50">
               AI-native applicant tracking for teams that would rather be hiring than sifting.
             </p>
-            <p className="mt-auto pt-10 text-mk-meta text-white/30">Built for small hiring teams.</p>
           </div>
 
           {columns.map(({ heading, links }) => (
@@ -65,22 +64,19 @@ export function SiteFooter() {
           <CrossMark className="pointer-events-none absolute -right-[0.5px] -top-[0.5px] translate-x-1/2 -translate-y-1/2 text-berry-400" />
         </div>
 
-        <div className="grid min-h-16 grid-cols-1 items-center gap-4 border-x border-t border-white/10 px-6 py-5 sm:grid-cols-[1fr_auto_1fr] sm:py-0 lg:px-11">
-          <span className="justify-self-start bg-white/5 px-2.5 py-2 font-mono text-[11px] uppercase tracking-[0.08em] text-white/40">
-            Applicant tracking, minus the bloat
-          </span>
-          <span className="font-mono text-[11px] tabular-nums text-white/40 sm:justify-self-center">
-            © {new Date().getFullYear()} {publicConfig.appName}. All rights reserved.
+        <div className="grid min-h-16 grid-cols-1 items-center gap-4 border-x border-t border-white/10 px-6 py-5 sm:grid-cols-[1fr_auto] sm:py-0 lg:px-11">
+          <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-white/40">
+            Fluxberry AI | All Rights Reserved
           </span>
           <ul className="flex list-none items-center gap-5 p-0 sm:justify-self-end">
             <li>
-              <Link href="/blog" className="mk-focus font-mono text-[11px] uppercase tracking-[0.08em] text-white/40 transition-colors hover:text-white">
-                Blog
+              <Link href="/terms" className="mk-focus font-mono text-[11px] uppercase tracking-[0.08em] text-white/40 transition-colors hover:text-white">
+                Terms of Service
               </Link>
             </li>
             <li>
-              <Link href="/sign-up" className="mk-focus font-mono text-[11px] uppercase tracking-[0.08em] text-white/40 transition-colors hover:text-white">
-                Get started
+              <Link href="/privacy" className="mk-focus font-mono text-[11px] uppercase tracking-[0.08em] text-white/40 transition-colors hover:text-white">
+                Privacy Policy
               </Link>
             </li>
           </ul>

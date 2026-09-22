@@ -105,6 +105,7 @@
  * prefixed and light-only; the dashboard keeps its own HSL theme tokens.
  * ------------------------------------------------------------------------- */
 @layer components {
+
   /* The outer frame: 1248px wide, 24px gutters, 1200px of content between rails. */
   .mk-frame {
     position: relative;
@@ -118,8 +119,8 @@
     position: absolute;
     inset: 0 24px;
     z-index: 2;
-    border-left: 1px solid theme('colors.ink.200');
-    border-right: 1px solid theme('colors.ink.200');
+    border-left: 1px solid theme('colors.berry.200');
+    border-right: 1px solid theme('colors.berry.200');
     pointer-events: none;
   }
 
@@ -137,7 +138,7 @@
     right: 0;
     z-index: 1;
     height: 1px;
-    background: theme('colors.ink.200');
+    background: theme('colors.berry.200');
   }
   .mk-line-top { top: 0; }
   .mk-line-bottom { bottom: 0; }
@@ -149,7 +150,7 @@
     bottom: 0;
     z-index: 1;
     width: 1px;
-    background: theme('colors.ink.200');
+    background: theme('colors.berry.200');
   }
   .mk-rail-left { left: max(24px, -600px + 50vw); }
   .mk-rail-right { right: max(24px, -600px + 50vw); }
@@ -170,7 +171,7 @@
   .mk-cross::after {
     content: '';
     position: absolute;
-    background: theme('colors.ink.300');
+    background: theme('colors.berry.200');
   }
   .mk-cross::before {
     top: 50%;
@@ -194,15 +195,15 @@
   /* Dashed rule used for the standalone separators between grid rows. */
   .mk-dash-line {
     height: 1px;
-    background: repeating-linear-gradient(to right, theme('colors.ink.300') 0 4px, transparent 4px 8px);
+    background: repeating-linear-gradient(to right, theme('colors.berry.200') 0 4px, transparent 4px 8px);
   }
 
   /* Diagonal hatch (borrowed from chanhdai.com) for the gutters beside a divider. */
   .mk-hatch {
     background-image: repeating-linear-gradient(
       315deg,
-      rgb(196 196 196 / 0.56) 0,
-      rgb(196 196 196 / 0.56) 1px,
+      rgb(79 120 216 / 0.18) 0,
+      rgb(79 120 216 / 0.18) 1px,
       transparent 0,
       transparent 50%
     );
@@ -213,9 +214,9 @@
   .mk-surface {
     position: relative;
     overflow: hidden;
-    border: 1px solid theme('colors.ink.200');
+    border: 1px solid theme('colors.berry.200');
     background-color: theme('colors.ink.50');
-    background-image: radial-gradient(theme('colors.ink.200') 1px, transparent 1px);
+    background-image: radial-gradient(theme('colors.berry.100') 1px, transparent 1px);
     background-position: -1px -1px;
     background-size: 18px 18px;
   }
@@ -228,8 +229,8 @@
     opacity: 0.55;
     pointer-events: none;
     background-image:
-      linear-gradient(theme('colors.ink.200') 1px, transparent 1px),
-      linear-gradient(90deg, theme('colors.ink.200') 1px, transparent 1px);
+      linear-gradient(theme('colors.berry.200') 1px, transparent 1px),
+      linear-gradient(90deg, theme('colors.berry.200') 1px, transparent 1px);
     background-position: 50% center;
     background-size: 68px 68px;
     -webkit-mask-image: radial-gradient(120% 90% at 50% 38%, #000 22%, transparent 68%);
@@ -292,7 +293,7 @@
   /* Dashed variant — chanhdai's exact 6px tile. */
   .mk-screen-dashed-top::before,
   .mk-screen-dashed-bottom::after {
-    background: linear-gradient(to right, theme('colors.ink.300') 4px, transparent 2px) repeat-x;
+    background: linear-gradient(to right, theme('colors.berry.200') 4px, transparent 2px) repeat-x;
     background-size: 6px 1px;
   }
   .mk-screen-dashed-top { position: relative; }
@@ -321,7 +322,7 @@
     display: flex;
     width: 8px;
     height: 8px;
-    border: 1px solid theme('colors.ink.300');
+    border: 1px solid theme('colors.berry.200');
     background: #fff;
     pointer-events: none;
   }

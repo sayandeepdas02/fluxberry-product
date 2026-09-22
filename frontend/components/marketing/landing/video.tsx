@@ -17,13 +17,12 @@ export function VideoSection() {
       <div className="px-8 pb-16 sm:px-12 lg:px-20">
         <div className="mk-surface relative aspect-video w-full overflow-hidden rounded-[12px]">
           <div className="flex h-full flex-col items-center justify-center gap-4">
-            <button
-              type="button"
-              aria-label="Play demo video"
-              className="group flex size-16 items-center justify-center rounded-full bg-berry-600 text-white shadow-lg transition-transform hover:scale-105 hover:bg-berry-700"
+            <div
+              aria-hidden="true"
+              className="flex size-16 items-center justify-center rounded-full bg-berry-600 text-white shadow-lg"
             >
               <Play className="size-7 translate-x-0.5" fill="currentColor" />
-            </button>
+            </div>
             <span className="text-mk-meta text-ink-400">Product demo coming soon</span>
           </div>
         </div>

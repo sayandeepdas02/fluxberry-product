@@ -8,7 +8,7 @@ import { ClosingSection } from '@/components/marketing/landing/closing';
 
 const title = `${publicConfig.appName} - AI Native Hiring Platform`;
 const description =
-  'Fluxberry AI scores every applicant on arrival, runs assessments and interviews, and moves your pipeline forward — the AI-native hiring platform for small teams.';
+  'Fluxberry AI scores every applicant on arrival, runs assessments and interviews, and moves your pipeline forward. The AI-native hiring platform for small teams.';
 
 export const metadata: Metadata = {
   title: { absolute: title },
@@ -23,7 +23,7 @@ const jsonLd = {
   '@type': 'SoftwareApplication',
   name: publicConfig.appName,
   applicationCategory: 'BusinessApplication',
-  description: 'AI Native Hiring Platform — AI-native applicant tracking for small hiring teams.',
+  description: 'AI Native Hiring Platform. AI-native applicant tracking for small hiring teams.',
   offers: { '@type': 'Offer', category: 'SaaS' },
 };
 

@@ -21,16 +21,16 @@ const ANNUAL_DISCOUNT = '58%';
 
 export function PricingSection() {
   return (
-    <Section id="pricing">
+    <Section id="pricing" tabIndex={-1}>
       <SectionIntro className="flex flex-col items-center text-center">
         <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-ink-400">Pricing</span>
         <h2 className="mt-4 text-mk-h2 text-ink">
-          Simple plans.
-          <br />
-          <span className="text-ink-muted">Everything you need.</span>
+          Simple plans. <span className="text-ink-muted">Everything you need.</span>
         </h2>
         <p className="mt-4 max-w-[440px] text-mk-body text-ink-500">
-          One plan, full access. Choose monthly for flexibility or pay annually to save.
+          The best investment for hiring best talent.
+          <br />
+          Select the one which suits you.
         </p>
       </SectionIntro>
 

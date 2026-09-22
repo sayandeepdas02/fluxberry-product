@@ -36,7 +36,7 @@ const items = [
   {
     icon: Database,
     title: 'Your candidate data',
-    body: 'Résumés and candidate records stay yours — exportable, and never sold or handed to a third-party hiring pool.',
+    body: 'Your candidate records are exportable and never sold or handed to a third-party hiring pool.',
   },
 ];
 

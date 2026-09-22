@@ -1,37 +1,37 @@
-import { Sparkles, BarChart3, Share2, Users, ShieldCheck, ScrollText } from 'lucide-react';
+import { FileText, Sparkles, Zap, BarChart3, Users, LayoutList } from 'lucide-react';
 import { Section, SectionIntro } from '../frame';
 import { Divider } from '../divider';
 
 const features = [
   {
+    icon: FileText,
+    title: 'Create engaging hiring forms',
+    body: 'Ask video questions, show your live response rate, and capture rich answers from candidates. Go beyond a plain resume.',
+  },
+  {
     icon: Sparkles,
-    title: 'AI applicant screening',
-    body: 'Every application scored and summarised on arrival. Start from a ranked shortlist, not a flooded inbox.',
+    title: 'Shortlist faster with AI',
+    body: 'Describe your ideal candidate and the AI will surface the best-fit applicants. Spend less time reading, more time talking.',
   },
   {
-    icon: Users,
-    title: 'Collaborative pipeline',
-    body: 'Custom stages, team notes, and activity history — every move tracked so nothing falls through the cracks.',
-  },
-  {
-    icon: Share2,
-    title: 'Hosted careers page',
-    body: 'A branded job board that lives on your domain. Post jobs and collect applications without touching your website.',
+    icon: Zap,
+    title: 'Superfast reading mode',
+    body: 'Review applications with a focused full-screen layout and keyboard shortcuts. Get through your inbox in half the time.',
   },
   {
     icon: BarChart3,
-    title: 'Hiring analytics',
-    body: "Funnel drop-off, source performance, time-to-hire. Know what's working before the next hire cycle.",
+    title: 'Analytics, careers page and more',
+    body: 'Track your hiring funnel, create a branded careers page, and manage employee referrals. Everything in one workspace.',
   },
   {
-    icon: ShieldCheck,
-    title: 'Role-based access',
-    body: 'Invite your whole team with the right permissions. Control who can publish jobs, view candidates, or change settings.',
+    icon: Users,
+    title: 'Collaborative team review',
+    body: 'Invite your team, assign reviewers, and collect structured feedback in one place. Every hiring decision made together.',
   },
   {
-    icon: ScrollText,
-    title: 'Full audit trail',
-    body: 'Stage moves, emails sent, and member changes are logged so you can reconstruct how any hire happened.',
+    icon: LayoutList,
+    title: 'Your pipeline, your way',
+    body: 'Create custom stages to match your exact hiring process. Move candidates forward, add notes, and keep every hire on track.',
   },
 ];
 
@@ -48,17 +48,17 @@ export function FeaturesSection() {
           <span className="text-ink-muted">to hire smarter.</span>
         </h2>
         <p className="mt-4 max-w-[480px] text-mk-body text-ink-500">
-          Screening, pipeline, analytics, and your careers page — all in one workspace. No stitching tools together.
+          Screening, pipeline, analytics, and your careers page. All in one workspace, no extra tools.
         </p>
       </SectionIntro>
 
-      <div className="grid grid-cols-1 border-t border-ink-200 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 border-t border-berry-200 sm:grid-cols-2 lg:grid-cols-3">
         {features.map(({ icon: Icon, title, body }, i) => (
           <article
             key={title}
             className={[
               'px-8 pb-10 pt-8',
-              'border-ink-line',
+              'border-berry-100',
               i > 0 ? 'border-t sm:[&:nth-child(-n+2)]:border-t-0' : '',
               'lg:[&:nth-child(-n+3)]:border-t-0',
               'sm:[&:not(:nth-child(2n))]:border-r',
@@ -66,7 +66,7 @@ export function FeaturesSection() {
             ].join(' ')}
           >
             <div className="mb-5 inline-flex size-10 items-center justify-center rounded-[8px] bg-berry-50">
-              <Icon className="size-5 text-berry-600" strokeWidth={1.5} />
+              <Icon className="size-5 text-berry-600" strokeWidth={1.5} aria-hidden="true" />
             </div>
             <h3 className="mb-2 text-mk-title text-ink">{title}</h3>
             <p className="text-mk-body text-ink-600">{body}</p>

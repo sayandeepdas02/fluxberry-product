@@ -1,10 +1,16 @@
 import { ImageResponse } from 'next/og';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
+export const runtime = 'nodejs';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
 /** Default social share image, used by every page that doesn't set its own OG image. */
 export default function OpengraphImage() {
+  const logoData = readFileSync(join(process.cwd(), 'public', 'logo-mark.png'));
+  const logoSrc = `data:image/png;base64,${logoData.toString('base64')}`;
+
   return new ImageResponse(
     (
       <div
@@ -20,12 +26,8 @@ export default function OpengraphImage() {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-          <div style={{ width: 64, height: 64, display: 'flex', flexWrap: 'wrap' }}>
-            <div style={{ width: '50%', height: '50%', background: '#0e2f7e' }} />
-            <div style={{ width: '50%', height: '50%', background: '#b8ccff' }} />
-            <div style={{ width: '50%', height: '50%', background: '#b8ccff' }} />
-            <div style={{ width: '50%', height: '50%', background: '#0a2462' }} />
-          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={logoSrc} width={64} height={64} alt="" />
           <div style={{ display: 'flex', fontSize: 52, fontWeight: 600, color: '#0d1117', letterSpacing: '-0.02em' }}>
             Fluxberry AI
           </div>

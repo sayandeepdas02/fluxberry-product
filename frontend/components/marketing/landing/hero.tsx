@@ -7,7 +7,7 @@ export function Hero() {
     <section className="relative">
       <Frame>
         <div className="flex flex-col items-center pt-14 text-center">
-          <h1 className="mt-4 whitespace-nowrap text-mk-hero text-berry-600">
+          <h1 className="mt-4 text-mk-hero text-berry-600 md:whitespace-nowrap">
             The #1 AI Native Hiring Platform
           </h1>
 
@@ -34,7 +34,7 @@ export function Hero() {
               <span />
               <span />
             </div>
-            <figcaption className="mt-8 border-t border-ink-line px-4 py-3 text-center font-mono text-[11px] text-ink-400">
+            <figcaption className="mt-8 border-t border-berry-100 px-4 py-3 text-center font-mono text-[11px] text-ink-400">
               <span className="mr-2 tracking-[0.08em] text-ink-300">FIG. 1</span>
               Senior Frontend Engineer, after screening has run.
             </figcaption>

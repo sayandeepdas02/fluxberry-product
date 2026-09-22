@@ -25,7 +25,7 @@ export function SiteHeader() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-ink-200 bg-white">
+    <header className="sticky top-0 z-50 w-full border-b border-berry-200 bg-white">
       <div className="relative mx-auto grid h-16 max-w-[1248px] grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-6 px-6">
         <Logo className="justify-self-start" />
 
