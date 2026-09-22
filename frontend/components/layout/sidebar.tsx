@@ -13,8 +13,11 @@ import {
   Bell,
   Gift,
   Mail,
+  Info,
+  UserSearch,
 } from 'lucide-react';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { WorkspaceSwitcher } from './workspace-switcher';
 import {
@@ -31,7 +34,11 @@ const NAV = [
   { href: '/app/jobs', label: 'Jobs', icon: Briefcase },
   { href: '/app/candidates', label: 'Candidates', icon: Users },
   { href: '/app/analytics', label: 'Analytics', icon: BarChart3 },
-  { href: '/app/referrals', label: 'Referrals', icon: Gift },
+];
+
+const LOCKED_NAV = [
+  { label: 'Talent Sourcing', icon: UserSearch },
+  { label: 'Referrals', icon: Gift },
 ];
 
 export function Sidebar() {
@@ -61,6 +68,35 @@ export function Sidebar() {
               <Icon className="size-4 shrink-0" />
               {item.label}
             </Link>
+          );
+        })}
+
+        {LOCKED_NAV.map((item) => {
+          const Icon = item.icon;
+          return (
+            <div
+              key={item.label}
+              className="flex cursor-default items-center gap-2.5 rounded-md px-2.5 py-2 text-sm font-medium text-muted-foreground/60"
+            >
+              <Icon className="size-4 shrink-0" />
+              {item.label}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      aria-label={`Show ${item.label} launch information`}
+                      className="ml-auto flex items-center justify-center rounded-full text-muted-foreground/60 hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      <Info className="size-4" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right" align="end">
+                    Launching in October 2026
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
           );
         })}
       </nav>
