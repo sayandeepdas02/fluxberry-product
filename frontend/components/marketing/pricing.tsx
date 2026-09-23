@@ -1,7 +1,7 @@
 import { Check } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { Section, SectionIntro } from './frame';
+import { Badge } from '@/components/ui/badge';
 
 const PRO_FEATURES = [
   'Unlimited job posts',
@@ -21,20 +21,25 @@ const ANNUAL_DISCOUNT = '58%';
 
 export function PricingSection() {
   return (
-    <Section id="pricing" tabIndex={-1}>
-      <SectionIntro className="flex flex-col items-center text-center">
-        <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-ink-400">Pricing</span>
-        <h2 className="mt-4 text-mk-h2 text-ink">
-          Simple plans. <span className="text-ink-muted">Everything you need.</span>
+    <section id="pricing" tabIndex={-1} className="mx-auto w-full max-w-6xl scroll-mt-20 px-6 py-16 md:py-24">
+      <div className="flex flex-col items-center text-center">
+        <Badge
+          variant="outline"
+          className="rounded-md bg-card/70 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground"
+        >
+          Pricing
+        </Badge>
+        <h2 className="mt-4 text-mk-h2 text-foreground">
+          Simple plans. <span className="text-muted-foreground">Everything you need.</span>
         </h2>
-        <p className="mt-4 max-w-[440px] text-mk-body text-ink-500">
+        <p className="mt-4 max-w-[440px] text-mk-body text-muted-foreground">
           The best investment for hiring best talent.
           <br />
           Select the one which suits you.
         </p>
-      </SectionIntro>
+      </div>
 
-      <div className="px-8 pb-16 sm:px-12">
+      <div className="mt-12 px-0 sm:px-4">
         <div className="mx-auto grid max-w-3xl grid-cols-1 gap-4 sm:grid-cols-2">
           <BillingCard
             label="Monthly"
@@ -55,7 +60,7 @@ export function PricingSection() {
           />
         </div>
       </div>
-    </Section>
+    </section>
   );
 }
 
@@ -84,11 +89,11 @@ function BillingCard({
         'flex flex-col rounded-[12px] border p-6',
         featured
           ? 'border-berry-600 bg-berry-600 text-white'
-          : 'border-ink-200 bg-white',
+          : 'border-border bg-white',
       )}
     >
       <div className="flex items-start justify-between gap-2">
-        <h3 className={cn('text-base font-semibold', featured ? 'text-white' : 'text-ink')}>
+        <h3 className={cn('text-mk-title', featured ? 'text-white' : 'text-foreground')}>
           {label}
         </h3>
         {featured && (
@@ -99,11 +104,11 @@ function BillingCard({
       </div>
 
       <div className="mt-4 flex items-end gap-1">
-        <span className={cn('mb-1 text-xl', featured ? 'text-white/60' : 'text-ink-400')}>$</span>
-        <span className={cn('text-5xl font-semibold leading-none tracking-tight', featured ? 'text-white' : 'text-ink')}>
+        <span className={cn('mb-1 text-xl', featured ? 'text-white/60' : 'text-muted-foreground')}>$</span>
+        <span className={cn('text-5xl font-semibold leading-none tracking-tight', featured ? 'text-white' : 'text-foreground')}>
           {price}
         </span>
-        <span className={cn('mb-1 text-sm', featured ? 'text-white/60' : 'text-ink-400')}>{period}</span>
+        <span className={cn('mb-1 text-sm', featured ? 'text-white/60' : 'text-muted-foreground')}>{period}</span>
         {discount && (
           <span className="mb-1 ml-2 rounded-full bg-white/20 px-2 py-0.5 text-[11px] font-semibold text-white">
             {discount} off
@@ -111,14 +116,14 @@ function BillingCard({
         )}
       </div>
 
-      <div className={cn('my-5 border-t', featured ? 'border-white/20' : 'border-ink-line')} />
-      <p className={cn('mb-3 font-mono text-[11px] uppercase tracking-[0.08em]', featured ? 'text-white/60' : 'text-ink-400')}>
+      <div className={cn('my-5 border-t', featured ? 'border-white/20' : 'border-border')} />
+      <p className={cn('mb-3 font-mono text-[11px] uppercase tracking-[0.08em]', featured ? 'text-white/60' : 'text-muted-foreground')}>
         Includes
       </p>
 
       <ul className="flex-1 space-y-2.5">
         {features.map((f) => (
-          <li key={f} className={cn('flex items-center gap-2.5 text-sm', featured ? 'text-white/90' : 'text-ink-600')}>
+          <li key={f} className={cn('flex items-center gap-2.5 text-sm', featured ? 'text-white/90' : 'text-muted-foreground')}>
             <Check className={cn('size-4 shrink-0', featured ? 'text-white' : 'text-berry-600')} />
             {f}
           </li>
@@ -133,7 +138,7 @@ function BillingCard({
             ? 'bg-white text-berry-600 hover:bg-berry-50'
             : filled
             ? 'bg-berry-600 text-white hover:bg-berry-700'
-            : 'border border-ink-200 text-ink hover:bg-ink-50',
+            : 'border border-border text-foreground hover:bg-muted',
         )}
       >
         Get started

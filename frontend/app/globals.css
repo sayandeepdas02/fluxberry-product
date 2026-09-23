@@ -40,6 +40,11 @@
     --ring: 222 80% 27%;
 
     --radius: 0.6rem;
+
+    /* Feature08 spotlight */
+    --warm: oklch(0.55 0.12 250);
+    --warm-foreground: oklch(0.22 0.016 256.8);
+    --warm-glow: oklch(0.55 0.12 250 / 10%);
   }
 
   .dark {
