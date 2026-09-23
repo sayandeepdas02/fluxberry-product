@@ -1,23 +1,31 @@
 import Link from 'next/link';
 import { formatPostDate, type PostMeta } from '@/lib/blog-types';
-import { PostThumb } from './post-thumb';
 
-/** The lead post: wide artwork on the left, headline and dek on the right. */
+/** Full-width dark hero card for the lead post. */
 export function FeaturedPost({ post }: { post: PostMeta }) {
   return (
     <Link
       href={`/blog/${post.slug}`}
-      className="group mx-3 grid grid-cols-1 items-center gap-6 no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-berry-700 md:grid-cols-[1fr_1.3fr] md:gap-10"
+      className="group block overflow-hidden rounded-2xl bg-ink no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-berry-500"
     >
-      <PostThumb className="aspect-[16/10] w-full md:aspect-[3/2]" />
-      <div className="flex flex-col justify-center gap-4">
-        <span className="text-mk-micro normal-case tracking-normal text-ink-500">{post.category}</span>
-        <h2 className="text-mk-h4 text-ink group-hover:underline group-hover:underline-offset-4">{post.title}</h2>
-        <p className="text-mk-body text-ink-600">{post.description}</p>
-        <span className="font-mono text-[11px] tabular-nums text-ink-400">
-          {post.author} <span className="mx-1 text-ink-300">/</span> {formatPostDate(post.date)}{' '}
-          <span className="mx-1 text-ink-300">/</span> {post.readingTime} min read
-        </span>
+      <div className="flex flex-col justify-between p-8 md:p-12 md:min-h-[260px]">
+        <div>
+          <span className="font-mono text-[11px] tabular-nums text-ink-400">
+            {formatPostDate(post.date)} · {post.readingTime} min read
+          </span>
+          <h2 className="mt-4 max-w-xl text-mk-h3 text-white group-hover:underline group-hover:underline-offset-4">
+            {post.title}
+          </h2>
+          <p className="mt-3 max-w-lg line-clamp-3 text-sm leading-relaxed text-ink-400">
+            {post.description}
+          </p>
+        </div>
+        <div className="mt-8 flex items-center gap-3">
+          <span className="inline-flex h-7 items-center rounded-full border border-ink-600 px-3 text-[11px] font-medium text-ink-300">
+            {post.category}
+          </span>
+          <span className="text-sm text-ink-500">{post.author}</span>
+        </div>
       </div>
     </Link>
   );

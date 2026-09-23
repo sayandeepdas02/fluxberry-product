@@ -2,33 +2,33 @@ import Link from 'next/link';
 import { formatPostDate, type PostMeta } from '@/lib/blog-types';
 import { PostThumb } from './post-thumb';
 
-/**
- * Grid cell for one post. Square corners, 12px padding, and a hover wash drawn by
- * an overlay so the card's own borders stay exactly 1px.
- */
 export function PostCard({ post }: { post: PostMeta }) {
   return (
     <Link
       href={`/blog/${post.slug}`}
-      className="group relative flex flex-col gap-3 p-3 no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-berry-700"
+      className="group flex flex-col overflow-hidden rounded-xl border border-border bg-white no-underline transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-berry-500"
     >
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-px transition-colors group-hover:bg-[rgba(13,17,23,0.05)]"
-      />
-      <PostThumb className="aspect-[600/491] w-full" />
-      <span className="relative text-mk-micro normal-case tracking-normal text-ink-500">{post.category}</span>
-      <h3 className="relative text-mk-h5 text-ink">{post.title}</h3>
-      <p className="relative line-clamp-2 text-[14px] leading-5 text-ink-600">{post.description}</p>
-      {/* Mono + tabular figures for metadata, so dates line up column to column. */}
-      <span className="relative mt-auto pt-4 font-mono text-[11px] tabular-nums text-ink-400">
-        {formatPostDate(post.date)} <span className="mx-1 text-ink-300">/</span> {post.readingTime} min read
-      </span>
+      <PostThumb className="aspect-[16/10] w-full" />
+      <div className="flex flex-col gap-2.5 p-5">
+        <div className="flex items-center gap-2.5">
+          <span className="rounded-full border border-border px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
+            {post.category}
+          </span>
+          <span className="font-mono text-[11px] tabular-nums text-muted-foreground">
+            {formatPostDate(post.date)}
+          </span>
+        </div>
+        <h3 className="text-[15px] font-semibold leading-snug text-foreground group-hover:text-berry-600">
+          {post.title}
+        </h3>
+        <p className="line-clamp-2 text-[13px] leading-relaxed text-muted-foreground">
+          {post.description}
+        </p>
+      </div>
     </Link>
   );
 }
 
-/** Keeps the three-column rhythm intact when a row is short on posts. */
 export function EmptyCard() {
-  return <span aria-hidden className="pointer-events-none relative flex min-h-[220px] flex-col p-3" />;
+  return <span aria-hidden className="pointer-events-none hidden lg:block" />;
 }
