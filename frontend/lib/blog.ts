@@ -1,6 +1,5 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import yaml from 'js-yaml';
 import matter from 'gray-matter';
 import { slugifyHeading, type Heading, type Post, type PostMeta } from './blog-types';
 
@@ -63,6 +62,8 @@ function readingTimeMinutes(markdown: string): number {
 }
 
 function parse(slug: string, raw: string): Post {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const yaml = require('js-yaml');
   const { data, content } = matter(raw, {
     engines: { yaml: { parse: (s: string) => yaml.load(s) as Record<string, unknown> } },
   });
