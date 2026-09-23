@@ -25,7 +25,7 @@ export function SiteHeader() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-berry-200 bg-white">
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-background">
       <div className="relative mx-auto grid h-16 max-w-[1248px] grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-6 px-6">
         <Logo className="justify-self-start" />
 
@@ -35,7 +35,7 @@ export function SiteHeader() {
               key={label}
               href={href}
               className={cn(
-                'mk-focus inline-flex items-center rounded-[6px] px-[15px] py-[9px] text-mk-nav text-ink-600 transition-colors hover:bg-ink-100',
+                'mk-focus inline-flex items-center rounded-[6px] px-[15px] py-[9px] text-mk-nav text-muted-foreground transition-colors hover:bg-muted',
               )}
             >
               {label}
@@ -65,14 +65,14 @@ export function SiteHeader() {
       </div>
 
       {mobileOpen && (
-        <div className="flex flex-col gap-4 border-t border-ink-100 bg-ink-50 px-6 pb-5 pt-2 min-[861px]:hidden">
+        <div className="flex flex-col gap-4 border-t border-border bg-muted/50 px-6 pb-5 pt-2 min-[861px]:hidden">
           <nav className="flex flex-col">
             {navLinks.map(({ label, href }) => (
               <Link
                 key={label}
                 href={href}
                 onClick={() => setMobileOpen(false)}
-                className="mk-focus border-b border-ink-100 py-3 text-[15px] font-medium leading-5 text-ink"
+                className="mk-focus border-b border-border py-3 text-mk-body font-medium leading-5 text-foreground"
               >
                 {label}
               </Link>

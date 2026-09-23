@@ -1,27 +1,27 @@
-import Link from 'next/link';
-import { Section } from '../frame';
+import { MkButton } from '../mk-button';
 
 export function ClosingSection() {
   return (
-    <Section className="px-8 py-24 text-center">
-        <div className="mx-auto max-w-[600px]">
-          <h2 className="text-balance text-[clamp(34px,3.8vw,50px)] font-medium leading-[1.1] tracking-[-0.04em] text-ink">
-            Streamline your hiring with{' '}
-            <span className="text-berry-600">Fluxberry AI</span>
-          </h2>
-          <p className="mx-auto mt-6 max-w-[460px] text-[17px] leading-[1.7] text-ink-500">
-            Fluxberry AI is an AI Native hiring tool that is fast, simple.
-            <br />
-            Built for founders &amp; hiring managers.
-          </p>
-          <Link
+    <section className="bg-primary py-10 text-center md:py-14">
+      <div className="mx-auto max-w-[600px] px-6">
+        <h2 className="whitespace-nowrap text-mk-h2 text-primary-foreground">
+          Streamline your hiring with Fluxberry AI
+        </h2>
+        <p className="mx-auto mt-4 text-mk-body leading-relaxed text-primary-foreground/70">
+          Fluxberry AI is an AI Native hiring tool that is fast, simple.
+          <br />
+          Built for founders &amp; hiring managers.
+        </p>
+        <div className="mt-8">
+          <MkButton
             href="/sign-up"
-            className="mt-10 inline-flex items-center gap-2 rounded-[12px] bg-berry-600 px-10 py-4 text-[15px] font-medium text-white transition-opacity hover:opacity-90"
+            variant="secondary"
+            className="border-white/20 bg-white text-primary hover:bg-white/90"
           >
             Get started
-            <span aria-hidden>→</span>
-          </Link>
+          </MkButton>
         </div>
-      </Section>
+      </div>
+    </section>
   );
 }

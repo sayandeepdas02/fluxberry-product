@@ -18,7 +18,7 @@ export function Logo({ className, href = '/' }: { className?: string; href?: str
   return (
     <Link href={href} className={cn('mk-focus inline-flex items-center gap-2', className)}>
       <LogoMark />
-      <span className="text-[17px] font-semibold tracking-tight text-ink">{publicConfig.appName}</span>
+      <span className="text-mk-title font-semibold tracking-tight text-foreground">{publicConfig.appName}</span>
     </Link>
   );
 }
