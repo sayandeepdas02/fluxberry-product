@@ -30,7 +30,7 @@ export function PricingSection() {
           Pricing
         </Badge>
         <h2 className="mt-4 text-mk-h2 text-foreground">
-          Simple plans. <span className="text-muted-foreground">Everything you need.</span>
+          Simple plans. Everything you need.
         </h2>
         <p className="mt-4 max-w-[440px] text-mk-body text-muted-foreground">
           The best investment for hiring best talent.

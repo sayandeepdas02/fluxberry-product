@@ -62,7 +62,11 @@ function readingTimeMinutes(markdown: string): number {
 }
 
 function parse(slug: string, raw: string): Post {
-  const { data, content } = matter(raw);
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const yaml = require('js-yaml');
+  const { data, content } = matter(raw, {
+    engines: { yaml: { parse: (s: string) => yaml.load(s) as Record<string, unknown> } },
+  });
   return {
     slug,
     title: String(data.title ?? slug),

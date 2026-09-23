@@ -2,8 +2,17 @@ import { MkButton } from '../mk-button';
 
 export function ClosingSection() {
   return (
-    <section className="bg-primary py-10 text-center md:py-14">
-      <div className="mx-auto max-w-[600px] px-6">
+    <section className="relative py-10 text-center md:py-14">
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+        src="/hero-bg.mp4"
+      />
+      <div className="absolute inset-0 bg-black/50" />
+      <div className="relative mx-auto max-w-[600px] px-6">
         <h2 className="whitespace-nowrap text-mk-h2 text-primary-foreground">
           Streamline your hiring with Fluxberry AI
         </h2>

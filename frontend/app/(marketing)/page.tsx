@@ -34,10 +34,10 @@ export default function LandingPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
       />
       <Hero02
-        title="The #1 AI Native"
-        titleLine2="Hiring Platform"
-        description="Fluxberry AI scores every applicant on arrival, runs assessments and interviews, and moves your pipeline forward. Built for founders & hiring managers."
-        washImage="https://images.unsplash.com/photo-1557683316-973673baf926?w=1920&q=80"
+        title="The #1 AI Native Hiring Platform"
+        description="Fluxberry AI is an AI Native hiring tool that is fast, simple."
+        descriptionLine2="Built for founders & hiring managers."
+        washImage="/hero-bg.mp4"
         animation="subtle"
       />
       <Feature08 />

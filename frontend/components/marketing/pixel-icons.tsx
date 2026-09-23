@@ -1,9 +1,3 @@
-/**
- * Icons drawn as 1.5px squares on a 16px grid instead of strokes. At the sizes the
- * marketing pages use them they stay crisp on any DPR, and they echo the sharp,
- * ruled character of the rest of the page.
- */
-
 type IconProps = { className?: string };
 
 const SQ = 1.5;
@@ -30,23 +24,6 @@ export function PixelChevronRight({ className }: IconProps) {
         [8, 8.5],
         [6.5, 10],
         [5, 11.5],
-      ]}
-    />
-  );
-}
-
-export function PixelChevronDown({ className }: IconProps) {
-  return (
-    <Squares
-      className={className}
-      points={[
-        [2.5, 5],
-        [4, 6.5],
-        [5.5, 8],
-        [7, 9.5],
-        [8.5, 8],
-        [10, 6.5],
-        [11.5, 5],
       ]}
     />
   );

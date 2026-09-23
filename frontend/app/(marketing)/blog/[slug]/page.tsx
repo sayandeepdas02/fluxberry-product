@@ -7,9 +7,9 @@ import { publicPageMetadata, toPlainDescription } from '@/lib/seo';
 import { publicConfig } from '@/lib/config';
 import { Frame } from '@/components/marketing/frame';
 import { EyebrowPill } from '@/components/marketing/bits';
-import { MkButton } from '@/components/marketing/mk-button';
 import { Prose } from '@/components/marketing/blog/prose';
 import { TocMinimap } from '@/components/marketing/blog/toc-minimap';
+import { ClosingSection } from '@/components/marketing/landing/closing';
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -98,19 +98,7 @@ export default async function BlogPostPage({ params }: Params) {
         </Frame>
       </div>
 
-      <Frame>
-        <section className="flex flex-col items-center border-b border-ink-100 py-24 text-center">
-          <h2 className="max-w-[min(620px,100%-48px)] text-balance text-mk-h4 text-ink">
-            See Fluxberry on your own pipeline.
-          </h2>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-            <MkButton href="/sign-up">Get started</MkButton>
-            <MkButton href="/blog" variant="secondary">
-              Read more
-            </MkButton>
-          </div>
-        </section>
-      </Frame>
+      <ClosingSection />
     </>
   );
 }

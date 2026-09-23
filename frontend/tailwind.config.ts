@@ -143,10 +143,6 @@ const config: Config = {
       keyframes: {
         'fade-in': { from: { opacity: '0' }, to: { opacity: '1' } },
         shimmer: { '100%': { transform: 'translateX(100%)' } },
-        'mk-reveal-up': {
-          from: { opacity: '0', transform: 'translateY(12px)' },
-          to: { opacity: '1', transform: 'none' },
-        },
       },
       animation: {
         'fade-in': 'fade-in 0.15s ease-out',

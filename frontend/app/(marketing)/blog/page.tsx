@@ -1,11 +1,10 @@
 import type { Metadata } from 'next';
 import { getAllPosts, getCategories } from '@/lib/blog';
 import { publicPageMetadata } from '@/lib/seo';
-import { Frame } from '@/components/marketing/frame';
-import { Divider } from '@/components/marketing/divider';
-import { EyebrowPill } from '@/components/marketing/bits';
+import { Badge } from '@/components/ui/badge';
 import { FeaturedPost } from '@/components/marketing/blog/featured-post';
 import { PostBrowser } from '@/components/marketing/blog/post-browser';
+import { ClosingSection } from '@/components/marketing/landing/closing';
 
 const description =
   'Notes on hiring with less noise: screening, assessments, interviews, and how we build Fluxberry.';
@@ -20,33 +19,35 @@ export default function BlogIndexPage() {
   const posts = getAllPosts();
   const categories = getCategories();
   const featured = posts.find((post) => post.featured) ?? posts[0];
+  const rest = posts.filter((post) => post.slug !== featured?.slug);
 
   return (
     <>
-      <Frame>
-        <section className="relative isolate flex flex-col items-center overflow-hidden py-24 text-center">
-          <span className="mk-grid-bg" aria-hidden />
-          <EyebrowPill className="mb-4">Blog</EyebrowPill>
-          <h1 className="max-w-[min(620px,100%-48px)] text-balance text-mk-h1 text-ink">
-            Hiring, with less noise.
-          </h1>
-          <p className="mt-5 max-w-[min(520px,100%-48px)] text-balance text-ink-600">{description}</p>
-        </section>
-      </Frame>
+      <div className="mx-auto w-full max-w-6xl px-6 py-16 md:py-20">
+        {/* Page header */}
+        <div className="mb-10 flex flex-col items-center text-center">
+          <Badge
+            variant="outline"
+            className="rounded-md bg-card/70 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground"
+          >
+            Blog
+          </Badge>
+          <h1 className="mt-4 text-mk-h2 text-foreground">Hiring, with less noise.</h1>
+          <p className="mt-3 max-w-[480px] text-mk-body text-muted-foreground">{description}</p>
+        </div>
 
-      <Divider variant="band" />
-
-      <Frame>
+        {/* Featured post */}
         {featured && (
-          <>
-            <section className="border-t border-ink-200 py-3">
-              <FeaturedPost post={featured} />
-            </section>
-            <Divider />
-          </>
+          <div className="mb-14">
+            <FeaturedPost post={featured} />
+          </div>
         )}
-        <PostBrowser posts={posts} categories={categories} />
-      </Frame>
+
+        {/* Filtered grid */}
+        <PostBrowser posts={rest} categories={categories} />
+      </div>
+
+      <ClosingSection />
     </>
   );
 }
