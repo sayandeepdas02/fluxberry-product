@@ -13,6 +13,7 @@ export interface Hero02Props {
   title: string;
   titleLine2?: string;
   description: string;
+  descriptionLine2?: string;
   washImage: string;
   animation?: 'none' | 'subtle';
   ctaText?: string;
@@ -86,6 +87,7 @@ export function Hero02({
   title,
   titleLine2,
   description,
+  descriptionLine2,
   washImage,
   animation = 'none',
   ctaText = 'Get started',
@@ -99,27 +101,33 @@ export function Hero02({
   const titleElement = title && (
     <h1
       className={cn(
-        'tracking-tight text-balance text-foreground',
+        'tracking-tight whitespace-nowrap text-white drop-shadow-md',
         vs.title,
       )}
     >
-      <Balancer>{title}</Balancer>
+      {title}
       {titleLine2 && (
         <>
           <br />
-          <Balancer>{titleLine2}</Balancer>
+          {titleLine2}
         </>
       )}
     </h1>
   );
 
   const descriptionElement = description && (
-    <p className={cn('text-muted-foreground', vs.description)}>
-      <Balancer>{description}</Balancer>
+    <p className={cn('text-white/80 drop-shadow', vs.description)}>
+      {description}
+      {descriptionLine2 && (
+        <>
+          <br />
+          {descriptionLine2}
+        </>
+      )}
     </p>
   );
 
-  const ctaElement = <MkButton href={ctaLink}>{ctaText}</MkButton>;
+  const ctaElement = <MkButton href={ctaLink} className="border-white/20 bg-white text-primary hover:bg-white/90">{ctaText}</MkButton>;
 
   const mediaElement = (
     <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-border bg-muted/30">
@@ -133,7 +141,17 @@ export function Hero02({
   );
 
   return (
-    <section className="bg-background relative isolate w-full overflow-hidden">
+    <section className="relative isolate w-full overflow-hidden">
+      {washImage && (
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+          src={washImage}
+        />
+      )}
       <motion.div
         className={cn(
           'relative z-10 mx-auto flex max-w-6xl flex-col px-6',
@@ -147,7 +165,7 @@ export function Hero02({
       >
         <Reveal
           active={animate}
-          className={cn('flex max-w-2xl flex-col items-start', vs.header)}
+          className={cn('flex w-full flex-col items-center text-center', vs.header)}
         >
           {titleElement}
           {descriptionElement}

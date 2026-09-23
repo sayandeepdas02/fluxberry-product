@@ -8,42 +8,42 @@ const FEATURES = [
     title: 'Create engaging hiring forms',
     description:
       'Ask video questions, show your live response rate, and capture rich answers from candidates. Go beyond a plain resume.',
-    image: null as string | null,
+    image: '/features/feature-forms.jpg',
     gradient: 'from-orange-100 via-pink-100 to-rose-100',
   },
   {
     title: 'Shortlist faster with AI',
     description:
       'Describe your ideal candidate and the AI will surface the best-fit applicants. Spend less time reading, more time talking.',
-    image: null as string | null,
+    image: '/features/feature-ai-shortlist.jpg',
     gradient: 'from-pink-200 via-fuchsia-200 to-purple-200',
   },
   {
     title: 'Superfast reading mode',
     description:
       'Review applications with a focused full-screen layout and keyboard shortcuts. Get through your inbox in half the time.',
-    image: null as string | null,
+    image: '/features/feature-reading-mode.jpg',
     gradient: 'from-sky-100 via-blue-100 to-indigo-100',
   },
   {
     title: 'Analytics, careers page and more',
     description:
       'Track your hiring funnel, create a branded careers page, and manage employee referrals. Everything in one workspace.',
-    image: null as string | null,
+    image: '/features/feature-analytics.jpg',
     gradient: 'from-amber-100 via-orange-100 to-rose-100',
   },
   {
     title: 'Collaborative team review',
     description:
       'Invite your team, assign reviewers, and collect structured feedback in one place. Every hiring decision made together.',
-    image: null as string | null,
+    image: '/features/feature-team-review.jpg',
     gradient: 'from-emerald-100 via-teal-100 to-cyan-100',
   },
   {
     title: 'Your pipeline, your way',
     description:
       'Create custom stages to match your exact hiring process. Move candidates forward, add notes, and keep every hire on track.',
-    image: null as string | null,
+    image: '/features/feature-pipeline.jpg',
     gradient: 'from-violet-100 via-purple-100 to-fuchsia-100',
   },
 ];
@@ -52,7 +52,7 @@ const Feature08 = () => {
   return (
     <section
       id="features"
-      className="flex w-full flex-col justify-center gap-12 bg-background px-6 py-16 md:px-10 md:py-24"
+      className="flex w-full flex-col justify-center gap-12 bg-background px-6 py-16 md:py-24"
     >
       <div className="mx-auto flex max-w-3xl flex-col items-center gap-4 text-center">
         <Badge
@@ -77,17 +77,19 @@ const Feature08 = () => {
             className="group flex flex-col overflow-hidden rounded-2xl border border-border/50 bg-white shadow-sm transition-shadow hover:shadow-md"
           >
             <div
-              className={`relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-gradient-to-br ${feature.gradient} p-6`}
+              className={`flex aspect-[4/3] items-center justify-center bg-gradient-to-br ${feature.gradient} p-5`}
             >
               {feature.image ? (
-                <Image
-                  src={feature.image}
-                  alt={feature.title}
-                  fill
-                  className="object-cover"
-                />
+                <div className="relative h-full w-full overflow-hidden rounded-xl border border-black/8 shadow-md">
+                  <Image
+                    src={feature.image}
+                    alt={feature.title}
+                    fill
+                    className="object-contain object-top"
+                  />
+                </div>
               ) : (
-                <div className="flex size-full items-center justify-center rounded-lg border border-white/60 bg-white/40 text-xs text-muted-foreground backdrop-blur-sm">
+                <div className="flex size-full items-center justify-center rounded-xl border border-white/60 bg-white/40 text-xs text-muted-foreground backdrop-blur-sm">
                   Image coming soon
                 </div>
               )}

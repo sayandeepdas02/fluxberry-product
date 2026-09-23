@@ -4,7 +4,10 @@ import { PipelineMockup } from '../mockups';
 
 export function Hero() {
   return (
-    <section className="relative">
+    <section
+      className="relative"
+      style={{ backgroundImage: 'url(/hero-bg.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}
+    >
       <Frame>
         <div className="flex flex-col items-center pt-14 text-center">
           <h1 className="mt-4 text-mk-hero text-berry-600 md:whitespace-nowrap">
