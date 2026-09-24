@@ -6,6 +6,7 @@ export const FEATURE_FLAGS = [
   'GDPR_TOOLS',
   'OFFER_MANAGEMENT',
   'BULK_IMPORT',
+  'TALENT_SOURCING',
 ] as const;
 export type FeatureFlag = (typeof FEATURE_FLAGS)[number];
 
@@ -18,4 +19,5 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlagState = {
   GDPR_TOOLS: false,
   OFFER_MANAGEMENT: true,
   BULK_IMPORT: false,
+  TALENT_SOURCING: true,
 };

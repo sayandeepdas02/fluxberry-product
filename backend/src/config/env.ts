@@ -92,6 +92,17 @@ const envSchema = z.object({
   /** Must exactly match an authorized redirect URI on the Google OAuth client. */
   GOOGLE_CALENDAR_REDIRECT_URI: z.string().optional().default(''),
 
+  /**
+   * People Data Labs (Talent Sourcing). Blank -> a realistic mock provider
+   * activates, so the whole sourcing flow (NL search -> ranked profiles ->
+   * lists -> campaigns) works end to end with zero keys and zero PDL spend.
+   * Set a real key to hit the live Person Search API (billed per record
+   * returned). `PDL_MAX_RESULTS` hard-caps how many profiles a single search
+   * can ever retrieve, as a spend guardrail.
+   */
+  PDL_API_KEY: z.string().optional().default(''),
+  PDL_MAX_RESULTS: z.coerce.number().int().min(1).max(1000).default(200),
+
   REDIS_URL: z.string().optional().default(''),
   SENTRY_RELEASE: z.string().optional().default(''),
   SENTRY_ENVIRONMENT: z.string().optional().default(''),
@@ -112,6 +123,7 @@ const envSchema = z.object({
   FEATURE_GDPR_TOOLS: bool(DEFAULT_FEATURE_FLAGS.GDPR_TOOLS),
   FEATURE_OFFER_MANAGEMENT: bool(DEFAULT_FEATURE_FLAGS.OFFER_MANAGEMENT),
   FEATURE_BULK_IMPORT: bool(DEFAULT_FEATURE_FLAGS.BULK_IMPORT),
+  FEATURE_TALENT_SOURCING: bool(DEFAULT_FEATURE_FLAGS.TALENT_SOURCING),
 
   CAREERS_PREVIEW_SECRET: z.string().optional().default(''),
 
@@ -147,6 +159,7 @@ const features: FeatureFlagState = {
   GDPR_TOOLS: e.FEATURE_GDPR_TOOLS,
   OFFER_MANAGEMENT: e.FEATURE_OFFER_MANAGEMENT,
   BULK_IMPORT: e.FEATURE_BULK_IMPORT,
+  TALENT_SOURCING: e.FEATURE_TALENT_SOURCING,
 };
 
 export const config = {
@@ -204,6 +217,7 @@ export const config = {
       redirectUri: e.GOOGLE_CALENDAR_REDIRECT_URI || `${e.PUBLIC_API_URL || `http://localhost:${e.PORT}`}/api/v1/integrations/google-calendar/callback`,
     },
     avScan: { host: e.CLAMD_HOST || '', port: e.CLAMD_PORT },
+    sourcing: { apiKey: e.PDL_API_KEY, maxResults: e.PDL_MAX_RESULTS },
   },
 
   careersPreviewSecret: e.CAREERS_PREVIEW_SECRET || 'dev-preview-secret',

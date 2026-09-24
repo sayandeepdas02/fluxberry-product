@@ -1,4 +1,4 @@
-import type { StructuredRequirements, ParsedProfile, ScoreBreakdown } from '../../shared';
+import type { StructuredRequirements, ParsedProfile, ScoreBreakdown, SourcingCriteria } from '../../shared';
 
 export interface ProviderMeta {
   provider: string;
@@ -63,6 +63,16 @@ export interface ScreeningReasoning {
   meta: ProviderMeta;
 }
 
+export interface SourcingQueryInput {
+  /** The recruiter's free-text description of who they want to source. */
+  prompt: string;
+}
+
+export interface SourcingQueryResult {
+  criteria: SourcingCriteria;
+  meta: ProviderMeta;
+}
+
 /**
  * Provider-agnostic AI surface (spec §127). Core services depend only on this;
  * concrete providers (Anthropic/OpenAI/Mock) are chosen by config.
@@ -72,4 +82,6 @@ export interface AIProvider {
   generateJobDescription(input: JdGenInput): Promise<JdGenResult>;
   parseResume(input: ResumeParseInput): Promise<ResumeParseResult>;
   screenCandidate(input: ScreeningInput): Promise<ScreeningReasoning>;
+  /** Turn a natural-language sourcing prompt into structured search criteria. */
+  parseSourcingQuery(input: SourcingQueryInput): Promise<SourcingQueryResult>;
 }

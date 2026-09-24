@@ -10,7 +10,7 @@ import type { FeatureFlag } from './feature-flags';
  */
 export const PLAN_FEATURES: Record<WorkspacePlan, FeatureFlag[]> = {
   FREE: [],
-  PRO: ['ADVANCED_ANALYTICS', 'GDPR_TOOLS', 'OUTBOUND_WEBHOOKS', 'BULK_IMPORT'],
+  PRO: ['ADVANCED_ANALYTICS', 'GDPR_TOOLS', 'OUTBOUND_WEBHOOKS', 'BULK_IMPORT', 'TALENT_SOURCING'],
 };
 
 export function planIncludesFeature(plan: WorkspacePlan, flag: FeatureFlag): boolean {
