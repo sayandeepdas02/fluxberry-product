@@ -1,4 +1,4 @@
-import type { JdGenInput, ResumeParseInput, ScreeningInput } from './types';
+import type { JdGenInput, ResumeParseInput, ScreeningInput, SourcingQueryInput } from './types';
 
 export interface PromptSpec {
   system: string;
@@ -108,6 +108,37 @@ Return ONLY JSON:
   "strengths": ["specific, evidence-based matches"],
   "concerns": ["specific, job-relevant gaps"],
   "relevanceScore": number  // 0-10, how relevant their actual experience/projects are to THIS role
+}`,
+  };
+}
+
+export function sourcingQueryPrompt(input: SourcingQueryInput): PromptSpec {
+  return {
+    version: 'sourcing-v1',
+    system: `${FAIRNESS}\nYou convert a recruiter's natural-language description of an ideal candidate into a structured people-search filter. Extract only what is stated or clearly implied. Do not invent constraints.`,
+    user: `Turn this sourcing request into structured search criteria.
+
+REQUEST:
+"""
+${input.prompt.slice(0, 1200)}
+"""
+
+Rules:
+- "titles": canonical role titles, e.g. ["Software Engineer", "Backend Engineer"]. Expand abbreviations (SWE -> Software Engineer).
+- "seniority": zero or more of exactly ["INTERN","ENTRY","MID","SENIOR","STAFF","LEAD","MANAGER","DIRECTOR","VP","CXO"].
+- "skills": concrete technologies/skills, e.g. ["Rust","Kubernetes"]. Do not include soft skills.
+- "minYears"/"maxYears": integers when a range or floor is stated ("4+ years" -> minYears 4). Omit if unstated.
+- "locations": cities/regions as written, e.g. ["Bangalore"]. "countries": lowercased country names when stated, e.g. ["india"].
+- "companies": target current employers. "excludeCompanies": employers to avoid.
+- "industries": lowercased, e.g. ["computer software"]. "keywords": anything meaningful that did not fit above.
+
+Return ONLY JSON with this exact shape (use [] for empty arrays, omit unknown numbers):
+{
+  "titles": [], "seniority": [], "skills": [],
+  "minYears": number, "maxYears": number,
+  "locations": [], "countries": [],
+  "companies": [], "excludeCompanies": [],
+  "industries": [], "keywords": []
 }`,
   };
 }

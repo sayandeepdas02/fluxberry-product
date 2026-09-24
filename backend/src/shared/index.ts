@@ -26,3 +26,4 @@ export * from './schemas/webhook';
 export * from './schemas/gdpr';
 export * from './schemas/offer';
 export * from './schemas/bulk-import';
+export * from './schemas/sourcing';

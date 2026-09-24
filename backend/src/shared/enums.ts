@@ -101,6 +101,8 @@ export const CANDIDATE_SOURCES = [
   'WEBSITE',
   'CAREERS_PAGE',
   'EMBED',
+  /** Added to a job from the Talent Sourcing module (outbound-sourced lead). */
+  'SOURCED',
   'OTHER',
 ] as const;
 export type CandidateSource = (typeof CANDIDATE_SOURCES)[number];
@@ -159,6 +161,56 @@ export type BulkImportStatus = (typeof BULK_IMPORT_STATUSES)[number];
 export const BULK_IMPORT_ENTITY_TYPES = ['candidate', 'job'] as const;
 export type BulkImportEntityType = (typeof BULK_IMPORT_ENTITY_TYPES)[number];
 
+// ---- Talent sourcing ------------------------------------------------------
+
+/** Seniority buckets an NL search prompt can imply (map to PDL job_title_levels). */
+export const SENIORITY_LEVELS = [
+  'INTERN',
+  'ENTRY',
+  'MID',
+  'SENIOR',
+  'STAFF',
+  'LEAD',
+  'MANAGER',
+  'DIRECTOR',
+  'VP',
+  'CXO',
+] as const;
+export type SeniorityLevel = (typeof SENIORITY_LEVELS)[number];
+
+/** Lifecycle of a saved sourcing search (an NL prompt turned into a query + cached results). */
+export const SOURCING_SEARCH_STATUSES = ['DRAFT', 'READY', 'RUNNING', 'COMPLETED', 'FAILED'] as const;
+export type SourcingSearchStatus = (typeof SOURCING_SEARCH_STATUSES)[number];
+
+/** Where a sourced contact's data originates. */
+export const SOURCING_PROVIDERS = ['PDL', 'MANUAL', 'MOCK'] as const;
+export type SourcingProviderName = (typeof SOURCING_PROVIDERS)[number];
+
+/** Lifecycle of an outreach campaign to a sourcing list. */
+export const SOURCING_CAMPAIGN_STATUSES = [
+  'DRAFT',
+  'SCHEDULED',
+  'SENDING',
+  'SENT',
+  'PAUSED',
+  'FAILED',
+] as const;
+export type SourcingCampaignStatus = (typeof SOURCING_CAMPAIGN_STATUSES)[number];
+
+/** Per-recipient delivery state within a campaign. */
+export const SOURCING_RECIPIENT_STATUSES = [
+  'PENDING',
+  'SENT',
+  'DELIVERED',
+  'OPENED',
+  'REPLIED',
+  'BOUNCED',
+  'FAILED',
+  'UNSUBSCRIBED',
+  'SKIPPED',
+] as const;
+export type SourcingRecipientStatus = (typeof SOURCING_RECIPIENT_STATUSES)[number];
+
 // ---- Async job queue ------------------------------------------------------
 
 export const JOB_QUEUE_TYPES = [
@@ -175,6 +227,9 @@ export const JOB_QUEUE_TYPES = [
   'DELETE_CANDIDATE',
   'VALIDATE_BULK_IMPORT',
   'PROCESS_BULK_IMPORT',
+  'SEND_SOURCING_CAMPAIGN',
+  'SEND_SOURCING_EMAIL',
+  'ENRICH_SOURCED_CONTACT',
 ] as const;
 export type JobQueueType = (typeof JOB_QUEUE_TYPES)[number];
 
@@ -215,6 +270,12 @@ export const EVENT_TYPES = [
   'offer.accepted',
   'offer.declined',
   'offer.rescinded',
+  'sourcing.search.completed',
+  'sourcing.contact.added_to_list',
+  'sourcing.contact.converted',
+  'sourcing.campaign.created',
+  'sourcing.campaign.sent',
+  'sourcing.campaign.replied',
 ] as const;
 export type EventType = (typeof EVENT_TYPES)[number];
 

@@ -1,4 +1,5 @@
-import type { StructuredRequirements, ParsedProfile } from '../../shared';
+import type { StructuredRequirements, ParsedProfile, SourcingCriteria } from '../../shared';
+import { sourcingCriteriaSchema, emptySourcingCriteria, SENIORITY_LEVELS } from '../../shared';
 import type {
   AIProvider,
   JdGenInput,
@@ -7,12 +8,15 @@ import type {
   ResumeParseResult,
   ScreeningInput,
   ScreeningReasoning,
+  SourcingQueryInput,
+  SourcingQueryResult,
   ProviderMeta,
 } from './types';
 import {
   jobDescriptionPrompt,
   resumeParsingPrompt,
   candidateScreeningPrompt,
+  sourcingQueryPrompt,
   type PromptSpec,
 } from './prompts';
 import { extractJson, clampScore, asStringArray } from './util';
@@ -60,6 +64,64 @@ export abstract class BaseLLMProvider implements AIProvider {
     };
   }
 
+  async parseSourcingQuery(input: SourcingQueryInput): Promise<SourcingQueryResult> {
+    const spec = sourcingQueryPrompt(input);
+    const json = extractJson<any>(await this.complete(spec, 700));
+    return { criteria: normalizeCriteria(json), meta: this.meta(spec.version) };
+  }
+
+}
+
+const SENIORITY_SET = new Set<string>(SENIORITY_LEVELS);
+const SENIORITY_SYNONYMS: Record<string, string> = {
+  intern: 'INTERN', internship: 'INTERN', trainee: 'INTERN',
+  junior: 'ENTRY', entry: 'ENTRY', 'entry level': 'ENTRY', associate: 'ENTRY', grad: 'ENTRY',
+  mid: 'MID', 'mid level': 'MID', intermediate: 'MID',
+  senior: 'SENIOR', sr: 'SENIOR',
+  staff: 'STAFF', principal: 'STAFF',
+  lead: 'LEAD', 'tech lead': 'LEAD',
+  manager: 'MANAGER', 'engineering manager': 'MANAGER', em: 'MANAGER',
+  director: 'DIRECTOR', head: 'DIRECTOR',
+  vp: 'VP', 'vice president': 'VP',
+  cxo: 'CXO', cto: 'CXO', ceo: 'CXO', founder: 'CXO', 'c-level': 'CXO',
+};
+
+/** Coerce arbitrary LLM JSON into a valid, clamped SourcingCriteria. */
+export function normalizeCriteria(j: any): SourcingCriteria {
+  const clampYear = (v: unknown) => {
+    const n = typeof v === 'number' && Number.isFinite(v) ? Math.round(v) : NaN;
+    return Number.isNaN(n) ? undefined : Math.max(0, Math.min(60, n));
+  };
+  const trimTo = (arr: string[], len: number) =>
+    arr.map((s) => s.trim().slice(0, len).trim()).filter(Boolean);
+
+  const seniority = Array.isArray(j?.seniority)
+    ? Array.from(
+        new Set(
+          j.seniority
+            .filter((s: unknown) => typeof s === 'string')
+            .map((s: string) => SENIORITY_SYNONYMS[s.trim().toLowerCase()] ?? s.trim().toUpperCase())
+            .filter((s: string) => SENIORITY_SET.has(s)),
+        ),
+      )
+    : [];
+
+  const raw = {
+    titles: trimTo(asStringArray(j?.titles, 12), 80),
+    seniority,
+    skills: trimTo(asStringArray(j?.skills, 30), 60),
+    minYears: clampYear(j?.minYears),
+    maxYears: clampYear(j?.maxYears),
+    locations: trimTo(asStringArray(j?.locations, 12), 80),
+    countries: trimTo(asStringArray(j?.countries, 12), 60).map((s) => s.toLowerCase()),
+    companies: trimTo(asStringArray(j?.companies, 20), 80),
+    excludeCompanies: trimTo(asStringArray(j?.excludeCompanies, 20), 80),
+    industries: trimTo(asStringArray(j?.industries, 12), 60).map((s) => s.toLowerCase()),
+    keywords: trimTo(asStringArray(j?.keywords, 20), 60),
+  };
+
+  const parsed = sourcingCriteriaSchema.safeParse(raw);
+  return parsed.success ? parsed.data : emptySourcingCriteria();
 }
 
 function normalizeReqs(r: any): StructuredRequirements {

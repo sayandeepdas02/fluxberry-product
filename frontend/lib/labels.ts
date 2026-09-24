@@ -16,6 +16,7 @@ export const FEATURE_FLAG_LABELS: Record<FeatureFlag, string> = {
   GDPR_TOOLS: 'GDPR tools',
   OFFER_MANAGEMENT: 'Offer management',
   BULK_IMPORT: 'Bulk import',
+  TALENT_SOURCING: 'Talent sourcing',
 };
 
 export const FORM_QUESTION_TYPE_LABELS: Record<FormQuestionType, string> = {
