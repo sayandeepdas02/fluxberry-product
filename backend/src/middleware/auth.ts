@@ -147,7 +147,7 @@ export function requirePlanFeature(flag: FeatureFlag): RequestHandler {
       if (!config.features[flag]) return next(forbidden(`The ${flag} feature is not enabled`));
       if (!req.auth?.workspaceId) return next(forbidden('You do not have access to this workspace'));
 
-      const account = await accountRepository.findByWorkspaceId(req.auth.workspaceId);
+      const account = await accountRepository.ensureForWorkspace(req.auth.workspaceId);
       if (!account) return next(notFound('Billing account not found'));
 
       const plan = (account.plan as WorkspacePlan) ?? 'FREE';
@@ -172,7 +172,7 @@ export const requireActiveSubscription: RequestHandler = async (req, _res, next)
   try {
     if (!req.auth?.workspaceId) return next(forbidden('You do not have access to this workspace'));
 
-    const account = await accountRepository.findByWorkspaceId(req.auth.workspaceId);
+    const account = await accountRepository.ensureForWorkspace(req.auth.workspaceId);
     if (!account) return next(notFound('Billing account not found'));
 
     const status = (account.billing?.subscriptionStatus as BillingSubscriptionStatus) ?? 'none';
