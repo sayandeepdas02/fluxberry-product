@@ -1,3 +1,6 @@
+'use client';
+
+import { useState } from 'react';
 import { Check } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
@@ -5,6 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { PLAN_PRICING, PLAN_TAGLINE, PRO_FEATURES, MAX_FEATURES, annualDiscount } from '@/lib/pricing';
 
 export function PricingSection() {
+  const [annual, setAnnual] = useState(false);
+
   return (
     <section id="pricing" tabIndex={-1} className="mx-auto w-full max-w-6xl scroll-mt-20 px-6 py-16 md:py-24">
       <div className="flex flex-col items-center text-center">
@@ -20,6 +25,34 @@ export function PricingSection() {
           <br />
           Select the one which suits you.
         </p>
+
+        <div className="mt-8 flex items-center gap-3">
+          <span className={cn('text-sm font-medium transition-colors', !annual ? 'text-foreground' : 'text-muted-foreground')}>
+            Monthly
+          </span>
+          <button
+            role="switch"
+            aria-checked={annual}
+            onClick={() => setAnnual((v) => !v)}
+            className={cn(
+              'relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-berry-600 focus-visible:ring-offset-2',
+              annual ? 'bg-berry-600' : 'bg-muted',
+            )}
+          >
+            <span
+              className={cn(
+                'pointer-events-none block h-4 w-4 rounded-full bg-white shadow-md ring-0 transition-transform',
+                annual ? 'translate-x-5' : 'translate-x-0.5',
+              )}
+            />
+          </button>
+          <span className={cn('flex items-center gap-1.5 text-sm font-medium transition-colors', annual ? 'text-foreground' : 'text-muted-foreground')}>
+            Annual
+            <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">
+              Save 58%
+            </span>
+          </span>
+        </div>
       </div>
 
       <div className="mt-12 px-0 sm:px-4">
@@ -31,6 +64,7 @@ export function PricingSection() {
             annual={PLAN_PRICING.PRO.annual}
             discount={annualDiscount('PRO')}
             features={PRO_FEATURES}
+            showAnnual={annual}
           />
           <PricingCard
             label="Max"
@@ -40,6 +74,7 @@ export function PricingSection() {
             discount={annualDiscount('MAX')}
             features={MAX_FEATURES}
             featured
+            showAnnual={annual}
           />
         </div>
       </div>
@@ -55,6 +90,7 @@ function PricingCard({
   discount,
   features,
   featured = false,
+  showAnnual,
 }: {
   label: string;
   tagline: string;
@@ -63,7 +99,10 @@ function PricingCard({
   discount: number;
   features: string[];
   featured?: boolean;
+  showAnnual: boolean;
 }) {
+  const displayPrice = showAnnual ? Math.round(annual / 12) : monthly;
+
   return (
     <div
       className={cn(
@@ -78,7 +117,7 @@ function PricingCard({
         </div>
         {featured && (
           <span className="rounded-full bg-white/20 px-2.5 py-0.5 text-[11px] font-medium text-white">
-            Most powerful
+            Recommended
           </span>
         )}
       </div>
@@ -86,12 +125,14 @@ function PricingCard({
       <div className="mt-4 flex items-end gap-1">
         <span className={cn('mb-1 text-xl', featured ? 'text-white/60' : 'text-muted-foreground')}>$</span>
         <span className={cn('text-5xl font-semibold leading-none tracking-tight', featured ? 'text-white' : 'text-foreground')}>
-          {monthly}
+          {displayPrice}
         </span>
         <span className={cn('mb-1 text-sm', featured ? 'text-white/60' : 'text-muted-foreground')}>/ month</span>
       </div>
       <p className={cn('mt-2 text-xs', featured ? 'text-white/70' : 'text-muted-foreground')}>
-        or ${annual}/year billed annually — save {discount}%
+        {showAnnual
+          ? `$${annual}/year billed annually — save ${discount}%`
+          : `or $${annual}/year billed annually — save ${discount}%`}
       </p>
 
       <div className={cn('my-5 border-t', featured ? 'border-white/20' : 'border-border')} />
