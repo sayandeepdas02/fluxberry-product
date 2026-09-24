@@ -168,6 +168,31 @@ describe('billing (integration, mock Dodo)', () => {
     expect(afterCancel.body.error.code).toBe('SUBSCRIPTION_REQUIRED');
   });
 
+  it('self-heals a workspace that has no account yet (pre-migration deploy)', async () => {
+    const token = await tokenFor('legacyowner@test.com', 'Legacy Owner');
+    const onboard = await request(app)
+      .post('/api/v1/workspaces/onboarding')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ name: 'Legacy Owner', company: 'Legacy Co' });
+    const workspaceId = onboard.body.data.id as string;
+    const ws = (r: request.Test) => r.set('Authorization', `Bearer ${token}`).set('X-Workspace-Id', workspaceId);
+
+    // Simulate the pre-account-tier state: drop the account link + the account.
+    const before = await WorkspaceModel.findById(workspaceId).lean();
+    await AccountModel.deleteOne({ _id: before!.accountId });
+    await WorkspaceModel.updateOne({ _id: workspaceId }, { $unset: { accountId: 1 } });
+
+    // Instead of hard-failing, the account is provisioned on the fly and a normal
+    // FREE status is returned.
+    const status = await ws(request(app).get(`/api/v1/workspaces/${workspaceId}/billing`) as any);
+    expect(status.status).toBe(200);
+    expect(status.body.data.plan).toBe('FREE');
+
+    const linked = await WorkspaceModel.findById(workspaceId).lean();
+    expect(linked!.accountId).toBeTruthy();
+    expect(await AccountModel.findById(linked!.accountId)).not.toBeNull();
+  });
+
   it('supports the annual billing cycle end to end', async () => {
     const token = await tokenFor('annualowner@test.com', 'Annual Owner');
     const onboard = await request(app)

@@ -24,7 +24,7 @@ export const billingService = {
     plan: WorkspacePlan,
     billingCycle: BillingCycle,
   ): Promise<{ url: string }> {
-    const account = await accountRepository.findByWorkspaceId(workspaceId);
+    const account = await accountRepository.ensureForWorkspace(workspaceId);
     if (!account) throw notFound('Billing account not found for this workspace');
     const user = await userRepository.findById(userId);
     if (!user) throw notFound('User not found');
@@ -46,7 +46,7 @@ export const billingService = {
     userId: string,
     packId: string,
   ): Promise<{ url: string }> {
-    const account = await accountRepository.findByWorkspaceId(workspaceId);
+    const account = await accountRepository.ensureForWorkspace(workspaceId);
     if (!account) throw notFound('Billing account not found for this workspace');
     const user = await userRepository.findById(userId);
     if (!user) throw notFound('User not found');
@@ -67,13 +67,13 @@ export const billingService = {
 
   /** The account's AI-credit ledger (most recent first). */
   async getCreditHistory(workspaceId: string) {
-    const account = await accountRepository.findByWorkspaceId(workspaceId);
+    const account = await accountRepository.ensureForWorkspace(workspaceId);
     if (!account) throw notFound('Billing account not found for this workspace');
     return creditsService.history(String(account._id));
   },
 
   async createPortalSession(workspaceId: string): Promise<{ url: string }> {
-    const account = await accountRepository.findByWorkspaceId(workspaceId);
+    const account = await accountRepository.ensureForWorkspace(workspaceId);
     if (!account) throw notFound('Billing account not found for this workspace');
     if (!account.billing?.customerId) {
       throw badRequest('No billing account yet — upgrade to a paid plan first.');
@@ -193,7 +193,7 @@ export const billingService = {
   },
 
   async getStatus(workspaceId: string): Promise<BillingStatusDto> {
-    const account = await accountRepository.findByWorkspaceId(workspaceId);
+    const account = await accountRepository.ensureForWorkspace(workspaceId);
     if (!account) throw notFound('Billing account not found for this workspace');
 
     const plan = (account.plan as WorkspacePlan) ?? 'FREE';
