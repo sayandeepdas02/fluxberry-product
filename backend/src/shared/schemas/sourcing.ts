@@ -46,7 +46,10 @@ export const sourcingCriteriaSchema = z.object({
   industries: z.array(z.string().trim().min(1).max(60)).max(12).default([]),
   /** Extra free-text keywords the structured fields didn't capture. */
   keywords: z.array(z.string().trim().min(1).max(60)).max(20).default([]),
-});
+}).refine(
+  (d) => d.minYears == null || d.maxYears == null || d.minYears <= d.maxYears,
+  { message: 'minYears must be less than or equal to maxYears', path: ['minYears'] },
+);
 export type SourcingCriteria = z.infer<typeof sourcingCriteriaSchema>;
 
 /** An empty criteria object (used as a safe default before parsing). */

@@ -43,6 +43,7 @@ export class PdlPeopleSourcingProvider implements PeopleSourcingProvider {
           'X-Api-Key': this.apiKey,
         },
         body: JSON.stringify(body),
+        signal: AbortSignal.timeout(20_000),
       });
     } catch (err) {
       logger.error({ err }, 'PDL search request failed');
@@ -74,10 +75,19 @@ export class PdlPeopleSourcingProvider implements PeopleSourcingProvider {
 
 // --- query builder ---------------------------------------------------------
 
+const LEVEL_TO_PDL: Record<string, string> = {
+  INTERN: 'training', ENTRY: 'entry', SENIOR: 'senior', MANAGER: 'manager',
+  DIRECTOR: 'director', VP: 'vp', CXO: 'cxo',
+};
+
 function buildEsQuery(c: SourcingCriteria): Record<string, unknown> {
   const must: unknown[] = [];
   const should: unknown[] = [];
   const mustNot: unknown[] = [];
+
+  // Seniority levels — map to PDL job_title_levels.
+  const levels = c.seniority.map((s) => LEVEL_TO_PDL[s]).filter(Boolean);
+  if (levels.length) must.push({ terms: { job_title_levels: levels } });
 
   // Titles — at least one should match (OR), lightly required if provided.
   if (c.titles.length) {
@@ -102,7 +112,7 @@ function buildEsQuery(c: SourcingCriteria): Record<string, unknown> {
 
   // Locations / countries.
   if (c.locations.length) {
-    should.push({
+    must.push({
       bool: {
         should: c.locations.map((l) => ({ match: { location_name: l } })),
         minimum_should_match: 1,
@@ -139,12 +149,12 @@ function buildEsQuery(c: SourcingCriteria): Record<string, unknown> {
     should.push({ terms: { industry: c.industries.map((x) => x.toLowerCase()) } });
   }
 
-  // Keywords — broad free-text catch-all across summary + titles.
+  // Keywords — broad free-text catch-all across summary.
   if (c.keywords.length) {
     should.push({
-      query_string: {
-        query: c.keywords.map((k) => `"${k}"`).join(' OR '),
-        default_field: 'summary',
+      bool: {
+        should: c.keywords.map((k) => ({ match_phrase: { summary: k } })),
+        minimum_should_match: 1,
       },
     });
   }
@@ -209,7 +219,7 @@ function mapPdlPerson(p: PdlPerson): SourcedPerson {
   const personalEmail = p.personal_emails?.[0] ?? p.emails?.find((e) => e.type === 'personal')?.address;
   return {
     providerId: p.id ?? null,
-    fullName: p.full_name ?? [p.first_name, p.last_name].filter(Boolean).join(' ') ?? 'Unknown',
+    fullName: p.full_name || [p.first_name, p.last_name].filter(Boolean).join(' ') || 'Unknown',
     firstName: p.first_name,
     lastName: p.last_name,
     title: p.job_title,

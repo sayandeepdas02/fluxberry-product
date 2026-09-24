@@ -9,7 +9,13 @@ let instance: PeopleSourcingProvider | null = null;
 function create(): PeopleSourcingProvider {
   if (config.providers.mockAll) return new MockPeopleSourcingProvider();
   const key = config.providers.sourcing.apiKey;
-  if (!key) return new MockPeopleSourcingProvider();
+  if (!key) {
+    if (config.isProd) {
+      throw new Error('PDL_API_KEY is required in production when TALENT_SOURCING is enabled');
+    }
+    logger.warn('PDL_API_KEY not set; using mock people sourcing provider');
+    return new MockPeopleSourcingProvider();
+  }
   return new PdlPeopleSourcingProvider(key);
 }
 

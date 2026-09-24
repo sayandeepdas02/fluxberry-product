@@ -92,7 +92,8 @@ export function normalizeCriteria(j: any): SourcingCriteria {
     const n = typeof v === 'number' && Number.isFinite(v) ? Math.round(v) : NaN;
     return Number.isNaN(n) ? undefined : Math.max(0, Math.min(60, n));
   };
-  const trimTo = (arr: string[], len: number) => arr.map((s) => s.slice(0, len));
+  const trimTo = (arr: string[], len: number) =>
+    arr.map((s) => s.trim().slice(0, len).trim()).filter(Boolean);
 
   const seniority = Array.isArray(j?.seniority)
     ? Array.from(
