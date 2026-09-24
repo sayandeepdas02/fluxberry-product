@@ -11,8 +11,8 @@ const referralSchema = new Schema(
     jobId: { type: Schema.Types.ObjectId, ref: 'Job', required: true },
     /**
      * Globally unique (not per-workspace) — the public redirect route
-     * (GET /public/r/:code) has no workspace in its URL, so the code alone
-     * must resolve a referral.
+     * (frontend /r/:code, resolved via GET /api/v1/public/referrals/:code) has
+     * no workspace in its URL, so the code alone must resolve a referral.
      */
     code: { type: String, required: true, unique: true },
     applicationIds: { type: [Schema.Types.ObjectId], ref: 'Application', default: [] },

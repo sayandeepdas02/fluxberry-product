@@ -34,11 +34,11 @@ const NAV = [
   { href: '/app/jobs', label: 'Jobs', icon: Briefcase },
   { href: '/app/candidates', label: 'Candidates', icon: Users },
   { href: '/app/analytics', label: 'Analytics', icon: BarChart3 },
+  { href: '/app/referrals', label: 'Referrals', icon: Gift },
 ];
 
 const LOCKED_NAV = [
   { label: 'Talent Sourcing', icon: UserSearch },
-  { label: 'Referrals', icon: Gift },
 ];
 
 export function Sidebar() {
