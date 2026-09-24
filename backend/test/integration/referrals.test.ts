@@ -54,7 +54,8 @@ describe('employee referrals (integration)', () => {
     const workspaceId = onboard.body.data.id as string;
     const workspaceSlug = onboard.body.data.slug as string;
     const ownerWs = (r: request.Test) => r.set('Authorization', `Bearer ${ownerToken}`).set('X-Workspace-Id', workspaceId);
-    await activateSubscription(workspaceId);
+    // Referrals is a Max-only feature.
+    await activateSubscription(workspaceId, 'MAX');
 
     // A recruiter member who will generate the referral link.
     await inviteAndAccept(ownerWs, workspaceId, 'refrecruiter@test.com', 'recruiter');
@@ -198,5 +199,27 @@ describe('employee referrals (integration)', () => {
     const afterRetry = await recruiterWs(request(app).get('/api/v1/referrals/my') as any);
     expect(afterRetry.body.data[0].applicationCount).toBe(2);
     expect(afterRetry.body.data[0].hiredCount).toBe(1);
+  });
+
+  it('gates referrals behind the Max plan — a Pro account is blocked with an upsell code', async () => {
+    const token = await tokenFor('proreferral@test.com', 'Pro Referral');
+    const onboard = await request(app)
+      .post('/api/v1/workspaces/onboarding')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ name: 'Pro Referral', company: 'ProRefco' });
+    const workspaceId = onboard.body.data.id as string;
+    const ws = (r: request.Test) => r.set('Authorization', `Bearer ${token}`).set('X-Workspace-Id', workspaceId);
+
+    // Pro plan does NOT include referrals.
+    await activateSubscription(workspaceId, 'PRO');
+    const blocked = await ws(request(app).get('/api/v1/referrals/my') as any);
+    expect(blocked.status).toBe(403);
+    expect(blocked.body.error.code).toBe('PLAN_UPGRADE_REQUIRED');
+    expect(blocked.body.error.details.flag).toBe('REFERRALS');
+
+    // Upgrading to Max unlocks it.
+    await activateSubscription(workspaceId, 'MAX');
+    const allowed = await ws(request(app).get('/api/v1/referrals/my') as any);
+    expect(allowed.status).toBe(200);
   });
 });

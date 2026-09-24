@@ -24,6 +24,9 @@ import { SkillsInput } from '@/components/jobs/skills-input';
 import { ApplicationFormFields } from '@/components/jobs/application-form-fields';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/components/ui/sonner';
+import { OutOfCreditsModal } from '@/components/billing/out-of-credits-modal';
+import { getInsufficientCredits } from '@/lib/api-client';
+import { useQueryClient } from '@tanstack/react-query';
 import { EMPLOYMENT_LABELS, WORK_MODE_LABELS } from '@/lib/labels';
 import { cn } from '@/lib/utils';
 
@@ -36,8 +39,10 @@ type SaveState = 'idle' | 'saving' | 'saved' | 'error';
 
 export default function NewJobPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [jobId, setJobId] = useState<string | null>(null);
   const [restoreChecked, setRestoreChecked] = useState(false);
+  const [outOfCredits, setOutOfCredits] = useState(false);
   const createJob = useCreateJob();
   const updateJob = useUpdateJob(jobId ?? '');
   const publishJob = usePublishJob();
@@ -182,7 +187,14 @@ export default function NewJobPage() {
       setDescription(r.description);
       setSR(r.structuredRequirements);
       setAiMeta({ provider: r.provider, model: r.model, promptVersion: r.promptVersion });
+      // Credits were just spent — refresh the balance shown in the sidebar meter.
+      void queryClient.invalidateQueries({ queryKey: ['billing'] });
     } catch (err) {
+      if (getInsufficientCredits(err)) {
+        setOutOfCredits(true);
+        void queryClient.invalidateQueries({ queryKey: ['billing'] });
+        return;
+      }
       toast.error(err instanceof Error ? err.message : 'Generation failed');
     } finally {
       setGenerating(false);
@@ -234,6 +246,7 @@ export default function NewJobPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-6 pb-10">
+      <OutOfCreditsModal open={outOfCredits} onOpenChange={setOutOfCredits} />
       <h1 className="sr-only">{jobId ? 'Edit job' : 'Create job'}</h1>
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">

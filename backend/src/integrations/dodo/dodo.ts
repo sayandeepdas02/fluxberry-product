@@ -5,6 +5,7 @@ import type {
   BillingProvider,
   BillingWebhookEvent,
   CheckoutSessionInput,
+  CreditPackCheckoutInput,
   CheckoutSessionResult,
   PortalSessionInput,
   PortalSessionResult,
@@ -28,6 +29,8 @@ export class DodoBillingProvider implements BillingProvider {
     environment: 'test_mode' | 'live_mode',
     private readonly proProductId: string,
     private readonly proProductIdAnnual: string,
+    private readonly maxProductId: string,
+    private readonly maxProductIdAnnual: string,
   ) {
     this.client = new DodoPayments({ bearerToken: apiKey, webhookKey: webhookSecret, environment });
   }
@@ -39,8 +42,27 @@ export class DodoBillingProvider implements BillingProvider {
       return_url: input.successUrl,
       cancel_url: input.cancelUrl,
       // Round-tripped by Dodo onto the resulting webhook event so we can map
-      // it back to a workspace without a separate lookup table.
-      metadata: { workspaceId: input.workspaceId, plan: input.plan, billingCycle: input.billingCycle },
+      // it back to an account without a separate lookup table.
+      metadata: { accountId: input.accountId, plan: input.plan, billingCycle: input.billingCycle },
+    });
+    if (!session.checkout_url) throw providerError('Dodo checkout session did not return a checkout_url');
+    return { sessionId: session.session_id, url: session.checkout_url };
+  }
+
+  async createCreditPackCheckout(input: CreditPackCheckoutInput): Promise<CheckoutSessionResult> {
+    const session = await this.client.checkoutSessions.create({
+      product_cart: [{ product_id: input.productId, quantity: 1 }],
+      customer: { email: input.customerEmail },
+      return_url: input.successUrl,
+      cancel_url: input.cancelUrl,
+      // `type` lets parseWebhookEvent classify this as a one-time credit grant
+      // rather than a subscription change.
+      metadata: {
+        accountId: input.accountId,
+        type: 'credit_pack',
+        packId: input.packId,
+        credits: String(input.credits),
+      },
     });
     if (!session.checkout_url) throw providerError('Dodo checkout session did not return a checkout_url');
     return { sessionId: session.session_id, url: session.checkout_url };
@@ -82,12 +104,21 @@ export class DodoBillingProvider implements BillingProvider {
       : null;
     const customer = data?.customer as { customer_id?: string } | undefined;
 
+    // A one-time credit-pack purchase is tagged with metadata.type === 'credit_pack'.
+    let creditPack: { packId: string; credits: number } | null = null;
+    if (metadata.type === 'credit_pack') {
+      const credits = Number(metadata.credits);
+      if (Number.isFinite(credits) && credits > 0) {
+        creditPack = { packId: String(metadata.packId ?? ''), credits };
+      }
+    }
+
     return {
       // The event body has no top-level id of its own — the Standard Webhooks
       // `webhook-id` header is the idempotency key.
       id: webhookId,
       type: event.type,
-      workspaceId: (metadata.workspaceId as string | undefined) ?? null,
+      accountId: (metadata.accountId as string | undefined) ?? null,
       plan,
       billingCycle,
       customerId: customer?.customer_id ?? null,
@@ -95,6 +126,7 @@ export class DodoBillingProvider implements BillingProvider {
       status: mapDodoStatus(data?.status as string | undefined),
       currentPeriodEnd: (data?.next_billing_date as string | undefined) ?? null,
       cancelAtPeriodEnd: Boolean(data?.cancel_at_next_billing_date),
+      creditPack,
       raw: event,
     };
   }
@@ -106,7 +138,7 @@ export class DodoBillingProvider implements BillingProvider {
     return {
       customerId,
       subscriptionId: sub.subscription_id,
-      plan: sub.product_id === this.proProductId ? 'PRO' : 'FREE',
+      plan: this.planForProductId(sub.product_id),
       status: mapDodoStatus(sub.status) ?? 'none',
       currentPeriodEnd: sub.next_billing_date ?? null,
       cancelAtPeriodEnd: sub.cancel_at_next_billing_date,
@@ -114,8 +146,16 @@ export class DodoBillingProvider implements BillingProvider {
   }
 
   private productIdFor(plan: string, billingCycle: BillingCycle): string {
-    if (plan !== 'PRO') throw providerError(`No Dodo product configured for plan: ${plan}`);
-    return billingCycle === 'ANNUAL' ? this.proProductIdAnnual : this.proProductId;
+    const annual = billingCycle === 'ANNUAL';
+    if (plan === 'PRO') return annual ? this.proProductIdAnnual : this.proProductId;
+    if (plan === 'MAX') return annual ? this.maxProductIdAnnual : this.maxProductId;
+    throw providerError(`No Dodo product configured for plan: ${plan}`);
+  }
+
+  private planForProductId(productId: string): WorkspacePlan {
+    if (productId === this.maxProductId || productId === this.maxProductIdAnnual) return 'MAX';
+    if (productId === this.proProductId || productId === this.proProductIdAnnual) return 'PRO';
+    return 'FREE';
   }
 }
 

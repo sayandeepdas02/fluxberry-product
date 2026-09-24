@@ -53,7 +53,7 @@ export const jobController = {
   }),
 
   generateDescription: asyncHandler(async (req, res) => {
-    const result = await jobService.generateDescription(req.body as GenerateJdInput);
+    const result = await jobService.generateDescription(req.auth!.workspaceId!, req.body as GenerateJdInput);
     ok(res, result);
   }),
 

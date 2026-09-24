@@ -31,6 +31,20 @@ export function getPlanUpgradeFlag(err: unknown): string | undefined {
   return undefined;
 }
 
+/**
+ * A user-initiated AI action that ran the account's credit pool dry fails with
+ * this distinct code (402). Catch it in a mutation's onError and show the
+ * OutOfCreditsModal (buy credits / upgrade) instead of a plain error toast.
+ */
+export function getInsufficientCredits(
+  err: unknown,
+): { feature?: string; needed?: number; available?: number } | undefined {
+  if (err instanceof ApiError && err.code === 'INSUFFICIENT_CREDITS') {
+    return (err.details as { feature?: string; needed?: number; available?: number } | undefined) ?? {};
+  }
+  return undefined;
+}
+
 /** Current access token: dev test-token (if set), then Clerk session token. */
 export async function getAccessToken(): Promise<string | null> {
   if (typeof window !== 'undefined') {

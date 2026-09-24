@@ -5,6 +5,9 @@
 export { JobQueueModel } from './job-queue.model';
 export { EventModel } from './event.model';
 export { UserModel } from './user.model';
+export { AccountModel } from './account.model';
+export { AccountMemberModel } from './account-member.model';
+export { CreditTransactionModel } from './credit-transaction.model';
 export { WorkspaceModel } from './workspace.model';
 export { WorkspaceMemberModel } from './workspace-member.model';
 export { AuditLogModel } from './audit-log.model';

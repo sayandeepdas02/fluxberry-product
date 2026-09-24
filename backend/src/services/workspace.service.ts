@@ -13,6 +13,8 @@ import type {
 import crypto from 'node:crypto';
 import { workspaceRepository } from '../repositories/workspace.repository';
 import { memberRepository } from '../repositories/member.repository';
+import { accountRepository } from '../repositories/account.repository';
+import { accountMemberRepository } from '../repositories/account-member.repository';
 import { userRepository } from '../repositories/user.repository';
 import { workspaceInviteRepository } from '../repositories/workspace-invite.repository';
 import { toWorkspaceDto, toMemberDto } from '../serializers/workspace.serializer';
@@ -82,13 +84,22 @@ async function acceptedResult(
 export const workspaceService = {
   async create(userId: string, input: CreateWorkspaceInput): Promise<WorkspaceDto> {
     const slug = await uniqueSlug(input.name, workspaceRepository.slugExists);
+    // Each new workspace gets its own billing Account (1:1). The account owns the
+    // plan + subscription + AI-credit pool; the workspace only caches the plan.
+    const account = await accountRepository.create({
+      name: input.name,
+      ownerUserId: userId as any,
+    });
     const ws = await workspaceRepository.create({
       name: input.name,
       slug,
       logoUrl: input.logoUrl || null,
       createdBy: userId as any,
+      accountId: account._id,
+      plan: 'FREE',
     });
     await memberRepository.create({ workspaceId: ws._id, userId: userId as any, role: 'owner' });
+    await accountMemberRepository.upsert(String(account._id), String(userId), 'owner');
 
     await auditService.log({
       workspaceId: String(ws._id),

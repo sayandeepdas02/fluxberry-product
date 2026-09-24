@@ -4,6 +4,8 @@ import {
   resolveWorkspace,
   requireWorkspace,
   requireActiveSubscription,
+  requireFeature,
+  requirePlanFeature,
   requireRole,
 } from '../middleware/auth';
 import { validateBody } from '../middleware/validate';
@@ -12,7 +14,17 @@ import { createReferralSchema, updateReferralRewardSchema } from '../shared';
 
 export const referralRouter = Router();
 
-const guard = [authenticate, resolveWorkspace, requireWorkspace, requireActiveSubscription] as const;
+// Referrals is a Max-only feature: the global kill-switch must be on AND the
+// account's plan (Max) must unlock it — else a 403 PLAN_UPGRADE_REQUIRED drives
+// the upsell modal on the client.
+const guard = [
+  authenticate,
+  resolveWorkspace,
+  requireWorkspace,
+  requireActiveSubscription,
+  requireFeature('REFERRALS'),
+  requirePlanFeature('REFERRALS'),
+] as const;
 
 // Any workspace member can generate/see their own referral links.
 referralRouter.get('/referrals/my', ...guard, referralController.listMine);

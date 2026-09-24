@@ -15,7 +15,8 @@
     "test:watch": "vitest",
     "seed": "tsx src/scripts/seed.ts",
     "migrate": "tsx src/scripts/migrate.ts",
-    "backfill:linkedin": "tsx src/scripts/backfill-linkedin-field.ts"
+    "backfill:linkedin": "tsx src/scripts/backfill-linkedin-field.ts",
+    "backfill:accounts": "tsx src/scripts/backfill-accounts.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.1",

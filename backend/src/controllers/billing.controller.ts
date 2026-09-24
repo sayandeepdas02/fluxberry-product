@@ -1,4 +1,4 @@
-import type { CreateCheckoutInput } from '../shared';
+import type { CreateCheckoutInput, CreateCreditPackCheckoutInput } from '../shared';
 import { asyncHandler, ok } from '../utils/http';
 import { billingService } from '../services/billing.service';
 
@@ -7,6 +7,17 @@ export const billingController = {
     const { plan, billingCycle } = req.body as CreateCheckoutInput;
     const result = await billingService.createCheckout(req.auth!.workspaceId!, req.auth!.user.id, plan, billingCycle);
     ok(res, result);
+  }),
+
+  createCreditPackCheckout: asyncHandler(async (req, res) => {
+    const { packId } = req.body as CreateCreditPackCheckoutInput;
+    const result = await billingService.createCreditPackCheckout(req.auth!.workspaceId!, req.auth!.user.id, packId);
+    ok(res, result);
+  }),
+
+  creditHistory: asyncHandler(async (req, res) => {
+    const items = await billingService.getCreditHistory(req.auth!.workspaceId!);
+    ok(res, { items });
   }),
 
   createPortalSession: asyncHandler(async (req, res) => {

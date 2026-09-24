@@ -5,6 +5,8 @@ import { ROLES } from '../shared';
 import { userRepository } from '../repositories/user.repository';
 import { memberRepository } from '../repositories/member.repository';
 import { workspaceRepository } from '../repositories/workspace.repository';
+import { accountRepository } from '../repositories/account.repository';
+import { accountMemberRepository } from '../repositories/account-member.repository';
 import { nameFromEmail } from './auth.service';
 import { logger } from '../utils/logger';
 
@@ -66,6 +68,8 @@ export const clerkSyncService = {
     // both reading the same unclaimed workspace and overwriting each other.
     const claimed = await workspaceRepository.claimBySlug(data.slug, data.id);
     if (claimed) {
+      // Mirror the Clerk-org link onto the workspace's billing Account.
+      await accountRepository.claimClerkOrgIdByWorkspaceSlug(data.slug, data.id);
       logger.info({ clerkOrgId: data.id, workspaceId: String(claimed._id) }, 'backfilled clerkOrgId on workspace via organization.created');
       return;
     }
@@ -126,6 +130,10 @@ export const clerkSyncService = {
     const user = await this.ensureLocalUserForMembership(data);
     const role = mapClerkRole(data.role);
 
+    // Mirror onto the account membership (the billing entity). Best-effort:
+    // WorkspaceMember remains the access-check unit in the 1:1 stage.
+    await this.mirrorAccountMember(workspace.accountId, String(user._id), role, data.id);
+
     const existingByMembershipId = await memberRepository.findByClerkMembershipId(data.id);
     if (existingByMembershipId) {
       await memberRepository.updateRole(String(existingByMembershipId._id), role);
@@ -172,17 +180,36 @@ export const clerkSyncService = {
 
   /** `organizationMembership.deleted` — remove the local WorkspaceMember row. */
   async syncMembershipDeleted(data: OrganizationMembershipJSON): Promise<void> {
+    const workspace = await workspaceRepository.findByClerkOrgId(data.organization.id);
+    const user = await userRepository.findByClerkId(data.public_user_data.user_id);
+    // Best-effort mirror removal from the account membership.
+    if (workspace?.accountId && user) {
+      await accountMemberRepository.removeByAccountUser(String(workspace.accountId), String(user._id));
+    }
+
     const existing = await memberRepository.findByClerkMembershipId(data.id);
     if (existing) {
       await memberRepository.remove(String(existing._id));
       return;
     }
 
-    const workspace = await workspaceRepository.findByClerkOrgId(data.organization.id);
-    const user = await userRepository.findByClerkId(data.public_user_data.user_id);
     if (!workspace || !user) return;
     const pair = await memberRepository.find(String(workspace._id), String(user._id));
     if (pair) await memberRepository.remove(String(pair._id));
+  },
+
+  /**
+   * Upsert the account-level membership that mirrors a workspace membership.
+   * No-op when the workspace has no account yet (pre-migration edge).
+   */
+  async mirrorAccountMember(
+    accountId: unknown,
+    userId: string,
+    role: Role,
+    clerkMembershipId: string | null,
+  ): Promise<void> {
+    if (!accountId) return;
+    await accountMemberRepository.upsert(String(accountId), userId, role, clerkMembershipId);
   },
 
   /** Finds (or JIT-provisions) the local User referenced by an org membership event. */

@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { authenticate, resolveWorkspace, requireWorkspace, requireRole } from '../middleware/auth';
 import { validateBody } from '../middleware/validate';
 import { billingController } from '../controllers/billing.controller';
-import { createCheckoutSchema } from '../shared';
+import { createCheckoutSchema, createCreditPackCheckoutSchema } from '../shared';
 
 export const billingRouter = Router();
 
@@ -16,6 +16,22 @@ billingRouter.post(
   requireRole('owner'),
   validateBody(createCheckoutSchema),
   billingController.createCheckout,
+);
+
+// Buying AI-credit top-up packs — allowed for owners and admins (billing managers).
+billingRouter.post(
+  '/workspaces/:workspaceId/billing/credits/checkout',
+  ...guard,
+  requireRole('admin'),
+  validateBody(createCreditPackCheckoutSchema),
+  billingController.createCreditPackCheckout,
+);
+
+billingRouter.get(
+  '/workspaces/:workspaceId/billing/credits/history',
+  ...guard,
+  requireRole('admin'),
+  billingController.creditHistory,
 );
 
 billingRouter.post(

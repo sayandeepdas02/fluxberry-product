@@ -8,6 +8,9 @@ import { Schema, model, models, type InferSchemaType, type Model } from 'mongoos
  */
 const billingEventSchema = new Schema(
   {
+    /** The account this event applied to (source of truth for plan/billing/credits). */
+    accountId: { type: Schema.Types.ObjectId, ref: 'Account', default: null },
+    /** @deprecated Retained for pre-account events; new events set accountId. */
     workspaceId: { type: Schema.Types.ObjectId, ref: 'Workspace', default: null },
     providerEventId: { type: String, required: true },
     type: { type: String, required: true },
@@ -18,6 +21,7 @@ const billingEventSchema = new Schema(
 );
 
 billingEventSchema.index({ providerEventId: 1 }, { unique: true });
+billingEventSchema.index({ accountId: 1, createdAt: -1 });
 billingEventSchema.index({ workspaceId: 1, createdAt: -1 });
 
 export type BillingEventDoc = InferSchemaType<typeof billingEventSchema>;

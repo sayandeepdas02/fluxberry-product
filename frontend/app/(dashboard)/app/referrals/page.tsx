@@ -7,6 +7,7 @@ import type { ReferralDto } from '@/lib/shared';
 import { useJobs } from '@/hooks/use-jobs';
 import { useMyReferrals, useCreateReferral, useWorkspaceReferrals, useUpdateReferralReward } from '@/hooks/use-referrals';
 import { useWorkspace } from '@/components/providers/workspace-provider';
+import { FeatureGate } from '@/components/billing/feature-gate';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -33,9 +34,10 @@ export default function ReferralsPage() {
         </p>
       </div>
 
-      <MyReferrals />
-
-      {isAdmin && <RewardManagement />}
+      <FeatureGate feature="REFERRALS">
+        <MyReferrals />
+        {isAdmin && <RewardManagement />}
+      </FeatureGate>
     </div>
   );
 }

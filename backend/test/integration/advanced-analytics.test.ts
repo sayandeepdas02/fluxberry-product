@@ -2,8 +2,8 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import { createApp } from '../../src/app';
 import { connectDatabase, disconnectDatabase, mongoose } from '../../src/config/db';
-import { WorkspaceModel } from '../../src/models/workspace.model';
 import { ApplicationModel } from '../../src/models/application.model';
+import { activateSubscription } from './helpers/activate-subscription';
 
 const app = createApp();
 const PDF = Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n', 'latin1');
@@ -52,8 +52,8 @@ describe('advanced analytics tier (integration)', () => {
     expect(blockedLeaderboard.status).toBe(403);
     expect(blockedLeaderboard.body.error.code).toBe('SUBSCRIPTION_REQUIRED');
 
-    // Subscribe the workspace directly (billing flow is covered elsewhere).
-    await WorkspaceModel.findByIdAndUpdate(workspaceId, { plan: 'PRO', 'billing.subscriptionStatus': 'active' });
+    // Subscribe the account directly (billing flow is covered elsewhere).
+    await activateSubscription(workspaceId);
 
     const job = await ws(request(app).post('/api/v1/jobs').send({ title: 'Advanced Analytics Role' }) as any);
     const jobId = job.body.data.id as string;
