@@ -218,7 +218,7 @@ export const jobService = {
   async generateDescription(workspaceId: string, input: GenerateJdInput): Promise<GenerateJdResult> {
     if (!input.title?.trim()) throw badRequest('A job title is required');
 
-    const account = await accountRepository.findByWorkspaceId(workspaceId);
+    const account = await accountRepository.ensureForWorkspace(workspaceId);
     if (!account) throw notFound('Billing account not found for this workspace');
     const accountId = String(account._id);
 

@@ -13,15 +13,10 @@ import {
   Bell,
   Gift,
   Mail,
-  Info,
   UserSearch,
 } from 'lucide-react';
-import { Lock } from 'lucide-react';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
-import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import type { FeatureFlag } from '@/lib/shared';
-import { useBillingStatus } from '@/hooks/use-billing';
 import { CreditMeter } from '@/components/billing/credit-meter';
 import { WorkspaceSwitcher } from './workspace-switcher';
 import {
@@ -38,28 +33,24 @@ type NavItem = {
   label: string;
   icon: typeof Home;
   exact?: boolean;
-  /** If set, the item requires this plan feature (Max) — otherwise it renders locked with an upsell. */
-  feature?: FeatureFlag;
 };
 
+// Every product surface is a normal, always-clickable nav item — no locks, no
+// dimming, no info badges. Access is decided on the destination page: the
+// SubscriptionGate for the paywall and FeatureGate for Max-only features both
+// render an "upgrade to get access" screen there. The nav experience is the
+// same on every plan.
 const NAV: NavItem[] = [
   { href: '/app', label: 'Home', icon: Home, exact: true },
   { href: '/app/jobs', label: 'Jobs', icon: Briefcase },
   { href: '/app/candidates', label: 'Candidates', icon: Users },
   { href: '/app/analytics', label: 'Analytics', icon: BarChart3 },
-  { href: '/app/referrals', label: 'Referrals', icon: Gift, feature: 'REFERRALS' },
-];
-
-// Talent Sourcing ships behind the Max plan; the feature itself is still being
-// built, so it stays a locked teaser until its routes land.
-const LOCKED_NAV = [
-  { label: 'Talent Sourcing', icon: UserSearch, note: 'Max plan · launching soon' },
+  { href: '/app/referrals', label: 'Referrals', icon: Gift },
+  { href: '/app/talent-sourcing', label: 'Talent Sourcing', icon: UserSearch },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { data: billing } = useBillingStatus();
-  const enabled = billing?.enabledFeatures ?? [];
   const isActive = (href: string, exact?: boolean) =>
     exact ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
 
@@ -71,56 +62,20 @@ export function Sidebar() {
         {NAV.map((item) => {
           const active = isActive(item.href, item.exact);
           const Icon = item.icon;
-          // Feature-gated items the account's plan doesn't unlock become an
-          // upsell link to billing, with a lock affordance instead of navigating.
-          const locked = item.feature ? !enabled.includes(item.feature) : false;
           return (
             <Link
               key={item.href}
-              href={locked ? '/app/settings/billing' : item.href}
-              title={locked ? `${item.label} is a Max feature — upgrade to unlock` : undefined}
+              href={item.href}
               className={cn(
                 'flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm font-medium transition-colors',
-                locked
-                  ? 'text-muted-foreground/60 hover:bg-accent hover:text-foreground'
-                  : active
+                active
                   ? 'bg-secondary text-foreground'
                   : 'text-muted-foreground hover:bg-accent hover:text-foreground',
               )}
             >
               <Icon className="size-4 shrink-0" />
               {item.label}
-              {locked && <Lock className="ml-auto size-3.5 shrink-0" />}
             </Link>
-          );
-        })}
-
-        {LOCKED_NAV.map((item) => {
-          const Icon = item.icon;
-          return (
-            <div
-              key={item.label}
-              className="flex cursor-default items-center gap-2.5 rounded-md px-2.5 py-2 text-sm font-medium text-muted-foreground/60"
-            >
-              <Icon className="size-4 shrink-0" />
-              {item.label}
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      type="button"
-                      aria-label={`Show ${item.label} launch information`}
-                      className="ml-auto flex items-center justify-center rounded-full text-muted-foreground/60 hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    >
-                      <Info className="size-4" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="right" align="end">
-                    {item.note}
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
           );
         })}
       </nav>
