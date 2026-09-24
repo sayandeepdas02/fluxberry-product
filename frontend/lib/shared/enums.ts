@@ -15,7 +15,12 @@ export const ROLE_RANK: Record<Role, number> = {
   owner: 3,
 };
 
-export const WORKSPACE_PLANS = ['FREE', 'PRO'] as const;
+/**
+ * Subscription plans, held on the Account (the billing entity). FREE is the
+ * unsubscribed state; PRO and MAX are the paid tiers. MAX adds Referral +
+ * Talent Sourcing and a larger monthly AI-credit allowance.
+ */
+export const WORKSPACE_PLANS = ['FREE', 'PRO', 'MAX'] as const;
 export type WorkspacePlan = (typeof WORKSPACE_PLANS)[number];
 
 /**
@@ -47,9 +52,22 @@ export const ACTIVE_BILLING_STATUSES: readonly BillingSubscriptionStatus[] = [
   'on_hold',
 ];
 
-/** How often a PRO subscription bills — same plan, two prices ($40/mo or $200/yr). */
+/** How often a paid subscription bills — same plan, two prices (e.g. Pro $40/mo or $200/yr, Max $60/mo or $300/yr). */
 export const BILLING_CYCLES = ['MONTHLY', 'ANNUAL'] as const;
 export type BillingCycle = (typeof BILLING_CYCLES)[number];
+
+/**
+ * Ledger entry kinds for the AI-credits system. Every balance change writes one
+ * append-only CreditTransaction so the balance is always reconstructable and
+ * grants/consumes are idempotent by key.
+ *  - GRANT    — allowance granted on subscription activate/renew.
+ *  - RESET    — monthly allowance reset to the plan amount (unused expires).
+ *  - CONSUME  — a user-initiated AI action spent credits.
+ *  - PURCHASE — a top-up pack was bought (adds to the never-expiring bucket).
+ *  - REFUND   — credits returned (e.g. the AI call failed after a debit).
+ */
+export const CREDIT_TRANSACTION_REASONS = ['GRANT', 'RESET', 'CONSUME', 'PURCHASE', 'REFUND'] as const;
+export type CreditTransactionReason = (typeof CREDIT_TRANSACTION_REASONS)[number];
 
 export const JOB_STATUSES = ['DRAFT', 'PUBLISHED', 'PAUSED', 'CLOSED', 'ARCHIVED'] as const;
 export type JobStatus = (typeof JOB_STATUSES)[number];

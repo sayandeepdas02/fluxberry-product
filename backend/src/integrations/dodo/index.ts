@@ -11,11 +11,20 @@ function create(): BillingProvider {
   // provider — an incomplete real config must fail closed, not silently fall
   // back to a provider whose webhook endpoint accepts unsigned JSON.
   if (config.providers.mockAll) return new MockBillingProvider();
-  const { apiKey, webhookSecret, environment, proProductId, proProductIdAnnual } = config.providers.billing;
+  const { apiKey, webhookSecret, environment, proProductId, proProductIdAnnual, maxProductId, maxProductIdAnnual } =
+    config.providers.billing;
   if (!apiKey || !webhookSecret || !proProductId) {
     throw new Error('Dodo billing credentials are incomplete (DODO_API_KEY/DODO_WEBHOOK_SECRET/DODO_PRO_PRODUCT_ID)');
   }
-  return new DodoBillingProvider(apiKey, webhookSecret, environment, proProductId, proProductIdAnnual);
+  return new DodoBillingProvider(
+    apiKey,
+    webhookSecret,
+    environment,
+    proProductId,
+    proProductIdAnnual,
+    maxProductId,
+    maxProductIdAnnual,
+  );
 }
 
 export function getBillingProvider(): BillingProvider {
@@ -31,4 +40,10 @@ export function __resetBillingProvider(): void {
 }
 
 export * from './types';
-export { mockSubscriptions, mockCompleteCheckout, mockCancelSubscription, __resetMockBilling } from './mock';
+export {
+  mockSubscriptions,
+  mockCompleteCheckout,
+  mockCompleteCreditPackCheckout,
+  mockCancelSubscription,
+  __resetMockBilling,
+} from './mock';

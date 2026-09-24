@@ -10,6 +10,7 @@ export type ErrorCode =
   | 'FORBIDDEN'
   | 'PLAN_UPGRADE_REQUIRED'
   | 'SUBSCRIPTION_REQUIRED'
+  | 'INSUFFICIENT_CREDITS'
   | 'NOT_FOUND'
   | 'CONFLICT'
   | 'RATE_LIMITED'
@@ -59,6 +60,15 @@ export const planUpgradeRequired = (flag: string, message = 'This feature requir
 /** Distinct from a plain 403 so the frontend can show a "subscribe to continue" prompt instead of a generic error. */
 export const subscriptionRequired = (message = 'An active subscription is required') =>
   new AppError('SUBSCRIPTION_REQUIRED', message, 403, { details: { flag: 'SUBSCRIPTION' } });
+
+/**
+ * Distinct from a plain 403 so the frontend can show a "buy more credits / upgrade"
+ * prompt. 402 Payment Required is the natural status for an exhausted balance.
+ */
+export const insufficientCredits = (feature: string, needed: number, available: number) =>
+  new AppError('INSUFFICIENT_CREDITS', 'Not enough AI credits to complete this action', 402, {
+    details: { feature, needed, available },
+  });
 
 export const notFound = (message = 'Not found') =>
   new AppError('NOT_FOUND', message, 404);

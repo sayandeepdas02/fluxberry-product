@@ -17,6 +17,7 @@ export const FEATURE_FLAG_LABELS: Record<FeatureFlag, string> = {
   OFFER_MANAGEMENT: 'Offer management',
   BULK_IMPORT: 'Bulk import',
   TALENT_SOURCING: 'Talent sourcing',
+  REFERRALS: 'Referrals',
 };
 
 export const FORM_QUESTION_TYPE_LABELS: Record<FormQuestionType, string> = {

@@ -7,6 +7,7 @@ export const FEATURE_FLAGS = [
   'OFFER_MANAGEMENT',
   'BULK_IMPORT',
   'TALENT_SOURCING',
+  'REFERRALS',
 ] as const;
 export type FeatureFlag = (typeof FEATURE_FLAGS)[number];
 
@@ -20,4 +21,5 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlagState = {
   OFFER_MANAGEMENT: true,
   BULK_IMPORT: false,
   TALENT_SOURCING: true,
+  REFERRALS: true,
 };

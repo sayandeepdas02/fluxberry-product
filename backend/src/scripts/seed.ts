@@ -1,6 +1,8 @@
 import { connectDatabase, disconnectDatabase, mongoose } from '../config/db';
-import { DEFAULT_FORM_FIELDS } from '../shared';
+import { DEFAULT_FORM_FIELDS, PLAN_CREDIT_ALLOWANCE } from '../shared';
 import { UserModel } from '../models/user.model';
+import { AccountModel } from '../models/account.model';
+import { AccountMemberModel } from '../models/account-member.model';
 import { WorkspaceModel } from '../models/workspace.model';
 import { WorkspaceMemberModel } from '../models/workspace-member.model';
 import { JobModel } from '../models/job.model';
@@ -15,7 +17,8 @@ import { logger } from '../utils/logger';
 
 async function wipe() {
   const collections = [
-    'users', 'workspaces', 'workspace_members', 'jobs', 'application_forms',
+    'users', 'accounts', 'account_members', 'credit_transactions',
+    'workspaces', 'workspace_members', 'jobs', 'application_forms',
     'candidates', 'applications', 'application_answers',
     'screening_results', 'events', 'audit_logs', 'jobs_queue', 'notifications',
   ];
@@ -46,10 +49,32 @@ async function main() {
   logger.info('Seeding database (dev)…');
   await wipe();
 
-  // Demo user + workspace
+  // Demo user + account + workspace. The account carries an active MAX
+  // subscription so the seeded demo has full feature access + a credit pool.
   const user = await UserModel.create({ email: 'demo@fluxberry.dev', name: 'Demo Recruiter' });
-  const ws = await WorkspaceModel.create({ name: 'Acme', slug: 'acme', plan: 'FREE', createdBy: user._id });
+  const periodEnd = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+  const account = await AccountModel.create({
+    name: 'Acme',
+    ownerUserId: user._id,
+    plan: 'MAX',
+    billing: {
+      customerId: 'seed_cus_acme',
+      subscriptionId: 'seed_sub_acme',
+      subscriptionStatus: 'active',
+      billingCycle: 'MONTHLY',
+      currentPeriodEnd: periodEnd,
+      cancelAtPeriodEnd: false,
+    },
+    credits: {
+      allowanceRemaining: PLAN_CREDIT_ALLOWANCE.MAX,
+      allowancePerPeriod: PLAN_CREDIT_ALLOWANCE.MAX,
+      periodResetAt: periodEnd,
+      purchasedBalance: 0,
+    },
+  });
+  const ws = await WorkspaceModel.create({ name: 'Acme', slug: 'acme', plan: 'MAX', accountId: account._id, createdBy: user._id });
   await WorkspaceMemberModel.create({ workspaceId: ws._id, userId: user._id, role: 'owner' });
+  await AccountMemberModel.create({ accountId: account._id, userId: user._id, role: 'owner' });
   const workspaceId = ws._id;
 
   // Jobs

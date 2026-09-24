@@ -54,7 +54,7 @@ export function SubscriptionGate({ children }: { children: React.ReactNode }) {
           </div>
           <h2 className="mt-4 text-base font-semibold text-foreground">Subscribe to get access</h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            Unlock jobs, candidates, and everything else in Fluxberry Pro.
+            Unlock jobs, candidates, and everything else in Fluxberry.
           </p>
           <div className="mt-6">
             {isOwner ? (

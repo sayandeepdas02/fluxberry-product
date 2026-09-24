@@ -5,6 +5,7 @@ import * as Sentry from '@sentry/node';
 import { authService } from '../services/auth.service';
 import { memberRepository } from '../repositories/member.repository';
 import { workspaceRepository } from '../repositories/workspace.repository';
+import { accountRepository } from '../repositories/account.repository';
 import { jobRepository } from '../repositories/job.repository';
 import { applicationRepository } from '../repositories/application.repository';
 import { getTokenVerifier } from '../auth';
@@ -134,10 +135,11 @@ export function requireFeature(flag: keyof typeof config.features): RequestHandl
 }
 
 /**
- * Guard: reject unless the workspace's PLAN unlocks this flag (and the global
- * kill-switch is also on — plan can only narrow, never override, requireFeature).
- * Distinct 403 code (PLAN_UPGRADE_REQUIRED) so the frontend shows an upsell
- * modal instead of a generic "forbidden" error.
+ * Guard: reject unless the workspace's owning ACCOUNT plan unlocks this flag (and
+ * the global kill-switch is also on — plan can only narrow, never override,
+ * requireFeature). Plan + subscription live on the Account (per-subscription, not
+ * per-workspace). Distinct 403 code (PLAN_UPGRADE_REQUIRED) so the frontend shows
+ * an upsell modal instead of a generic "forbidden" error.
  */
 export function requirePlanFeature(flag: FeatureFlag): RequestHandler {
   return async (req, _res, next) => {
@@ -145,10 +147,10 @@ export function requirePlanFeature(flag: FeatureFlag): RequestHandler {
       if (!config.features[flag]) return next(forbidden(`The ${flag} feature is not enabled`));
       if (!req.auth?.workspaceId) return next(forbidden('You do not have access to this workspace'));
 
-      const workspace = await workspaceRepository.findById(req.auth.workspaceId);
-      if (!workspace) return next(notFound('Workspace not found'));
+      const account = await accountRepository.findByWorkspaceId(req.auth.workspaceId);
+      if (!account) return next(notFound('Billing account not found'));
 
-      const plan = (workspace.plan as WorkspacePlan) ?? 'FREE';
+      const plan = (account.plan as WorkspacePlan) ?? 'FREE';
       if (!planIncludesFeature(plan, flag)) {
         return next(planUpgradeRequired(flag));
       }
@@ -160,8 +162,8 @@ export function requirePlanFeature(flag: FeatureFlag): RequestHandler {
 }
 
 /**
- * Hard paywall gate: reject unless the workspace has an active (or
- * dunning-grace-period) subscription. Fluxberry has no free tier — this is
+ * Hard paywall gate: reject unless the workspace's owning ACCOUNT has an active
+ * (or dunning-grace-period) subscription. Fluxberry has no free tier — this is
  * the single gate almost every product route sits behind. Distinct 403 code
  * (SUBSCRIPTION_REQUIRED) so the frontend shows a "subscribe to continue"
  * prompt instead of a generic "forbidden" error.
@@ -170,10 +172,10 @@ export const requireActiveSubscription: RequestHandler = async (req, _res, next)
   try {
     if (!req.auth?.workspaceId) return next(forbidden('You do not have access to this workspace'));
 
-    const workspace = await workspaceRepository.findById(req.auth.workspaceId);
-    if (!workspace) return next(notFound('Workspace not found'));
+    const account = await accountRepository.findByWorkspaceId(req.auth.workspaceId);
+    if (!account) return next(notFound('Billing account not found'));
 
-    const status = (workspace.billing?.subscriptionStatus as BillingSubscriptionStatus) ?? 'none';
+    const status = (account.billing?.subscriptionStatus as BillingSubscriptionStatus) ?? 'none';
     if (!ACTIVE_BILLING_STATUSES.includes(status)) {
       return next(subscriptionRequired());
     }

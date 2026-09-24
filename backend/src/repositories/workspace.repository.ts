@@ -19,6 +19,12 @@ export const workspaceRepository = {
 
   findByClerkOrgId: (clerkOrgId: string) => WorkspaceModel.findOne({ clerkOrgId }),
 
+  findByAccountId: (accountId: string) => WorkspaceModel.find({ accountId }),
+
+  /** Refresh the denormalized plan cache on every workspace under an account. */
+  setPlanForAccount: (accountId: string, plan: string) =>
+    WorkspaceModel.updateMany({ accountId }, { $set: { plan } }),
+
   /** Atomically set clerkOrgId on a workspace matched by slug, only if it hasn't been claimed yet. */
   claimBySlug: (slug: string, clerkOrgId: string) =>
     WorkspaceModel.findOneAndUpdate(

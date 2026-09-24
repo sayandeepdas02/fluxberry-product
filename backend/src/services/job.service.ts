@@ -13,6 +13,8 @@ import { APPLICATION_STAGES, defaultPipelineStages } from '../shared';
 import { jobRepository } from '../repositories/job.repository';
 import { applicationRepository } from '../repositories/application.repository';
 import { memberRepository } from '../repositories/member.repository';
+import { accountRepository } from '../repositories/account.repository';
+import { creditsService } from './credits.service';
 import { toJobDto } from '../serializers/job.serializer';
 import { uniqueSlug } from '../utils/slug';
 import { notFound, badRequest, conflict } from '../utils/errors';
@@ -207,20 +209,40 @@ export const jobService = {
     return toJobDto(updated!.toObject());
   },
 
-  /** Synchronous AI job-description generation (user waits with a loading state). */
-  async generateDescription(input: GenerateJdInput): Promise<GenerateJdResult> {
+  /**
+   * Synchronous AI job-description generation (user waits with a loading state).
+   * This is a user-initiated generative-AI action, so it debits AI credits from
+   * the workspace's account. Credits are consumed up front and refunded if the
+   * provider call fails, so a failed generation is never charged.
+   */
+  async generateDescription(workspaceId: string, input: GenerateJdInput): Promise<GenerateJdResult> {
     if (!input.title?.trim()) throw badRequest('A job title is required');
+
+    const account = await accountRepository.findByWorkspaceId(workspaceId);
+    if (!account) throw notFound('Billing account not found for this workspace');
+    const accountId = String(account._id);
+
+    // Throws INSUFFICIENT_CREDITS (402) if the pool is exhausted — the client
+    // catches it and prompts to buy credits / upgrade.
+    await creditsService.consume(accountId, 'JD_GENERATION');
+
     const ai = getAIProvider();
-    const result = await ai.generateJobDescription({
-      title: input.title,
-      userPrompt: input.userPrompt,
-      employmentType: input.employmentType,
-      workMode: input.workMode,
-      location: input.location,
-      salary: input.salary,
-      experience: input.experience,
-      skills: input.skills,
-    });
+    let result;
+    try {
+      result = await ai.generateJobDescription({
+        title: input.title,
+        userPrompt: input.userPrompt,
+        employmentType: input.employmentType,
+        workMode: input.workMode,
+        location: input.location,
+        salary: input.salary,
+        experience: input.experience,
+        skills: input.skills,
+      });
+    } catch (err) {
+      await creditsService.refund(accountId, 'JD_GENERATION', { reason: 'ai_failure' });
+      throw err;
+    }
     logger.info({ provider: result.meta.provider, model: result.meta.model }, 'JD generated');
     return {
       description: result.description,

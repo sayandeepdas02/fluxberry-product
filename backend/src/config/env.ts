@@ -74,6 +74,14 @@ const envSchema = z.object({
   DODO_PRO_PRODUCT_ID: z.string().optional().default(''),
   /** Dodo product/price id billed for the PRO plan, annual cycle ($200/yr). */
   DODO_PRO_PRODUCT_ID_ANNUAL: z.string().optional().default(''),
+  /** Dodo product/price id billed for the MAX plan, monthly cycle ($60/mo). */
+  DODO_MAX_PRODUCT_ID: z.string().optional().default(''),
+  /** Dodo product/price id billed for the MAX plan, annual cycle ($300/yr). */
+  DODO_MAX_PRODUCT_ID_ANNUAL: z.string().optional().default(''),
+  /** One-time Dodo product ids for AI-credit top-up packs (250/$60, 500/$90, 1000/$150). */
+  DODO_CREDITS_250_PRODUCT_ID: z.string().optional().default(''),
+  DODO_CREDITS_500_PRODUCT_ID: z.string().optional().default(''),
+  DODO_CREDITS_1000_PRODUCT_ID: z.string().optional().default(''),
 
   STORAGE_ENDPOINT: z.string().optional().default(''),
   STORAGE_REGION: z.string().default('auto'),
@@ -124,6 +132,7 @@ const envSchema = z.object({
   FEATURE_OFFER_MANAGEMENT: bool(DEFAULT_FEATURE_FLAGS.OFFER_MANAGEMENT),
   FEATURE_BULK_IMPORT: bool(DEFAULT_FEATURE_FLAGS.BULK_IMPORT),
   FEATURE_TALENT_SOURCING: bool(DEFAULT_FEATURE_FLAGS.TALENT_SOURCING),
+  FEATURE_REFERRALS: bool(DEFAULT_FEATURE_FLAGS.REFERRALS),
 
   CAREERS_PREVIEW_SECRET: z.string().optional().default(''),
 
@@ -160,6 +169,7 @@ const features: FeatureFlagState = {
   OFFER_MANAGEMENT: e.FEATURE_OFFER_MANAGEMENT,
   BULK_IMPORT: e.FEATURE_BULK_IMPORT,
   TALENT_SOURCING: e.FEATURE_TALENT_SOURCING,
+  REFERRALS: e.FEATURE_REFERRALS,
 };
 
 export const config = {
@@ -202,6 +212,14 @@ export const config = {
       environment: e.DODO_ENVIRONMENT,
       proProductId: e.DODO_PRO_PRODUCT_ID,
       proProductIdAnnual: e.DODO_PRO_PRODUCT_ID_ANNUAL,
+      maxProductId: e.DODO_MAX_PRODUCT_ID,
+      maxProductIdAnnual: e.DODO_MAX_PRODUCT_ID_ANNUAL,
+      /** One-time credit-pack product ids, keyed by CREDIT_PACKS id. */
+      creditPackProductIds: {
+        pack_250: e.DODO_CREDITS_250_PRODUCT_ID,
+        pack_500: e.DODO_CREDITS_500_PRODUCT_ID,
+        pack_1000: e.DODO_CREDITS_1000_PRODUCT_ID,
+      } as Record<string, string>,
     },
     storage: {
       endpoint: e.STORAGE_ENDPOINT,

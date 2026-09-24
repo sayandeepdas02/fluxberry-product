@@ -3,6 +3,7 @@ import request from 'supertest';
 import { createApp } from '../../src/app';
 import { connectDatabase, disconnectDatabase, mongoose } from '../../src/config/db';
 import { WorkspaceModel } from '../../src/models/workspace.model';
+import { AccountModel } from '../../src/models/account.model';
 import { BillingEventModel } from '../../src/models/billing-event.model';
 import { billingService } from '../../src/services/billing.service';
 import { mockCompleteCheckout, mockCancelSubscription } from '../../src/integrations/dodo';
@@ -12,6 +13,12 @@ const app = createApp();
 async function tokenFor(email: string, name?: string) {
   const res = await request(app).post('/api/v1/auth/test-token').send({ email, name });
   return res.body.data.token as string;
+}
+
+/** Plan + subscription live on the account now — resolve it from the workspace. */
+async function accountIdForWorkspace(workspaceId: string): Promise<string> {
+  const ws = await WorkspaceModel.findById(workspaceId).select('accountId').lean();
+  return String(ws!.accountId);
 }
 
 beforeAll(async () => {
@@ -81,12 +88,16 @@ describe('billing (integration, mock Dodo)', () => {
     expect(portal.status).toBe(200);
     expect(portal.body.data.url).toContain('mockPortal=1');
 
-    // Cancel — webhook should flip the workspace back to FREE.
-    const cancelEvent = mockCancelSubscription(workspaceId);
+    // Cancel — webhook should flip the account back to FREE.
+    const accountId = await accountIdForWorkspace(workspaceId);
+    const cancelEvent = mockCancelSubscription(accountId);
     await billingService.applyWebhookEvent(cancelEvent);
-    const afterCancel = await WorkspaceModel.findById(workspaceId).lean();
+    const afterCancel = await AccountModel.findById(accountId).lean();
     expect(afterCancel!.plan).toBe('FREE');
     expect(afterCancel!.billing!.subscriptionStatus).toBe('cancelled');
+    // The workspace's denormalized plan cache follows the account.
+    const afterCancelWs = await WorkspaceModel.findById(workspaceId).lean();
+    expect(afterCancelWs!.plan).toBe('FREE');
   });
 
   it('rejects webhooks with a bad signature and enforces owner-only checkout', async () => {
@@ -150,7 +161,8 @@ describe('billing (integration, mock Dodo)', () => {
     expect(afterSubscribe.status).toBe(201);
 
     // Cancel — locked out again.
-    await billingService.applyWebhookEvent(mockCancelSubscription(workspaceId));
+    const paywallAccountId = await accountIdForWorkspace(workspaceId);
+    await billingService.applyWebhookEvent(mockCancelSubscription(paywallAccountId));
     const afterCancel = await createJob();
     expect(afterCancel.status).toBe(403);
     expect(afterCancel.body.error.code).toBe('SUBSCRIPTION_REQUIRED');

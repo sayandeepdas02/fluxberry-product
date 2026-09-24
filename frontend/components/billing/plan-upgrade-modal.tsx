@@ -3,7 +3,9 @@
 import Link from 'next/link';
 import { Sparkles } from 'lucide-react';
 import type { FeatureFlag } from '@/lib/shared';
+import { requiredPlanForFeature } from '@/lib/shared';
 import { FEATURE_FLAG_LABELS } from '@/lib/labels';
+import { PLAN_LABELS } from '@/lib/pricing';
 import {
   Dialog,
   DialogContent,
@@ -34,6 +36,8 @@ interface PlanUpgradeModalProps {
  */
 export function PlanUpgradeModal({ open, onOpenChange, flag }: PlanUpgradeModalProps) {
   const featureName = flag && flag in FEATURE_FLAG_LABELS ? FEATURE_FLAG_LABELS[flag as FeatureFlag] : 'This feature';
+  const requiredPlan = flag && flag in FEATURE_FLAG_LABELS ? requiredPlanForFeature(flag as FeatureFlag) : null;
+  const planName = requiredPlan && requiredPlan !== 'FREE' ? PLAN_LABELS[requiredPlan] : 'a paid';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -44,7 +48,7 @@ export function PlanUpgradeModal({ open, onOpenChange, flag }: PlanUpgradeModalP
           </div>
           <DialogTitle className="pt-2">Upgrade to unlock {featureName.toLowerCase()}</DialogTitle>
           <DialogDescription>
-            {featureName} is available on the Pro plan. Upgrade your workspace to turn it on.
+            {featureName} is available on the {planName} plan. Upgrade your workspace to turn it on.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>

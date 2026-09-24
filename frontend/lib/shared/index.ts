@@ -3,6 +3,7 @@ export * from './common';
 export * from './scoring';
 export * from './feature-flags';
 export * from './plan-features';
+export * from './credits';
 export * from './pipeline-stages';
 
 // Domain contract schemas (added per slice)
