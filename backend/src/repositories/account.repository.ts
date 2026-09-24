@@ -44,45 +44,94 @@ export const accountRepository = {
     if (!ws) return null;
     if (ws.accountId) return AccountModel.findById(ws.accountId);
 
+    // Link the workspace to an account that already exists (re-read after the
+    // claim so a concurrent winner is honoured).
+    const linkWorkspace = async (accountId: string) => {
+      await WorkspaceModel.findOneAndUpdate({ _id: ws._id, accountId: null }, { $set: { accountId } });
+      const fresh = await WorkspaceModel.findById(ws._id).select('accountId').lean();
+      return AccountModel.findById(fresh?.accountId ? String(fresh.accountId) : accountId);
+    };
+
+    // If an account already exists for this workspace's Clerk org, reuse it — the
+    // unique clerkOrgId index would reject a duplicate create (E11000), which
+    // would otherwise leave billing/gating unable to resolve the account.
+    if (ws.clerkOrgId) {
+      const existing = await AccountModel.findOne({ clerkOrgId: ws.clerkOrgId });
+      if (existing) return linkWorkspace(String(existing._id));
+    }
+
     const plan = ((ws.plan as WorkspacePlan) ?? 'FREE') as WorkspacePlan;
     const allowance = PLAN_CREDIT_ALLOWANCE[plan] ?? 0;
-    const account = await AccountModel.create({
-      name: ws.name,
-      ownerUserId: ws.createdBy,
-      clerkOrgId: ws.clerkOrgId ?? null,
-      plan,
-      billing: ws.billing ?? {},
-      credits: {
-        allowanceRemaining: allowance,
-        allowancePerPeriod: allowance,
-        periodResetAt: ws.billing?.currentPeriodEnd ? new Date(ws.billing.currentPeriodEnd) : null,
-        purchasedBalance: 0,
-      },
-    });
 
-    // Atomically claim the workspace; if another concurrent request beat us to
-    // it, discard our duplicate and use the one that won.
-    const claimed = await WorkspaceModel.findOneAndUpdate(
-      { _id: ws._id, accountId: null },
-      { $set: { accountId: account._id } },
-      { new: true },
-    );
-    if (!claimed) {
+    let account;
+    try {
+      account = await AccountModel.create({
+        name: ws.name,
+        ownerUserId: ws.createdBy,
+        clerkOrgId: ws.clerkOrgId ?? null,
+        plan,
+        billing: ws.billing ?? {},
+        credits: {
+          allowanceRemaining: allowance,
+          allowancePerPeriod: allowance,
+          periodResetAt: ws.billing?.currentPeriodEnd ? new Date(ws.billing.currentPeriodEnd) : null,
+          purchasedBalance: 0,
+        },
+      });
+    } catch (err) {
+      // A concurrent self-heal already created the org's account — reuse the
+      // winner instead of failing on the unique clerkOrgId index.
+      if ((err as { code?: number }).code === 11000 && ws.clerkOrgId) {
+        const winner = await AccountModel.findOne({ clerkOrgId: ws.clerkOrgId });
+        if (winner) return linkWorkspace(String(winner._id));
+      }
+      throw err;
+    }
+
+    // Copy the workspace's members onto the account BEFORE linking the workspace,
+    // so no caller ever observes a linked account with incomplete membership. On
+    // any failure (or a lost claim race) remove the partial account + members.
+    const cleanup = async () => {
+      await AccountMemberModel.deleteMany({ accountId: account._id });
       await AccountModel.deleteOne({ _id: account._id });
+    };
+
+    let claimLost = false;
+    try {
+      const members = await WorkspaceMemberModel.find({ workspaceId: ws._id }).lean();
+      if (members.length) {
+        await AccountMemberModel.bulkWrite(
+          members.map((m) => ({
+            updateOne: {
+              filter: { accountId: account._id, userId: m.userId },
+              update: {
+                $setOnInsert: { accountId: account._id, userId: m.userId },
+                $set: { role: m.role, clerkMembershipId: m.clerkMembershipId ?? null },
+              },
+              upsert: true,
+            },
+          })),
+        );
+      }
+
+      // Atomically claim the workspace; if another request beat us to it, we lose.
+      const claimed = await WorkspaceModel.findOneAndUpdate(
+        { _id: ws._id, accountId: null },
+        { $set: { accountId: account._id } },
+        { new: true },
+      );
+      claimLost = !claimed;
+    } catch (err) {
+      await cleanup();
+      throw err;
+    }
+
+    if (claimLost) {
+      await cleanup();
       const fresh = await WorkspaceModel.findById(ws._id).select('accountId').lean();
       return fresh?.accountId ? AccountModel.findById(fresh.accountId) : null;
     }
 
-    // Copy the workspace's members onto the account (same shape as the backfill).
-    const members = await WorkspaceMemberModel.find({ workspaceId: ws._id }).lean();
-    for (const m of members) {
-      // eslint-disable-next-line no-await-in-loop
-      await AccountMemberModel.updateOne(
-        { accountId: account._id, userId: m.userId },
-        { $setOnInsert: { accountId: account._id, userId: m.userId }, $set: { role: m.role, clerkMembershipId: m.clerkMembershipId ?? null } },
-        { upsert: true },
-      );
-    }
     return account;
   },
 

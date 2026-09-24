@@ -193,6 +193,33 @@ describe('billing (integration, mock Dodo)', () => {
     expect(await AccountModel.findById(linked!.accountId)).not.toBeNull();
   });
 
+  it('reuses an existing Clerk-org account instead of failing on the unique index', async () => {
+    const token = await tokenFor('orgowner@test.com', 'Org Owner');
+    const onboard = await request(app)
+      .post('/api/v1/workspaces/onboarding')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ name: 'Org Owner', company: 'Org Co' });
+    const workspaceId = onboard.body.data.id as string;
+    const ws = (r: request.Test) => r.set('Authorization', `Bearer ${token}`).set('X-Workspace-Id', workspaceId);
+
+    // Simulate legacy state: the workspace has a Clerk org whose account already
+    // exists (holding that same clerkOrgId), but the workspace's link is missing.
+    const before = await WorkspaceModel.findById(workspaceId).lean();
+    const existingAccountId = String(before!.accountId);
+    const clerkOrgId = 'org_test_reuse';
+    await AccountModel.updateOne({ _id: existingAccountId }, { $set: { clerkOrgId } });
+    await WorkspaceModel.updateOne({ _id: workspaceId }, { $set: { clerkOrgId }, $unset: { accountId: 1 } });
+
+    // Must NOT throw E11000 on the unique clerkOrgId index.
+    const status = await ws(request(app).get(`/api/v1/workspaces/${workspaceId}/billing`) as any);
+    expect(status.status).toBe(200);
+
+    // Relinked to the SAME pre-existing account — no duplicate account created.
+    const after = await WorkspaceModel.findById(workspaceId).lean();
+    expect(String(after!.accountId)).toBe(existingAccountId);
+    expect(await AccountModel.countDocuments({ clerkOrgId })).toBe(1);
+  });
+
   it('supports the annual billing cycle end to end', async () => {
     const token = await tokenFor('annualowner@test.com', 'Annual Owner');
     const onboard = await request(app)
