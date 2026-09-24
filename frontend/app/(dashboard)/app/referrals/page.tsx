@@ -239,6 +239,7 @@ function ReferralRewardRow({ referral }: { referral: ReferralDto }) {
         <Input
           value={note}
           placeholder="Optional note"
+          maxLength={500}
           className="h-8 w-40 text-xs"
           disabled={updateReward.isPending}
           onChange={(e) => setNote(e.target.value)}

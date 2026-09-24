@@ -27,7 +27,7 @@ export type ReferralDto = {
   referrerName: string;
   referrerEmail: string;
   code: string;
-  /** Full shareable URL — `{APP_URL}/public/r/{code}`. */
+  /** Full shareable URL — `{APP_URL}/r/{code}`. */
   shareUrl: string;
   jobId: string;
   jobTitle: string;

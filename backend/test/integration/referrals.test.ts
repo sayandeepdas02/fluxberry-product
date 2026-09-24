@@ -1,8 +1,9 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import request from 'supertest';
 import { createApp } from '../../src/app';
 import { connectDatabase, disconnectDatabase, mongoose } from '../../src/config/db';
 import { ApplicationModel } from '../../src/models/application.model';
+import { referralRepository } from '../../src/repositories/referral.repository';
 import { mockOutbox } from '../../src/integrations';
 import { processOnce } from '../../src/workers/runner';
 import { activateSubscription } from './helpers/activate-subscription';
@@ -137,6 +138,30 @@ describe('employee referrals (integration)', () => {
     expect(rewarded.body.data.rewardStatus).toBe('PAID');
     expect(rewarded.body.data.rewardNote).toBe('Paid via UPI');
 
+    // hiredCount reflects applications that reach HIRED — recomputed live from
+    // application status on every read, not stored on the referral.
+    await ApplicationModel.updateOne({ _id: apply.body.data.applicationId }, { status: 'HIRED' });
+    const afterHire = await recruiterWs(request(app).get('/api/v1/referrals/my') as any);
+    expect(afterHire.body.data[0].applicationCount).toBe(1);
+    expect(afterHire.body.data[0].hiredCount).toBe(1);
+
+    // Reward updates are validated by validateBody (Zod → 422): an unknown
+    // status and an over-500-char note are both rejected before touching data.
+    const badStatus = await ownerWs(
+      request(app).patch(`/api/v1/workspaces/${workspaceId}/referrals/${referralId}/reward`).send({ rewardStatus: 'BOGUS' }) as any,
+    );
+    expect(badStatus.status).toBe(422);
+    const longNote = await ownerWs(
+      request(app)
+        .patch(`/api/v1/workspaces/${workspaceId}/referrals/${referralId}/reward`)
+        .send({ rewardStatus: 'PAID', rewardNote: 'x'.repeat(501) }) as any,
+    );
+    expect(longNote.status).toBe(422);
+
+    // The public resolver 404s on an unknown code (never leaks or 500s).
+    const unknown = await request(app).get('/api/v1/public/referrals/NONEXISTENTCODE');
+    expect(unknown.status).toBe(404);
+
     // A job restricted away from this recruiter must be invisible for referral
     // creation too, not just candidate/job routes — same 404-not-403 convention.
     const restrictedJob = await ownerWs(request(app).post('/api/v1/jobs').send({ title: 'Restricted Referral Role' }) as any);
@@ -148,5 +173,30 @@ describe('employee referrals (integration)', () => {
 
     const blocked = await recruiterWs(request(app).post('/api/v1/referrals').send({ jobId: restrictedJobId }) as any);
     expect(blocked.status).toBe(404);
+
+    // Durable attribution: if the inline linkage write fails, the application is
+    // still linked by the LINK_REFERRAL_APPLICATION retry job ($addToSet is idempotent),
+    // so referral credit is never silently lost on a transient write error.
+    const spy = vi.spyOn(referralRepository, 'addApplication').mockRejectedValueOnce(new Error('transient write failure'));
+    const retryApply = await request(app)
+      .post(`/api/v1/public/jobs/${workspaceSlug}/${jobSlug}/apply`)
+      .field('name', 'Retry Candidate')
+      .field('email', 'retrycand@test.com')
+      .field('source', 'DIRECT')
+      .field('referralCode', code)
+      .field('answers', '[]')
+      .attach('resume', PDF, { filename: 'resume.pdf', contentType: 'application/pdf' });
+    expect(retryApply.status).toBe(201); // the application always succeeds; only the linkage is deferred
+    expect(spy).toHaveBeenCalledTimes(1); // the inline attempt we forced to fail
+    while (await processOnce()) {
+      /* drain the queue so the enqueued LINK_REFERRAL_APPLICATION retry runs */
+    }
+    vi.restoreAllMocks();
+
+    // Both the referred candidate and the retry candidate are attributed — the
+    // retry one only got linked via the queue after its inline write failed.
+    const afterRetry = await recruiterWs(request(app).get('/api/v1/referrals/my') as any);
+    expect(afterRetry.body.data[0].applicationCount).toBe(2);
+    expect(afterRetry.body.data[0].hiredCount).toBe(1);
   });
 });
