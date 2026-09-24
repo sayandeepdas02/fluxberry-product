@@ -44,9 +44,9 @@ const NAV: NavItem[] = [
   { href: '/app', label: 'Home', icon: Home, exact: true },
   { href: '/app/jobs', label: 'Jobs', icon: Briefcase },
   { href: '/app/candidates', label: 'Candidates', icon: Users },
+  { href: '/app/talent-sourcing', label: 'Talent Sourcing', icon: UserSearch },
   { href: '/app/analytics', label: 'Analytics', icon: BarChart3 },
   { href: '/app/referrals', label: 'Referrals', icon: Gift },
-  { href: '/app/talent-sourcing', label: 'Talent Sourcing', icon: UserSearch },
 ];
 
 export function Sidebar() {
