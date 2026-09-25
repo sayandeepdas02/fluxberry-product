@@ -16,6 +16,7 @@ import { gdprRouter } from './gdpr.routes';
 import { offerRouter } from './offer.routes';
 import { webhookEndpointRouter } from './webhook-endpoint.routes';
 import { bulkImportRouter } from './bulk-import.routes';
+import { sourcingRouter } from './sourcing.routes';
 
 /**
  * Versioned API router (/api/v1). Sub-routers are mounted here per slice:
@@ -40,3 +41,4 @@ apiRouter.use(gdprRouter);
 apiRouter.use(offerRouter);
 apiRouter.use(webhookEndpointRouter);
 apiRouter.use(bulkImportRouter);
+apiRouter.use(sourcingRouter);

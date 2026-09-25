@@ -77,10 +77,27 @@ export const SOURCING_MAX_PAGE_SIZE = 100;
 
 export const sourcingSearchInputSchema = z.object({
   prompt: z.string().trim().min(3, 'Describe who you are looking for').max(500),
+  /**
+   * Pre-parsed / recruiter-edited criteria. When present the search skips the AI
+   * parse and runs these directly, so a "review your filters, then spend" flow
+   * doesn't re-call the AI or discard chip edits.
+   */
+  criteria: sourcingCriteriaSchema.optional(),
   /** Optional page size override (bounded to control credit spend). */
   size: z.coerce.number().int().min(1).max(SOURCING_MAX_PAGE_SIZE).optional(),
 });
 export type SourcingSearchInput = z.infer<typeof sourcingSearchInputSchema>;
+
+/** Prompt-only input for the free "parse before you spend" step. */
+export const sourcingParseInputSchema = z.object({
+  prompt: z.string().trim().min(3, 'Describe who you are looking for').max(500),
+});
+export type SourcingParseInput = z.infer<typeof sourcingParseInputSchema>;
+
+/** Response of `POST /sourcing/parse` — criteria only, no PDL spend. */
+export type SourcingParseResultDto = {
+  criteria: SourcingCriteria;
+};
 
 /** Re-run a saved search after the recruiter tweaks the parsed criteria chips. */
 export const updateSearchCriteriaSchema = z.object({
@@ -171,6 +188,20 @@ export type SourcingSearchResultDto = {
   contacts: SourcedContactDto[];
 };
 
+// ---- Contacts list (durable people store) --------------------------------
+
+export const sourcingContactListQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(25),
+  search: z.string().trim().max(120).optional(),
+  // Query values are strings; z.coerce.boolean() would turn "false"/"0" into true.
+  hasEmail: z
+    .enum(['true', 'false'])
+    .transform((v) => v === 'true')
+    .optional(),
+});
+export type SourcingContactListQuery = z.infer<typeof sourcingContactListQuerySchema>;
+
 // ---- Lists (talent pools) -------------------------------------------------
 
 export const createListSchema = z.object({
@@ -251,6 +282,22 @@ export const testCampaignSchema = z.object({
   toEmail: z.string().trim().email(),
 });
 export type TestCampaignInput = z.infer<typeof testCampaignSchema>;
+
+/** AI email drafting input for the composer's "Write with AI" / "Refine with AI". */
+export const draftCampaignSchema = z.object({
+  role: z.string().trim().min(1, 'What role are you pitching?').max(120),
+  tone: z.string().trim().max(40).optional(),
+  brief: z.string().trim().max(1000).optional(),
+  /** An existing body to improve rather than write from scratch. */
+  refine: z.string().trim().max(10000).optional(),
+});
+export type DraftCampaignInput = z.infer<typeof draftCampaignSchema>;
+
+/** Response of the AI draft endpoint — subject + body with merge tags. */
+export type CampaignDraftDto = {
+  subject: string;
+  body: string;
+};
 
 export type SourcingCampaignStatsDto = {
   recipients: number;

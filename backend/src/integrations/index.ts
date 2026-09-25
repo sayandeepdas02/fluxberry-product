@@ -7,6 +7,7 @@ export { getAIProvider, __resetAIProvider } from './ai';
 export { getEmailProvider, __resetEmailProvider, emailTemplates, mockOutbox } from './email';
 export { getStorageProvider, __resetStorageProvider, mockStorageRouter } from './storage';
 export { getCalendarProvider, __resetCalendarProvider } from './calendar';
+export { getPeopleSourcingProvider, __resetPeopleSourcingProvider } from './pdl';
 export {
   getBillingProvider,
   __resetBillingProvider,
@@ -21,3 +22,4 @@ export type { EmailProvider } from './email/types';
 export type { StorageProvider, FileRef, DownloadUrlOptions } from './storage/types';
 export type { BillingProvider } from './dodo/types';
 export type { CalendarProvider } from './calendar/types';
+export type { PeopleSourcingProvider } from './pdl/types';

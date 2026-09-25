@@ -1,4 +1,4 @@
-import type { JdGenInput, ResumeParseInput, ScreeningInput, SourcingQueryInput } from './types';
+import type { JdGenInput, ResumeParseInput, ScreeningInput, SourcingQueryInput, OutreachDraftInput } from './types';
 
 export interface PromptSpec {
   system: string;
@@ -139,6 +139,30 @@ Return ONLY JSON with this exact shape (use [] for empty arrays, omit unknown nu
   "locations": [], "countries": [],
   "companies": [], "excludeCompanies": [],
   "industries": [], "keywords": []
+}`,
+  };
+}
+
+export function outreachEmailPrompt(input: OutreachDraftInput): PromptSpec {
+  const facts = [
+    `Role being pitched: ${input.role}`,
+    `Hiring company: ${input.company}`,
+    input.senderName && `Sender: ${input.senderName}`,
+    input.tone && `Tone: ${input.tone}`,
+    input.contactSample?.title && `Recipient is typically a ${input.contactSample.title}${input.contactSample.company ? ` at ${input.contactSample.company}` : ''}`,
+    input.brief && `Notes: ${input.brief}`,
+    input.refine && `Improve this existing draft rather than starting over:\n"""\n${input.refine.slice(0, 2000)}\n"""`,
+  ]
+    .filter(Boolean)
+    .join('\n');
+
+  return {
+    version: 'outreach-v1',
+    system: `${FAIRNESS}\nYou write short, personable cold-outreach recruiting emails that get replies. Be specific and human, never spammy or over-formal. One clear ask (a quick chat). Keep the body under ~130 words. Use the merge tags {{firstName}} and {{company}} where natural so each email personalizes. Do not fabricate specific facts about the recipient.`,
+    user: `Write a cold outreach email using these details:\n\n${facts}\n\nReturn ONLY JSON with this exact shape:
+{
+  "subject": "short, specific subject line (may use {{firstName}} or {{company}})",
+  "body": "the email body, plain text with line breaks, using {{firstName}} where natural, ending with a clear ask and a sign-off"
 }`,
   };
 }

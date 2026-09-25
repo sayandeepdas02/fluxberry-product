@@ -23,4 +23,11 @@ export { GdprRequestModel } from './gdpr-request.model';
 export { WebhookEndpointModel } from './webhook-endpoint.model';
 export { WebhookDeliveryModel } from './webhook-delivery.model';
 export { BulkImportModel } from './bulk-import.model';
+export { SourcedContactModel } from './sourced-contact.model';
+export { SourcingSearchModel } from './sourcing-search.model';
+export { SourcingListModel } from './sourcing-list.model';
+export { SourcingListMemberModel } from './sourcing-list-member.model';
+export { SourcingCampaignModel } from './sourcing-campaign.model';
+export { SourcingCampaignRecipientModel } from './sourcing-campaign-recipient.model';
+export { SourcingSuppressionModel } from './sourcing-suppression.model';
 // Later: JobAnalytics (precomputed) ...

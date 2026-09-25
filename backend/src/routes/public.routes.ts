@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { publicController } from '../controllers/public.controller';
 import { careersController } from '../controllers/careers.controller';
+import { sourcingController } from '../controllers/sourcing.controller';
 import { messageController } from '../controllers/message.controller';
 import { referralController } from '../controllers/referral.controller';
 import { offerController } from '../controllers/offer.controller';
@@ -39,6 +40,15 @@ publicRouter.get('/public/sitemap-entries', careersController.publicSitemapEntri
 // Public offer view + candidate response (token-gated, no account needed).
 publicRouter.get('/public/offers/:token', offerController.getByToken);
 publicRouter.post('/public/offers/:token/respond', publicApplyLimiter, validateBody(offerDecisionSchema), offerController.respond);
+
+// One-click unsubscribe from sourcing outreach (tokenized, no auth) — CAN-SPAM.
+publicRouter.get('/public/sourcing/unsubscribe/:token', sourcingController.unsubscribe);
+
+// Open-tracking pixel for sourcing campaign emails (tokenized, no auth).
+publicRouter.get('/public/sourcing/open/:token', sourcingController.trackOpen);
+
+// Email delivery-event webhook (Resend) — gated by an unguessable URL secret.
+publicRouter.post('/webhooks/sourcing-email/:secret', sourcingController.emailWebhook);
 
 // Inbound candidate email replies — provider-agnostic, gated by an unguessable
 // URL secret. Whichever inbound email vendor is configured should be set up to

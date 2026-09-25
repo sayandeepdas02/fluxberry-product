@@ -9,6 +9,8 @@ import type {
   ScreeningReasoning,
   SourcingQueryInput,
   SourcingQueryResult,
+  OutreachDraftInput,
+  OutreachDraftResult,
   ProviderMeta,
 } from './types';
 import { SCORE_DIMENSION_LABELS } from '../../shared';
@@ -148,6 +150,22 @@ ${preferred.length ? preferred.map((s) => `- Familiarity with ${s}`).join('\n') 
       keywords: [],
     };
     return { criteria, meta: meta('sourcing-v1') };
+  }
+
+  async draftOutreachEmail(input: OutreachDraftInput): Promise<OutreachDraftResult> {
+    const sender = input.senderName ?? 'the team';
+    const subject = `{{firstName}} — ${input.role} at ${input.company}`;
+    const body = `Hi {{firstName}},
+
+I came across your work at {{company}} and thought you might be a strong fit for a ${input.role} role we're hiring for at ${input.company}.${
+      input.brief ? ` ${input.brief.trim()}` : ' We\'re building something ambitious and looking for people who like real ownership.'
+    }
+
+Would you be open to a quick 15-minute chat this week? Happy to work around your schedule.
+
+Best,
+${sender}`;
+    return { subject, body, meta: meta('outreach-v1') };
   }
 
 }
