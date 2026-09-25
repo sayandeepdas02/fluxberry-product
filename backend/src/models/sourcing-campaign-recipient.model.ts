@@ -15,7 +15,15 @@ const sourcingCampaignRecipientSchema = new Schema(
     providerMessageId: { type: String, default: null },
     /** Public, unguessable token backing the one-click unsubscribe link. */
     unsubscribeToken: { type: String, required: true },
+    /**
+     * Funnel timestamps, set once and never cleared so aggregate stats stay
+     * monotonic even after a later status change (e.g. an unsubscribe must not
+     * lower the sent/opened/replied counts).
+     */
     sentAt: { type: Date, default: null },
+    deliveredAt: { type: Date, default: null },
+    openedAt: { type: Date, default: null },
+    repliedAt: { type: Date, default: null },
     error: { type: String, default: null },
   },
   { timestamps: true, collection: 'sourcing_campaign_recipients' },
@@ -23,6 +31,11 @@ const sourcingCampaignRecipientSchema = new Schema(
 
 sourcingCampaignRecipientSchema.index({ campaignId: 1, status: 1 });
 sourcingCampaignRecipientSchema.index({ unsubscribeToken: 1 }, { unique: true });
+// Delivery-event webhooks look recipients up by providerMessageId on every event.
+sourcingCampaignRecipientSchema.index(
+  { providerMessageId: 1 },
+  { partialFilterExpression: { providerMessageId: { $type: 'string' } } },
+);
 
 export type SourcingCampaignRecipientDoc = InferSchemaType<typeof sourcingCampaignRecipientSchema>;
 export const SourcingCampaignRecipientModel =

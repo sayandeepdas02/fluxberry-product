@@ -7,10 +7,22 @@ import type { JobHandler } from './index';
  * staggered to throttle the provider, then mark the campaign dispatched.
  */
 export const sendSourcingCampaignHandler: JobHandler = async (payload, ctx) => {
-  const { campaignId } = payload as { campaignId: string; workspaceId: string };
+  const { campaignId, scheduledAt } = payload as {
+    campaignId: string;
+    workspaceId: string;
+    scheduledAt?: string | null;
+  };
   const campaign = await sourcingCampaignRepository.findById(campaignId);
   if (!campaign) {
     ctx.logger.warn({ campaignId }, 'send-sourcing-campaign: campaign not found');
+    return;
+  }
+
+  // Skip a superseded job: if the campaign was rescheduled (or already sent), the
+  // effective scheduled time no longer matches this job's payload — don't send.
+  const currentScheduledAt = campaign.scheduledAt ? new Date(campaign.scheduledAt).toISOString() : null;
+  if ((scheduledAt ?? null) !== currentScheduledAt) {
+    ctx.logger.info({ campaignId }, 'send-sourcing-campaign: stale job (rescheduled) — skipping');
     return;
   }
 

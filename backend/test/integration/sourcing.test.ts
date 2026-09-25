@@ -252,6 +252,11 @@ describe('Talent Sourcing (integration)', () => {
     const unsub = await request(app).get(`/api/v1/public/sourcing/unsubscribe/${recDoc!.unsubscribeToken}`);
     expect(unsub.status).toBe(200);
 
+    // The funnel is monotonic: an unsubscribe records unsubscribed but never lowers sent.
+    const afterUnsub = await ws(request(app).get(`/api/v1/sourcing/campaigns/${campaignId}`) as any);
+    expect(afterUnsub.body.data.stats.sent).toBe(contactable.length);
+    expect(afterUnsub.body.data.stats.unsubscribed).toBe(1);
+
     // A fresh campaign to the same list now skips the unsubscribed address.
     const campaign2 = await ws(
       request(app).post('/api/v1/sourcing/campaigns').send({

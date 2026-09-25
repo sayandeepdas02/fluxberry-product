@@ -28,11 +28,18 @@ function norm(s: string): string {
   return s.toLowerCase().trim();
 }
 
-/** True if `haystack` contains `needle` or vice-versa (token-level contains). */
+/**
+ * True if every token of the shorter phrase appears as a whole token in the
+ * longer one. Token-level (not substring) matching so a one/two-letter skill
+ * like "R" or "C" doesn't spuriously match "Rust" or "Scala".
+ */
 function looseMatch(haystack: string, needle: string): boolean {
-  const h = norm(haystack);
-  const n = norm(needle);
-  return h.includes(n) || n.includes(h);
+  const tokens = (s: string) => norm(s).split(/[^a-z0-9+#.]+/).filter(Boolean);
+  const h = tokens(haystack);
+  const n = tokens(needle);
+  if (!h.length || !n.length) return false;
+  const [small, big] = h.length <= n.length ? [h, new Set(n)] : [n, new Set(h)];
+  return small.every((t) => big.has(t));
 }
 
 export function scoreContact(criteria: SourcingCriteria, person: ScorablePerson): MatchResult {

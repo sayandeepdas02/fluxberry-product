@@ -113,6 +113,13 @@ export const sourcingCampaignRepository = {
   create: (data: Record<string, any>) => SourcingCampaignModel.create(data),
   findById: (id: string) => SourcingCampaignModel.findById(id),
   findInWorkspace: (workspaceId: string, id: string) => SourcingCampaignModel.findOne({ _id: id, workspaceId }),
+  /** Atomically move an eligible campaign to SENDING so concurrent sends can't both proceed. */
+  claimForSend: (workspaceId: string, id: string) =>
+    SourcingCampaignModel.findOneAndUpdate(
+      { _id: id, workspaceId, status: { $in: ['DRAFT', 'SCHEDULED', 'PAUSED', 'FAILED'] } },
+      { $set: { status: 'SENDING' } },
+      { new: true },
+    ),
   listByWorkspace: (workspaceId: string) =>
     SourcingCampaignModel.find({ workspaceId }).sort({ createdAt: -1 }).lean(),
   update: (id: string, patch: Record<string, any>) =>
@@ -131,16 +138,53 @@ export const sourcingRecipientRepository = {
   update: (id: string, patch: Record<string, any>) =>
     SourcingCampaignRecipientModel.findByIdAndUpdate(id, patch, { new: true }),
   deleteByCampaign: (campaignId: string) => SourcingCampaignRecipientModel.deleteMany({ campaignId }),
-  /** Aggregate the recipient statuses of a campaign into the campaign stats shape. */
-  statusCounts: async (campaignId: string) => {
-    const rows = await SourcingCampaignRecipientModel.aggregate([
+  deletePendingByCampaign: (campaignId: string) =>
+    SourcingCampaignRecipientModel.deleteMany({ campaignId, status: 'PENDING' }),
+  /**
+   * Aggregate a campaign into the monotonic funnel: sent/delivered/opened/replied
+   * are derived from progression timestamps (which are never cleared), so a later
+   * status change like an unsubscribe can't lower them. Terminal states
+   * (bounced/unsubscribed/failed) come from the current status.
+   */
+  funnelCounts: async (campaignId: string) => {
+    const notNull = (field: string) => ({ $cond: [{ $ne: [`$${field}`, null] }, 1, 0] });
+    const eqStatus = (s: string) => ({ $cond: [{ $eq: ['$status', s] }, 1, 0] });
+    const [row] = await SourcingCampaignRecipientModel.aggregate([
       { $match: { campaignId: new Types.ObjectId(campaignId) } },
-      { $group: { _id: '$status', n: { $sum: 1 } } },
+      {
+        $group: {
+          _id: null,
+          recipients: { $sum: 1 },
+          sent: { $sum: notNull('sentAt') },
+          delivered: {
+            $sum: {
+              $cond: [
+                { $or: [{ $ne: ['$deliveredAt', null] }, { $ne: ['$openedAt', null] }, { $ne: ['$repliedAt', null] }] },
+                1,
+                0,
+              ],
+            },
+          },
+          opened: {
+            $sum: { $cond: [{ $or: [{ $ne: ['$openedAt', null] }, { $ne: ['$repliedAt', null] }] }, 1, 0] },
+          },
+          replied: { $sum: notNull('repliedAt') },
+          bounced: { $sum: eqStatus('BOUNCED') },
+          unsubscribed: { $sum: eqStatus('UNSUBSCRIBED') },
+          failed: { $sum: eqStatus('FAILED') },
+        },
+      },
     ]);
-    return rows.reduce((acc: Record<string, number>, r: any) => {
-      acc[String(r._id)] = r.n;
-      return acc;
-    }, {});
+    return {
+      recipients: row?.recipients ?? 0,
+      sent: row?.sent ?? 0,
+      delivered: row?.delivered ?? 0,
+      opened: row?.opened ?? 0,
+      replied: row?.replied ?? 0,
+      bounced: row?.bounced ?? 0,
+      unsubscribed: row?.unsubscribed ?? 0,
+      failed: row?.failed ?? 0,
+    };
   },
 };
 

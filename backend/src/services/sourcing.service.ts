@@ -17,7 +17,7 @@ import type {
   DraftCampaignInput,
   CampaignDraftDto,
 } from '../shared';
-import { SOURCING_PAGE_SIZE, SOURCING_MAX_PAGE_SIZE } from '../shared';
+import { SOURCING_PAGE_SIZE, SOURCING_MAX_PAGE_SIZE, CREDIT_COSTS } from '../shared';
 import {
   sourcingSearchRepository,
   sourcedContactRepository,
@@ -49,6 +49,8 @@ import { notFound, badRequest, conflict, providerError } from '../utils/errors';
 import { logger } from '../utils/logger';
 
 const SEARCH_ACTION = 'SOURCING_SEARCH' as const;
+/** Credits charged per search page — reported usage always matches the real charge. */
+const SEARCH_COST = CREDIT_COSTS[SEARCH_ACTION];
 
 function providerName(): 'PDL' | 'MOCK' {
   return config.providers.sourcing.apiKey && !config.providers.mockAll ? 'PDL' : 'MOCK';
@@ -164,7 +166,7 @@ export const sourcingService = {
       status: 'COMPLETED',
       total: result.total,
       fetched: docs.length,
-      creditsUsed: search.creditsUsed + 10,
+      creditsUsed: search.creditsUsed + SEARCH_COST,
       scrollToken: result.scrollToken,
       contactIds: docs.map((d) => d._id),
       lastRunAt: new Date(),
@@ -186,9 +188,11 @@ export const sourcingService = {
     }
     const criteria = search.criteria as SourcingCriteria;
     const accountId = await resolveAccountId(workspaceId);
-    const page = Math.floor((search.fetched ?? 0) / SOURCING_PAGE_SIZE) + 2;
+    // Derive the spend key from credits already charged (not `fetched`, which can
+    // stay flat when a page returns only duplicates) so every charge is distinct.
+    const charge = Math.floor((search.creditsUsed ?? 0) / SEARCH_COST) + 1;
 
-    await creditsService.consume(accountId, SEARCH_ACTION, `sourcing-search-${searchId}-p${page}`);
+    await creditsService.consume(accountId, SEARCH_ACTION, `sourcing-search-${searchId}-c${charge}`);
 
     let result;
     try {
@@ -211,7 +215,7 @@ export const sourcingService = {
     const updated = await sourcingSearchRepository.update(searchId, {
       total: result.total,
       fetched: mergedIds.length,
-      creditsUsed: (search.creditsUsed ?? 0) + 10,
+      creditsUsed: (search.creditsUsed ?? 0) + SEARCH_COST,
       scrollToken: result.scrollToken,
       contactIds: mergedIds,
       lastRunAt: new Date(),
@@ -230,7 +234,9 @@ export const sourcingService = {
     if (!search) throw notFound('Search not found');
     const accountId = await resolveAccountId(workspaceId);
 
-    await creditsService.consume(accountId, SEARCH_ACTION);
+    // Idempotent per run so a retried PATCH doesn't double-charge.
+    const runKey = `sourcing-search-${searchId}-rerun-${search.lastRunAt?.getTime() ?? 0}`;
+    await creditsService.consume(accountId, SEARCH_ACTION, runKey);
 
     let result;
     try {
@@ -246,7 +252,7 @@ export const sourcingService = {
       status: 'COMPLETED',
       total: result.total,
       fetched: docs.length,
-      creditsUsed: (search.creditsUsed ?? 0) + 10,
+      creditsUsed: (search.creditsUsed ?? 0) + SEARCH_COST,
       scrollToken: result.scrollToken,
       contactIds: docs.map((d) => d._id),
       lastRunAt: new Date(),
@@ -388,7 +394,15 @@ export const sourcingService = {
       description: input.description ?? null,
     });
     if (input.contactIds.length) {
-      await sourcingListMemberRepository.addMany(workspaceId, String(list._id), input.contactIds, createdBy);
+      // Only add contacts that actually belong to this workspace, so contactCount
+      // never counts foreign or non-existent ids the list can't show.
+      const owned = await sourcedContactRepository.findByIds(workspaceId, input.contactIds);
+      await sourcingListMemberRepository.addMany(
+        workspaceId,
+        String(list._id),
+        owned.map((c: any) => String(c._id)),
+        createdBy,
+      );
     }
     const synced = await sourcingListRepository.syncCount(String(list._id));
     return toSourcingListDto((synced ?? list).toObject());
@@ -414,7 +428,8 @@ export const sourcingService = {
   async addToList(workspaceId: string, listId: string, contactIds: string[]): Promise<SourcingListDto> {
     const list = await sourcingListRepository.findInWorkspace(workspaceId, listId);
     if (!list) throw notFound('List not found');
-    await sourcingListMemberRepository.addMany(workspaceId, listId, contactIds, null);
+    const owned = await sourcedContactRepository.findByIds(workspaceId, contactIds);
+    await sourcingListMemberRepository.addMany(workspaceId, listId, owned.map((c: any) => String(c._id)), null);
     const synced = await sourcingListRepository.syncCount(listId);
     return toSourcingListDto((synced ?? list).toObject());
   },
@@ -548,33 +563,49 @@ export const sourcingService = {
       throw badRequest('No contactable recipients — every contact lacks an email or is unsubscribed');
     }
 
-    // Rebuild the recipient set from scratch (a re-send replaces prior recipients).
-    await sourcingRecipientRepository.deleteByCampaign(campaignId);
-    await sourcingRecipientRepository.insertMany(
-      eligible.map((x) => ({
-        workspaceId,
-        campaignId,
-        contactId: x.c._id,
-        fullName: x.c.fullName,
-        email: x.email,
-        company: x.c.company ?? null,
-        title: x.c.title ?? null,
-        status: 'PENDING',
-        unsubscribeToken: randomToken(),
-      })),
+    // Atomically claim the campaign (DRAFT/SCHEDULED/PAUSED/FAILED → SENDING) so two
+    // concurrent sends can't both build recipients and double-email everyone.
+    const claimed = await sourcingCampaignRepository.claimForSend(workspaceId, campaignId);
+    if (!claimed) throw conflict('This campaign is already sending or has been sent');
+
+    // Reuse recipients by contact: preserve rows that already progressed past PENDING
+    // (a retry from PAUSED/FAILED must never re-email an already-contacted person),
+    // and only (re)insert PENDING rows for the rest.
+    const existing = await sourcingRecipientRepository.listByCampaign(campaignId);
+    const alreadyProcessed = new Set(
+      existing.filter((r: any) => r.status !== 'PENDING').map((r: any) => String(r.contactId)),
     );
+    await sourcingRecipientRepository.deletePendingByCampaign(campaignId);
+    const toInsert = eligible.filter((x) => !alreadyProcessed.has(String(x.c._id)));
+    if (toInsert.length) {
+      await sourcingRecipientRepository.insertMany(
+        toInsert.map((x) => ({
+          workspaceId,
+          campaignId,
+          contactId: x.c._id,
+          fullName: x.c.fullName,
+          email: x.email,
+          company: x.c.company ?? null,
+          title: x.c.title ?? null,
+          status: 'PENDING',
+          unsubscribeToken: randomToken(),
+        })),
+      );
+    }
 
     const scheduledAt = scheduledAtIso ? new Date(scheduledAtIso) : null;
-    const scheduled = scheduledAt && scheduledAt.getTime() > Date.now();
+    const scheduled = Boolean(scheduledAt && scheduledAt.getTime() > Date.now());
     await sourcingCampaignRepository.update(campaignId, {
       status: scheduled ? 'SCHEDULED' : 'SENDING',
       scheduledAt: scheduledAt ?? null,
-      'stats.recipients': eligible.length,
+      'stats.recipients': alreadyProcessed.size + toInsert.length,
     });
 
+    // Stamp the effective scheduled time on the job so a superseded (rescheduled)
+    // job can be recognized as stale by the handler and skipped.
     await jobQueue.enqueue(
       'SEND_SOURCING_CAMPAIGN',
-      { campaignId, workspaceId },
+      { campaignId, workspaceId, scheduledAt: scheduledAt ? scheduledAt.toISOString() : null },
       {
         runAt: scheduled ? scheduledAt! : undefined,
         idempotencyKey: `sourcing-campaign-${campaignId}-${scheduledAt?.getTime() ?? 'now'}`,
@@ -584,36 +615,45 @@ export const sourcingService = {
     return this.getCampaign(workspaceId, campaignId);
   },
 
-  /** Open-pixel hit: promote a sent/delivered recipient to OPENED (never downgrades). */
+  /** Open-pixel hit: record openedAt (once) and promote a sent/delivered recipient to OPENED. */
   async recordOpen(token: string): Promise<void> {
     const r = await sourcingRecipientRepository.findByToken(token);
     if (!r) return;
-    if (r.status === 'SENT' || r.status === 'DELIVERED') {
-      await sourcingRecipientRepository.update(String(r._id), { status: 'OPENED' });
-    }
+    const patch: Record<string, unknown> = {};
+    if (!r.openedAt) patch.openedAt = new Date();
+    if (r.status === 'SENT' || r.status === 'DELIVERED') patch.status = 'OPENED';
+    if (Object.keys(patch).length) await sourcingRecipientRepository.update(String(r._id), patch);
   },
 
-  /** A candidate replied (via the inbound email webhook) — mark the recipient REPLIED. */
+  /** A candidate replied (via the inbound email webhook) — record repliedAt + mark REPLIED. */
   async recordReply(recipientId: string): Promise<void> {
     const r = await sourcingRecipientRepository.findById(recipientId);
-    if (!r || r.status === 'UNSUBSCRIBED' || r.status === 'REPLIED') return;
-    await sourcingRecipientRepository.update(recipientId, { status: 'REPLIED' });
+    if (!r || r.repliedAt) return;
+    const patch: Record<string, unknown> = { repliedAt: new Date() };
+    if (r.status !== 'UNSUBSCRIBED') patch.status = 'REPLIED';
+    await sourcingRecipientRepository.update(recipientId, patch);
   },
 
   /**
    * Apply a normalized email-provider delivery event (Resend webhook) to the
    * matching recipient; hard bounces and spam complaints also suppress the
-   * address so future campaigns skip it.
+   * address so future campaigns skip it. Progression timestamps are set once.
    */
   async applyEmailEvent(evt: { type: 'delivered' | 'opened' | 'bounced' | 'complained'; providerMessageId?: string }): Promise<void> {
     if (!evt.providerMessageId) return;
     const r = await sourcingRecipientRepository.findByProviderMessageId(evt.providerMessageId);
     if (!r) return;
     const id = String(r._id);
-    if (evt.type === 'delivered' && r.status === 'SENT') {
-      await sourcingRecipientRepository.update(id, { status: 'DELIVERED' });
-    } else if (evt.type === 'opened' && (r.status === 'SENT' || r.status === 'DELIVERED')) {
-      await sourcingRecipientRepository.update(id, { status: 'OPENED' });
+    if (evt.type === 'delivered') {
+      const patch: Record<string, unknown> = {};
+      if (!r.deliveredAt) patch.deliveredAt = new Date();
+      if (r.status === 'SENT') patch.status = 'DELIVERED';
+      if (Object.keys(patch).length) await sourcingRecipientRepository.update(id, patch);
+    } else if (evt.type === 'opened') {
+      const patch: Record<string, unknown> = {};
+      if (!r.openedAt) patch.openedAt = new Date();
+      if (r.status === 'SENT' || r.status === 'DELIVERED') patch.status = 'OPENED';
+      if (Object.keys(patch).length) await sourcingRecipientRepository.update(id, patch);
     } else if (evt.type === 'bounced') {
       await sourcingRecipientRepository.update(id, { status: 'BOUNCED' });
       await sourcingSuppressionRepository.add(String(r.workspaceId), r.email, 'bounced');
@@ -633,20 +673,13 @@ export const sourcingService = {
     }
   },
 
-  /** Recompute a campaign's aggregate stats from its recipients' current statuses. */
+  /**
+   * Recompute a campaign's aggregate stats. sent/delivered/opened/replied come
+   * from progression timestamps (never cleared), so a later unsubscribe or bounce
+   * can't lower them; bounced/unsubscribed/failed come from the current status.
+   */
   async refreshStats(campaignId: string) {
-    const counts = await sourcingRecipientRepository.statusCounts(campaignId);
-    const g = (k: string) => counts[k] ?? 0;
-    const stats = {
-      recipients: Object.values(counts).reduce((a, b) => a + b, 0),
-      sent: g('SENT') + g('DELIVERED') + g('OPENED') + g('REPLIED') + g('BOUNCED'),
-      delivered: g('DELIVERED') + g('OPENED') + g('REPLIED'),
-      opened: g('OPENED') + g('REPLIED'),
-      replied: g('REPLIED'),
-      bounced: g('BOUNCED'),
-      unsubscribed: g('UNSUBSCRIBED'),
-      failed: g('FAILED'),
-    };
+    const stats = await sourcingRecipientRepository.funnelCounts(campaignId);
     return sourcingCampaignRepository.update(campaignId, { stats });
   },
 };

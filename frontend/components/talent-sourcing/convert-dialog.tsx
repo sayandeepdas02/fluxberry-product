@@ -37,9 +37,12 @@ export function ConvertDialog({
       contactIds.map((contactId) => convert.mutateAsync({ contactId, jobId })),
     );
     const ok = results.filter((r) => r.status === 'fulfilled').length;
-    const failed = results.length - ok;
+    const errors = results.filter((r): r is PromiseRejectedResult => r.status === 'rejected');
     if (ok) toast.success(`${ok} contact${ok !== 1 ? 's' : ''} added to the pipeline`);
-    if (failed) toast.error(`${failed} skipped — no email to contact`);
+    if (errors.length) {
+      const first = errors[0].reason instanceof Error ? errors[0].reason.message : 'Could not add to the pipeline';
+      toast.error(`${errors.length} not added`, { description: first });
+    }
     onOpenChange(false);
     onDone?.();
   };

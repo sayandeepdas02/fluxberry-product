@@ -194,7 +194,11 @@ export const sourcingContactListQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(25),
   search: z.string().trim().max(120).optional(),
-  hasEmail: z.coerce.boolean().optional(),
+  // Query values are strings; z.coerce.boolean() would turn "false"/"0" into true.
+  hasEmail: z
+    .enum(['true', 'false'])
+    .transform((v) => v === 'true')
+    .optional(),
 });
 export type SourcingContactListQuery = z.infer<typeof sourcingContactListQuerySchema>;
 
