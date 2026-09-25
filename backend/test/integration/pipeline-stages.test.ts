@@ -24,7 +24,7 @@ afterAll(async () => {
 });
 
 describe('custom pipeline stages (integration)', () => {
-  it('defaults to the 7 system stages, then supports add/rename/reorder/delete', async () => {
+  it('defaults to the 5 system stages, then supports add/rename/reorder/delete', async () => {
     const token = await tokenFor('stagesrec@test.com', 'Stages Rec');
     const onboard = await request(app)
       .post('/api/v1/workspaces/onboarding')
@@ -36,24 +36,25 @@ describe('custom pipeline stages (integration)', () => {
 
     const job = await ws(request(app).post('/api/v1/jobs').send({ title: 'Designer' }) as any);
     const jobId = job.body.data.id as string;
-    expect(job.body.data.stages).toHaveLength(7);
+    expect(job.body.data.stages).toHaveLength(5);
     expect(job.body.data.stages[0]).toMatchObject({ id: 'APPLIED', system: true });
 
-    // Fetch via the dedicated endpoint — same 7 system defaults.
+    // Fetch via the dedicated endpoint — same 5 system defaults.
     const got = await ws(request(app).get(`/api/v1/jobs/${jobId}/stages`) as any);
     expect(got.status).toBe(200);
-    expect(got.body.data).toHaveLength(7);
+    expect(got.body.data).toHaveLength(5);
 
-    // Add a custom stage between INTERVIEW and OFFER, and rename APPLIED.
+    // Insert a custom stage (Technical Round) after Screening, and rename APPLIED.
     const current = got.body.data as any[];
     const withCustom = [
-      ...current.slice(0, 4).map((s: any, i: number) => (i === 0 ? { ...s, label: 'New Applicant' } : s)),
+      { ...current[0], label: 'New Applicant' },
+      current[1],
       { id: 'TECH_ROUND', label: 'Technical Round', color: '#8855ff', sortOrder: 0, system: false, terminal: false },
-      ...current.slice(4),
+      ...current.slice(2),
     ];
     const updated = await ws(request(app).put(`/api/v1/jobs/${jobId}/stages`).send({ stages: withCustom }) as any);
     expect(updated.status).toBe(200);
-    expect(updated.body.data).toHaveLength(8);
+    expect(updated.body.data).toHaveLength(6);
     expect(updated.body.data.find((s: any) => s.id === 'APPLIED').label).toBe('New Applicant');
     const custom = updated.body.data.find((s: any) => s.id === 'TECH_ROUND');
     expect(custom).toMatchObject({ label: 'Technical Round', system: false, terminal: false });

@@ -10,6 +10,8 @@ import type {
   ScreeningReasoning,
   SourcingQueryInput,
   SourcingQueryResult,
+  OutreachDraftInput,
+  OutreachDraftResult,
   ProviderMeta,
 } from './types';
 import {
@@ -17,6 +19,7 @@ import {
   resumeParsingPrompt,
   candidateScreeningPrompt,
   sourcingQueryPrompt,
+  outreachEmailPrompt,
   type PromptSpec,
 } from './prompts';
 import { extractJson, clampScore, asStringArray } from './util';
@@ -68,6 +71,16 @@ export abstract class BaseLLMProvider implements AIProvider {
     const spec = sourcingQueryPrompt(input);
     const json = extractJson<any>(await this.complete(spec, 700));
     return { criteria: normalizeCriteria(json), meta: this.meta(spec.version) };
+  }
+
+  async draftOutreachEmail(input: OutreachDraftInput): Promise<OutreachDraftResult> {
+    const spec = outreachEmailPrompt(input);
+    const json = extractJson<any>(await this.complete(spec, 800));
+    return {
+      subject: String(json.subject ?? '').trim(),
+      body: String(json.body ?? '').trim(),
+      meta: this.meta(spec.version),
+    };
   }
 
 }

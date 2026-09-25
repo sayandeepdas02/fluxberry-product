@@ -5,6 +5,7 @@ import { CandidateModel } from '../models/candidate.model';
 import { JobModel } from '../models/job.model';
 import { emailTemplates } from '../integrations';
 import { jobQueue } from '../queue/job-queue';
+import { sourcingService } from './sourcing.service';
 import { notificationService } from './notification.service';
 import { config } from '../config/env';
 import { notFound, forbidden, badRequest } from '../utils/errors';
@@ -101,6 +102,14 @@ export const messageService = {
     if (payload.messageId) {
       const existing = await messageRepository.findByProviderMessageId(payload.messageId);
       if (existing) return; // already processed — webhook retries are common
+    }
+
+    // A reply to a sourcing campaign email (campaign+<recipientId>@domain) marks
+    // that recipient REPLIED, mirroring the application reply-threading convention.
+    const campaignMatch = /campaign\+([a-f0-9]{24})@/i.exec(payload.to);
+    if (campaignMatch) {
+      await sourcingService.recordReply(campaignMatch[1]);
+      return;
     }
 
     const match = /application\+([a-f0-9]{24})@/i.exec(payload.to);

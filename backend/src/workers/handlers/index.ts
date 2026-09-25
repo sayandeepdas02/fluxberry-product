@@ -28,6 +28,8 @@ import { anonymizeCandidateHandler } from './anonymize-candidate';
 import { deleteCandidateHandler } from './delete-candidate';
 import { validateBulkImportHandler } from './validate-bulk-import';
 import { processBulkImportHandler } from './process-bulk-import';
+import { sendSourcingCampaignHandler } from './send-sourcing-campaign';
+import { sendSourcingEmailHandler } from './send-sourcing-email';
 
 export const handlers: Partial<Record<JobQueueType, JobHandler>> = {
   SCAN_RESUME: scanResumeHandler,
@@ -42,4 +44,6 @@ export const handlers: Partial<Record<JobQueueType, JobHandler>> = {
   DELETE_CANDIDATE: deleteCandidateHandler,
   VALIDATE_BULK_IMPORT: validateBulkImportHandler,
   PROCESS_BULK_IMPORT: processBulkImportHandler,
+  SEND_SOURCING_CAMPAIGN: sendSourcingCampaignHandler,
+  SEND_SOURCING_EMAIL: sendSourcingEmailHandler,
 };

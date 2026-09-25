@@ -73,6 +73,29 @@ export interface SourcingQueryResult {
   meta: ProviderMeta;
 }
 
+export interface OutreachDraftInput {
+  /** The role being pitched (e.g. "Senior Rust Engineer"). */
+  role: string;
+  /** The hiring company's name. */
+  company: string;
+  senderName?: string;
+  /** Desired tone, e.g. "warm", "concise", "direct". */
+  tone?: string;
+  /** Freeform notes about the pitch / what to emphasise. */
+  brief?: string;
+  /** A representative recipient, to ground personalization (never a specific person). */
+  contactSample?: { title?: string; company?: string };
+  /** An existing body to improve rather than write from scratch. */
+  refine?: string;
+}
+
+export interface OutreachDraftResult {
+  subject: string;
+  /** Body containing {{firstName}}/{{company}} merge tags and optional {a|b} spintax. */
+  body: string;
+  meta: ProviderMeta;
+}
+
 /**
  * Provider-agnostic AI surface (spec §127). Core services depend only on this;
  * concrete providers (Anthropic/OpenAI/Mock) are chosen by config.
@@ -84,4 +107,6 @@ export interface AIProvider {
   screenCandidate(input: ScreeningInput): Promise<ScreeningReasoning>;
   /** Turn a natural-language sourcing prompt into structured search criteria. */
   parseSourcingQuery(input: SourcingQueryInput): Promise<SourcingQueryResult>;
+  /** Draft (or refine) a personalized cold-outreach recruiting email. */
+  draftOutreachEmail(input: OutreachDraftInput): Promise<OutreachDraftResult>;
 }
