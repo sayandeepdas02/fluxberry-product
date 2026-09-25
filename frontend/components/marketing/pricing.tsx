@@ -5,7 +5,7 @@ import { Check } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
-import { PLAN_PRICING, PLAN_TAGLINE, PRO_FEATURES, MAX_FEATURES, annualDiscount } from '@/lib/pricing';
+import { PLAN_PRICING, PRO_FEATURES, MAX_FEATURES } from '@/lib/pricing';
 
 export function PricingSection() {
   const [annual, setAnnual] = useState(false);
@@ -59,19 +59,15 @@ export function PricingSection() {
         <div className="mx-auto grid max-w-3xl grid-cols-1 gap-4 sm:grid-cols-2">
           <PricingCard
             label="Pro"
-            tagline={PLAN_TAGLINE.PRO}
             monthly={PLAN_PRICING.PRO.monthly}
             annual={PLAN_PRICING.PRO.annual}
-            discount={annualDiscount('PRO')}
             features={PRO_FEATURES}
             showAnnual={annual}
           />
           <PricingCard
             label="Max"
-            tagline={PLAN_TAGLINE.MAX}
             monthly={PLAN_PRICING.MAX.monthly}
             annual={PLAN_PRICING.MAX.annual}
-            discount={annualDiscount('MAX')}
             features={MAX_FEATURES}
             featured
             showAnnual={annual}
@@ -84,19 +80,15 @@ export function PricingSection() {
 
 function PricingCard({
   label,
-  tagline,
   monthly,
   annual,
-  discount,
   features,
   featured = false,
   showAnnual,
 }: {
   label: string;
-  tagline: string;
   monthly: number;
   annual: number;
-  discount: number;
   features: string[];
   featured?: boolean;
   showAnnual: boolean;
@@ -113,7 +105,6 @@ function PricingCard({
       <div className="flex items-start justify-between gap-2">
         <div>
           <h3 className={cn('text-mk-title', featured ? 'text-white' : 'text-foreground')}>{label}</h3>
-          <p className={cn('mt-0.5 text-sm', featured ? 'text-white/70' : 'text-muted-foreground')}>{tagline}</p>
         </div>
         {featured && (
           <span className="rounded-full bg-white/20 px-2.5 py-0.5 text-[11px] font-medium text-white">
@@ -129,11 +120,6 @@ function PricingCard({
         </span>
         <span className={cn('mb-1 text-sm', featured ? 'text-white/60' : 'text-muted-foreground')}>/ month</span>
       </div>
-      <p className={cn('mt-2 text-xs', featured ? 'text-white/70' : 'text-muted-foreground')}>
-        {showAnnual
-          ? `$${annual}/year billed annually — save ${discount}%`
-          : `or $${annual}/year billed annually — save ${discount}%`}
-      </p>
 
       <div className={cn('my-5 border-t', featured ? 'border-white/20' : 'border-border')} />
       <p
