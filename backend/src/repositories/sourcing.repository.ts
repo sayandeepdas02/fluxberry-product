@@ -166,6 +166,13 @@ export const sourcingRecipientRepository = {
   deleteByCampaign: (campaignId: string) => SourcingCampaignRecipientModel.deleteMany({ campaignId }),
   deletePendingByCampaign: (campaignId: string) =>
     SourcingCampaignRecipientModel.deleteMany({ campaignId, status: 'PENDING' }),
+  countPending: (campaignId: string) => SourcingCampaignRecipientModel.countDocuments({ campaignId, status: 'PENDING' }),
+  /** Emails actually handed to the provider for this campaign since `since` (the latest credit charge). */
+  countSentSince: (campaignId: string, since: Date) =>
+    SourcingCampaignRecipientModel.countDocuments({ campaignId, sentAt: { $gte: since } }),
+  /** Outreach emails queued across the workspace since `since` — for the daily sending cap. */
+  countQueuedSince: (workspaceId: string, since: Date) =>
+    SourcingCampaignRecipientModel.countDocuments({ workspaceId, createdAt: { $gte: since }, status: { $ne: 'SKIPPED' } }),
   /**
    * Aggregate a campaign into the monotonic funnel: sent/delivered/opened/replied
    * are derived from progression timestamps (which are never cleared), so a later

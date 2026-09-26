@@ -12,6 +12,29 @@ export const applicationRepository = {
     ApplicationModel.findByIdAndUpdate(id, patch, { new: true }).populate('labelIds'),
   listByCandidate: (candidateId: string) =>
     ApplicationModel.find({ candidateId }).sort({ appliedAt: -1 }).lean(),
+  /**
+   * Atomically take the right to bill this application's AI screening: succeeds
+   * for exactly one concurrent caller while it's unbilled and not already
+   * claimed (a claim older than `staleMs` — a crashed caller — can be retaken).
+   */
+  claimScreeningBilling: (applicationId: string, staleMs = 5 * 60_000) =>
+    ApplicationModel.findOneAndUpdate(
+      {
+        _id: applicationId,
+        screeningBilledVia: null,
+        $or: [{ screeningClaimAt: null }, { screeningClaimAt: { $lt: new Date(Date.now() - staleMs) } }],
+      },
+      { $set: { screeningClaimAt: new Date() } },
+      { new: true },
+    ).lean(),
+  countAwaitingScreening: (workspaceId: string, jobId: string) =>
+    ApplicationModel.countDocuments({ workspaceId, jobId, 'screeningResult.status': 'AWAITING_CREDITS' }),
+  /** Oldest first, so applicants are screened in the order they applied. */
+  listAwaitingScreening: (workspaceId: string, jobId: string, limit: number) =>
+    ApplicationModel.find({ workspaceId, jobId, 'screeningResult.status': 'AWAITING_CREDITS' })
+      .sort({ appliedAt: 1 })
+      .limit(limit)
+      .lean(),
   countByJobAndStage: (jobId: string, stage: string) =>
     ApplicationModel.countDocuments({ jobId, stage }),
 };

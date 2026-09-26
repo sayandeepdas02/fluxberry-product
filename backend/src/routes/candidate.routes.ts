@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { aiLimiter } from '../middleware/rate-limit';
 import {
   authenticate,
   resolveWorkspace,
@@ -59,7 +60,7 @@ candidateRouter.post(
 );
 candidateRouter.post('/applications/:applicationId/shortlist', requireRole('recruiter'), applicationController.shortlist);
 candidateRouter.post('/applications/:applicationId/hire', requireRole('recruiter'), applicationController.hire);
-candidateRouter.post('/applications/:applicationId/rescreen', requireRole('recruiter'), applicationController.rescreen);
+candidateRouter.post('/applications/:applicationId/rescreen', requireRole('recruiter'), aiLimiter, applicationController.rescreen);
 candidateRouter.post(
   '/applications/:applicationId/reject',
   requireRole('recruiter'),

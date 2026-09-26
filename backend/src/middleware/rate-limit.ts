@@ -40,3 +40,5 @@ export const authLimiter = make({ windowMs: 15 * 60_000, max: 30, message: 'Too 
 export const publicApplyLimiter = make({ windowMs: 60_000, max: 10, message: 'Too many applications from this network', prefix: 'apply' });
 export const uploadLimiter = make({ windowMs: 60_000, max: 20, prefix: 'upload' });
 export const aiLimiter = make({ windowMs: 60_000, max: 20, message: 'AI is busy, try again shortly', prefix: 'ai' });
+/** Campaign test sends — members' own inboxes only, and never a bulk channel. */
+export const testEmailLimiter = make({ windowMs: 60 * 60_000, max: 10, message: 'Test email limit reached — try again in an hour', prefix: 'test-email' });

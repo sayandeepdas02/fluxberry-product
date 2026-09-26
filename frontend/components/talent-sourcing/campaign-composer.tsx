@@ -22,6 +22,8 @@ import {
   useTestCampaign,
   useSendCampaign,
 } from '@/hooks/use-talent-sourcing';
+import { useCreditErrorHandler } from '@/components/billing/credits-provider';
+import { CostLabel, costOf, creditsText } from '@/components/billing/cost-label';
 import { EmailEditor } from './email-editor';
 
 export function CampaignComposer({ campaignId }: { campaignId?: string }) {
@@ -33,6 +35,7 @@ export function CampaignComposer({ campaignId }: { campaignId?: string }) {
   const draftEmail = useDraftEmail();
   const testCampaign = useTestCampaign();
   const sendCampaign = useSendCampaign();
+  const handleCreditError = useCreditErrorHandler();
 
   const [name, setName] = useState('');
   const [listId, setListId] = useState('');
@@ -97,8 +100,8 @@ export function CampaignComposer({ campaignId }: { campaignId?: string }) {
       setBody(res.body);
       setAiOpen(false);
       toast.success('Draft ready — review and edit');
-    } catch {
-      toast.error('Could not generate a draft');
+    } catch (err) {
+      if (!handleCreditError(err)) toast.error('Could not generate a draft');
     }
   };
 
@@ -121,10 +124,14 @@ export function CampaignComposer({ campaignId }: { campaignId?: string }) {
           setSendOpen(false);
           router.push(`/app/talent-sourcing/campaigns/${campaignId}`);
         },
-        onError: (e) => toast.error(e instanceof Error ? e.message : 'Could not send'),
+        onError: (e) => {
+          if (!handleCreditError(e)) toast.error(e instanceof Error ? e.message : 'Could not send');
+        },
       },
     );
   };
+
+  const listSize = lists?.find((l) => l.id === listId)?.contactCount ?? 0;
 
   if (campaignId && isLoading) return <Skeleton className="h-96 w-full" />;
 
@@ -202,7 +209,9 @@ export function CampaignComposer({ campaignId }: { campaignId?: string }) {
           </Field>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setAiOpen(false)}>Cancel</Button>
-            <Button onClick={generate} loading={draftEmail.isPending}>Generate</Button>
+            <Button onClick={generate} loading={draftEmail.isPending}>
+              Generate <CostLabel action="OUTREACH_DRAFT" />
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -214,6 +223,12 @@ export function CampaignComposer({ campaignId }: { campaignId?: string }) {
           <p className="text-sm text-muted-foreground">
             Contacts without an email or who have unsubscribed are skipped automatically.
           </p>
+          {listSize > 0 && (
+            <p className="rounded-md bg-muted/50 px-3 py-2 text-sm text-muted-foreground">
+              Up to {creditsText(costOf('OUTREACH_EMAIL', listSize))} for {listSize.toLocaleString()} recipients (1 credit
+              per 25 emails). Skipped recipients are refunded.
+            </p>
+          )}
           <Field label="Schedule for later (optional)">
             <Input type="datetime-local" value={scheduleAt} onChange={(e) => setScheduleAt(e.target.value)} />
           </Field>

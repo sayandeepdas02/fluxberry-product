@@ -94,9 +94,39 @@ export function useContact(contactId: string | null) {
 }
 
 /**
- * Estimated market compensation band (Levels.fyi) — lazy, on-demand: pass
- * `enabled: false` until the recruiter actually opens the Compensation tab so
- * the (small, but non-zero) spend never happens just from opening a contact.
+ * Paid "Enrich profile" (PROFILE_ENRICH credits, refunded on no-match): fills
+ * skills/education/GitHub/personal email/phone. Charged once per contact.
+ */
+export function useEnrichContact() {
+  const { currentWorkspace } = useWorkspace();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (contactId: string) => api.post<SourcedContactDto>(`/api/v1/sourcing/contacts/${contactId}/enrich`),
+    onSuccess: (contact) => {
+      qc.setQueryData(['sourcing', 'contact', currentWorkspace.id, contact.id], contact);
+      void qc.invalidateQueries({ queryKey: ['billing'] });
+    },
+  });
+}
+
+/** First view of a contact's market band — spends COMPENSATION_LOOKUP credits (refunded when there's no coverage). */
+export function useUnlockCompensation() {
+  const { currentWorkspace } = useWorkspace();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (contactId: string) =>
+      api.post<CompensationBandResultDto>(`/api/v1/sourcing/contacts/${contactId}/compensation/unlock`),
+    onSuccess: (result, contactId) => {
+      qc.setQueryData(['sourcing', 'compensation', currentWorkspace.id, contactId], result);
+      void qc.invalidateQueries({ queryKey: ['billing'] });
+    },
+  });
+}
+
+/**
+ * Estimated market compensation band (Levels.fyi). Reading is free: it returns
+ * `unlocked: false` until the workspace pays once (useUnlockCompensation). Pass
+ * `enabled: false` until the Compensation tab is opened.
  */
 export function useCompensationBand(contactId: string | null, enabled: boolean) {
   const { currentWorkspace } = useWorkspace();
@@ -299,13 +329,17 @@ export function useSendCampaign() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['sourcing', 'campaigns'] });
       qc.invalidateQueries({ queryKey: ['sourcing', 'campaign'] });
+      qc.invalidateQueries({ queryKey: ['billing'] }); // OUTREACH_EMAIL credits reserved
     },
   });
 }
 
+/** AI outreach draft/refine — spends OUTREACH_DRAFT credits. */
 export function useDraftEmail() {
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: (input: DraftCampaignInput) => api.post<CampaignDraftDto>('/api/v1/sourcing/campaigns/draft', input),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['billing'] }),
   });
 }
 

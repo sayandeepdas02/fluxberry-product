@@ -30,6 +30,7 @@ export async function processOnce(): Promise<boolean> {
     const result = await handler(job.payload, {
       jobId: job.id,
       attempts: job.attempts ?? 0,
+      maxAttempts: job.maxAttempts ?? config.worker.maxAttempts,
       logger: log,
       idempotencyKey: job.idempotencyKey ?? undefined,
     });

@@ -1,3 +1,4 @@
+import { hasEnrichmentGap } from '../integrations/monid/types';
 import type {
   SourcedContactDto,
   SourcingSearchDto,
@@ -35,6 +36,9 @@ export function toSourcedContactDto(c: any, opts: { reveal: boolean }): SourcedC
     personalEmail: opts.reveal ? (c.personalEmail ?? null) : null,
     hasEmail,
     phone: opts.reveal ? (c.phone ?? null) : null,
+    enrichmentAttempted: Boolean(c.backfillAttemptedAt),
+    hasEnrichmentGap: hasEnrichmentGap(c),
+    compensationUnlocked: Boolean(c.compensationUnlockedAt),
     experience: (c.experience ?? []).map((e: any) => ({
       title: e.title ?? undefined,
       company: e.company ?? undefined,

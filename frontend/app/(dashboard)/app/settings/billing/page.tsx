@@ -7,6 +7,7 @@ import { useWorkspace } from '@/components/providers/workspace-provider';
 import { useBillingStatus, useCreateCheckout, useCreatePortalSession } from '@/hooks/use-billing';
 import { PLAN_LABELS, PLAN_TAGLINE, PRO_FEATURES, MAX_FEATURES, priceLabel, annualDiscount } from '@/lib/pricing';
 import { BillingCycleToggle } from '@/components/billing/billing-cycle-toggle';
+import { CreditUsageCard } from '@/components/billing/credit-usage-card';
 import { CreditsCard } from '@/components/billing/credits-card';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -113,6 +114,7 @@ export default function BillingSettingsPage() {
 
       {/* AI credits */}
       <CreditsCard canManage={canManage} />
+      {canManage && <CreditUsageCard />}
 
       {/* Plans */}
       {isOwner ? (

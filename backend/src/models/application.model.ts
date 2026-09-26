@@ -38,6 +38,10 @@ const applicationSchema = new Schema(
     referralCode: { type: String, default: null },
     score: { type: Number, default: null },
     screeningResult: { type: screeningResultSchema, default: () => ({ status: 'PENDING' }) },
+    /** How this applicant's automatic AI screening was paid for (once per application); null = not yet. */
+    screeningBilledVia: { type: String, enum: ['QUOTA', 'CREDITS', null], default: null },
+    /** In-flight lock while one caller decides how to pay for screening (see claimScreeningBilling); stale after 5 min. */
+    screeningClaimAt: { type: Date, default: null },
     labelIds: { type: [Schema.Types.ObjectId], ref: 'Label', default: [] },
     // Denormalized copy of the owning job's `restrictedTo` (see job.model.ts),
     // kept in sync by job.service.updateAccess — avoids a $lookup to `jobs` on

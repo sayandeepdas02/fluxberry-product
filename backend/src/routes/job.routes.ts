@@ -44,6 +44,9 @@ jobRouter.post(
 // be invisible (404, not 403) to a caller who isn't in it — see requireJobAccess.
 jobRouter.get('/jobs/:jobId', requireJobAccess, jobController.get);
 jobRouter.patch('/jobs/:jobId', requireJobAccess, requireRole('recruiter'), validateBody(updateJobSchema), jobController.update);
+// Applicants waiting on credits for AI screening (quota used up, no credits left).
+jobRouter.get('/jobs/:jobId/screen-pending', requireJobAccess, jobController.screenPendingCount);
+jobRouter.post('/jobs/:jobId/screen-pending', requireJobAccess, requireRole('recruiter'), aiLimiter, jobController.screenPending);
 jobRouter.post('/jobs/:jobId/clone', requireJobAccess, requireRole('recruiter'), jobController.clone);
 jobRouter.post('/jobs/:jobId/publish', requireJobAccess, requireRole('recruiter'), jobController.publish);
 jobRouter.post(

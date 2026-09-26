@@ -65,6 +65,13 @@ export const billingService = {
     return { url: session.url };
   },
 
+  /** The account's current credit balance + screening-quota usage. */
+  async getCredits(workspaceId: string) {
+    const account = await accountRepository.ensureForWorkspace(workspaceId);
+    if (!account) throw notFound('Billing account not found for this workspace');
+    return creditsService.getBalance(String(account._id));
+  },
+
   /** The account's AI-credit ledger (most recent first). */
   async getCreditHistory(workspaceId: string) {
     const account = await accountRepository.ensureForWorkspace(workspaceId);
@@ -158,9 +165,18 @@ export const billingService = {
         cancelAtPeriodEnd: event.cancelAtPeriodEnd,
       });
       await workspaceRepository.setPlanForAccount(event.accountId, nextPlan);
-      // (Re)grant the monthly allowance for the (possibly new) plan and anchor
-      // the reset to this period's end. Idempotent per event.
-      await creditsService.grantPlanAllowance(event.accountId, nextPlan, event.currentPeriodEnd, `dodo-grant-${event.id}`);
+      // Refill the monthly allowance only when something entitles a refill: a new
+      // billing period (renewal), a plan change, or (re)activation. A routine
+      // same-period event (payment update, past_due/on_hold dunning) must not
+      // top the allowance back up. Idempotent per event.
+      const prevPeriodEnd = account?.billing?.currentPeriodEnd ? new Date(account.billing.currentPeriodEnd) : null;
+      const prevStatus = account?.billing?.subscriptionStatus as BillingSubscriptionStatus | undefined;
+      const isNewPeriod =
+        !prevPeriodEnd || (event.currentPeriodEnd != null && new Date(event.currentPeriodEnd).getTime() > prevPeriodEnd.getTime());
+      const wasActive = prevStatus != null && ACTIVE_BILLING_STATUSES.includes(prevStatus);
+      if (isNewPeriod || !wasActive || nextPlan !== currentPlan) {
+        await creditsService.grantPlanAllowance(event.accountId, nextPlan, event.currentPeriodEnd, `dodo-grant-${event.id}`);
+      }
       return;
     }
 

@@ -150,6 +150,15 @@ export type SourcedContactDto = {
   /** Contactability signal for list views without leaking the address itself. */
   hasEmail: boolean;
   phone?: string | null;
+  /**
+   * True once a paid "Enrich profile" was attempted (success or no-match) —
+   * enriching again is never charged twice. False + gaps = offer the button.
+   */
+  enrichmentAttempted: boolean;
+  /** True when fields only enrichment can fill (skills/education/GitHub/personal email) are missing. */
+  hasEnrichmentGap: boolean;
+  /** True once the compensation band was unlocked for this workspace (later views are free). */
+  compensationUnlocked: boolean;
   experience: SourcedContactExperience[];
   education: SourcedContactEducation[];
   /** Transparent 0-100 fit score computed against the search criteria. */
@@ -364,5 +373,7 @@ export type CompensationBandDto = {
 
 /** Response of `GET /sourcing/contacts/:id/compensation` — null is a normal "no coverage" outcome, not an error. */
 export type CompensationBandResultDto = {
+  /** False until the workspace unlocks this contact's band (COMPENSATION_LOOKUP credits). */
+  unlocked: boolean;
   band: CompensationBandDto | null;
 };

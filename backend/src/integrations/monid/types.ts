@@ -18,6 +18,12 @@ export interface PersonSearchInput {
   size: number;
   /** Opaque pagination cursor from a previous page (null = first page). */
   scrollToken?: string | null;
+  /**
+   * Given the upstream ids a page surfaced, return the ones the caller already
+   * has cached. The provider must NOT pay to enrich those — it reports them in
+   * `knownIds` instead — so re-surfaced people cost nothing (and are never billed).
+   */
+  resolveKnown?: (providerIds: string[]) => Promise<Set<string>>;
 }
 
 export interface SourcedPersonExperience {
@@ -61,7 +67,10 @@ export interface SourcedPerson {
 }
 
 export interface PersonSearchResult {
+  /** Newly retrieved (paid-for) people — excludes `knownIds`. */
   people: SourcedPerson[];
+  /** Upstream ids on this page the caller already owns (skipped, not enriched). */
+  knownIds: string[];
   /** Total matches available upstream (for "load more" affordance). */
   total: number;
   /** Cursor to pass back for the next page, or null when exhausted. */
@@ -75,6 +84,8 @@ export interface BackfillFields {
   skills: string[];
   githubUrl?: string;
   personalEmail?: string;
+  /** From PDL's mobile_phone / phone_numbers when the Monid PDL tier returns them. */
+  phone?: string;
   education: SourcedPersonEducation[];
   yearsExperience?: number;
 }

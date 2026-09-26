@@ -1,5 +1,6 @@
 import { sourcingCampaignRepository, sourcingRecipientRepository } from '../../repositories/sourcing.repository';
 import { jobQueue } from '../../queue/job-queue';
+import { sourcingService } from '../../services/sourcing.service';
 import type { JobHandler } from './index';
 
 /**
@@ -42,5 +43,6 @@ export const sendSourcingCampaignHandler: JobHandler = async (payload, ctx) => {
   }
 
   await sourcingCampaignRepository.update(campaignId, { status: 'SENT', sentAt: new Date() });
+  if (pending.length === 0) await sourcingService.settleCampaignCredits(campaignId);
   ctx.logger.info({ campaignId, dispatched: pending.length }, 'sourcing campaign dispatched');
 };

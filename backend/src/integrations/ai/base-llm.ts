@@ -25,23 +25,36 @@ import {
 import { extractJson, clampScore, asStringArray } from './util';
 
 /**
+ * Which model a task runs on: `main` for user-facing writing (JD, outreach),
+ * `fast` for high-volume structured extraction (resume parse, screening,
+ * search-prompt parsing) — AI_MODEL_FAST, e.g. Claude Haiku 4.5 at half the
+ * price. Credit prices in CREDIT_CATALOG assume this split.
+ */
+export type ModelTier = 'main' | 'fast';
+
+/**
  * Shared LLM logic (prompt -> JSON -> typed result). Concrete providers only
  * implement `complete()`. Keeps core services decoupled from any vendor SDK.
  */
 export abstract class BaseLLMProvider implements AIProvider {
   abstract readonly name: string;
   protected abstract model: string;
+  protected abstract fastModel: string;
 
   /** Send a system+user prompt and return the raw text completion. */
-  protected abstract complete(spec: PromptSpec, maxTokens: number): Promise<string>;
+  protected abstract complete(spec: PromptSpec, maxTokens: number, tier: ModelTier): Promise<string>;
 
-  protected meta(version: string): ProviderMeta {
-    return { provider: this.name, model: this.model, promptVersion: version };
+  protected modelFor(tier: ModelTier): string {
+    return tier === 'fast' ? this.fastModel : this.model;
+  }
+
+  protected meta(version: string, tier: ModelTier = 'main'): ProviderMeta {
+    return { provider: this.name, model: this.modelFor(tier), promptVersion: version };
   }
 
   async generateJobDescription(input: JdGenInput): Promise<JdGenResult> {
     const spec = jobDescriptionPrompt(input);
-    const json = extractJson<any>(await this.complete(spec, 2200));
+    const json = extractJson<any>(await this.complete(spec, 2200, 'main'));
     return {
       description: String(json.description ?? '').trim(),
       structuredRequirements: normalizeReqs(json.structuredRequirements),
@@ -51,31 +64,31 @@ export abstract class BaseLLMProvider implements AIProvider {
 
   async parseResume(input: ResumeParseInput): Promise<ResumeParseResult> {
     const spec = resumeParsingPrompt(input);
-    const json = extractJson<any>(await this.complete(spec, 1800));
-    return { profile: normalizeProfile(json), meta: this.meta(spec.version) };
+    const json = extractJson<any>(await this.complete(spec, 1800, 'fast'));
+    return { profile: normalizeProfile(json), meta: this.meta(spec.version, 'fast') };
   }
 
   async screenCandidate(input: ScreeningInput): Promise<ScreeningReasoning> {
     const spec = candidateScreeningPrompt(input);
-    const json = extractJson<any>(await this.complete(spec, 1200));
+    const json = extractJson<any>(await this.complete(spec, 1200, 'fast'));
     return {
       summary: String(json.summary ?? '').trim(),
       strengths: asStringArray(json.strengths),
       concerns: asStringArray(json.concerns),
       relevanceScore: clampScore(json.relevanceScore),
-      meta: this.meta(spec.version),
+      meta: this.meta(spec.version, 'fast'),
     };
   }
 
   async parseSourcingQuery(input: SourcingQueryInput): Promise<SourcingQueryResult> {
     const spec = sourcingQueryPrompt(input);
-    const json = extractJson<any>(await this.complete(spec, 700));
-    return { criteria: normalizeCriteria(json), meta: this.meta(spec.version) };
+    const json = extractJson<any>(await this.complete(spec, 700, 'fast'));
+    return { criteria: normalizeCriteria(json), meta: this.meta(spec.version, 'fast') };
   }
 
   async draftOutreachEmail(input: OutreachDraftInput): Promise<OutreachDraftResult> {
     const spec = outreachEmailPrompt(input);
-    const json = extractJson<any>(await this.complete(spec, 800));
+    const json = extractJson<any>(await this.complete(spec, 800, 'main'));
     return {
       subject: String(json.subject ?? '').trim(),
       body: String(json.body ?? '').trim(),

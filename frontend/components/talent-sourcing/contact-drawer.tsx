@@ -9,7 +9,10 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Spinner } from '@/components/ui/spinner';
 import { initials } from '@/lib/utils';
-import { useContact, useCompensationBand } from '@/hooks/use-talent-sourcing';
+import { useContact, useCompensationBand, useEnrichContact, useUnlockCompensation } from '@/hooks/use-talent-sourcing';
+import { useCreditErrorHandler } from '@/components/billing/credits-provider';
+import { CostLabel } from '@/components/billing/cost-label';
+import { toast } from '@/components/ui/sonner';
 import { MatchScoreBadge } from './match-score-badge';
 
 export function ContactDrawer({
@@ -139,9 +142,38 @@ function Body({ contact }: { contact: SourcedContactDto }) {
   const email = contact.workEmail || contact.personalEmail;
   const [activeTab, setActiveTab] = useState('overview');
   const { data: compResult, isLoading: compLoading, isError: compError, refetch: refetchComp } = useCompensationBand(contact.id, activeTab === 'compensation');
+  const enrich = useEnrichContact();
+  const unlockComp = useUnlockCompensation();
+  const handleCreditError = useCreditErrorHandler();
+  const onSpendError = (err: unknown) => {
+    if (!handleCreditError(err)) toast.error(err instanceof Error ? err.message : 'Something went wrong');
+  };
 
   return (
     <div className="space-y-5">
+      {contact.hasEnrichmentGap && !contact.enrichmentAttempted && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-dashed border-border px-3 py-2.5">
+          <p className="text-sm text-muted-foreground">
+            Fill in skills, education, GitHub, personal email and phone where available.
+          </p>
+          <Button
+            size="sm"
+            variant="outline"
+            loading={enrich.isPending}
+            onClick={() =>
+              enrich.mutate(contact.id, {
+                onSuccess: (c) =>
+                  c.hasEnrichmentGap && c.skills.length === contact.skills.length
+                    ? toast.info('No additional data found — your credits were refunded')
+                    : toast.success('Profile enriched'),
+                onError: onSpendError,
+              })
+            }
+          >
+            <Sparkles className="size-4" /> Enrich profile <CostLabel action="PROFILE_ENRICH" />
+          </Button>
+        </div>
+      )}
       {contact.matchReasons.length > 0 && (
         <div className="rounded-lg border border-border bg-primary/5 px-3 py-2.5">
           <div className="mb-1 flex items-center gap-1.5 text-xs font-medium text-primary">
@@ -235,6 +267,21 @@ function Body({ contact }: { contact: SourcedContactDto }) {
             <div className="flex flex-col items-start gap-2 text-sm">
               <p className="text-muted-foreground">Couldn&apos;t load compensation data — this may be temporary.</p>
               <Button variant="outline" size="sm" onClick={() => refetchComp()}>Retry</Button>
+            </div>
+          ) : compResult && !compResult.unlocked ? (
+            <div className="flex flex-col items-start gap-2 text-sm">
+              <p className="text-muted-foreground">
+                See the estimated market pay band for this role at {contact.company ?? 'their company'} (Levels.fyi,
+                aggregate data). Free to view again once unlocked; refunded if there&apos;s no data.
+              </p>
+              <Button
+                size="sm"
+                variant="outline"
+                loading={unlockComp.isPending}
+                onClick={() => unlockComp.mutate(contact.id, { onError: onSpendError })}
+              >
+                <DollarSign className="size-4" /> Show estimate <CostLabel action="COMPENSATION_LOOKUP" />
+              </Button>
             </div>
           ) : compResult?.band ? (
             <CompensationBandView band={compResult.band} />

@@ -8,6 +8,7 @@ import { Sidebar } from '@/components/layout/sidebar';
 import { PageSpinner } from '@/components/ui/spinner';
 import { CommandMenu } from '@/components/command-menu';
 import { SubscriptionGate } from '@/components/billing/subscription-gate';
+import { CreditsProvider } from '@/components/billing/credits-provider';
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -22,6 +23,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
   return (
     <WorkspaceProvider session={session}>
+      <CreditsProvider>
       <div className="flex min-h-screen">
         <Sidebar />
         <div className="min-w-0 flex-1 bg-muted/20">
@@ -31,6 +33,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         </div>
       </div>
       <CommandMenu />
+      </CreditsProvider>
     </WorkspaceProvider>
   );
 }

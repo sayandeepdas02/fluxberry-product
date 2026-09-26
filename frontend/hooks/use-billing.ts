@@ -1,7 +1,7 @@
 'use client';
 
 import { useMutation, useQuery } from '@tanstack/react-query';
-import type { BillingStatusDto, CreateCheckoutInput } from '@/lib/shared';
+import type { BillingStatusDto, CreateCheckoutInput, CreditsDto, CreditTransactionDto } from '@/lib/shared';
 import { api } from '@/lib/api-client';
 import { useWorkspace } from '@/components/providers/workspace-provider';
 
@@ -37,8 +37,28 @@ export function useBuyCreditPack() {
   });
 }
 
-/** Convenience selector: the account's credit balance from the billing status. */
+/**
+ * The account's credit balance + screening quota. Readable by every member (not
+ * just admins), so cost hints and the sidebar meter work for recruiters too.
+ * Keyed under ['billing'] so existing `invalidateQueries(['billing'])` calls
+ * after a spend refresh it.
+ */
 export function useCredits() {
-  const { data, isLoading } = useBillingStatus();
-  return { credits: data?.credits ?? null, plan: data?.plan ?? 'FREE', isLoading };
+  const { currentWorkspace } = useWorkspace();
+  const { data, isLoading } = useQuery({
+    queryKey: ['billing', 'credits', currentWorkspace.id],
+    queryFn: () => api.get<CreditsDto>(`/api/v1/workspaces/${currentWorkspace.id}/credits`),
+  });
+  return { credits: data ?? null, isLoading };
+}
+
+/** Recent credit ledger rows (admins only — the billing page). */
+export function useCreditHistory(enabled = true) {
+  const { currentWorkspace } = useWorkspace();
+  return useQuery({
+    queryKey: ['billing', 'credit-history', currentWorkspace.id],
+    queryFn: () =>
+      api.get<{ items: CreditTransactionDto[] }>(`/api/v1/workspaces/${currentWorkspace.id}/billing/credits/history`),
+    enabled,
+  });
 }

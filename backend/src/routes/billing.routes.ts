@@ -27,6 +27,10 @@ billingRouter.post(
   billingController.createCreditPackCheckout,
 );
 
+// Balance + screening quota — readable by every member so cost hints and the
+// sidebar meter work for recruiters too (buying stays admin-only).
+billingRouter.get('/workspaces/:workspaceId/credits', ...guard, billingController.getCredits);
+
 billingRouter.get(
   '/workspaces/:workspaceId/billing/credits/history',
   ...guard,

@@ -14,7 +14,11 @@ const creditTransactionSchema = new Schema(
     /** Signed change to the balance (negative for CONSUME, positive for GRANT/PURCHASE/REFUND/RESET). */
     delta: { type: Number, required: true },
     reason: { type: String, enum: CREDIT_TRANSACTION_REASONS, required: true },
-    /** For CONSUME/REFUND: which feature spent/returned the credits (e.g. JD_GENERATION). */
+    /**
+     * For CONSUME/REFUND: which catalog action spent/returned the credits. CONSUME
+     * rows carry meta { quantity, unit, providerCostUsd, fromAllowance,
+     * fromPurchased, refundedAllowance, refundedPurchased, periodResetAt, actorUserId }.
+     */
     feature: { type: String, default: null },
     /** Total balance (allowanceRemaining + purchasedBalance) immediately after applying this delta. */
     balanceAfter: { type: Number, required: true },
@@ -26,7 +30,13 @@ const creditTransactionSchema = new Schema(
 );
 
 creditTransactionSchema.index({ accountId: 1, createdAt: -1 });
-creditTransactionSchema.index({ idempotencyKey: 1 }, { unique: true, sparse: true });
+// Partial (not sparse): a sparse index still indexes explicit nulls, so every
+// keyless row after the first collided and was silently dropped. Only real
+// string keys are unique-indexed.
+creditTransactionSchema.index(
+  { idempotencyKey: 1 },
+  { unique: true, partialFilterExpression: { idempotencyKey: { $type: 'string' } } },
+);
 
 export type CreditTransactionDoc = InferSchemaType<typeof creditTransactionSchema>;
 export const CreditTransactionModel =

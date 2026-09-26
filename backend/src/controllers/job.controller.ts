@@ -1,3 +1,4 @@
+import { screeningService } from '../services/screening.service';
 import { asyncHandler, ok, created } from '../utils/http';
 import { jobService } from '../services/job.service';
 import type {
@@ -52,8 +53,16 @@ export const jobController = {
     ok(res, job);
   }),
 
+  screenPendingCount: asyncHandler(async (req, res) => {
+    ok(res, { pending: await screeningService.pendingCount(req.auth!.workspaceId!, req.params.jobId) });
+  }),
+
+  screenPending: asyncHandler(async (req, res) => {
+    ok(res, await screeningService.screenPending(req.auth!.workspaceId!, req.params.jobId, req.auth!.user.id));
+  }),
+
   generateDescription: asyncHandler(async (req, res) => {
-    const result = await jobService.generateDescription(req.auth!.workspaceId!, req.body as GenerateJdInput);
+    const result = await jobService.generateDescription(req.auth!.workspaceId!, req.body as GenerateJdInput, req.auth!.user.id);
     ok(res, result);
   }),
 

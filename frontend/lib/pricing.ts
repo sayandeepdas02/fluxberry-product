@@ -1,5 +1,5 @@
 import type { WorkspacePlan, BillingCycle } from '@/lib/shared';
-import { PLAN_CREDIT_ALLOWANCE } from '@/lib/shared';
+import { PLAN_CREDIT_ALLOWANCE, PLAN_SCREENING_QUOTA } from '@/lib/shared';
 
 /** Human labels for each plan. */
 export const PLAN_LABELS: Record<WorkspacePlan, string> = {
@@ -36,7 +36,7 @@ export const PLAN_TAGLINE: Record<'PRO' | 'MAX', string> = {
 export const PRO_FEATURES: string[] = [
   'Unlimited job posts',
   'Unlimited candidates',
-  'AI applicant scoring',
+  `AI scoring for ${PLAN_SCREENING_QUOTA.PRO} applicants / month`,
   'Custom pipeline stages',
   'Application forms',
   'Team collaboration',
@@ -51,6 +51,7 @@ export const PRO_FEATURES: string[] = [
 export const MAX_EXTRA_FEATURES: string[] = [
   'Talent Sourcing (outbound)',
   'Employee referrals',
+  `AI scoring for ${PLAN_SCREENING_QUOTA.MAX} applicants / month`,
   `${PLAN_CREDIT_ALLOWANCE.MAX} AI credits / month`,
 ];
 

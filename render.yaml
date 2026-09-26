@@ -45,6 +45,8 @@ envVarGroups:
         sync: false
       - key: AI_MODEL
         sync: false
+      - key: AI_MODEL_FAST
+        value: claude-haiku-4-5
       - key: SENTRY_DSN
         sync: false
       - key: SENTRY_ENVIRONMENT

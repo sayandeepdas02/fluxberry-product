@@ -1,10 +1,10 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import request from 'supertest';
 import { createApp } from '../../src/app';
 import { connectDatabase, disconnectDatabase, mongoose } from '../../src/config/db';
 import { activateSubscription } from './helpers/activate-subscription';
-import { CREDIT_COSTS, PLAN_CREDIT_ALLOWANCE } from '../../src/shared';
-import { mockOutbox } from '../../src/integrations';
+import { creditsFor, PLAN_CREDIT_ALLOWANCE } from '../../src/shared';
+import { mockOutbox, getEmailProvider } from '../../src/integrations';
 import { logger } from '../../src/utils/logger';
 import { sendSourcingCampaignHandler } from '../../src/workers/handlers/send-sourcing-campaign';
 import { sendSourcingEmailHandler } from '../../src/workers/handlers/send-sourcing-email';
@@ -59,7 +59,7 @@ describe('Talent Sourcing (integration)', () => {
     const afterParse = await ws(request(app).get(`/api/v1/workspaces/${workspaceId}/billing`) as any);
     expect(afterParse.body.data.credits.allowanceRemaining).toBe(PLAN_CREDIT_ALLOWANCE.MAX);
 
-    // 2. Search spends one page of credits and returns ranked, contactable-hidden rows.
+    // 2. Search charges per NEW profile and returns ranked, contactable-hidden rows.
     const search = await ws(request(app).post('/api/v1/sourcing/search').send({ prompt: PROMPT }) as any);
     expect(search.status).toBe(200);
     const contacts = search.body.data.contacts as any[];
@@ -69,32 +69,57 @@ describe('Talent Sourcing (integration)', () => {
     expect(contacts[0].workEmail).toBeNull();
     expect(typeof contacts[0].hasEmail).toBe('boolean');
     const searchId = search.body.data.search.id as string;
-    expect(search.body.data.search.creditsUsed).toBe(10);
+    const pageCost = creditsFor('SOURCING_PROFILE', contacts.length);
+    expect(search.body.data.search.creditsUsed).toBe(pageCost);
 
     const afterSearch = await ws(request(app).get(`/api/v1/workspaces/${workspaceId}/billing`) as any);
-    expect(afterSearch.body.data.credits.allowanceRemaining).toBe(
-      PLAN_CREDIT_ALLOWANCE.MAX - CREDIT_COSTS.SOURCING_SEARCH,
-    );
+    expect(afterSearch.body.data.credits.allowanceRemaining).toBe(PLAN_CREDIT_ALLOWANCE.MAX - pageCost);
+
+    // 2b. The same search again surfaces only people the workspace already owns —
+    // no paid lookups, so it costs nothing.
+    const repeat = await ws(request(app).post('/api/v1/sourcing/search').send({ prompt: PROMPT }) as any);
+    expect(repeat.status).toBe(200);
+    expect(repeat.body.data.contacts.length).toBe(contacts.length);
+    expect(repeat.body.data.search.creditsUsed).toBe(0);
+    const afterRepeat = await ws(request(app).get(`/api/v1/workspaces/${workspaceId}/credits`) as any);
+    expect(afterRepeat.body.data.total).toBe(PLAN_CREDIT_ALLOWANCE.MAX - pageCost);
 
     // 3. Rehydrate the saved search.
     const rehydrated = await ws(request(app).get(`/api/v1/sourcing/searches/${searchId}`) as any);
     expect(rehydrated.status).toBe(200);
     expect(rehydrated.body.data.contacts.length).toBe(contacts.length);
 
-    // 4. The profile detail reveals the email when one exists.
+    // 4. The profile detail reveals the email when one exists — and is free.
     const contactable = contacts.find((c) => c.hasEmail) ?? contacts[0];
     const detail = await ws(request(app).get(`/api/v1/sourcing/contacts/${contactable.id}`) as any);
     expect(detail.status).toBe(200);
     if (contactable.hasEmail) {
       expect(detail.body.data.workEmail || detail.body.data.personalEmail).toBeTruthy();
     }
+    expect(detail.body.data.enrichmentAttempted).toBe(false);
+
+    // 4b. "Enrich profile" is an explicit paid action, charged once per contact.
+    const beforeEnrich = (await ws(request(app).get(`/api/v1/workspaces/${workspaceId}/credits`) as any)).body.data.total;
+    expect(detail.body.data.hasEnrichmentGap).toBe(true); // mock Apollo, like live, has no skills/education
+    {
+      const enriched = await ws(request(app).post(`/api/v1/sourcing/contacts/${contactable.id}/enrich`) as any);
+      expect(enriched.status).toBe(200);
+      expect(enriched.body.data.enrichmentAttempted).toBe(true);
+      expect(enriched.body.data.skills.length).toBeGreaterThan(0);
+      expect(enriched.body.data.phone).toBeTruthy();
+      const again = await ws(request(app).post(`/api/v1/sourcing/contacts/${contactable.id}/enrich`) as any);
+      expect(again.status).toBe(200);
+      const afterEnrich = (await ws(request(app).get(`/api/v1/workspaces/${workspaceId}/credits`) as any)).body.data.total;
+      expect(afterEnrich).toBe(beforeEnrich - creditsFor('PROFILE_ENRICH', 1));
+    }
 
     // 5. Load more appends and spends another page of credits.
     if (search.body.data.search.canLoadMore) {
       const more = await ws(request(app).post(`/api/v1/sourcing/searches/${searchId}/more`).send({}) as any);
       expect(more.status).toBe(200);
-      expect(more.body.data.search.fetched).toBeGreaterThan(contacts.length);
-      expect(more.body.data.search.creditsUsed).toBe(20);
+      const added = more.body.data.search.fetched - contacts.length;
+      expect(added).toBeGreaterThan(0);
+      expect(more.body.data.search.creditsUsed).toBe(pageCost + creditsFor('SOURCING_PROFILE', added));
     }
 
     // 6. Editing criteria re-runs without re-calling the AI.
@@ -105,6 +130,14 @@ describe('Talent Sourcing (integration)', () => {
     expect(rerun.status).toBe(200);
     expect(rerun.body.data.contacts.length).toBeGreaterThan(0);
 
+    // 6b. Page cost scales with page size (no more flat price for a bigger page).
+    const big = await ws(
+      request(app).post('/api/v1/sourcing/search').send({ prompt: PROMPT, criteria: { ...edited, skills: ['Kotlin'] }, size: 50 }) as any,
+    );
+    expect(big.status).toBe(200);
+    expect(big.body.data.search.creditsUsed).toBe(creditsFor('SOURCING_PROFILE', big.body.data.contacts.length));
+    expect(big.body.data.contacts.length).toBe(50);
+
     // 7. CSV export returns a downloadable file with revealed emails.
     const exportRes = await ws(
       request(app).post('/api/v1/sourcing/contacts/export').send({ contactIds: [contactable.id] }) as any,
@@ -114,28 +147,33 @@ describe('Talent Sourcing (integration)', () => {
     expect(exportRes.text.split('\r\n')[0]).toContain('Name');
   });
 
-  it('returns an estimated compensation band (or a clean no-coverage null), cached on repeat lookups', async () => {
+  it('gates the compensation band behind a one-time 1-credit unlock per contact', async () => {
     const workspaceId = await onboard(token, 'Sourcing Comp', 'Compco');
     const ws = (r: request.Test) => r.set('Authorization', `Bearer ${token}`).set('X-Workspace-Id', workspaceId);
     await activateSubscription(workspaceId, 'MAX');
 
     const search = await ws(request(app).post('/api/v1/sourcing/search').send({ prompt: PROMPT }) as any);
-    const contactId = search.body.data.contacts[0].id as string;
+    const contact = (search.body.data.contacts as any[]).find((c) => c.company);
+    const credits = async () => (await ws(request(app).get(`/api/v1/workspaces/${workspaceId}/credits`) as any)).body.data.total;
 
-    const first = await ws(request(app).get(`/api/v1/sourcing/contacts/${contactId}/compensation`) as any);
-    expect(first.status).toBe(200);
-    expect('band' in first.body.data).toBe(true);
-    if (first.body.data.band) {
-      expect(first.body.data.band.source).toBe('levels.fyi');
-      expect(typeof first.body.data.band.currency).toBe('string');
-    }
+    // Viewing before unlocking is free and returns no band.
+    const locked = await ws(request(app).get(`/api/v1/sourcing/contacts/${contact.id}/compensation`) as any);
+    expect(locked.status).toBe(200);
+    expect(locked.body.data).toEqual({ unlocked: false, band: null });
 
-    // Second lookup hits the cache — same result, no re-fetch (the cache
-    // stores a `null` band result too, so an unresolvable company doesn't
-    // get re-queried on every open).
-    const second = await ws(request(app).get(`/api/v1/sourcing/contacts/${contactId}/compensation`) as any);
-    expect(second.status).toBe(200);
-    expect(second.body.data.band).toEqual(first.body.data.band);
+    const before = await credits();
+    const unlocked = await ws(request(app).post(`/api/v1/sourcing/contacts/${contact.id}/compensation/unlock`) as any);
+    expect(unlocked.status).toBe(200);
+    expect(unlocked.body.data.unlocked).toBe(true);
+    // Charged only when a band came back (no coverage is refunded).
+    const charged = unlocked.body.data.band ? creditsFor('COMPENSATION_LOOKUP', 1) : 0;
+    expect(await credits()).toBe(before - charged);
+    if (unlocked.body.data.band) expect(unlocked.body.data.band.source).toBe('levels.fyi');
+
+    // Later views are free.
+    const second = await ws(request(app).get(`/api/v1/sourcing/contacts/${contact.id}/compensation`) as any);
+    expect(second.body.data.band).toEqual(unlocked.body.data.band);
+    expect(await credits()).toBe(before - charged);
   });
 
   it('lists contacts, manages talent pools, and converts a contact into the ATS', async () => {
@@ -213,12 +251,16 @@ describe('Talent Sourcing (integration)', () => {
     );
     const listId = list.body.data.id as string;
 
-    // AI draft returns a body with merge tags.
+    const credits = async () => (await ws(request(app).get(`/api/v1/workspaces/${workspaceId}/credits`) as any)).body.data.total;
+    const beforeDraft = await credits();
+
+    // AI draft returns a body with merge tags, and costs 1 credit.
     const draft = await ws(
       request(app).post('/api/v1/sourcing/campaigns/draft').send({ role: 'Rust Engineer', brief: 'We raised a seed round.' }) as any,
     );
     expect(draft.status).toBe(200);
     expect(draft.body.data.body).toContain('{{firstName}}');
+    expect(await credits()).toBe(beforeDraft - creditsFor('OUTREACH_DRAFT', 1));
 
     // Create a campaign with merge tags + spintax.
     const campaign = await ws(
@@ -232,7 +274,18 @@ describe('Talent Sourcing (integration)', () => {
     expect(campaign.status).toBe(201);
     const campaignId = campaign.body.data.id as string;
 
-    // Send it → recipients built from contactable members.
+    // Test emails only go to workspace members.
+    const badTest = await ws(
+      request(app).post(`/api/v1/sourcing/campaigns/${campaignId}/test`).send({ toEmail: 'stranger@example.com' }) as any,
+    );
+    expect(badTest.status).toBe(400);
+    const goodTest = await ws(
+      request(app).post(`/api/v1/sourcing/campaigns/${campaignId}/test`).send({ toEmail: 'sourcing-suite@test.com' }) as any,
+    );
+    expect(goodTest.status).toBe(200);
+
+    // Send it → recipients built from contactable members; 1 credit per 25 recipients.
+    const beforeSend = await credits();
     mockOutbox.length = 0;
     const sent = await ws(request(app).post(`/api/v1/sourcing/campaigns/${campaignId}/send`).send({}) as any);
     expect(sent.status).toBe(200);
@@ -250,6 +303,9 @@ describe('Talent Sourcing (integration)', () => {
     expect(sentMails.length).toBe(contactable.length);
     expect(sentMails[0].subject).not.toContain('{{');
     expect(sentMails[0].html.toLowerCase()).toContain('unsubscribe');
+
+    // Settled to the emails actually sent: ⌈n/25⌉ credits.
+    expect(await credits()).toBe(beforeSend - creditsFor('OUTREACH_EMAIL', contactable.length));
 
     // Stats reflect the sends.
     const afterSend = await ws(request(app).get(`/api/v1/sourcing/campaigns/${campaignId}`) as any);
@@ -292,6 +348,42 @@ describe('Talent Sourcing (integration)', () => {
     );
     const sent2 = await ws(request(app).post(`/api/v1/sourcing/campaigns/${campaign2.body.data.id}/send`).send({}) as any);
     expect(sent2.body.data.stats.recipients).toBe(contactable.length - 1);
+  });
+
+  it('refunds a campaign email that fails permanently, so the reservation settles', async () => {
+    const workspaceId = await onboard(token, 'Sourcing Fail', 'Failco');
+    const ws = (r: request.Test) => r.set('Authorization', `Bearer ${token}`).set('X-Workspace-Id', workspaceId);
+    await activateSubscription(workspaceId, 'MAX');
+    const credits = async () => (await ws(request(app).get(`/api/v1/workspaces/${workspaceId}/credits`) as any)).body.data.total;
+
+    const search = await ws(request(app).post('/api/v1/sourcing/search').send({ prompt: PROMPT }) as any);
+    const one = (search.body.data.contacts as any[]).find((c) => c.hasEmail);
+    const list = await ws(request(app).post('/api/v1/sourcing/lists').send({ name: 'Solo', contactIds: [one.id] }) as any);
+    const campaign = await ws(
+      request(app).post('/api/v1/sourcing/campaigns').send({ name: 'Solo', listId: list.body.data.id, subject: 'Hi', body: 'Hi {{firstName}}' }) as any,
+    );
+    const campaignId = campaign.body.data.id as string;
+
+    const beforeSend = await credits();
+    await ws(request(app).post(`/api/v1/sourcing/campaigns/${campaignId}/send`).send({}) as any);
+    expect(await credits()).toBe(beforeSend - 1); // reserved ⌈1/25⌉
+
+    await sendSourcingCampaignHandler({ campaignId, workspaceId }, jobCtx);
+    const [recipient] = (await ws(request(app).get(`/api/v1/sourcing/campaigns/${campaignId}/recipients`) as any)).body.data;
+    const spy = vi.spyOn(getEmailProvider(), 'send').mockRejectedValue(new Error('mailbox provider down'));
+    try {
+      // A non-final failure keeps it PENDING for a retry — nothing settles yet.
+      await expect(sendSourcingEmailHandler({ recipientId: recipient.id }, { ...jobCtx, attempts: 1, maxAttempts: 4 })).rejects.toThrow();
+      expect((await SourcingCampaignRecipientModel.findById(recipient.id).lean())!.status).toBe('PENDING');
+      expect(await credits()).toBe(beforeSend - 1);
+
+      // The final attempt fails permanently → FAILED, and the unused credit is refunded.
+      await expect(sendSourcingEmailHandler({ recipientId: recipient.id }, { ...jobCtx, attempts: 4, maxAttempts: 4 })).rejects.toThrow();
+    } finally {
+      spy.mockRestore();
+    }
+    expect((await SourcingCampaignRecipientModel.findById(recipient.id).lean())!.status).toBe('FAILED');
+    expect(await credits()).toBe(beforeSend);
   });
 
   it('refunds credits and does not gate below MAX', async () => {

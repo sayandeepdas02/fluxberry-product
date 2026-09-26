@@ -215,7 +215,7 @@ export const jobService = {
    * the workspace's account. Credits are consumed up front and refunded if the
    * provider call fails, so a failed generation is never charged.
    */
-  async generateDescription(workspaceId: string, input: GenerateJdInput): Promise<GenerateJdResult> {
+  async generateDescription(workspaceId: string, input: GenerateJdInput, userId?: string): Promise<GenerateJdResult> {
     if (!input.title?.trim()) throw badRequest('A job title is required');
 
     const account = await accountRepository.ensureForWorkspace(workspaceId);
@@ -224,7 +224,7 @@ export const jobService = {
 
     // Throws INSUFFICIENT_CREDITS (402) if the pool is exhausted — the client
     // catches it and prompts to buy credits / upgrade.
-    await creditsService.consume(accountId, 'JD_GENERATION');
+    const charge = await creditsService.charge(accountId, 'JD_GENERATION', 1, { actorUserId: userId ?? null });
 
     const ai = getAIProvider();
     let result;
@@ -240,7 +240,7 @@ export const jobService = {
         skills: input.skills,
       });
     } catch (err) {
-      await creditsService.refund(accountId, 'JD_GENERATION', { reason: 'ai_failure' });
+      await creditsService.refund(charge.txId);
       throw err;
     }
     logger.info({ provider: result.meta.provider, model: result.meta.model }, 'JD generated');

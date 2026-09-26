@@ -1,21 +1,23 @@
 import OpenAI from 'openai';
-import { BaseLLMProvider } from './base-llm';
+import { BaseLLMProvider, type ModelTier } from './base-llm';
 import type { PromptSpec } from './prompts';
 
 export class OpenAIProvider extends BaseLLMProvider {
   readonly name = 'openai';
   protected model: string;
+  protected fastModel: string;
   private client: OpenAI;
 
-  constructor(apiKey: string, model?: string) {
+  constructor(apiKey: string, model?: string, fastModel?: string) {
     super();
     this.client = new OpenAI({ apiKey });
     this.model = model || 'gpt-4o-mini';
+    this.fastModel = fastModel || this.model;
   }
 
-  protected async complete(spec: PromptSpec, maxTokens: number): Promise<string> {
+  protected async complete(spec: PromptSpec, maxTokens: number, tier: ModelTier): Promise<string> {
     const res = await this.client.chat.completions.create({
-      model: this.model,
+      model: this.modelFor(tier),
       max_tokens: maxTokens,
       response_format: { type: 'json_object' },
       messages: [
