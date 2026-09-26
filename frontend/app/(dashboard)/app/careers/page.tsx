@@ -10,6 +10,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { MarkdownEditor } from '@/components/ui/markdown-editor';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/components/ui/sonner';
 import { publicConfig } from '@/lib/config';
@@ -26,6 +28,11 @@ export default function CareersEmbedPage() {
   const [slugStatus, setSlugStatus] = useState<SlugStatus>('idle');
   const [published, setPublished] = useState(false);
   const [accentColor, setAccentColor] = useState<string | null>(null);
+  const [headline, setHeadline] = useState('');
+  const [tagline, setTagline] = useState('');
+  const [aboutEnabled, setAboutEnabled] = useState(true);
+  const [aboutContent, setAboutContent] = useState('');
+  const [jobsHeading, setJobsHeading] = useState('');
   const debounce = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const [initializedFor, setInitializedFor] = useState<string | null>(null);
 
@@ -34,6 +41,11 @@ export default function CareersEmbedPage() {
       setSlug(careers.slug ?? '');
       setPublished(careers.published);
       setAccentColor(careers.accentColor);
+      setHeadline(careers.headline);
+      setTagline(careers.tagline);
+      setAboutEnabled(careers.about.enabled);
+      setAboutContent(careers.about.content);
+      setJobsHeading(careers.jobs.heading);
       setInitializedFor(currentWorkspace.id);
     }
   }, [careers, initializedFor, currentWorkspace.id]);
@@ -79,6 +91,25 @@ export default function CareersEmbedPage() {
     });
   };
 
+  const saveContent = () => {
+    if (headline.length > LIMITS.headline || tagline.length > LIMITS.tagline || aboutContent.length > LIMITS.about || jobsHeading.length > LIMITS.jobsHeading) {
+      toast.error('Some fields are too long');
+      return;
+    }
+    update.mutate(
+      {
+        headline: headline.trim(),
+        tagline: tagline.trim(),
+        about: { enabled: aboutEnabled, content: aboutContent.trim() },
+        jobs: { enabled: careers.jobs.enabled, heading: jobsHeading.trim() || 'Open Positions' },
+      },
+      {
+        onSuccess: () => toast.success('Page content saved'),
+        onError: () => toast.error('Could not save page content'),
+      },
+    );
+  };
+
   const saveColor = () => {
     if (accentColor && !/^#[0-9a-fA-F]{6}$/.test(accentColor)) {
       toast.error('Use a valid hex color like #7c3aed');
@@ -97,7 +128,7 @@ export default function CareersEmbedPage() {
         <div>
           <h1 className="text-page-title">Careers page</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Embed your open roles on your own website.
+            Customize your hosted careers page and embed your open roles.
           </p>
         </div>
         <label className="flex flex-col items-end gap-1 text-sm font-medium">
@@ -173,6 +204,52 @@ export default function CareersEmbedPage() {
         </Card>
       )}
 
+      {/* Page content */}
+      <Card>
+        <CardHeader><CardTitle as="h2">Page content</CardTitle></CardHeader>
+        <CardContent className="space-y-5">
+          <p className="text-sm text-muted-foreground">
+            Shown on your hosted careers page above your open roles. The embed shows jobs only.
+          </p>
+          <Field id="careers-tagline" label="Eyebrow" hint="Optional short line above the headline, e.g. “Careers”." value={tagline} max={LIMITS.tagline}>
+            <Input id="careers-tagline" value={tagline} onChange={(e) => setTagline(e.target.value)} placeholder="Careers" />
+          </Field>
+          <Field id="careers-headline" label="Headline" value={headline} max={LIMITS.headline}>
+            <Input
+              id="careers-headline"
+              value={headline}
+              onChange={(e) => setHeadline(e.target.value)}
+              placeholder="Join a team that strives to do their best work every day."
+            />
+          </Field>
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="careers-about-toggle">Description</Label>
+              <label className="flex items-center gap-2 text-xs text-muted-foreground">
+                {aboutEnabled ? 'Shown' : 'Hidden'}
+                <Switch id="careers-about-toggle" checked={aboutEnabled} onCheckedChange={setAboutEnabled} />
+              </label>
+            </div>
+            <MarkdownEditor
+              value={aboutContent}
+              onChange={setAboutContent}
+              ariaLabel="Careers page description"
+              placeholder="Tell candidates who you are, where you're headed, and how you work…"
+              minHeight={220}
+            />
+            <p className={`text-right text-xs ${aboutContent.length > LIMITS.about ? 'text-destructive' : 'text-muted-foreground'}`}>
+              {aboutContent.length}/{LIMITS.about}
+            </p>
+          </div>
+          <Field id="careers-jobs-heading" label="Jobs section heading" value={jobsHeading} max={LIMITS.jobsHeading}>
+            <Input id="careers-jobs-heading" value={jobsHeading} onChange={(e) => setJobsHeading(e.target.value)} placeholder="Open Positions" />
+          </Field>
+          <Button size="sm" onClick={saveContent} loading={update.isPending}>
+            Save content
+          </Button>
+        </CardContent>
+      </Card>
+
       {/* Brand color */}
       <Card>
         <CardHeader><CardTitle as="h2">Brand color</CardTitle></CardHeader>
@@ -206,6 +283,21 @@ export default function CareersEmbedPage() {
           </Button>
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+const LIMITS = { headline: 120, tagline: 280, about: 4000, jobsHeading: 80 };
+
+function Field({ id, label, hint, value, max, children }: { id: string; label: string; hint?: string; value: string; max: number; children: React.ReactNode }) {
+  return (
+    <div className="space-y-1.5">
+      <div className="flex items-center justify-between">
+        <Label htmlFor={id}>{label}</Label>
+        <span className={`text-xs ${value.length > max ? 'text-destructive' : 'text-muted-foreground'}`}>{value.length}/{max}</span>
+      </div>
+      {children}
+      {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
     </div>
   );
 }

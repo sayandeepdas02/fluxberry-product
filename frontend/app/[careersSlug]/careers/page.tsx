@@ -14,7 +14,9 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const data = await fetchPublicCareers(careersSlug);
   if (!data) return { title: 'Careers' };
   const title = `Careers at ${data.company.name}`;
-  const description = toPlainDescription(`Open roles at ${data.company.name}`);
+  const description = toPlainDescription(
+    data.about.enabled && data.about.content ? data.about.content : `Open roles at ${data.company.name}`,
+  );
   return publicPageMetadata({ title, description, path: `/${careersSlug}/careers` });
 }
 
@@ -55,6 +57,12 @@ export default async function PublicCareersPage({ params, searchParams }: { para
         openings={data.openings}
         appUrl={publicConfig.appUrl}
         accentColor={data.accentColor}
+        intro={{
+          headline: data.headline !== data.company.name ? data.headline : '',
+          tagline: data.tagline,
+          content: data.about.enabled ? data.about.content : '',
+        }}
+        jobsHeading={data.jobs.heading && data.jobs.heading !== 'Open roles' ? data.jobs.heading : undefined}
       />
     </div>
   );
