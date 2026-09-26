@@ -12,13 +12,15 @@ const compensationBandCacheSchema = new Schema(
   {
     companyKey: { type: String, required: true, trim: true, lowercase: true },
     titleKey: { type: String, default: null, trim: true, lowercase: true },
+    /** Levels.fyi returns a different band/currency per location — must be part of the cache identity, not just company+title. */
+    locationKey: { type: String, default: null, trim: true, lowercase: true },
     band: { type: Schema.Types.Mixed, default: null },
     fetchedAt: { type: Date, required: true },
   },
   { timestamps: true, collection: 'compensation_band_cache' },
 );
 
-compensationBandCacheSchema.index({ companyKey: 1, titleKey: 1 }, { unique: true });
+compensationBandCacheSchema.index({ companyKey: 1, titleKey: 1, locationKey: 1 }, { unique: true });
 
 export type CompensationBandCacheDoc = InferSchemaType<typeof compensationBandCacheSchema>;
 export const CompensationBandCacheModel =

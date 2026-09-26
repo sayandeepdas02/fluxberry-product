@@ -211,21 +211,28 @@ export const sourcingSuppressionRepository = {
     ),
 };
 
-function compKeys(company: string, title?: string) {
-  return { companyKey: company.trim().toLowerCase(), titleKey: title?.trim().toLowerCase() ?? null };
+// Location is part of the cache identity — Levels.fyi's /get_salary_data
+// returns a different band (and currency) per location, so two contacts at
+// the same company+title in different countries must never share a cache row.
+function compKeys(company: string, title?: string, location?: string) {
+  return {
+    companyKey: company.trim().toLowerCase(),
+    titleKey: title?.trim().toLowerCase() ?? null,
+    locationKey: location?.trim().toLowerCase() ?? null,
+  };
 }
 
 export const compensationBandCacheRepository = {
   /** Returns the cached band (or cached null-coverage) if fresh; null if there's no cached entry, or it's gone stale, and a live lookup should run. */
-  find: async (company: string, title?: string): Promise<{ band: CompensationBandDto | null } | null> => {
-    const doc = await CompensationBandCacheModel.findOne(compKeys(company, title)).lean();
+  find: async (company: string, title?: string, location?: string): Promise<{ band: CompensationBandDto | null } | null> => {
+    const doc = await CompensationBandCacheModel.findOne(compKeys(company, title, location)).lean();
     if (!doc) return null;
     if (Date.now() - doc.fetchedAt.getTime() > COMPENSATION_BAND_CACHE_TTL_MS) return null;
     return { band: (doc.band as CompensationBandDto | null) ?? null };
   },
-  save: (company: string, title: string | undefined, band: CompensationBandDto | null) =>
+  save: (company: string, title: string | undefined, location: string | undefined, band: CompensationBandDto | null) =>
     CompensationBandCacheModel.findOneAndUpdate(
-      compKeys(company, title),
+      compKeys(company, title, location),
       { $set: { band, fetchedAt: new Date() } },
       { upsert: true, new: true },
     ),

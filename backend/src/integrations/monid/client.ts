@@ -1,5 +1,20 @@
 import { logger } from '../../utils/logger';
-import { providerError } from '../../utils/errors';
+import { AppError, providerError } from '../../utils/errors';
+
+/**
+ * An account/infra-level Monid failure (bad key, empty wallet, unreachable,
+ * budget cap, timeout) — as opposed to a normal business-level "this specific
+ * run failed" result (e.g. an unresolvable Levels.fyi company slug). Callers
+ * that treat a failure as "no data for this input" (and cache that result)
+ * MUST re-throw on this subtype instead — an outage is not the same as "no
+ * coverage" and must never get cached as one.
+ */
+export class MonidOperationalError extends AppError {
+  constructor(message: string) {
+    super('PROVIDER_ERROR', message, 502, { expose: true });
+    this.name = 'MonidOperationalError';
+  }
+}
 
 /**
  * Thin wrapper around Monid's broker API (https://api.monid.ai) — the single
@@ -44,11 +59,16 @@ export class MonidClient {
     }
 
     if (result.status === 'BLOCKED') {
-      throw providerError('Monid workspace budget/cap blocked this run — check controls at app.monid.ai');
+      throw new MonidOperationalError('Monid workspace budget/cap blocked this run — check controls at app.monid.ai');
     }
     if (result.status === 'TIMED_OUT') {
-      throw providerError(`Monid run for ${provider}${endpoint} timed out upstream`);
+      throw new MonidOperationalError(`Monid run for ${provider}${endpoint} timed out upstream`);
     }
+    // A run-level FAILED / upstream 4xx-5xx means the underlying provider couldn't
+    // process THIS specific request (e.g. an unresolvable company slug) — a normal
+    // business outcome for some inputs, not a Monid/account-level outage. Callers
+    // that treat "not found" as valid input-specific data (like compensation
+    // lookups) are meant to catch this as a plain AppError, not MonidOperationalError.
     if (result.status === 'FAILED' || (result.providerResponse?.httpStatus && result.providerResponse.httpStatus >= 400)) {
       const msg = result.providerResponse?.error?.message ?? `${provider}${endpoint} failed`;
       throw providerError(msg);
@@ -70,15 +90,15 @@ export class MonidClient {
       });
     } catch (err) {
       logger.error({ err, path }, 'Monid request failed');
-      throw providerError('Monid is unreachable');
+      throw new MonidOperationalError('Monid is unreachable');
     }
 
-    if (res.status === 402) throw providerError('Monid wallet balance exhausted — top up at app.monid.ai/wallet');
-    if (res.status === 401 || res.status === 403) throw providerError('Monid API key invalid or unauthorized');
+    if (res.status === 402) throw new MonidOperationalError('Monid wallet balance exhausted — top up at app.monid.ai/wallet');
+    if (res.status === 401 || res.status === 403) throw new MonidOperationalError('Monid API key invalid or unauthorized');
     if (!res.ok) {
       const text = await res.text().catch(() => '');
       logger.error({ status: res.status, text: text.slice(0, 500), path }, 'Monid API error');
-      throw providerError(`Monid API error (${res.status})`);
+      throw new MonidOperationalError(`Monid API error (${res.status})`);
     }
     return (await res.json()) as T;
   }

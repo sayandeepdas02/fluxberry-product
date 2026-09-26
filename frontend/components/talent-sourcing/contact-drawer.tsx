@@ -138,7 +138,7 @@ function Header({
 function Body({ contact }: { contact: SourcedContactDto }) {
   const email = contact.workEmail || contact.personalEmail;
   const [activeTab, setActiveTab] = useState('overview');
-  const { data: compResult, isLoading: compLoading } = useCompensationBand(contact.id, activeTab === 'compensation');
+  const { data: compResult, isLoading: compLoading, isError: compError, refetch: refetchComp } = useCompensationBand(contact.id, activeTab === 'compensation');
 
   return (
     <div className="space-y-5">
@@ -230,6 +230,11 @@ function Body({ contact }: { contact: SourcedContactDto }) {
           {compLoading ? (
             <div className="flex items-center justify-center py-8">
               <Spinner className="size-5" />
+            </div>
+          ) : compError ? (
+            <div className="flex flex-col items-start gap-2 text-sm">
+              <p className="text-muted-foreground">Couldn&apos;t load compensation data — this may be temporary.</p>
+              <Button variant="outline" size="sm" onClick={() => refetchComp()}>Retry</Button>
             </div>
           ) : compResult?.band ? (
             <CompensationBandView band={compResult.band} />

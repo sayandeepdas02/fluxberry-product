@@ -33,7 +33,7 @@ export class MonidPeopleSourcingProvider implements PeopleSourcingProvider {
     const page = decodePage(input.scrollToken);
     const perPage = Math.max(1, Math.min(100, input.size));
 
-    const { previews, total } = await searchApollo(this.client, input.criteria, page, perPage);
+    const { previews, total, nextUpstreamPage } = await searchApollo(this.client, input.criteria, page, perPage);
 
     const enriched = await mapWithConcurrency(previews, ENRICH_CONCURRENCY, async (preview) => {
       try {
@@ -45,12 +45,14 @@ export class MonidPeopleSourcingProvider implements PeopleSourcingProvider {
     });
 
     const people: SourcedPerson[] = enriched.filter((p): p is SourcedPerson => p != null);
-    const hasMore = page * perPage < total;
 
     return {
       people,
       total,
-      scrollToken: hasMore ? encodePage(page + 1) : null,
+      // Driven by Apollo's real page-exhaustion signal, not `total` — `total` is
+      // an unfiltered upper bound whenever a company filter is active (see
+      // searchApollo) and can't safely gate whether "load more" is worth charging for.
+      scrollToken: nextUpstreamPage != null ? encodePage(nextUpstreamPage) : null,
       creditsUsed: people.length,
     };
   }

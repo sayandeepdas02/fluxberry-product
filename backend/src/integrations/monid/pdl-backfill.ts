@@ -1,5 +1,5 @@
 import { logger } from '../../utils/logger';
-import type { MonidClient } from './client';
+import { MonidOperationalError, type MonidClient } from './client';
 import type { BackfillFields, SourcedPerson } from './types';
 
 /**
@@ -33,8 +33,11 @@ interface PdlPerson {
 
 /**
  * Attempts to backfill the Apollo-blind fields for one person. Returns null
- * (not an error) on a no-match — PDL's ~3B-profile dataset still won't cover
- * everyone, and a miss shouldn't block the rest of the contact detail view.
+ * (not an error) on a genuine no-match — PDL's ~3B-profile dataset still won't
+ * cover everyone, and a miss shouldn't block the rest of the contact detail
+ * view. A `MonidOperationalError` (bad key, empty wallet, unreachable, etc.)
+ * is NOT a no-match and is re-thrown — the caller (sourcing.service.ts) must
+ * not permanently remember an outage as "already tried."
  */
 export async function backfillFromPdl(
   client: MonidClient,
@@ -52,7 +55,8 @@ export async function backfillFromPdl(
   try {
     output = (await client.run('pdl', '/v5/person/enrich', { body })) as PdlEnrichResponse;
   } catch (err) {
-    logger.warn({ err }, 'PDL backfill enrich failed');
+    if (err instanceof MonidOperationalError) throw err;
+    logger.warn({ err }, 'PDL backfill enrich failed — treating as no match');
     return null;
   }
 

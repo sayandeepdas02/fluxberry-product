@@ -1,5 +1,5 @@
 import { logger } from '../../utils/logger';
-import { MonidClient } from './client';
+import { MonidClient, MonidOperationalError } from './client';
 import type { CompensationBand, CompensationBandInput, CompensationProvider } from './types';
 
 /**
@@ -93,7 +93,18 @@ export class MonidCompensationProvider implements CompensationProvider {
     const companyName = await this.tryResolveCompany(companySlug);
     if (!companyName) return null;
 
-    const jobFamily = input.title ? matchJobFamily(await this.getJobFamilies(), input.title) : undefined;
+    let jobFamily: JobFamily | undefined;
+    if (input.title) {
+      try {
+        jobFamily = matchJobFamily(await this.getJobFamilies(), input.title);
+      } catch (err) {
+        if (err instanceof MonidOperationalError) throw err;
+        // The job-family directory itself failed to load/parse for a non-account
+        // reason — fall back to a company-wide lookup rather than aborting the
+        // whole compensation lookup over an optional refinement.
+        logger.info({ err }, 'Levels.fyi job-family lookup failed — falling back to company-wide comp data');
+      }
+    }
 
     const queryParams: Record<string, unknown> = { company_slug: companySlug };
     if (jobFamily) queryParams.job_family_slug = jobFamily.slug;
@@ -103,6 +114,10 @@ export class MonidCompensationProvider implements CompensationProvider {
     try {
       output = (await this.client.run('levels.fyi', '/get_salary_data', { queryParams })) as LevelsSalaryDataResponse;
     } catch (err) {
+      // An operational failure (bad key, empty wallet, unreachable, budget cap,
+      // timeout) is NOT "no coverage" — propagate it so the caller does not cache
+      // a transient outage as a 30-day negative result.
+      if (err instanceof MonidOperationalError) throw err;
       logger.warn({ err, companySlug }, 'Levels.fyi get_salary_data failed — treating as no coverage');
       return null;
     }
@@ -138,6 +153,7 @@ export class MonidCompensationProvider implements CompensationProvider {
       })) as LevelsCompanyOverviewResponse;
       return output?.data?.company?.name ?? null;
     } catch (err) {
+      if (err instanceof MonidOperationalError) throw err;
       logger.info({ companySlug }, 'Levels.fyi has no coverage for this company slug');
       return null;
     }

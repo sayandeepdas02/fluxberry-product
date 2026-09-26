@@ -36,6 +36,7 @@ import { WorkspaceModel } from '../models/workspace.model';
 import { candidateService } from './candidate.service';
 import { getAIProvider, getPeopleSourcingProvider, getCompensationProvider, getEmailProvider } from '../integrations';
 import { hasEnrichmentGap } from '../integrations/monid/types';
+import { MonidOperationalError } from '../integrations/monid/client';
 import { jobQueue } from '../queue/job-queue';
 import { creditsService } from './credits.service';
 import {
@@ -290,15 +291,22 @@ export const sourcingService = {
    * Full profile with the contact's email/phone revealed (viewing is free —
    * data is cached). Lazily backfills skills/education/githubUrl/personalEmail
    * via a targeted PDL enrich call the FIRST time this contact is opened, if
-   * (and only if) a gap actually exists — never during bulk search, to keep
-   * the cheap Apollo-eager / PDL-lazy cost split intact.
+   * (and only if) a gap actually exists AND a backfill hasn't already been
+   * attempted — `backfillAttemptedAt` is stamped unconditionally (whether PDL
+   * found data, found nothing, or errored), so a contact with a genuine,
+   * permanent gap (no GitHub/personal email anywhere) is never re-billed
+   * $0.30 on every later open.
    */
   async getContact(workspaceId: string, contactId: string): Promise<SourcedContactDto> {
     const contact = await sourcedContactRepository.findInWorkspace(workspaceId, contactId);
     if (!contact) throw notFound('Contact not found');
 
     let doc = contact.toObject();
-    if (hasEnrichmentGap(doc)) {
+    if (!doc.backfillAttemptedAt && hasEnrichmentGap(doc)) {
+      // Only stamp `backfillAttemptedAt` on a genuine attempt (success or a real
+      // "PDL has nothing" outcome) — a Monid outage during the attempt should be
+      // retried on the next open, not permanently remembered as "already tried."
+      let patch: Record<string, unknown> | null = null;
       try {
         const backfilled = await getPeopleSourcingProvider().backfill({
           fullName: doc.fullName,
@@ -306,18 +314,28 @@ export const sourcingService = {
           workEmail: doc.workEmail ?? undefined,
           linkedinUrl: doc.linkedinUrl ?? undefined,
         });
+        patch = { backfillAttemptedAt: new Date() };
         if (backfilled) {
-          const updated = await sourcedContactRepository.update(contactId, {
+          patch = {
+            ...patch,
             skills: backfilled.skills.length ? backfilled.skills : doc.skills,
             githubUrl: backfilled.githubUrl ?? doc.githubUrl,
             personalEmail: backfilled.personalEmail ?? doc.personalEmail,
             education: backfilled.education.length ? backfilled.education : doc.education,
             yearsExperience: backfilled.yearsExperience ?? doc.yearsExperience,
-          });
-          doc = (updated ?? contact).toObject();
+          };
         }
       } catch (err) {
-        logger.warn({ err, contactId }, 'PDL backfill failed — showing contact with the gap unfilled');
+        if (err instanceof MonidOperationalError) {
+          logger.warn({ err, contactId }, 'PDL backfill hit a Monid outage — will retry on next open');
+        } else {
+          logger.warn({ err, contactId }, 'PDL backfill failed — showing contact with the gap unfilled');
+          patch = { backfillAttemptedAt: new Date() };
+        }
+      }
+      if (patch) {
+        const updated = await sourcedContactRepository.update(contactId, patch);
+        doc = (updated ?? contact).toObject();
       }
     }
 
@@ -336,7 +354,7 @@ export const sourcingService = {
     if (!contact) throw notFound('Contact not found');
     if (!contact.company) return null;
 
-    const cached = await compensationBandCacheRepository.find(contact.company, contact.title ?? undefined);
+    const cached = await compensationBandCacheRepository.find(contact.company, contact.title ?? undefined, contact.location ?? undefined);
     if (cached) return cached.band;
 
     const band = await getCompensationProvider().getSalaryBand({
@@ -344,7 +362,7 @@ export const sourcingService = {
       title: contact.title ?? undefined,
       location: contact.location ?? undefined,
     });
-    await compensationBandCacheRepository.save(contact.company, contact.title ?? undefined, band);
+    await compensationBandCacheRepository.save(contact.company, contact.title ?? undefined, contact.location ?? undefined, band);
     return band;
   },
 

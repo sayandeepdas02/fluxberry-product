@@ -54,7 +54,34 @@ export interface ApolloSearchPreview {
 
 export interface ApolloSearchPage {
   previews: ApolloSearchPreview[];
+  /** Apollo's own (unfiltered) total match count — an upper bound, not exact, when a company filter is active (see below). */
   total: number;
+  /** Next upstream Apollo page to request, or null when upstream is genuinely exhausted. Governs pagination — NOT `total`, which can't be trusted once client-side filtering is applied. */
+  nextUpstreamPage: number | null;
+}
+
+const MAX_UPSTREAM_FILTER_ATTEMPTS = 5;
+
+async function fetchApolloPage(
+  client: MonidClient,
+  criteria: SourcingCriteria,
+  page: number,
+  perPage: number,
+): Promise<{ total: number; people: Array<{ id: string; organization?: { name?: string } }> }> {
+  const output = (await client.run('apollo', '/mixed_people/api_search', {
+    queryParams: buildSearchQueryParams(criteria, page, perPage),
+  })) as {
+    total_entries?: number;
+    people?: Array<{ id: string; organization?: { name?: string } }>;
+  };
+  return { total: output.total_entries ?? 0, people: output.people ?? [] };
+}
+
+function matchesCompanyFilters(criteria: SourcingCriteria, organizationName: string | undefined): boolean {
+  const name = organizationName ?? '';
+  if (criteria.companies.length && !criteria.companies.some((c) => looseMatch(name, c))) return false;
+  if (criteria.excludeCompanies.length && criteria.excludeCompanies.some((c) => looseMatch(name, c))) return false;
+  return true;
 }
 
 function buildSearchQueryParams(criteria: SourcingCriteria, page: number, perPage: number): Record<string, unknown> {
@@ -79,7 +106,18 @@ function buildSearchQueryParams(criteria: SourcingCriteria, page: number, perPag
 /**
  * Searches Apollo and returns redacted previews (id + org name only). Applies
  * the companies/excludeCompanies filters client-side on `organization.name`
- * since Apollo's search API only accepts domains/org-ids, not free-text names.
+ * since Apollo's search API only accepts domains/org-ids, not free-text names
+ * — there's no server-side way to filter by a free-text company name.
+ *
+ * Because of that, Apollo's own `total_entries`/page count are UNFILTERED and
+ * can't be used to drive pagination once a company filter is active: a page
+ * of upstream results can filter down to near-zero while Apollo still reports
+ * more pages available, which would otherwise charge credits for empty "load
+ * more" pages forever. When a filter is active, this keeps pulling bounded
+ * additional upstream pages internally (same request, no extra recruiter
+ * action/charge beyond the one search call) until it collects `perPage`
+ * filtered matches or upstream is confirmed exhausted, and reports the real
+ * next-page cursor via `nextUpstreamPage` rather than trusting the raw total.
  */
 export async function searchApollo(
   client: MonidClient,
@@ -87,28 +125,41 @@ export async function searchApollo(
   page: number,
   perPage: number,
 ): Promise<ApolloSearchPage> {
-  const output = (await client.run('apollo', '/mixed_people/api_search', {
-    queryParams: buildSearchQueryParams(criteria, page, perPage),
-  })) as {
-    total_entries?: number;
-    people?: Array<{ id: string; organization?: { name?: string } }>;
-  };
+  const hasCompanyFilter = criteria.companies.length > 0 || criteria.excludeCompanies.length > 0;
 
-  let people = output.people ?? [];
-  if (criteria.companies.length) {
-    people = people.filter((p) =>
-      criteria.companies.some((c) => looseMatch(p.organization?.name ?? '', c)),
-    );
+  if (!hasCompanyFilter) {
+    const { total, people } = await fetchApolloPage(client, criteria, page, perPage);
+    return {
+      previews: people.map((p) => ({ id: p.id, organizationName: p.organization?.name })),
+      total,
+      nextUpstreamPage: page * perPage < total ? page + 1 : null,
+    };
   }
-  if (criteria.excludeCompanies.length) {
-    people = people.filter(
-      (p) => !criteria.excludeCompanies.some((c) => looseMatch(p.organization?.name ?? '', c)),
+
+  let upstreamPage = page;
+  let lastTotal = 0;
+  const collected: ApolloSearchPreview[] = [];
+  let exhausted = false;
+
+  for (let attempt = 0; attempt < MAX_UPSTREAM_FILTER_ATTEMPTS && collected.length < perPage; attempt++) {
+    const { total, people } = await fetchApolloPage(client, criteria, upstreamPage, perPage);
+    lastTotal = total;
+    collected.push(
+      ...people
+        .filter((p) => matchesCompanyFilters(criteria, p.organization?.name))
+        .map((p) => ({ id: p.id, organizationName: p.organization?.name })),
     );
+    if (people.length < perPage) {
+      exhausted = true;
+      break;
+    }
+    upstreamPage++;
   }
 
   return {
-    previews: people.map((p) => ({ id: p.id, organizationName: p.organization?.name })),
-    total: output.total_entries ?? people.length,
+    previews: collected.slice(0, perPage),
+    total: lastTotal, // Apollo's raw unfiltered count — a rough upper bound, not the true filtered total.
+    nextUpstreamPage: exhausted ? null : upstreamPage + 1,
   };
 }
 
