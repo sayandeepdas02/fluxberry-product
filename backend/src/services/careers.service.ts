@@ -30,9 +30,12 @@ export const careersService = {
   async update(workspaceId: string, actorId: string, input: UpdateCareersInput): Promise<CareersPageDto> {
     await this.getForWorkspace(workspaceId); // ensure exists
     const patch: Record<string, any> = {};
-    for (const k of ['headline', 'tagline', 'published', 'about', 'links', 'team', 'jobs', 'benefits', 'sectionOrder', 'accentColor', 'coverImageUrl'] as const) {
+    for (const k of ['headline', 'tagline', 'published', 'about', 'links', 'team', 'benefits', 'sectionOrder', 'accentColor', 'coverImageUrl'] as const) {
       if (input[k] !== undefined) patch[k] = input[k];
     }
+    // Dotted paths so a partial `jobs` update never overwrites a sibling field with a stale value.
+    if (input.jobs?.enabled !== undefined) patch['jobs.enabled'] = input.jobs.enabled;
+    if (input.jobs?.heading !== undefined) patch['jobs.heading'] = input.jobs.heading;
     const page = await careersRepository.update(workspaceId, patch);
     const workspace = await workspaceRepository.findById(workspaceId);
     await auditService.log({

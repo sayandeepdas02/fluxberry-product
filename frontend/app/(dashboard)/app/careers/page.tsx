@@ -101,7 +101,7 @@ export default function CareersEmbedPage() {
         headline: headline.trim(),
         tagline: tagline.trim(),
         about: { enabled: aboutEnabled, content: aboutContent.trim() },
-        jobs: { enabled: careers.jobs.enabled, heading: jobsHeading.trim() || 'Open Positions' },
+        jobs: { heading: jobsHeading.trim() || 'Open Positions' },
       },
       {
         onSuccess: () => toast.success('Page content saved'),

@@ -54,7 +54,7 @@ export const updateCareersSchema = z.object({
   about: z.object({ enabled: z.boolean(), content: z.string().max(4000) }).optional(),
   links: z.object({ enabled: z.boolean(), items: z.array(careersLinkSchema).max(12) }).optional(),
   team: z.object({ enabled: z.boolean(), members: z.array(careersTeamMemberSchema).max(24) }).optional(),
-  jobs: z.object({ enabled: z.boolean(), heading: z.string().trim().max(80) }).optional(),
+  jobs: z.object({ enabled: z.boolean().optional(), heading: z.string().trim().max(80).optional() }).optional(),
   benefits: z.object({ enabled: z.boolean(), items: z.array(careersBenefitSchema).max(12) }).optional(),
   sectionOrder: z.array(z.enum(SECTION_KEYS)).optional(),
   accentColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).nullable().optional(),
