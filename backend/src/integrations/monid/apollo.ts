@@ -52,12 +52,18 @@ export interface ApolloSearchPreview {
   organizationName?: string;
 }
 
+/** Where to resume an Apollo search. `offset` is how many already-filtered matches from `upstreamPage` were already returned in a previous call — needed because a page's filtered matches can overflow `perPage` (see searchApollo). */
+export interface ApolloSearchCursor {
+  upstreamPage: number;
+  offset: number;
+}
+
 export interface ApolloSearchPage {
   previews: ApolloSearchPreview[];
   /** Apollo's own (unfiltered) total match count — an upper bound, not exact, when a company filter is active (see below). */
   total: number;
-  /** Next upstream Apollo page to request, or null when upstream is genuinely exhausted. Governs pagination — NOT `total`, which can't be trusted once client-side filtering is applied. */
-  nextUpstreamPage: number | null;
+  /** Where the next call should resume, or null when upstream is genuinely exhausted. Governs pagination — NOT `total`, which can't be trusted once client-side filtering is applied. */
+  nextCursor: ApolloSearchCursor | null;
 }
 
 const MAX_UPSTREAM_FILTER_ATTEMPTS = 5;
@@ -116,50 +122,70 @@ function buildSearchQueryParams(criteria: SourcingCriteria, page: number, perPag
  * more" pages forever. When a filter is active, this keeps pulling bounded
  * additional upstream pages internally (same request, no extra recruiter
  * action/charge beyond the one search call) until it collects `perPage`
- * filtered matches or upstream is confirmed exhausted, and reports the real
- * next-page cursor via `nextUpstreamPage` rather than trusting the raw total.
+ * filtered matches or upstream is confirmed exhausted.
+ *
+ * A single upstream page's filtered matches can overflow `perPage` — those
+ * extra matches are never dropped; `nextCursor.offset` records exactly how
+ * many of that same page's filtered matches were already returned, so the
+ * next call resumes mid-page (not at the next page, which would silently
+ * skip the overflow) and never re-fetches a page already fully consumed.
  */
 export async function searchApollo(
   client: MonidClient,
   criteria: SourcingCriteria,
-  page: number,
+  cursor: ApolloSearchCursor,
   perPage: number,
 ): Promise<ApolloSearchPage> {
   const hasCompanyFilter = criteria.companies.length > 0 || criteria.excludeCompanies.length > 0;
 
   if (!hasCompanyFilter) {
-    const { total, people } = await fetchApolloPage(client, criteria, page, perPage);
+    const { total, people } = await fetchApolloPage(client, criteria, cursor.upstreamPage, perPage);
     return {
       previews: people.map((p) => ({ id: p.id, organizationName: p.organization?.name })),
       total,
-      nextUpstreamPage: page * perPage < total ? page + 1 : null,
+      nextCursor: cursor.upstreamPage * perPage < total ? { upstreamPage: cursor.upstreamPage + 1, offset: 0 } : null,
     };
   }
 
-  let upstreamPage = page;
+  let page = cursor.upstreamPage;
+  let consumedFromPage = cursor.offset;
   let lastTotal = 0;
   const collected: ApolloSearchPreview[] = [];
   let exhausted = false;
 
   for (let attempt = 0; attempt < MAX_UPSTREAM_FILTER_ATTEMPTS && collected.length < perPage; attempt++) {
-    const { total, people } = await fetchApolloPage(client, criteria, upstreamPage, perPage);
+    const { total, people } = await fetchApolloPage(client, criteria, page, perPage);
     lastTotal = total;
-    collected.push(
-      ...people
-        .filter((p) => matchesCompanyFilters(criteria, p.organization?.name))
-        .map((p) => ({ id: p.id, organizationName: p.organization?.name })),
-    );
+    const filtered = people
+      .filter((p) => matchesCompanyFilters(criteria, p.organization?.name))
+      .map((p) => ({ id: p.id, organizationName: p.organization?.name }));
+    // Skip whatever was already returned from THIS page in a prior call.
+    const available = filtered.slice(consumedFromPage);
+
+    const need = perPage - collected.length;
+    const take = available.slice(0, need);
+    collected.push(...take);
+    consumedFromPage += take.length;
+
+    if (available.length > take.length) {
+      // Overflow within this exact page — resume here next time, nothing lost.
+      break;
+    }
+
     if (people.length < perPage) {
       exhausted = true;
       break;
     }
-    upstreamPage++;
+
+    // Fully consumed this page's filtered matches — advance to a fresh page.
+    page += 1;
+    consumedFromPage = 0;
   }
 
   return {
-    previews: collected.slice(0, perPage),
+    previews: collected,
     total: lastTotal, // Apollo's raw unfiltered count — a rough upper bound, not the true filtered total.
-    nextUpstreamPage: exhausted ? null : upstreamPage + 1,
+    nextCursor: exhausted ? null : { upstreamPage: page, offset: consumedFromPage },
   };
 }
 

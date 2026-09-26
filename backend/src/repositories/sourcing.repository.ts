@@ -36,6 +36,27 @@ export const sourcedContactRepository = {
     SourcedContactModel.findByIdAndUpdate(id, patch, { new: true }),
 
   /**
+   * Atomically claims the right to run a PDL backfill for this contact —
+   * matches only if `backfillAttemptedAt` is still null, so two concurrent
+   * detail-view opens can't both trigger the paid PDL call. Returns the
+   * claimed doc (with `backfillAttemptedAt` now stamped) on success, or null
+   * if someone else already claimed/completed it first.
+   */
+  claimBackfill: (id: string) =>
+    SourcedContactModel.findOneAndUpdate(
+      { _id: id, backfillAttemptedAt: null },
+      { $set: { backfillAttemptedAt: new Date() } },
+      { new: true },
+    ),
+
+  /** Batched lookup by upstream id, for preserving previously-enriched fields across a re-cache (see cacheAndScore). */
+  findManyByPdlIds: async (workspaceId: string, pdlIds: string[]): Promise<Map<string, any>> => {
+    if (pdlIds.length === 0) return new Map();
+    const rows = await SourcedContactModel.find({ workspaceId, pdlId: { $in: pdlIds } }).lean();
+    return new Map(rows.map((r) => [r.pdlId as string, r]));
+  },
+
+  /**
    * Upsert a person by upstream id (dedupe within a workspace), returning the
    * saved doc. A null pdlId always inserts a fresh contact.
    */

@@ -72,16 +72,27 @@ function pageSize(size?: number): number {
   return Math.max(1, Math.min(size ?? SOURCING_PAGE_SIZE, cap));
 }
 
-/** Cache a page of people (dedupe by pdlId), score them, and return docs ordered best-fit first. */
+/**
+ * Cache a page of people (dedupe by pdlId), score them, and return docs
+ * ordered best-fit first. When the same upstream person resurfaces in a later
+ * search, Apollo's fresh data never includes skills/education/githubUrl/
+ * personalEmail (Apollo doesn't have them) — so those fields are preserved
+ * from the existing doc rather than blanked out, or a prior PDL backfill
+ * would silently vanish on the contact's next re-search.
+ */
 async function cacheAndScore(
   workspaceId: string,
   criteria: SourcingCriteria,
   people: Awaited<ReturnType<ReturnType<typeof getPeopleSourcingProvider>['search']>>['people'],
 ): Promise<any[]> {
   const provider = providerName();
+  const pdlIds = people.map((p) => p.providerId).filter((id): id is string => Boolean(id));
+  const existingById = await sourcedContactRepository.findManyByPdlIds(workspaceId, pdlIds);
+
   const docs: any[] = [];
   for (const p of people) {
     const { score, reasons } = scoreContact(criteria, p);
+    const existing = p.providerId ? existingById.get(p.providerId) : undefined;
     const doc = await sourcedContactRepository.upsertByPdlId(workspaceId, p.providerId ?? null, {
       provider,
       fullName: p.fullName,
@@ -94,15 +105,15 @@ async function cacheAndScore(
       industry: p.industry ?? null,
       location: p.location ?? null,
       country: p.country ?? null,
-      yearsExperience: p.yearsExperience ?? null,
-      skills: p.skills ?? [],
+      yearsExperience: p.yearsExperience ?? existing?.yearsExperience ?? null,
+      skills: p.skills.length ? p.skills : (existing?.skills ?? []),
       linkedinUrl: p.linkedinUrl ?? null,
-      githubUrl: p.githubUrl ?? null,
+      githubUrl: p.githubUrl ?? existing?.githubUrl ?? null,
       workEmail: p.workEmail ?? null,
-      personalEmail: p.personalEmail ?? null,
+      personalEmail: p.personalEmail ?? existing?.personalEmail ?? null,
       phone: p.phone ?? null,
-      experience: p.experience ?? [],
-      education: p.education ?? [],
+      experience: p.experience.length ? p.experience : (existing?.experience ?? []),
+      education: p.education.length ? p.education : (existing?.education ?? []),
       rawProfile: p,
       matchScore: score,
       matchReasons: reasons,
@@ -303,40 +314,43 @@ export const sourcingService = {
 
     let doc = contact.toObject();
     if (!doc.backfillAttemptedAt && hasEnrichmentGap(doc)) {
-      // Only stamp `backfillAttemptedAt` on a genuine attempt (success or a real
-      // "PDL has nothing" outcome) — a Monid outage during the attempt should be
-      // retried on the next open, not permanently remembered as "already tried."
-      let patch: Record<string, unknown> | null = null;
-      try {
-        const backfilled = await getPeopleSourcingProvider().backfill({
-          fullName: doc.fullName,
-          company: doc.company ?? undefined,
-          workEmail: doc.workEmail ?? undefined,
-          linkedinUrl: doc.linkedinUrl ?? undefined,
-        });
-        patch = { backfillAttemptedAt: new Date() };
-        if (backfilled) {
-          patch = {
-            ...patch,
-            skills: backfilled.skills.length ? backfilled.skills : doc.skills,
-            githubUrl: backfilled.githubUrl ?? doc.githubUrl,
-            personalEmail: backfilled.personalEmail ?? doc.personalEmail,
-            education: backfilled.education.length ? backfilled.education : doc.education,
-            yearsExperience: backfilled.yearsExperience ?? doc.yearsExperience,
-          };
+      // Atomically claim the right to backfill this contact — the conditional
+      // filter (backfillAttemptedAt: null) means only ONE concurrent detail-view
+      // open can win this; a second request gets null back and skips straight
+      // through without a duplicate paid PDL call.
+      const claimed = await sourcedContactRepository.claimBackfill(contactId);
+      if (claimed) {
+        let patch: Record<string, unknown> | null = null;
+        try {
+          const backfilled = await getPeopleSourcingProvider().backfill({
+            fullName: doc.fullName,
+            company: doc.company ?? undefined,
+            workEmail: doc.workEmail ?? undefined,
+            linkedinUrl: doc.linkedinUrl ?? undefined,
+          });
+          if (backfilled) {
+            patch = {
+              skills: backfilled.skills.length ? backfilled.skills : doc.skills,
+              githubUrl: backfilled.githubUrl ?? doc.githubUrl,
+              personalEmail: backfilled.personalEmail ?? doc.personalEmail,
+              education: backfilled.education.length ? backfilled.education : doc.education,
+              yearsExperience: backfilled.yearsExperience ?? doc.yearsExperience,
+            };
+          }
+        } catch (err) {
+          if (err instanceof MonidOperationalError) {
+            // Not a real attempt — release the claim so a later open can retry.
+            await sourcedContactRepository.update(contactId, { backfillAttemptedAt: null });
+            logger.warn({ err, contactId }, 'PDL backfill hit a Monid outage — will retry on next open');
+          } else {
+            logger.warn({ err, contactId }, 'PDL backfill failed — showing contact with the gap unfilled');
+          }
         }
-      } catch (err) {
-        if (err instanceof MonidOperationalError) {
-          logger.warn({ err, contactId }, 'PDL backfill hit a Monid outage — will retry on next open');
-        } else {
-          logger.warn({ err, contactId }, 'PDL backfill failed — showing contact with the gap unfilled');
-          patch = { backfillAttemptedAt: new Date() };
-        }
+        const updated = patch ? await sourcedContactRepository.update(contactId, patch) : claimed;
+        doc = (updated ?? claimed).toObject();
       }
-      if (patch) {
-        const updated = await sourcedContactRepository.update(contactId, patch);
-        doc = (updated ?? contact).toObject();
-      }
+      // If claimed is null, another request already won the race (or completed
+      // with a permanent gap) — proceed with `doc` as-is, no extra PDL spend.
     }
 
     return toSourcedContactDto(doc, { reveal: true });

@@ -65,13 +65,18 @@ export class MonidClient {
       throw new MonidOperationalError(`Monid run for ${provider}${endpoint} timed out upstream`);
     }
     // A run-level FAILED / upstream 4xx-5xx means the underlying provider couldn't
-    // process THIS specific request (e.g. an unresolvable company slug) — a normal
+    // process THIS specific request (e.g. an unresolvable company slug — observed
+    // in practice to come back as an upstream 502, not a clean 404) — a normal
     // business outcome for some inputs, not a Monid/account-level outage. Callers
     // that treat "not found" as valid input-specific data (like compensation
     // lookups) are meant to catch this as a plain AppError, not MonidOperationalError.
+    // The raw upstream status is exposed via `details.upstreamStatus` so a caller
+    // that needs a finer distinction (e.g. PDL backfill treating a genuine upstream
+    // 5xx as transient/retryable, since that's a different signal than a business
+    // 4xx) can make that call itself, per-endpoint, without changing this default.
     if (result.status === 'FAILED' || (result.providerResponse?.httpStatus && result.providerResponse.httpStatus >= 400)) {
       const msg = result.providerResponse?.error?.message ?? `${provider}${endpoint} failed`;
-      throw providerError(msg);
+      throw providerError(msg, { upstreamStatus: result.providerResponse?.httpStatus });
     }
     return result.output;
   }

@@ -1,3 +1,4 @@
+import { AppError } from '../../utils/errors';
 import { logger } from '../../utils/logger';
 import { MonidOperationalError, type MonidClient } from './client';
 import type { BackfillFields, SourcedPerson } from './types';
@@ -56,6 +57,13 @@ export async function backfillFromPdl(
     output = (await client.run('pdl', '/v5/person/enrich', { body })) as PdlEnrichResponse;
   } catch (err) {
     if (err instanceof MonidOperationalError) throw err;
+    // A genuine upstream 5xx (PDL's own servers erroring) is transient, not a
+    // "no match" — rethrow as operational so the caller retries later instead
+    // of permanently stamping this contact as already-attempted.
+    const upstreamStatus = err instanceof AppError ? (err.details as { upstreamStatus?: number } | undefined)?.upstreamStatus : undefined;
+    if (typeof upstreamStatus === 'number' && upstreamStatus >= 500) {
+      throw new MonidOperationalError(`PDL enrich failed upstream (${upstreamStatus})`);
+    }
     logger.warn({ err }, 'PDL backfill enrich failed — treating as no match');
     return null;
   }

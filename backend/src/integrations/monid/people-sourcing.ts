@@ -1,6 +1,6 @@
 import { logger } from '../../utils/logger';
 import { MonidClient } from './client';
-import { searchApollo, enrichApolloPerson } from './apollo';
+import { searchApollo, enrichApolloPerson, type ApolloSearchCursor } from './apollo';
 import { backfillFromPdl } from './pdl-backfill';
 import type {
   BackfillFields,
@@ -30,10 +30,10 @@ export class MonidPeopleSourcingProvider implements PeopleSourcingProvider {
   }
 
   async search(input: PersonSearchInput): Promise<PersonSearchResult> {
-    const page = decodePage(input.scrollToken);
+    const cursor = decodeCursor(input.scrollToken);
     const perPage = Math.max(1, Math.min(100, input.size));
 
-    const { previews, total, nextUpstreamPage } = await searchApollo(this.client, input.criteria, page, perPage);
+    const { previews, total, nextCursor } = await searchApollo(this.client, input.criteria, cursor, perPage);
 
     const enriched = await mapWithConcurrency(previews, ENRICH_CONCURRENCY, async (preview) => {
       try {
@@ -52,7 +52,7 @@ export class MonidPeopleSourcingProvider implements PeopleSourcingProvider {
       // Driven by Apollo's real page-exhaustion signal, not `total` — `total` is
       // an unfiltered upper bound whenever a company filter is active (see
       // searchApollo) and can't safely gate whether "load more" is worth charging for.
-      scrollToken: nextUpstreamPage != null ? encodePage(nextUpstreamPage) : null,
+      scrollToken: nextCursor != null ? encodeCursor(nextCursor) : null,
       creditsUsed: people.length,
     };
   }
@@ -75,18 +75,19 @@ async function mapWithConcurrency<T, R>(items: T[], limit: number, fn: (item: T)
   return results;
 }
 
-// Apollo pages by 1-based page number, not an opaque cursor — encode/decode it
-// the same opaque-token way the mock provider does, so callers never care.
-function encodePage(page: number): string {
-  return Buffer.from(`page:${page}`).toString('base64');
+// Apollo pages by page number + an in-page offset (see ApolloSearchCursor),
+// not an opaque cursor — encode/decode it the same opaque-token way the mock
+// provider does, so callers never care.
+function encodeCursor(cursor: ApolloSearchCursor): string {
+  return Buffer.from(`page:${cursor.upstreamPage}:${cursor.offset}`).toString('base64');
 }
-function decodePage(token?: string | null): number {
-  if (!token) return 1;
+function decodeCursor(token?: string | null): ApolloSearchCursor {
+  if (!token) return { upstreamPage: 1, offset: 0 };
   try {
     const s = Buffer.from(token, 'base64').toString('utf8');
-    const m = s.match(/^page:(\d+)$/);
-    return m ? Number(m[1]) : 1;
+    const m = s.match(/^page:(\d+):(\d+)$/);
+    return m ? { upstreamPage: Number(m[1]), offset: Number(m[2]) } : { upstreamPage: 1, offset: 0 };
   } catch {
-    return 1;
+    return { upstreamPage: 1, offset: 0 };
   }
 }
