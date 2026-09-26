@@ -16,6 +16,7 @@ import type {
   UpdateCampaignInput,
   DraftCampaignInput,
   CampaignDraftDto,
+  CompensationBandDto,
 } from '../shared';
 import { SOURCING_PAGE_SIZE, SOURCING_MAX_PAGE_SIZE, CREDIT_COSTS } from '../shared';
 import {
@@ -26,13 +27,15 @@ import {
   sourcingCampaignRepository,
   sourcingRecipientRepository,
   sourcingSuppressionRepository,
+  compensationBandCacheRepository,
 } from '../repositories/sourcing.repository';
 import { accountRepository } from '../repositories/account.repository';
 import { jobRepository } from '../repositories/job.repository';
 import { applicationRepository } from '../repositories/application.repository';
 import { WorkspaceModel } from '../models/workspace.model';
 import { candidateService } from './candidate.service';
-import { getAIProvider, getPeopleSourcingProvider, getEmailProvider } from '../integrations';
+import { getAIProvider, getPeopleSourcingProvider, getCompensationProvider, getEmailProvider } from '../integrations';
+import { hasEnrichmentGap } from '../integrations/monid/types';
 import { jobQueue } from '../queue/job-queue';
 import { creditsService } from './credits.service';
 import {
@@ -52,8 +55,8 @@ const SEARCH_ACTION = 'SOURCING_SEARCH' as const;
 /** Credits charged per search page — reported usage always matches the real charge. */
 const SEARCH_COST = CREDIT_COSTS[SEARCH_ACTION];
 
-function providerName(): 'PDL' | 'MOCK' {
-  return config.providers.sourcing.apiKey && !config.providers.mockAll ? 'PDL' : 'MOCK';
+function providerName(): 'MONID' | 'MOCK' {
+  return config.providers.sourcing.apiKey && !config.providers.mockAll ? 'MONID' : 'MOCK';
 }
 
 /** Resolve the account that owns a workspace (the credit-spending authority). */
@@ -283,11 +286,66 @@ export const sourcingService = {
     };
   },
 
-  /** Full profile with the contact's email/phone revealed (viewing is free — data is cached). */
+  /**
+   * Full profile with the contact's email/phone revealed (viewing is free —
+   * data is cached). Lazily backfills skills/education/githubUrl/personalEmail
+   * via a targeted PDL enrich call the FIRST time this contact is opened, if
+   * (and only if) a gap actually exists — never during bulk search, to keep
+   * the cheap Apollo-eager / PDL-lazy cost split intact.
+   */
   async getContact(workspaceId: string, contactId: string): Promise<SourcedContactDto> {
     const contact = await sourcedContactRepository.findInWorkspace(workspaceId, contactId);
     if (!contact) throw notFound('Contact not found');
-    return toSourcedContactDto(contact.toObject(), { reveal: true });
+
+    let doc = contact.toObject();
+    if (hasEnrichmentGap(doc)) {
+      try {
+        const backfilled = await getPeopleSourcingProvider().backfill({
+          fullName: doc.fullName,
+          company: doc.company ?? undefined,
+          workEmail: doc.workEmail ?? undefined,
+          linkedinUrl: doc.linkedinUrl ?? undefined,
+        });
+        if (backfilled) {
+          const updated = await sourcedContactRepository.update(contactId, {
+            skills: backfilled.skills.length ? backfilled.skills : doc.skills,
+            githubUrl: backfilled.githubUrl ?? doc.githubUrl,
+            personalEmail: backfilled.personalEmail ?? doc.personalEmail,
+            education: backfilled.education.length ? backfilled.education : doc.education,
+            yearsExperience: backfilled.yearsExperience ?? doc.yearsExperience,
+          });
+          doc = (updated ?? contact).toObject();
+        }
+      } catch (err) {
+        logger.warn({ err, contactId }, 'PDL backfill failed — showing contact with the gap unfilled');
+      }
+    }
+
+    return toSourcedContactDto(doc, { reveal: true });
+  },
+
+  /**
+   * Estimated market compensation band for this contact's company + title
+   * (Levels.fyi via Monid) — aggregate data, NOT this person's actual salary.
+   * Cached globally by company+role, so repeat lookups across candidates at
+   * the same company are free. Returns null when unresolvable — a normal,
+   * expected outcome for smaller/less-known employers, not an error.
+   */
+  async getCompensationBand(workspaceId: string, contactId: string): Promise<CompensationBandDto | null> {
+    const contact = await sourcedContactRepository.findInWorkspace(workspaceId, contactId);
+    if (!contact) throw notFound('Contact not found');
+    if (!contact.company) return null;
+
+    const cached = await compensationBandCacheRepository.find(contact.company, contact.title ?? undefined);
+    if (cached) return cached.band;
+
+    const band = await getCompensationProvider().getSalaryBand({
+      company: contact.company,
+      title: contact.title ?? undefined,
+      location: contact.location ?? undefined,
+    });
+    await compensationBandCacheRepository.save(contact.company, contact.title ?? undefined, band);
+    return band;
   },
 
   /** Build a CSV of the given contacts (emails revealed) for download. */

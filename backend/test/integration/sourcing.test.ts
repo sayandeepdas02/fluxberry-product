@@ -114,6 +114,30 @@ describe('Talent Sourcing (integration)', () => {
     expect(exportRes.text.split('\r\n')[0]).toContain('Name');
   });
 
+  it('returns an estimated compensation band (or a clean no-coverage null), cached on repeat lookups', async () => {
+    const workspaceId = await onboard(token, 'Sourcing Comp', 'Compco');
+    const ws = (r: request.Test) => r.set('Authorization', `Bearer ${token}`).set('X-Workspace-Id', workspaceId);
+    await activateSubscription(workspaceId, 'MAX');
+
+    const search = await ws(request(app).post('/api/v1/sourcing/search').send({ prompt: PROMPT }) as any);
+    const contactId = search.body.data.contacts[0].id as string;
+
+    const first = await ws(request(app).get(`/api/v1/sourcing/contacts/${contactId}/compensation`) as any);
+    expect(first.status).toBe(200);
+    expect('band' in first.body.data).toBe(true);
+    if (first.body.data.band) {
+      expect(first.body.data.band.source).toBe('levels.fyi');
+      expect(typeof first.body.data.band.currency).toBe('string');
+    }
+
+    // Second lookup hits the cache — same result, no re-fetch (the cache
+    // stores a `null` band result too, so an unresolvable company doesn't
+    // get re-queried on every open).
+    const second = await ws(request(app).get(`/api/v1/sourcing/contacts/${contactId}/compensation`) as any);
+    expect(second.status).toBe(200);
+    expect(second.body.data.band).toEqual(first.body.data.band);
+  });
+
   it('lists contacts, manages talent pools, and converts a contact into the ATS', async () => {
     const workspaceId = await onboard(token, 'Sourcing Lists', 'Listco');
     const ws = (r: request.Test) => r.set('Authorization', `Bearer ${token}`).set('X-Workspace-Id', workspaceId);

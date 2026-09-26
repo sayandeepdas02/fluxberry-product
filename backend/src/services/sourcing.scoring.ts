@@ -33,7 +33,8 @@ function norm(s: string): string {
  * longer one. Token-level (not substring) matching so a one/two-letter skill
  * like "R" or "C" doesn't spuriously match "Rust" or "Scala".
  */
-function looseMatch(haystack: string, needle: string): boolean {
+/** Exported for reuse — e.g. the Apollo people-search post-filter on `organization.name` (see integrations/monid/apollo.ts). */
+export function looseMatch(haystack: string, needle: string): boolean {
   const tokens = (s: string) => norm(s).split(/[^a-z0-9+#.]+/).filter(Boolean);
   const h = tokens(haystack);
   const n = tokens(needle);
@@ -47,8 +48,11 @@ export function scoreContact(criteria: SourcingCriteria, person: ScorablePerson)
   let weighted = 0;
   let activeWeight = 0;
 
-  // Skills — share of requested skills present.
-  if (criteria.skills.length) {
+  // Skills — share of requested skills present. Excluded from activeWeight
+  // entirely (not just scored 0) when the person has no skills data at all —
+  // e.g. a freshly Apollo-sourced contact before any PDL backfill — so a
+  // missing-data gap doesn't get counted the same as a genuine mismatch.
+  if (criteria.skills.length && (person.skills?.length ?? 0) > 0) {
     activeWeight += WEIGHTS.skills;
     const have = new Set((person.skills ?? []).map(norm));
     const matched = criteria.skills.filter((s) =>

@@ -101,15 +101,17 @@ const envSchema = z.object({
   GOOGLE_CALENDAR_REDIRECT_URI: z.string().optional().default(''),
 
   /**
-   * People Data Labs (Talent Sourcing). Blank -> a realistic mock provider
-   * activates, so the whole sourcing flow (NL search -> ranked profiles ->
-   * lists -> campaigns) works end to end with zero keys and zero PDL spend.
-   * Set a real key to hit the live Person Search API (billed per record
-   * returned). `PDL_MAX_RESULTS` hard-caps how many profiles a single search
-   * can ever retrieve, as a spend guardrail.
+   * Monid (Talent Sourcing + compensation). Brokers Apollo (search + email
+   * enrichment), PDL (backfill for skills/education/github/personal email),
+   * and Levels.fyi (estimated market compensation) under one API key/wallet.
+   * Blank -> realistic mock providers activate, so the whole sourcing flow
+   * (NL search -> ranked profiles -> lists -> campaigns) and the
+   * compensation panel work end to end with zero keys and zero spend.
+   * `MONID_MAX_RESULTS` hard-caps how many profiles a single search can ever
+   * retrieve, as a spend guardrail (each result costs one Apollo enrich call).
    */
-  PDL_API_KEY: z.string().optional().default(''),
-  PDL_MAX_RESULTS: z.coerce.number().int().min(1).max(1000).default(200),
+  MONID_API_KEY: z.string().optional().default(''),
+  MONID_MAX_RESULTS: z.coerce.number().int().min(1).max(1000).default(200),
 
   REDIS_URL: z.string().optional().default(''),
   SENTRY_RELEASE: z.string().optional().default(''),
@@ -235,7 +237,7 @@ export const config = {
       redirectUri: e.GOOGLE_CALENDAR_REDIRECT_URI || `${e.PUBLIC_API_URL || `http://localhost:${e.PORT}`}/api/v1/integrations/google-calendar/callback`,
     },
     avScan: { host: e.CLAMD_HOST || '', port: e.CLAMD_PORT },
-    sourcing: { apiKey: e.PDL_API_KEY, maxResults: e.PDL_MAX_RESULTS },
+    sourcing: { apiKey: e.MONID_API_KEY, maxResults: e.MONID_MAX_RESULTS },
   },
 
   careersPreviewSecret: e.CAREERS_PREVIEW_SECRET || 'dev-preview-secret',

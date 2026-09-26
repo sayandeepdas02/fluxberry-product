@@ -6,6 +6,11 @@ import { SourcingListMemberModel } from '../models/sourcing-list-member.model';
 import { SourcingCampaignModel } from '../models/sourcing-campaign.model';
 import { SourcingCampaignRecipientModel } from '../models/sourcing-campaign-recipient.model';
 import { SourcingSuppressionModel } from '../models/sourcing-suppression.model';
+import {
+  CompensationBandCacheModel,
+  COMPENSATION_BAND_CACHE_TTL_MS,
+} from '../models/compensation-band-cache.model';
+import type { CompensationBandDto } from '../shared';
 
 export const sourcingSearchRepository = {
   create: (data: Record<string, any>) => SourcingSearchModel.create(data),
@@ -203,5 +208,25 @@ export const sourcingSuppressionRepository = {
       { workspaceId, email: email.toLowerCase() },
       { $setOnInsert: { workspaceId, email: email.toLowerCase(), reason } },
       { upsert: true },
+    ),
+};
+
+function compKeys(company: string, title?: string) {
+  return { companyKey: company.trim().toLowerCase(), titleKey: title?.trim().toLowerCase() ?? null };
+}
+
+export const compensationBandCacheRepository = {
+  /** Returns the cached band (or cached null-coverage) if fresh; null if there's no cached entry, or it's gone stale, and a live lookup should run. */
+  find: async (company: string, title?: string): Promise<{ band: CompensationBandDto | null } | null> => {
+    const doc = await CompensationBandCacheModel.findOne(compKeys(company, title)).lean();
+    if (!doc) return null;
+    if (Date.now() - doc.fetchedAt.getTime() > COMPENSATION_BAND_CACHE_TTL_MS) return null;
+    return { band: (doc.band as CompensationBandDto | null) ?? null };
+  },
+  save: (company: string, title: string | undefined, band: CompensationBandDto | null) =>
+    CompensationBandCacheModel.findOneAndUpdate(
+      compKeys(company, title),
+      { $set: { band, fetchedAt: new Date() } },
+      { upsert: true, new: true },
     ),
 };

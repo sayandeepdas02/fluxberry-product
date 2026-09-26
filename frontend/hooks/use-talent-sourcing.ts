@@ -17,6 +17,7 @@ import type {
   UpdateCampaignInput,
   DraftCampaignInput,
   CampaignDraftDto,
+  CompensationBandResultDto,
 } from '@/lib/shared';
 import { api, getAccessToken, getWorkspaceId } from '@/lib/api-client';
 import { publicConfig } from '@/lib/config';
@@ -89,6 +90,20 @@ export function useContact(contactId: string | null) {
     queryKey: ['sourcing', 'contact', currentWorkspace.id, contactId],
     queryFn: () => api.get<SourcedContactDto>(`/api/v1/sourcing/contacts/${contactId}`),
     enabled: Boolean(contactId),
+  });
+}
+
+/**
+ * Estimated market compensation band (Levels.fyi) — lazy, on-demand: pass
+ * `enabled: false` until the recruiter actually opens the Compensation tab so
+ * the (small, but non-zero) spend never happens just from opening a contact.
+ */
+export function useCompensationBand(contactId: string | null, enabled: boolean) {
+  const { currentWorkspace } = useWorkspace();
+  return useQuery({
+    queryKey: ['sourcing', 'compensation', currentWorkspace.id, contactId],
+    queryFn: () => api.get<CompensationBandResultDto>(`/api/v1/sourcing/contacts/${contactId}/compensation`),
+    enabled: Boolean(contactId) && enabled,
   });
 }
 

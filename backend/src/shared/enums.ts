@@ -200,8 +200,8 @@ export type SeniorityLevel = (typeof SENIORITY_LEVELS)[number];
 export const SOURCING_SEARCH_STATUSES = ['DRAFT', 'READY', 'RUNNING', 'COMPLETED', 'FAILED'] as const;
 export type SourcingSearchStatus = (typeof SOURCING_SEARCH_STATUSES)[number];
 
-/** Where a sourced contact's data originates. */
-export const SOURCING_PROVIDERS = ['PDL', 'MANUAL', 'MOCK'] as const;
+/** Where a sourced contact's data originates. 'PDL' kept for historical records — new live contacts are 'MONID' (Apollo + PDL backfill, brokered through Monid). */
+export const SOURCING_PROVIDERS = ['PDL', 'MONID', 'MANUAL', 'MOCK'] as const;
 export type SourcingProviderName = (typeof SOURCING_PROVIDERS)[number];
 
 /** Lifecycle of an outreach campaign to a sourcing list. */

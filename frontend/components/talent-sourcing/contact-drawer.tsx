@@ -1,14 +1,15 @@
 'use client';
 
-import { Linkedin, Github, Download, ChevronLeft, ChevronRight, Briefcase, GraduationCap, Sparkles, UserPlus, ListPlus, CheckCircle2 } from 'lucide-react';
-import type { SourcedContactDto } from '@/lib/shared';
+import { useState } from 'react';
+import { Linkedin, Github, Download, ChevronLeft, ChevronRight, Briefcase, GraduationCap, Sparkles, UserPlus, ListPlus, CheckCircle2, DollarSign } from 'lucide-react';
+import type { SourcedContactDto, CompensationBandDto } from '@/lib/shared';
 import { Sheet, SheetContent, SheetBody, SheetFooter, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Spinner } from '@/components/ui/spinner';
 import { initials } from '@/lib/utils';
-import { useContact } from '@/hooks/use-talent-sourcing';
+import { useContact, useCompensationBand } from '@/hooks/use-talent-sourcing';
 import { MatchScoreBadge } from './match-score-badge';
 
 export function ContactDrawer({
@@ -136,6 +137,9 @@ function Header({
 
 function Body({ contact }: { contact: SourcedContactDto }) {
   const email = contact.workEmail || contact.personalEmail;
+  const [activeTab, setActiveTab] = useState('overview');
+  const { data: compResult, isLoading: compLoading } = useCompensationBand(contact.id, activeTab === 'compensation');
+
   return (
     <div className="space-y-5">
       {contact.matchReasons.length > 0 && (
@@ -149,12 +153,13 @@ function Body({ contact }: { contact: SourcedContactDto }) {
         </div>
       )}
 
-      <Tabs defaultValue="overview">
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="experience">Experience</TabsTrigger>
           <TabsTrigger value="education">Education</TabsTrigger>
           <TabsTrigger value="skills">Skills</TabsTrigger>
+          <TabsTrigger value="compensation">Compensation</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview">
@@ -220,7 +225,58 @@ function Body({ contact }: { contact: SourcedContactDto }) {
             </div>
           )}
         </TabsContent>
+
+        <TabsContent value="compensation">
+          {compLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Spinner className="size-5" />
+            </div>
+          ) : compResult?.band ? (
+            <CompensationBandView band={compResult.band} />
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              No compensation data available for this company/role.
+            </p>
+          )}
+        </TabsContent>
       </Tabs>
+    </div>
+  );
+}
+
+function CompensationBandView({ band }: { band: CompensationBandDto }) {
+  const fmt = (n?: number) =>
+    n == null ? '—' : new Intl.NumberFormat('en-US', { style: 'currency', currency: band.currency, maximumFractionDigits: 0 }).format(n);
+
+  return (
+    <div className="space-y-4">
+      <div className="rounded-lg border border-border bg-primary/5 px-3 py-2.5">
+        <div className="mb-1 flex items-center gap-1.5 text-xs font-medium text-primary">
+          <DollarSign className="size-3.5" /> Estimated market compensation (Levels.fyi, aggregate data)
+        </div>
+        <p className="text-sm text-foreground">
+          Crowd-sourced pay data for {band.jobFamilyName ?? 'this role'} at {band.companyName ?? 'this company'} —
+          not this candidate&apos;s actual salary.
+        </p>
+      </div>
+
+      <div>
+        <div className="mb-2 text-xs font-medium text-muted-foreground">Total compensation</div>
+        <dl className="grid grid-cols-3 gap-3 text-sm">
+          <Row label="P25">{fmt(band.totalComp.p25)}</Row>
+          <Row label="Median">{fmt(band.totalComp.p50)}</Row>
+          <Row label="P75">{fmt(band.totalComp.p75)}</Row>
+        </dl>
+      </div>
+
+      <div>
+        <div className="mb-2 text-xs font-medium text-muted-foreground">Base salary</div>
+        <dl className="grid grid-cols-3 gap-3 text-sm">
+          <Row label="P25">{fmt(band.base.p25)}</Row>
+          <Row label="Median">{fmt(band.base.p50)}</Row>
+          <Row label="P75">{fmt(band.base.p75)}</Row>
+        </dl>
+      </div>
     </div>
   );
 }

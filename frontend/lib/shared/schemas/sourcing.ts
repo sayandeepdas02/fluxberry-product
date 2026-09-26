@@ -340,3 +340,29 @@ export type SourcingCampaignRecipientDto = {
   sentAt?: string | null;
   error?: string | null;
 };
+
+// ---- Compensation (Levels.fyi, via Monid) ---------------------------------
+
+export type CompensationPercentilesDto = {
+  p25?: number;
+  p50?: number;
+  p75?: number;
+};
+
+/** Aggregate, crowd-sourced market compensation for a company + job family — NOT this specific candidate's actual pay. */
+export type CompensationBandDto = {
+  companySlug: string;
+  companyName?: string;
+  jobFamilySlug?: string;
+  jobFamilyName?: string;
+  currency: string;
+  totalComp: CompensationPercentilesDto;
+  base: CompensationPercentilesDto;
+  source: 'levels.fyi';
+  fetchedAt: string;
+};
+
+/** Response of `GET /sourcing/contacts/:id/compensation` — null is a normal "no coverage" outcome, not an error. */
+export type CompensationBandResultDto = {
+  band: CompensationBandDto | null;
+};

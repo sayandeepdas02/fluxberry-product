@@ -59,6 +59,12 @@ export const sourcingController = {
     ok(res, contact);
   }),
 
+  /** Estimated market compensation band (Levels.fyi) — null when unresolvable, not an error. */
+  getCompensation: asyncHandler(async (req, res) => {
+    const band = await sourcingService.getCompensationBand(req.auth!.workspaceId!, req.params.contactId);
+    ok(res, { band });
+  }),
+
   exportContacts: asyncHandler(async (req, res) => {
     const { contactIds } = req.body as ExportContactsInput;
     const csv = await sourcingService.exportContactsCsv(req.auth!.workspaceId!, contactIds);
