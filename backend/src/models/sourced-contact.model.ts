@@ -65,6 +65,13 @@ const sourcedContactSchema = new Schema(
     education: { type: [educationSchema], default: [] },
     /** The full provider payload, kept for later enrichment without a re-fetch. */
     rawProfile: { type: Schema.Types.Mixed, default: null },
+    /**
+     * When a PDL backfill was last attempted for this contact (set whether it
+     * found data, found nothing, or errored) — so a contact with a permanent
+     * gap (e.g. genuinely no GitHub/personal email anywhere) isn't re-billed
+     * $0.30 on every subsequent detail-view open. See hasEnrichmentGap.
+     */
+    backfillAttemptedAt: { type: Date, default: null },
     matchScore: { type: Number, default: 0 },
     matchReasons: { type: [String], default: [] },
     /** Set once the contact has been converted into a Candidate + Application. */

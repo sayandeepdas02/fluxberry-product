@@ -2,27 +2,27 @@
 
 Outbound candidate discovery for Fluxberry. A recruiter types one line —
 _"Senior Software Engineer with 4+ years of experience in Rust based in
-Bangalore"_ — and Fluxberry parses it into filters, searches People Data Labs,
-ranks the results with a transparent match score, and lets the recruiter select
-people, save them into lists (talent pools), and run email outreach campaigns
-about an open role.
+Bangalore"_ — and Fluxberry parses it into filters, searches Apollo (via
+Monid), ranks the results with a transparent match score, and lets the
+recruiter select people, save them into lists (talent pools), and run email
+outreach campaigns about an open role.
 
 It closes the single biggest product gap called out in `IMPLEMENTATION.md`:
 Fluxberry collects inbound applicants but cannot help you _find_ people who have
 not applied. This is the top-of-funnel that feeds the existing ATS.
 
 ```
-Prompt → AI criteria → PDL search → ranked contacts → lists → campaigns → replies → convert to candidate → existing pipeline
+Prompt → AI criteria → Apollo search+enrich → ranked contacts → (lazy PDL backfill / Levels.fyi comp) → lists → campaigns → replies → convert to candidate → existing pipeline
 ```
 
 ## Where it plugs into the existing architecture
 
 Nothing here is novel infrastructure. It reuses every established pattern:
 
-- **Provider abstraction** — People Data Labs is a new provider behind an
-  interface (`integrations/pdl/`), with a realistic mock so the whole flow runs
-  with zero keys, exactly like `ai/`, `email/`, `storage/`. Selected by
-  `config.providers.sourcing.apiKey`.
+- **Provider abstraction** — Monid brokers Apollo, PDL, and Levels.fyi behind
+  one interface (`integrations/monid/`), with realistic mocks so the whole flow
+  runs with zero keys, exactly like `ai/`, `email/`, `storage/`. Selected by
+  `config.providers.sourcing.apiKey` (`MONID_API_KEY`).
 - **AI abstraction** — natural-language → structured filters is a new
   `AIProvider.parseSourcingQuery()` method, implemented in `base-llm.ts`
   (Anthropic/OpenAI) and `mock.ts`, mirroring `generateJobDescription`.
@@ -38,31 +38,42 @@ Nothing here is novel infrastructure. It reuses every established pattern:
   goes through `authenticate → resolveWorkspace → requireWorkspace →
   requireActiveSubscription`.
 
-## People Data Labs — cost model and controls
+## Monid (Apollo + PDL + Levels.fyi) — cost model and controls
 
-The live Person Search API (`GET /v5/person/search`, header `X-Api-Key`) is
-**billed one credit per record returned** (roughly $0.28–0.38/record depending on
-plan). Search is the expensive operation, so the design treats credits as a
-first-class budget:
+Monid (`api.monid.ai`) is a single broker/wallet for three upstream providers,
+each used for what it's cheapest/best at:
+
+| Provider | Role | Cost |
+|---|---|---|
+| Apollo `/mixed_people/api_search` | Find candidate ids matching criteria | Free (but returns only redacted previews) |
+| Apollo `/people/match` | Resolve one id into a full, displayable profile (name/title/company/location/work-email) | $0.05/call — every search result needs this to be usable at all |
+| PDL `/v5/person/enrich` (via Monid) | Lazy backfill for `skills`/`education`/`githubUrl`/`personalEmail` when Apollo lacks them | $0.30/call — only on contact-detail open, only when a gap exists |
+| Levels.fyi `/get_salary_data` | Estimated market compensation band by company + role | $0.01/call, cached globally by company+role |
+
+Apollo has no per-person skills/education/GitHub data — those fields are empty
+on a fresh search result and only populate after a lazy PDL backfill. See
+`sourcing.scoring.ts`'s skills-weight guard: the skills dimension is excluded
+from a contact's score entirely (not scored as a miss) until it has real data.
 
 - **Bounded pages.** A search retrieves `SOURCING_PAGE_SIZE` (25) profiles at a
-  time; "Load more" is an explicit, credit-costing action, never automatic.
-- **Hard cap.** `PDL_MAX_RESULTS` (default 200) caps how many profiles a single
-  search can ever pull.
+  time; "Load more" is an explicit, spend-costing action, never automatic.
+- **Hard cap.** `MONID_MAX_RESULTS` (default 200) caps how many profiles a
+  single search can ever pull.
 - **Cache once, reuse free.** Retrieved people are cached as `SourcedContact`
-  docs; viewing, listing, exporting, and emailing them never re-hits PDL.
-- **Credit accounting.** Each `SourcingSearch` records `creditsUsed`, surfaced
-  in the UI so spend is always visible.
-- **Mock-first.** With no `PDL_API_KEY`, a deterministic mock generates
-  realistic matching people (stable per query, paginated), so dev/demo/tests
-  cost nothing. Set the key to go live; method signatures never change.
+  docs; viewing, listing, exporting, and emailing them never re-hits Apollo.
+  PDL backfill and Levels.fyi lookups are similarly on-demand and cached
+  (compensation bands globally, by company+role — not per candidate).
+- **Mock-first.** With no `MONID_API_KEY`, deterministic mocks generate
+  realistic matching people and compensation bands, so dev/demo/tests cost
+  nothing. Set the key to go live; method signatures never change.
 
 ## Data model (new collections)
 
 | Collection | Purpose | Key fields / indexes |
 |---|---|---|
 | `sourcing_searches` | One executed NL search (prompt → criteria → cached page state) | `workspaceId`, `createdBy`, `prompt`, `criteria`, `status`, `total`, `fetched`, `creditsUsed`, `scrollToken`, `lastRunAt`. Idx `(workspaceId, createdAt)` |
-| `sourced_contacts` | A cached person, workspace-scoped, deduped | `workspaceId`, `pdlId`, `provider`, name/title/company/location/skills/yearsExperience, `workEmail`/`personalEmail`, `rawProfile`, `matchScore`, `matchReasons`, `addedToJob`. Idx `(workspaceId, pdlId)` unique-sparse, `(workspaceId, createdAt)` |
+| `sourced_contacts` | A cached person, workspace-scoped, deduped | `workspaceId`, `pdlId` (opaque upstream-id dedupe key — Apollo person id live, PDL id for historical `provider: 'PDL'` records), `provider`, name/title/company/location/skills/yearsExperience, `workEmail`/`personalEmail`, `rawProfile`, `matchScore`, `matchReasons`, `addedToJob`. Idx `(workspaceId, pdlId)` unique-sparse, `(workspaceId, createdAt)` |
+| `compensation_band_cache` | Global (not workspace-scoped) cache of a resolved Levels.fyi band, or a cached "no coverage" miss | `companySlug`, `jobFamilySlug`, `location`, `currency`, `base{p25,p50,p75}`, `totalComp{p25,p50,p75}`, `fetchedAt`. Idx `(companySlug, jobFamilySlug, location)` unique |
 | `sourcing_lists` | A talent pool | `workspaceId`, `name`, `description`, `contactCount`, `createdBy`. Idx `(workspaceId, name)` |
 | `sourcing_list_members` | List ↔ contact join | `workspaceId`, `listId`, `contactId`, `addedBy`, `note`. Idx `(listId, contactId)` unique |
 | `sourcing_campaigns` | An outreach campaign to a list | `workspaceId`, `name`, `listId`, `subject`, `body` (merge tags), `fromName`, `replyToEmail`, `status`, `scheduledAt`, `sentAt`, `stats{}`. Idx `(workspaceId, status)` |
@@ -87,7 +98,7 @@ criteria** (not an opaque number), plus plain-language `matchReasons`:
 - location match
 
 The score is computed in the service, so the same ranking applies to both mock
-and live PDL results. Results are sorted by it, so the strongest fits are on top.
+and live results. Results are sorted by it, so the strongest fits are on top.
 
 ## AI: prompt → criteria
 
@@ -112,6 +123,7 @@ Search & contacts
 - `PATCH /sourcing/searches/:id/criteria` `{ criteria }` → re-run with edited chips.
 - `GET /sourcing/searches` / `GET /sourcing/searches/:id` → history + rehydrate.
 - `GET /sourcing/contacts/:id` → full profile (reveals email).
+- `GET /sourcing/contacts/:id/compensation` → estimated market compensation band (Levels.fyi via Monid, cached globally by company+role, `null` when unresolvable) — lazy, on-demand, no spend on search/list views.
 - `POST /sourcing/contacts/export` `{ contactIds }` → CSV.
 - `POST /sourcing/contacts/:id/convert` `{ jobId }` → create Candidate+Application.
 
@@ -175,28 +187,32 @@ law); the product makes the compliant path the default one.
 ## Configuration
 
 ```
-PDL_API_KEY=            # blank -> realistic mock; set -> live People Data Labs
-PDL_MAX_RESULTS=200     # hard cap on profiles per search (spend guardrail)
+MONID_API_KEY=          # blank -> realistic mocks; set -> live Apollo/PDL/Levels.fyi via Monid
+MONID_MAX_RESULTS=200   # hard cap on profiles per search (spend guardrail)
 FEATURE_TALENT_SOURCING=true
 # reuses existing RESEND_API_KEY / EMAIL_FROM / INBOUND_EMAIL_DOMAIN for campaigns
 ```
 
 ## Phasing & status
 
-- **Phase 1a — foundation (DONE, typechecked, verified).** Shared contracts
-  (`schemas/sourcing.ts`, enums, flags, plan-features, mirrored to
-  `frontend/lib/shared`), `config.providers.sourcing`, the People Data Labs
-  provider + realistic mock (`integrations/pdl/`), and
-  `AIProvider.parseSourcingQuery` across `types/prompts/base-llm/mock`. Proven on
-  the canonical prompt end to end.
-- **Phase 1b — search backend slice.** `sourcing_searches` + `sourced_contacts`
-  models, repository, `sourcing.service` (parse → search → cache → score),
-  serializer, controller, routes, mount; CSV export.
-- **Phase 1c — search UI.** Nav unlock, `/app/talent-sourcing` hero page,
-  `use-talent-sourcing` hook, criteria chips, ranked results + multi-select,
-  profile slide-over, CSV export.
-- **Phase 2 — lists + convert-to-candidate bridge.**
-- **Phase 3 — outreach campaigns** (composer, queue fan-out, tracking,
+- **Phase 1a — foundation (DONE).** Shared contracts (`schemas/sourcing.ts`,
+  enums, flags, plan-features, mirrored to `frontend/lib/shared`),
+  `config.providers.sourcing`, and `AIProvider.parseSourcingQuery` across
+  `types/prompts/base-llm/mock`. Proven on the canonical prompt end to end.
+- **Phase 1b — search backend slice (DONE).** `sourcing_searches` +
+  `sourced_contacts` models, repository, `sourcing.service` (parse → search →
+  cache → score), serializer, controller, routes, mount; CSV export.
+- **Phase 1c — search UI (DONE).** Nav unlock, `/app/talent-sourcing` hero
+  page, `use-talent-sourcing` hook, criteria chips, ranked results +
+  multi-select, profile slide-over, CSV export.
+- **Phase 2 — lists + convert-to-candidate bridge (DONE).**
+- **Phase 3 — outreach campaigns (DONE)** (composer, queue fan-out, tracking,
   unsubscribe/suppression, reply threading).
+- **Phase 4 — Monid migration + compensation (DONE).** Retired the direct PDL
+  provider (`integrations/pdl/`) in favor of `integrations/monid/`: Apollo for
+  search + eager email enrichment, PDL (via Monid) as a lazy backfill for
+  fields Apollo lacks, and a new Levels.fyi-backed "estimated market
+  compensation" panel on the contact detail view, cached globally by
+  company+role in `compensation_band_cache`.
 
 Each phase is independently shippable and demoable.

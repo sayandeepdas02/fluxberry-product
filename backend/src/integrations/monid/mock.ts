@@ -1,5 +1,8 @@
 import type { SourcingCriteria } from '../../shared';
 import type {
+  CompensationBand,
+  CompensationBandInput,
+  CompensationProvider,
   PeopleSourcingProvider,
   PersonSearchInput,
   PersonSearchResult,
@@ -139,6 +142,18 @@ export class MockPeopleSourcingProvider implements PeopleSourcingProvider {
     const scrollToken = nextOffset < total ? encodeToken(nextOffset) : null;
 
     return { people, total, scrollToken, creditsUsed: people.length };
+  }
+
+  /** Deterministic mock backfill — exercises the same lazy-enrichment code path as the live PDL backfill, seeded from the person's identity so it's stable and reproducible. */
+  async backfill(person: Pick<SourcedPerson, 'fullName' | 'company' | 'workEmail' | 'linkedinUrl'>) {
+    const rng = mulberry32(hashString(`${person.fullName}|${person.company ?? ''}`));
+    return {
+      skills: buildSkills(rng, []),
+      githubUrl: `https://github.com/${person.fullName.toLowerCase().replace(/\s+/g, '-')}-mock`,
+      personalEmail: `${person.fullName.toLowerCase().replace(/\s+/g, '.')}@example.org`,
+      education: [buildEducation(rng)],
+      yearsExperience: 2 + Math.floor(rng() * 10),
+    };
   }
 }
 
@@ -288,5 +303,36 @@ function decodeToken(token?: string | null): number {
     return m ? Number(m[1]) : 0;
   } catch {
     return 0;
+  }
+}
+
+/**
+ * Deterministic mock of the compensation provider — seeded from company+title
+ * so the same input always returns the same believable band, and a small
+ * fraction of companies (odd hash) simulate "no coverage" the way most
+ * smaller employers will in production.
+ */
+export class MockCompensationProvider implements CompensationProvider {
+  readonly name = 'mock';
+
+  async getSalaryBand(input: CompensationBandInput): Promise<CompensationBand | null> {
+    const seed = hashString(`${input.company}|${input.title ?? ''}`);
+    if (seed % 5 === 0) return null; // simulate "no coverage" for ~20% of lookups
+
+    const rng = mulberry32(seed);
+    const baseMid = 90_000 + Math.floor(rng() * 160_000);
+    const tcMid = baseMid + Math.floor(rng() * 120_000);
+
+    return {
+      companySlug: input.company.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      companyName: input.company,
+      jobFamilySlug: input.title ? 'software-engineer' : undefined,
+      jobFamilyName: input.title ? 'Software Engineer' : undefined,
+      currency: 'USD',
+      base: { p25: Math.round(baseMid * 0.85), p50: baseMid, p75: Math.round(baseMid * 1.2) },
+      totalComp: { p25: Math.round(tcMid * 0.8), p50: tcMid, p75: Math.round(tcMid * 1.35) },
+      source: 'levels.fyi',
+      fetchedAt: '2026-01-01T00:00:00.000Z',
+    };
   }
 }

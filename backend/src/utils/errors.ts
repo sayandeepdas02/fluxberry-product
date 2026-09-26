@@ -82,5 +82,5 @@ export const payloadTooLarge = (message = 'File too large') =>
 export const unsupportedMediaType = (message = 'Unsupported file type') =>
   new AppError('UNSUPPORTED_MEDIA_TYPE', message, 415);
 
-export const providerError = (message = 'Upstream provider failed') =>
-  new AppError('PROVIDER_ERROR', message, 502, { expose: true });
+export const providerError = (message = 'Upstream provider failed', details?: unknown) =>
+  new AppError('PROVIDER_ERROR', message, 502, { expose: true, details });

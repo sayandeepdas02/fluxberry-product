@@ -16,6 +16,7 @@ import type {
   UpdateCampaignInput,
   DraftCampaignInput,
   CampaignDraftDto,
+  CompensationBandDto,
 } from '../shared';
 import { SOURCING_PAGE_SIZE, SOURCING_MAX_PAGE_SIZE, CREDIT_COSTS } from '../shared';
 import {
@@ -26,13 +27,16 @@ import {
   sourcingCampaignRepository,
   sourcingRecipientRepository,
   sourcingSuppressionRepository,
+  compensationBandCacheRepository,
 } from '../repositories/sourcing.repository';
 import { accountRepository } from '../repositories/account.repository';
 import { jobRepository } from '../repositories/job.repository';
 import { applicationRepository } from '../repositories/application.repository';
 import { WorkspaceModel } from '../models/workspace.model';
 import { candidateService } from './candidate.service';
-import { getAIProvider, getPeopleSourcingProvider, getEmailProvider } from '../integrations';
+import { getAIProvider, getPeopleSourcingProvider, getCompensationProvider, getEmailProvider } from '../integrations';
+import { hasEnrichmentGap } from '../integrations/monid/types';
+import { MonidOperationalError } from '../integrations/monid/client';
 import { jobQueue } from '../queue/job-queue';
 import { creditsService } from './credits.service';
 import {
@@ -52,8 +56,8 @@ const SEARCH_ACTION = 'SOURCING_SEARCH' as const;
 /** Credits charged per search page — reported usage always matches the real charge. */
 const SEARCH_COST = CREDIT_COSTS[SEARCH_ACTION];
 
-function providerName(): 'PDL' | 'MOCK' {
-  return config.providers.sourcing.apiKey && !config.providers.mockAll ? 'PDL' : 'MOCK';
+function providerName(): 'MONID' | 'MOCK' {
+  return config.providers.sourcing.apiKey && !config.providers.mockAll ? 'MONID' : 'MOCK';
 }
 
 /** Resolve the account that owns a workspace (the credit-spending authority). */
@@ -68,16 +72,27 @@ function pageSize(size?: number): number {
   return Math.max(1, Math.min(size ?? SOURCING_PAGE_SIZE, cap));
 }
 
-/** Cache a page of people (dedupe by pdlId), score them, and return docs ordered best-fit first. */
+/**
+ * Cache a page of people (dedupe by pdlId), score them, and return docs
+ * ordered best-fit first. When the same upstream person resurfaces in a later
+ * search, Apollo's fresh data never includes skills/education/githubUrl/
+ * personalEmail (Apollo doesn't have them) — so those fields are preserved
+ * from the existing doc rather than blanked out, or a prior PDL backfill
+ * would silently vanish on the contact's next re-search.
+ */
 async function cacheAndScore(
   workspaceId: string,
   criteria: SourcingCriteria,
   people: Awaited<ReturnType<ReturnType<typeof getPeopleSourcingProvider>['search']>>['people'],
 ): Promise<any[]> {
   const provider = providerName();
+  const pdlIds = people.map((p) => p.providerId).filter((id): id is string => Boolean(id));
+  const existingById = await sourcedContactRepository.findManyByPdlIds(workspaceId, pdlIds);
+
   const docs: any[] = [];
   for (const p of people) {
     const { score, reasons } = scoreContact(criteria, p);
+    const existing = p.providerId ? existingById.get(p.providerId) : undefined;
     const doc = await sourcedContactRepository.upsertByPdlId(workspaceId, p.providerId ?? null, {
       provider,
       fullName: p.fullName,
@@ -90,15 +105,15 @@ async function cacheAndScore(
       industry: p.industry ?? null,
       location: p.location ?? null,
       country: p.country ?? null,
-      yearsExperience: p.yearsExperience ?? null,
-      skills: p.skills ?? [],
+      yearsExperience: p.yearsExperience ?? existing?.yearsExperience ?? null,
+      skills: p.skills.length ? p.skills : (existing?.skills ?? []),
       linkedinUrl: p.linkedinUrl ?? null,
-      githubUrl: p.githubUrl ?? null,
+      githubUrl: p.githubUrl ?? existing?.githubUrl ?? null,
       workEmail: p.workEmail ?? null,
-      personalEmail: p.personalEmail ?? null,
+      personalEmail: p.personalEmail ?? existing?.personalEmail ?? null,
       phone: p.phone ?? null,
-      experience: p.experience ?? [],
-      education: p.education ?? [],
+      experience: p.experience.length ? p.experience : (existing?.experience ?? []),
+      education: p.education.length ? p.education : (existing?.education ?? []),
       rawProfile: p,
       matchScore: score,
       matchReasons: reasons,
@@ -283,11 +298,86 @@ export const sourcingService = {
     };
   },
 
-  /** Full profile with the contact's email/phone revealed (viewing is free — data is cached). */
+  /**
+   * Full profile with the contact's email/phone revealed (viewing is free —
+   * data is cached). Lazily backfills skills/education/githubUrl/personalEmail
+   * via a targeted PDL enrich call the FIRST time this contact is opened, if
+   * (and only if) a gap actually exists AND a backfill hasn't already been
+   * attempted — `backfillAttemptedAt` is stamped unconditionally (whether PDL
+   * found data, found nothing, or errored), so a contact with a genuine,
+   * permanent gap (no GitHub/personal email anywhere) is never re-billed
+   * $0.30 on every later open.
+   */
   async getContact(workspaceId: string, contactId: string): Promise<SourcedContactDto> {
     const contact = await sourcedContactRepository.findInWorkspace(workspaceId, contactId);
     if (!contact) throw notFound('Contact not found');
-    return toSourcedContactDto(contact.toObject(), { reveal: true });
+
+    let doc = contact.toObject();
+    if (!doc.backfillAttemptedAt && hasEnrichmentGap(doc)) {
+      // Atomically claim the right to backfill this contact — the conditional
+      // filter (backfillAttemptedAt: null) means only ONE concurrent detail-view
+      // open can win this; a second request gets null back and skips straight
+      // through without a duplicate paid PDL call.
+      const claimed = await sourcedContactRepository.claimBackfill(contactId);
+      if (claimed) {
+        let patch: Record<string, unknown> | null = null;
+        try {
+          const backfilled = await getPeopleSourcingProvider().backfill({
+            fullName: doc.fullName,
+            company: doc.company ?? undefined,
+            workEmail: doc.workEmail ?? undefined,
+            linkedinUrl: doc.linkedinUrl ?? undefined,
+          });
+          if (backfilled) {
+            patch = {
+              skills: backfilled.skills.length ? backfilled.skills : doc.skills,
+              githubUrl: backfilled.githubUrl ?? doc.githubUrl,
+              personalEmail: backfilled.personalEmail ?? doc.personalEmail,
+              education: backfilled.education.length ? backfilled.education : doc.education,
+              yearsExperience: backfilled.yearsExperience ?? doc.yearsExperience,
+            };
+          }
+        } catch (err) {
+          if (err instanceof MonidOperationalError) {
+            // Not a real attempt — release the claim so a later open can retry.
+            await sourcedContactRepository.update(contactId, { backfillAttemptedAt: null });
+            logger.warn({ err, contactId }, 'PDL backfill hit a Monid outage — will retry on next open');
+          } else {
+            logger.warn({ err, contactId }, 'PDL backfill failed — showing contact with the gap unfilled');
+          }
+        }
+        const updated = patch ? await sourcedContactRepository.update(contactId, patch) : claimed;
+        doc = (updated ?? claimed).toObject();
+      }
+      // If claimed is null, another request already won the race (or completed
+      // with a permanent gap) — proceed with `doc` as-is, no extra PDL spend.
+    }
+
+    return toSourcedContactDto(doc, { reveal: true });
+  },
+
+  /**
+   * Estimated market compensation band for this contact's company + title
+   * (Levels.fyi via Monid) — aggregate data, NOT this person's actual salary.
+   * Cached globally by company+role, so repeat lookups across candidates at
+   * the same company are free. Returns null when unresolvable — a normal,
+   * expected outcome for smaller/less-known employers, not an error.
+   */
+  async getCompensationBand(workspaceId: string, contactId: string): Promise<CompensationBandDto | null> {
+    const contact = await sourcedContactRepository.findInWorkspace(workspaceId, contactId);
+    if (!contact) throw notFound('Contact not found');
+    if (!contact.company) return null;
+
+    const cached = await compensationBandCacheRepository.find(contact.company, contact.title ?? undefined, contact.location ?? undefined);
+    if (cached) return cached.band;
+
+    const band = await getCompensationProvider().getSalaryBand({
+      company: contact.company,
+      title: contact.title ?? undefined,
+      location: contact.location ?? undefined,
+    });
+    await compensationBandCacheRepository.save(contact.company, contact.title ?? undefined, contact.location ?? undefined, band);
+    return band;
   },
 
   /** Build a CSV of the given contacts (emails revealed) for download. */

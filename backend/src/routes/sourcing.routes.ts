@@ -80,6 +80,7 @@ sourcingRouter.post(
   sourcingController.exportContacts,
 );
 sourcingRouter.get('/sourcing/contacts/:contactId', sourcingController.getContact);
+sourcingRouter.get('/sourcing/contacts/:contactId/compensation', sourcingController.getCompensation);
 sourcingRouter.post(
   '/sourcing/contacts/:contactId/convert',
   requireRole('recruiter'),

@@ -6,6 +6,11 @@ import { SourcingListMemberModel } from '../models/sourcing-list-member.model';
 import { SourcingCampaignModel } from '../models/sourcing-campaign.model';
 import { SourcingCampaignRecipientModel } from '../models/sourcing-campaign-recipient.model';
 import { SourcingSuppressionModel } from '../models/sourcing-suppression.model';
+import {
+  CompensationBandCacheModel,
+  COMPENSATION_BAND_CACHE_TTL_MS,
+} from '../models/compensation-band-cache.model';
+import type { CompensationBandDto } from '../shared';
 
 export const sourcingSearchRepository = {
   create: (data: Record<string, any>) => SourcingSearchModel.create(data),
@@ -29,6 +34,27 @@ export const sourcedContactRepository = {
 
   update: (id: string, patch: Record<string, any>) =>
     SourcedContactModel.findByIdAndUpdate(id, patch, { new: true }),
+
+  /**
+   * Atomically claims the right to run a PDL backfill for this contact —
+   * matches only if `backfillAttemptedAt` is still null, so two concurrent
+   * detail-view opens can't both trigger the paid PDL call. Returns the
+   * claimed doc (with `backfillAttemptedAt` now stamped) on success, or null
+   * if someone else already claimed/completed it first.
+   */
+  claimBackfill: (id: string) =>
+    SourcedContactModel.findOneAndUpdate(
+      { _id: id, backfillAttemptedAt: null },
+      { $set: { backfillAttemptedAt: new Date() } },
+      { new: true },
+    ),
+
+  /** Batched lookup by upstream id, for preserving previously-enriched fields across a re-cache (see cacheAndScore). */
+  findManyByPdlIds: async (workspaceId: string, pdlIds: string[]): Promise<Map<string, any>> => {
+    if (pdlIds.length === 0) return new Map();
+    const rows = await SourcedContactModel.find({ workspaceId, pdlId: { $in: pdlIds } }).lean();
+    return new Map(rows.map((r) => [r.pdlId as string, r]));
+  },
 
   /**
    * Upsert a person by upstream id (dedupe within a workspace), returning the
@@ -203,5 +229,32 @@ export const sourcingSuppressionRepository = {
       { workspaceId, email: email.toLowerCase() },
       { $setOnInsert: { workspaceId, email: email.toLowerCase(), reason } },
       { upsert: true },
+    ),
+};
+
+// Location is part of the cache identity — Levels.fyi's /get_salary_data
+// returns a different band (and currency) per location, so two contacts at
+// the same company+title in different countries must never share a cache row.
+function compKeys(company: string, title?: string, location?: string) {
+  return {
+    companyKey: company.trim().toLowerCase(),
+    titleKey: title?.trim().toLowerCase() ?? null,
+    locationKey: location?.trim().toLowerCase() ?? null,
+  };
+}
+
+export const compensationBandCacheRepository = {
+  /** Returns the cached band (or cached null-coverage) if fresh; null if there's no cached entry, or it's gone stale, and a live lookup should run. */
+  find: async (company: string, title?: string, location?: string): Promise<{ band: CompensationBandDto | null } | null> => {
+    const doc = await CompensationBandCacheModel.findOne(compKeys(company, title, location)).lean();
+    if (!doc) return null;
+    if (Date.now() - doc.fetchedAt.getTime() > COMPENSATION_BAND_CACHE_TTL_MS) return null;
+    return { band: (doc.band as CompensationBandDto | null) ?? null };
+  },
+  save: (company: string, title: string | undefined, location: string | undefined, band: CompensationBandDto | null) =>
+    CompensationBandCacheModel.findOneAndUpdate(
+      compKeys(company, title, location),
+      { $set: { band, fetchedAt: new Date() } },
+      { upsert: true, new: true },
     ),
 };
