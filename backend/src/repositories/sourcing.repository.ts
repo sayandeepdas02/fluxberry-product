@@ -6,6 +6,7 @@ import { SourcingListMemberModel } from '../models/sourcing-list-member.model';
 import { SourcingCampaignModel } from '../models/sourcing-campaign.model';
 import { SourcingCampaignRecipientModel } from '../models/sourcing-campaign-recipient.model';
 import { SourcingSuppressionModel } from '../models/sourcing-suppression.model';
+import { OutreachDailyUsageModel } from '../models/outreach-daily-usage.model';
 import {
   CompensationBandCacheModel,
   COMPENSATION_BAND_CACHE_TTL_MS,
@@ -170,9 +171,7 @@ export const sourcingRecipientRepository = {
   /** Emails actually handed to the provider for this campaign since `since` (the latest credit charge). */
   countSentSince: (campaignId: string, since: Date) =>
     SourcingCampaignRecipientModel.countDocuments({ campaignId, sentAt: { $gte: since } }),
-  /** Outreach emails queued across the workspace since `since` — for the daily sending cap. */
-  countQueuedSince: (workspaceId: string, since: Date) =>
-    SourcingCampaignRecipientModel.countDocuments({ workspaceId, createdAt: { $gte: since }, status: { $ne: 'SKIPPED' } }),
+
   /**
    * Aggregate a campaign into the monotonic funnel: sent/delivered/opened/replied
    * are derived from progression timestamps (which are never cleared), so a later
@@ -264,4 +263,39 @@ export const compensationBandCacheRepository = {
       { $set: { band, fetchedAt: new Date() } },
       { upsert: true, new: true },
     ),
+};
+
+const utcDay = (d = new Date()) => d.toISOString().slice(0, 10);
+
+/** Atomic per-workspace, per-UTC-day outreach counter backing the daily sending cap. */
+export const outreachUsageRepository = {
+  /**
+   * Reserve `n` sends against today's cap. Succeeds only if count + n ≤ cap,
+   * atomically, so concurrent sends can't jointly overshoot. Returns the day key
+   * to release with on success, or null (with today's count) when over the cap.
+   */
+  async reserve(workspaceId: string, n: number, cap: number): Promise<{ day: string | null; used: number }> {
+    const day = utcDay();
+    try {
+      await OutreachDailyUsageModel.updateOne(
+        { workspaceId, day },
+        { $setOnInsert: { workspaceId, day, count: 0 } },
+        { upsert: true },
+      );
+    } catch (err) {
+      if ((err as { code?: number }).code !== 11000) throw err; // lost the upsert race — row exists now
+    }
+    const reserved = await OutreachDailyUsageModel.findOneAndUpdate(
+      { workspaceId, day, count: { $lte: cap - n } },
+      { $inc: { count: n } },
+      { new: true },
+    ).lean();
+    if (reserved) return { day, used: reserved.count };
+    const current = await OutreachDailyUsageModel.findOne({ workspaceId, day }).lean();
+    return { day: null, used: current?.count ?? 0 };
+  },
+
+  /** Give back a reservation (the send aborted before queueing anything). */
+  release: (workspaceId: string, day: string, n: number) =>
+    OutreachDailyUsageModel.updateOne({ workspaceId, day }, { $inc: { count: -n } }),
 };

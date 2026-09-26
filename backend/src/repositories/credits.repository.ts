@@ -116,6 +116,27 @@ export const credits = {
 
   findByKey: (idempotencyKey: string) => CreditTransactionModel.findOne({ idempotencyKey }).lean(),
 
+  /**
+   * Free a fully refunded charge's idempotency key (renaming it on the old row)
+   * so the next attempt is debited afresh instead of replaying a charge that
+   * was given back. Only matches while the row is still fully refunded.
+   */
+  retireRefundedKey: (txId: string, idempotencyKey: string) =>
+    CreditTransactionModel.updateOne(
+      {
+        _id: txId,
+        idempotencyKey,
+        reason: 'CONSUME',
+        $expr: {
+          $gte: [
+            { $add: [{ $ifNull: ['$meta.refundedAllowance', 0] }, { $ifNull: ['$meta.refundedPurchased', 0] }] },
+            { $multiply: ['$delta', -1] },
+          ],
+        },
+      },
+      { $set: { idempotencyKey: `${idempotencyKey}:refunded:${txId}` } },
+    ),
+
   /** Record the settled (actual) quantity on a CONSUME row, for usage history. */
   setQuantity: (txId: string, quantity: number) =>
     CreditTransactionModel.updateOne({ _id: txId }, { $set: { 'meta.quantity': quantity } }),
@@ -124,10 +145,11 @@ export const credits = {
 
   /**
    * Atomically record a partial refund against a CONSUME row. The guard ensures
-   * total refunds never exceed what was charged, so concurrent settle/refund
-   * calls can't double-return credits. Returns the updated row or null.
+   * total refunds never exceed `ceiling` (the full charge for a refund, or
+   * charged − owed for a settle), so concurrent settle/refund calls can't
+   * double-return credits. Returns the updated row or null.
    */
-  claimRefund: (txId: string, allowance: number, purchased: number, charged: number) =>
+  claimRefund: (txId: string, allowance: number, purchased: number, ceiling: number) =>
     CreditTransactionModel.findOneAndUpdate(
       {
         _id: txId,
@@ -142,7 +164,7 @@ export const credits = {
                 purchased,
               ],
             },
-            charged,
+            ceiling,
           ],
         },
       },

@@ -2,7 +2,7 @@ import type { ParsedProfile, BillingSubscriptionStatus } from '../shared';
 import { SCORING_VERSION, ACTIVE_BILLING_STATUSES } from '../shared';
 import { accountRepository } from '../repositories/account.repository';
 import { creditsService } from './credits.service';
-import { AppError, badRequest, insufficientCredits } from '../utils/errors';
+import { AppError, badRequest, conflict, insufficientCredits } from '../utils/errors';
 import { candidateRepository } from '../repositories/candidate.repository';
 import { applicationRepository } from '../repositories/application.repository';
 import { jobRepository } from '../repositories/job.repository';
@@ -14,6 +14,9 @@ import { eventBus } from '../events/event-bus';
 import { jobQueue } from '../queue/job-queue';
 import { logger } from '../utils/logger';
 import { notFound } from '../utils/errors';
+
+/** Outcome of billing an application's AI screening (see authorizeScreening). */
+export type ScreeningAuthorization = 'BILLED' | 'ALREADY_BILLED' | 'UNPAID';
 
 const isInsufficientCredits = (err: unknown) => err instanceof AppError && err.code === 'INSUFFICIENT_CREDITS';
 
@@ -216,19 +219,26 @@ export const screeningService = {
    * most once per application (screeningBilledVia). With no active subscription,
    * or nothing left to pay with, the application is marked AWAITING_CREDITS and
    * the AI is skipped — the application itself is never blocked.
+   *
+   * Returns BILLED only to the one caller that just paid — that caller alone
+   * queues the screening run; ALREADY_BILLED means someone else owns it.
    */
-  async authorizeScreening(workspaceId: string, applicationId: string, actorUserId: string | null = null): Promise<boolean> {
+  async authorizeScreening(
+    workspaceId: string,
+    applicationId: string,
+    actorUserId: string | null = null,
+  ): Promise<ScreeningAuthorization> {
     const app = await applicationRepository.findInWorkspace(workspaceId, applicationId);
-    if (!app) return false;
-    if (app.screeningBilledVia) return true;
+    if (!app) return 'UNPAID';
+    if (app.screeningBilledVia) return 'ALREADY_BILLED';
 
     // Only one concurrent caller may bill a given application — otherwise two
     // simultaneous submissions could each take quota (or a credit) for it.
     const claimed = await applicationRepository.claimScreeningBilling(applicationId);
     if (!claimed) {
-      // Someone else holds (or just finished) the claim — they queue the screening.
-      const fresh = await applicationRepository.findInWorkspace(workspaceId, applicationId);
-      return Boolean(fresh?.screeningBilledVia);
+      // Another caller holds (or just finished) the claim — it owns queueing the
+      // screening, so this caller must not queue a duplicate run.
+      return 'ALREADY_BILLED';
     }
 
     const settleAs = (via: 'QUOTA' | 'CREDITS' | null) =>
@@ -244,7 +254,7 @@ export const screeningService = {
       const status = (account?.billing?.subscriptionStatus as BillingSubscriptionStatus | undefined) ?? 'none';
       if (!account || !ACTIVE_BILLING_STATUSES.includes(status)) {
         await settleAs(null);
-        return false;
+        return 'UNPAID';
       }
       const accountId = String(account._id);
 
@@ -264,10 +274,36 @@ export const screeningService = {
         }
       }
       await settleAs(via);
-      return via != null;
+      return via ? 'BILLED' : 'UNPAID';
     } catch (err) {
       await applicationRepository.update(applicationId, { screeningClaimAt: null }); // release for a later retry
       throw err;
+    }
+  },
+
+  /**
+   * Queue the parse → screen run for an application that has been paid for.
+   * An enqueue failure never surfaces to the applicant: the screening is marked
+   * FAILED instead, which a recruiter can retry for free (it was already paid).
+   * Returns whether the run was queued.
+   */
+  async queueScreening(
+    workspaceId: string,
+    candidateId: string,
+    applicationId: string,
+    opts: { idempotencyKey: string; run?: number; jobType?: 'PARSE_RESUME' | 'SCAN_RESUME' },
+  ): Promise<boolean> {
+    try {
+      await jobQueue.enqueue(
+        opts.jobType ?? 'PARSE_RESUME',
+        { workspaceId, candidateId, applicationId, ...(opts.run ? { run: opts.run } : {}) },
+        { idempotencyKey: opts.idempotencyKey },
+      );
+      return true;
+    } catch (err) {
+      logger.error({ err, applicationId }, 'failed to queue screening — marked FAILED for a free retry');
+      await applicationRepository.update(applicationId, { 'screeningResult.status': 'FAILED' });
+      return false;
     }
   },
 
@@ -276,46 +312,55 @@ export const screeningService = {
    *  - AWAITING_CREDITS → paid like an automatic screening (quota first, then 1 credit);
    *  - FAILED after it was already paid for → free retry (our failure, not theirs);
    *  - otherwise (a genuine re-screen) → 1 APPLICANT_SCREENING credit, 402 when short.
+   * Rejected with 409 while a screening is already queued or running, so a
+   * double-click can't charge (or run) twice.
    */
   async retry(workspaceId: string, applicationId: string, userId: string | null = null) {
     const app = await applicationRepository.findInWorkspace(workspaceId, applicationId);
     if (!app) throw notFound('Application not found');
     const candidate = await candidateRepository.findById(String(app.candidateId));
     if (!candidate?.resume) throw badRequest('This candidate has no resume to screen');
-
-    const status = app.screeningResult?.status;
     const account = await accountRepository.ensureForWorkspace(workspaceId);
     if (!account) throw notFound('Billing account not found');
+    const candidateId = String(app.candidateId);
+    const run = Date.now();
 
-    let txId: string | null = null;
-    if (status === 'AWAITING_CREDITS') {
-      if (!(await this.authorizeScreening(workspaceId, applicationId, userId))) {
+    if (app.screeningResult?.status === 'AWAITING_CREDITS') {
+      const auth = await this.authorizeScreening(workspaceId, applicationId, userId);
+      if (auth === 'ALREADY_BILLED') throw conflict('Screening is already in progress');
+      if (auth === 'UNPAID') {
         const balance = await creditsService.getBalance(String(account._id));
         throw insufficientCredits('APPLICANT_SCREENING', 1, balance.total);
       }
-    } else if (!(status === 'FAILED' && app.screeningBilledVia)) {
-      const charge = await creditsService.charge(String(account._id), 'APPLICANT_SCREENING', 1, {
-        actorUserId: userId,
-        meta: { applicationId, rescreen: true },
-      });
-      txId = charge.txId;
+      await this.queueScreening(workspaceId, candidateId, applicationId, { idempotencyKey: `parse:${applicationId}:${run}`, run });
+      return;
     }
 
-    const run = Date.now();
-    try {
-      await applicationRepository.update(applicationId, {
-        'screeningResult.status': 'PENDING',
-        screeningBilledVia: app.screeningBilledVia ?? 'CREDITS',
-      });
-      await jobQueue.enqueue(
-        'PARSE_RESUME',
-        { workspaceId, candidateId: String(app.candidateId), applicationId, run },
-        { idempotencyKey: `parse:${applicationId}:${run}` },
-      );
-    } catch (err) {
-      await creditsService.refund(txId);
-      throw err;
+    // Atomically move a finished screening back to PENDING — only one caller wins.
+    const previous = await applicationRepository.claimRescreen(applicationId);
+    if (!previous) throw conflict('Screening is already in progress');
+    const prevStatus = previous.screeningResult?.status ?? 'COMPLETED';
+    const free = prevStatus === 'FAILED' && Boolean(previous.screeningBilledVia);
+
+    let txId: string | null = null;
+    if (!free) {
+      try {
+        const charge = await creditsService.charge(String(account._id), 'APPLICANT_SCREENING', 1, {
+          actorUserId: userId,
+          meta: { applicationId, rescreen: true },
+        });
+        txId = charge.txId;
+      } catch (err) {
+        await applicationRepository.update(applicationId, { 'screeningResult.status': prevStatus });
+        throw err;
+      }
     }
+    await applicationRepository.update(applicationId, { screeningBilledVia: previous.screeningBilledVia ?? 'CREDITS' });
+    const queued = await this.queueScreening(workspaceId, candidateId, applicationId, {
+      idempotencyKey: `parse:${applicationId}:${run}`,
+      run,
+    });
+    if (!queued) await creditsService.refund(txId); // didn't run — don't keep the credit
   },
 
   /** How many of a job's applicants are waiting on credits for AI screening. */
@@ -331,23 +376,27 @@ export const screeningService = {
   async screenPending(workspaceId: string, jobId: string, userId: string | null) {
     const waiting = await applicationRepository.listAwaitingScreening(workspaceId, jobId, 500);
     let queued = 0;
+    let unpaid = false;
     for (const app of waiting) {
       const applicationId = String(app._id);
-      if (!(await this.authorizeScreening(workspaceId, applicationId, userId))) break;
-      const run = Date.now();
-      await jobQueue.enqueue(
-        'PARSE_RESUME',
-        { workspaceId, candidateId: String(app.candidateId), applicationId, run },
-        { idempotencyKey: `parse:${applicationId}:${run}` },
-      );
-      queued++;
+      const auth = await this.authorizeScreening(workspaceId, applicationId, userId);
+      if (auth === 'UNPAID') {
+        unpaid = true;
+        break;
+      }
+      if (auth === 'ALREADY_BILLED') continue; // a concurrent call is screening this one
+      // Stable key: an application is only ever billed out of AWAITING once.
+      if (await this.queueScreening(workspaceId, String(app.candidateId), applicationId, { idempotencyKey: `parse:${applicationId}:pending` })) {
+        queued++;
+      }
     }
-    if (queued === 0 && waiting.length > 0) {
+    if (queued === 0 && unpaid) {
       // Nothing could be paid for — surface the same 402 the rest of the app uses.
       const account = await accountRepository.ensureForWorkspace(workspaceId);
       const balance = account ? await creditsService.getBalance(String(account._id)) : null;
       throw insufficientCredits('APPLICANT_SCREENING', 1, balance?.total ?? 0);
     }
-    return { queued, remaining: waiting.length - queued };
+    return { queued, remaining: await applicationRepository.countAwaitingScreening(workspaceId, jobId) };
   },
+
 };

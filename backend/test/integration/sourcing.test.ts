@@ -9,6 +9,11 @@ import { logger } from '../../src/utils/logger';
 import { sendSourcingCampaignHandler } from '../../src/workers/handlers/send-sourcing-campaign';
 import { sendSourcingEmailHandler } from '../../src/workers/handlers/send-sourcing-email';
 import { SourcingCampaignRecipientModel } from '../../src/models/sourcing-campaign-recipient.model';
+import { SourcingCampaignModel } from '../../src/models/sourcing-campaign.model';
+import { OutreachDailyUsageModel } from '../../src/models/outreach-daily-usage.model';
+import { CreditTransactionModel } from '../../src/models/credit-transaction.model';
+import { getPeopleSourcingProvider } from '../../src/integrations';
+import { PLAN_DAILY_OUTREACH_CAP } from '../../src/shared';
 
 const jobCtx = { jobId: 'test', attempts: 1, logger } as any;
 
@@ -384,6 +389,62 @@ describe('Talent Sourcing (integration)', () => {
     }
     expect((await SourcingCampaignRecipientModel.findById(recipient.id).lean())!.status).toBe('FAILED');
     expect(await credits()).toBe(beforeSend);
+  });
+
+  it('enforces the daily cap atomically and settles a prior reservation on resend', async () => {
+    const workspaceId = await onboard(token, 'Sourcing Cap', 'Capco');
+    const ws = (r: request.Test) => r.set('Authorization', `Bearer ${token}`).set('X-Workspace-Id', workspaceId);
+    await activateSubscription(workspaceId, 'MAX');
+    const search = await ws(request(app).post('/api/v1/sourcing/search').send({ prompt: PROMPT }) as any);
+    const two = (search.body.data.contacts as any[]).filter((c) => c.hasEmail).slice(0, 2);
+    const list = await ws(request(app).post('/api/v1/sourcing/lists').send({ name: 'Pair', contactIds: two.map((c) => c.id) }) as any);
+    const mk = async (name: string) =>
+      (await ws(request(app).post('/api/v1/sourcing/campaigns').send({ name, listId: list.body.data.id, subject: 'Hi', body: 'Hi {{firstName}}' }) as any)).body.data.id as string;
+
+    // At the cap → rejected before any credit is taken.
+    const day = new Date().toISOString().slice(0, 10);
+    await OutreachDailyUsageModel.create({ workspaceId, day, count: PLAN_DAILY_OUTREACH_CAP.MAX - 1 });
+    const blocked = await ws(request(app).post(`/api/v1/sourcing/campaigns/${await mk('Over')}/send`).send({}) as any);
+    expect(blocked.status).toBe(400);
+    expect(blocked.body.error.message).toMatch(/Daily sending limit/);
+    await OutreachDailyUsageModel.updateOne({ workspaceId, day }, { count: 0 });
+
+    // Send, deliver only one of two, then resend after a failure: the first
+    // reservation is settled to the 1 email it actually sent.
+    const campaignId = await mk('Resend');
+    await ws(request(app).post(`/api/v1/sourcing/campaigns/${campaignId}/send`).send({}) as any);
+    const firstTx = (await SourcingCampaignModel.findById(campaignId).lean())!.creditTxId!;
+    await sendSourcingCampaignHandler({ campaignId, workspaceId }, jobCtx);
+    const recs = (await ws(request(app).get(`/api/v1/sourcing/campaigns/${campaignId}/recipients`) as any)).body.data;
+    await sendSourcingEmailHandler({ recipientId: recs[0].id }, jobCtx);
+    await SourcingCampaignModel.findByIdAndUpdate(campaignId, { status: 'FAILED' });
+    const resend = await ws(request(app).post(`/api/v1/sourcing/campaigns/${campaignId}/send`).send({}) as any);
+    expect(resend.status).toBe(200);
+    const settled = await CreditTransactionModel.findById(firstTx).lean();
+    expect((settled!.meta as any).quantity).toBe(1);
+    expect((await OutreachDailyUsageModel.findOne({ workspaceId, day }).lean())!.count).toBe(3); // 2 + 1 re-queued
+  });
+
+  it('charges a load-more retry again after a failed (refunded) attempt', async () => {
+    const workspaceId = await onboard(token, 'Sourcing Retry', 'Retryco');
+    const ws = (r: request.Test) => r.set('Authorization', `Bearer ${token}`).set('X-Workspace-Id', workspaceId);
+    await activateSubscription(workspaceId, 'MAX');
+    const search = await ws(request(app).post('/api/v1/sourcing/search').send({ prompt: PROMPT }) as any);
+    const searchId = search.body.data.search.id as string;
+    const credits = async () => (await ws(request(app).get(`/api/v1/workspaces/${workspaceId}/credits`) as any)).body.data.total;
+
+    const before = await credits();
+    const spy = vi.spyOn(getPeopleSourcingProvider(), 'search').mockRejectedValueOnce(new Error('provider down'));
+    const failed = await ws(request(app).post(`/api/v1/sourcing/searches/${searchId}/more`).send({}) as any);
+    spy.mockRestore();
+    expect(failed.status).toBe(502);
+    expect(await credits()).toBe(before); // refunded
+
+    const retry = await ws(request(app).post(`/api/v1/sourcing/searches/${searchId}/more`).send({}) as any);
+    expect(retry.status).toBe(200);
+    const added = retry.body.data.search.fetched - search.body.data.contacts.length;
+    expect(added).toBeGreaterThan(0);
+    expect(await credits()).toBe(before - creditsFor('SOURCING_PROFILE', added)); // not a free replay
   });
 
   it('refunds credits and does not gate below MAX', async () => {

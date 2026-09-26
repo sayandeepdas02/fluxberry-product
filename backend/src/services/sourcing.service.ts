@@ -29,6 +29,7 @@ import {
   sourcingRecipientRepository,
   sourcingSuppressionRepository,
   compensationBandCacheRepository,
+  outreachUsageRepository,
 } from '../repositories/sourcing.repository';
 import { accountRepository } from '../repositories/account.repository';
 import { jobRepository } from '../repositories/job.repository';
@@ -795,31 +796,48 @@ export const sourcingService = {
     );
     const toInsert = eligible.filter((x) => !alreadyProcessed.has(String(x.c._id)));
 
-    // Daily sending cap per plan — protects sender-domain reputation.
+    // Daily sending cap per plan (UTC day) — protects sender-domain reputation.
+    // Reserved atomically so concurrent sends can't jointly overshoot it.
     const account = await accountRepository.ensureForWorkspace(workspaceId);
     if (!account) throw notFound('Billing account not found');
     const cap = PLAN_DAILY_OUTREACH_CAP[(account.plan as WorkspacePlan) ?? 'FREE'] ?? 0;
-    const queuedToday = await sourcingRecipientRepository.countQueuedSince(workspaceId, new Date(Date.now() - 24 * 3600 * 1000));
-    if (queuedToday + toInsert.length > cap) {
+    const capHold = await outreachUsageRepository.reserve(workspaceId, toInsert.length, cap);
+    if (!capHold.day) {
       throw badRequest(
-        `Daily sending limit reached: your plan allows ${cap} outreach emails per 24 hours ` +
-          `(${Math.max(0, cap - queuedToday)} left). Schedule this campaign later or send to a smaller list.`,
+        `Daily sending limit reached: your plan allows ${cap} outreach emails per day (UTC) ` +
+          `(${Math.max(0, cap - capHold.used)} left today). Schedule this campaign later or send to a smaller list.`,
       );
     }
+    const releaseCap = () => outreachUsageRepository.release(workspaceId, capHold.day!, toInsert.length);
 
     // Reserve OUTREACH_EMAIL credits for every recipient about to be queued; settled
     // down to emails actually sent once the fan-out finishes (settleCampaignCredits).
-    const charge = await creditsService.charge(String(account._id), 'OUTREACH_EMAIL', toInsert.length, {
-      actorUserId: userId,
-      meta: { campaignId },
-    });
+    let charge;
+    try {
+      charge = await creditsService.charge(String(account._id), 'OUTREACH_EMAIL', toInsert.length, {
+        actorUserId: userId,
+        meta: { campaignId },
+      });
+    } catch (err) {
+      await releaseCap();
+      throw err;
+    }
 
     // Atomically claim the campaign (DRAFT/SCHEDULED/PAUSED/FAILED → SENDING) so two
     // concurrent sends can't both build recipients and double-email everyone.
     const claimed = await sourcingCampaignRepository.claimForSend(workspaceId, campaignId);
     if (!claimed) {
       await creditsService.refund(charge.txId);
+      await releaseCap();
       throw conflict('This campaign is already sending or has been sent');
+    }
+
+    // A resend (from PAUSED/FAILED) replaces the previous reservation — settle
+    // that one first to the emails it actually sent, so its unsent (still
+    // pending, about to be re-queued) recipients aren't paid for twice.
+    if (campaign.creditTxId && campaign.creditChargedAt) {
+      const sentUnderPrior = await sourcingRecipientRepository.countSentSince(campaignId, campaign.creditChargedAt);
+      await creditsService.settle(campaign.creditTxId, sentUnderPrior);
     }
     await sourcingRecipientRepository.deletePendingByCampaign(campaignId);
     if (toInsert.length) {

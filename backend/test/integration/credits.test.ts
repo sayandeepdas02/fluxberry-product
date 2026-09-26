@@ -160,6 +160,34 @@ describe('AI credits (integration)', () => {
     expect((await creditsService.getBalance(accountId)).total).toBe(PLAN_CREDIT_ALLOWANCE.MAX - 6);
   });
 
+  it('never over-refunds when two settles race on the same stale read', async () => {
+    const accountId = await freshAccount('settle-race', 'MAX');
+    const r = await creditsService.charge(accountId, 'SOURCING_PROFILE', 25); // 38 reserved
+    const owed = 24; // 16 new profiles → 24 credits, so 14 comes back
+    // Both settlers read the row before either refunds (the race): each computes
+    // refund = 14. Without a ceiling of charged − owed, 14 + 14 ≤ 38 would pass twice.
+    const stale = await CreditTransactionModel.findById(r.txId).lean();
+    const refunds = await Promise.all([
+      creditsService.refundAmount(stale!, 38 - owed, 38 - owed),
+      creditsService.refundAmount(stale!, 38 - owed, 38 - owed),
+    ]);
+    expect(refunds[0] + refunds[1]).toBe(38 - owed);
+    expect((await creditsService.getBalance(accountId)).total).toBe(PLAN_CREDIT_ALLOWANCE.MAX - owed);
+  });
+
+  it('debits afresh when an idempotency key belongs to a fully refunded charge', async () => {
+    const accountId = await freshAccount('refunded-key', 'PRO');
+    const first = await creditsService.charge(accountId, 'COMPENSATION_LOOKUP', 1, { idempotencyKey: 'compensation-c1' });
+    await creditsService.refund(first.txId); // e.g. no coverage last time
+    const again = await creditsService.charge(accountId, 'COMPENSATION_LOOKUP', 1, { idempotencyKey: 'compensation-c1' });
+    expect(again.replayed).toBe(false);
+    expect(again.txId).not.toBe(first.txId);
+    expect((await creditsService.getBalance(accountId)).total).toBe(PLAN_CREDIT_ALLOWANCE.PRO - 1);
+    // …while a charge that was kept still replays.
+    const replay = await creditsService.charge(accountId, 'COMPENSATION_LOOKUP', 1, { idempotencyKey: 'compensation-c1' });
+    expect(replay.replayed).toBe(true);
+  });
+
   it('refunds purchased credits back to the purchased bucket', async () => {
     const accountId = await freshAccount('bucket', 'PRO');
     await AccountModel.findByIdAndUpdate(accountId, { 'credits.allowanceRemaining': 2, 'credits.purchasedBalance': 10 });

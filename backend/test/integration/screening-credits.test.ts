@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import request from 'supertest';
 import { createApp } from '../../src/app';
 import { connectDatabase, disconnectDatabase, mongoose } from '../../src/config/db';
@@ -7,6 +7,7 @@ import { AccountModel } from '../../src/models/account.model';
 import { ApplicationModel } from '../../src/models/application.model';
 import { JobQueueModel } from '../../src/models/job-queue.model';
 import { screeningService } from '../../src/services/screening.service';
+import { jobQueue } from '../../src/queue/job-queue';
 import { activateSubscription } from './helpers/activate-subscription';
 import { PLAN_CREDIT_ALLOWANCE, PLAN_SCREENING_QUOTA } from '../../src/shared';
 
@@ -110,6 +111,8 @@ describe('applicant AI screening — quota, then credits, never blocking', () =>
     // First run chains a SCREEN job; a re-screen run must chain a new one (not dedupe).
     await screeningService.parseResume({ workspaceId, candidateId: String(app4!.candidateId), applicationId: appId });
     const before = await JobQueueModel.countDocuments({ type: 'SCREEN_CANDIDATE', 'payload.applicationId': appId });
+    // The first screening finished (a re-screen while one is still queued is rejected).
+    await ApplicationModel.findByIdAndUpdate(appId, { 'screeningResult.status': 'COMPLETED' });
 
     const credit = (await balance()).total;
     const res = await ws(request(app).post(`/api/v1/applications/${appId}/rescreen`) as any);
@@ -148,6 +151,50 @@ describe('applicant AI screening — quota, then credits, never blocking', () =>
     const after = await ApplicationModel.findById(appId).lean();
     expect(after!.screeningBilledVia).toBe('QUOTA');
     expect(after!.screeningClaimAt).toBeNull();
+  });
+
+  it('rejects a re-screen while one is already queued, charging once', async () => {
+    const target = await ApplicationModel.findOne({ workspaceId, 'screeningResult.status': { $ne: 'AWAITING_CREDITS' } }).lean();
+    const appId = String(target!._id);
+    await ApplicationModel.findByIdAndUpdate(appId, { 'screeningResult.status': 'COMPLETED', screeningBilledVia: 'QUOTA' });
+    await AccountModel.findByIdAndUpdate(accountId, { 'credits.purchasedBalance': 10 });
+    const before = (await balance()).total;
+    const [a, b] = await Promise.all([
+      ws(request(app).post(`/api/v1/applications/${appId}/rescreen`) as any),
+      ws(request(app).post(`/api/v1/applications/${appId}/rescreen`) as any),
+    ]);
+    expect([a.status, b.status].sort()).toEqual([200, 409]);
+    expect((await balance()).total).toBe(before - 1);
+  });
+
+  it('never fails an application when queueing its screening fails', async () => {
+    await AccountModel.findByIdAndUpdate(accountId, {
+      'billing.subscriptionStatus': 'active',
+      'credits.screeningsUsed': 0,
+    });
+    const spy = vi.spyOn(jobQueue, 'enqueue').mockRejectedValueOnce(new Error('queue down'));
+    let created;
+    try {
+      created = await apply(); // asserts 201 inside
+    } finally {
+      spy.mockRestore();
+    }
+    expect(created!.screeningBilledVia).toBe('QUOTA');
+    expect(created!.screeningResult?.status).toBe('FAILED'); // retryable for free
+  });
+
+  it('does not queue duplicate runs when screen-pending is triggered twice at once', async () => {
+    await AccountModel.findByIdAndUpdate(accountId, { 'credits.screeningsUsed': PLAN_SCREENING_QUOTA.PRO, 'credits.allowanceRemaining': 0, 'credits.purchasedBalance': 0 });
+    const waiting = await apply();
+    expect(waiting!.screeningResult?.status).toBe('AWAITING_CREDITS');
+    await AccountModel.findByIdAndUpdate(accountId, { 'credits.purchasedBalance': 5 });
+    await Promise.all([
+      ws(request(app).post(`/api/v1/jobs/${jobId}/screen-pending`) as any),
+      ws(request(app).post(`/api/v1/jobs/${jobId}/screen-pending`) as any),
+    ]);
+    const runs = await JobQueueModel.countDocuments({ type: 'PARSE_RESUME', 'payload.applicationId': String(waiting!._id) });
+    expect(runs).toBe(1);
+    expect((await balance()).purchasedBalance).toBe(4);
   });
 
   it('skips AI (and charges nothing) when the subscription has lapsed', async () => {

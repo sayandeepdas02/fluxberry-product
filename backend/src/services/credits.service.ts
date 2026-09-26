@@ -158,7 +158,16 @@ export const creditsService = {
 
     if (opts.idempotencyKey) {
       const prior = await creditsRepo.findByKey(opts.idempotencyKey);
-      if (prior) return { txId: String(prior._id), credits: -prior.delta, balance: prior.balanceAfter, replayed: true };
+      if (prior) {
+        const pm = (prior.meta ?? {}) as ConsumeMeta;
+        const fullyRefunded = (pm.refundedAllowance ?? 0) + (pm.refundedPurchased ?? 0) >= -prior.delta;
+        // A charge that was fully given back (provider failed, no data) must not
+        // be replayed as paid — free its key and debit this attempt afresh.
+        if (!fullyRefunded) {
+          return { txId: String(prior._id), credits: -prior.delta, balance: prior.balanceAfter, replayed: true };
+        }
+        await creditsRepo.retireRefundedKey(String(prior._id), opts.idempotencyKey);
+      }
     }
 
     await this.ensurePeriodCurrent(accountId);
@@ -220,7 +229,9 @@ export const creditsService = {
     const net = -tx.delta - (meta.refundedAllowance ?? 0) - (meta.refundedPurchased ?? 0);
     const owed = creditsFor(tx.feature as CreditAction, actualQuantity);
     await creditsRepo.setQuantity(txId, actualQuantity);
-    return this.refundAmount(tx, Math.max(0, net - owed));
+    // Ceiling = charged − owed: even if two settles race on a stale read, total
+    // refunds can never exceed what isn't owed.
+    return this.refundAmount(tx, Math.max(0, net - owed), -tx.delta - owed);
   },
 
   /** Refund whatever is left of a charge (e.g. the provider call failed). Safe to call twice. */
@@ -240,6 +251,7 @@ export const creditsService = {
   async refundAmount(
     tx: { _id: unknown; accountId: unknown; delta: number; feature?: string | null; meta?: unknown },
     amount: number,
+    ceiling: number = -tx.delta,
   ): Promise<number> {
     const meta = (tx.meta ?? {}) as ConsumeMeta;
     const charged = -tx.delta;
@@ -251,7 +263,7 @@ export const creditsService = {
     const toPurchased = Math.min(refundable, Math.max(0, purchasedLeft));
     const toAllowance = refundable - toPurchased;
 
-    const claimed = await creditsRepo.claimRefund(String(tx._id), toAllowance, toPurchased, charged);
+    const claimed = await creditsRepo.claimRefund(String(tx._id), toAllowance, toPurchased, Math.min(ceiling, charged));
     if (!claimed) return 0; // a concurrent refund got there first
 
     const accountId = String(tx.accountId);

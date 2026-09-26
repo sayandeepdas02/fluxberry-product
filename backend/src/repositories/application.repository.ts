@@ -27,6 +27,17 @@ export const applicationRepository = {
       { $set: { screeningClaimAt: new Date() } },
       { new: true },
     ).lean(),
+  /**
+   * Atomically move a finished screening (COMPLETED/FAILED) back to PENDING for a
+   * re-screen. Returns the application as it was before, or null when a run is
+   * already queued/in flight (or it's awaiting credits) — so only one caller wins.
+   */
+  claimRescreen: (applicationId: string) =>
+    ApplicationModel.findOneAndUpdate(
+      { _id: applicationId, 'screeningResult.status': { $in: ['COMPLETED', 'FAILED'] } },
+      { $set: { 'screeningResult.status': 'PENDING' } },
+      { new: false },
+    ).lean(),
   countAwaitingScreening: (workspaceId: string, jobId: string) =>
     ApplicationModel.countDocuments({ workspaceId, jobId, 'screeningResult.status': 'AWAITING_CREDITS' }),
   /** Oldest first, so applicants are screened in the order they applied. */
