@@ -46,6 +46,7 @@ describe('candidate messaging (integration)', () => {
 
     await request(app)
       .post(`/api/v1/public/jobs/${slug}/${jobSlug}/apply`)
+      .field('privacyConsent', 'true')
       .field('name', 'Message Candidate')
       .field('email', 'msgcand@test.com')
       .field('answers', '[]')

@@ -64,6 +64,7 @@ describe('custom pipeline stages (integration)', () => {
     // A candidate applies, gets moved to the new custom stage.
     await request(app)
       .post(`/api/v1/public/jobs/${onboard.body.data.slug}/${job.body.data.slug}/apply`)
+      .field('privacyConsent', 'true')
       .field('name', 'Stage Candidate')
       .field('email', 'stagecand@test.com')
       .field('answers', '[]')

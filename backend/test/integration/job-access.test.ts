@@ -73,6 +73,7 @@ describe('per-job access control (integration)', () => {
     await asOwner(request(app).post(`/api/v1/jobs/${jobId}/publish`) as any);
     await request(app)
       .post(`/api/v1/public/jobs/${slug}/${jobSlug}/apply`)
+      .field('privacyConsent', 'true')
       .field('name', 'Restricted Candidate')
       .field('email', 'restrictedcand@test.com')
       .field('answers', '[]')

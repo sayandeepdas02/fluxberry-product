@@ -89,7 +89,12 @@ export default async function PublicJobPage({ params }: { params: Params }) {
           No account needed — it only takes a minute.
         </p>
         <div className="mt-6">
-          <ApplyForm workspaceSlug={workspaceSlug} jobSlug={jobSlug} questions={questions} />
+          <ApplyForm
+            workspaceSlug={workspaceSlug}
+            jobSlug={jobSlug}
+            companyName={job.workspace.name}
+            questions={questions}
+          />
         </div>
       </div>
     </div>

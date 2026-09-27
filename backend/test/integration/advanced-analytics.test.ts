@@ -63,6 +63,7 @@ describe('advanced analytics tier (integration)', () => {
     // One applicant, submitted today — falls inside range A only.
     await request(app)
       .post(`/api/v1/public/jobs/${workspaceSlug}/${jobSlug}/apply`)
+      .field('privacyConsent', 'true')
       .field('name', 'Advanced Candidate')
       .field('email', 'advcand@test.com')
       .field('answers', '[]')

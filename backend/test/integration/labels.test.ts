@@ -62,6 +62,7 @@ describe('candidate labels (integration)', () => {
     await ws(request(app).post(`/api/v1/jobs/${jobId}/publish`) as any);
     await request(app)
       .post(`/api/v1/public/jobs/${slug}/${jobSlug}/apply`)
+      .field('privacyConsent', 'true')
       .field('name', 'Label Candidate')
       .field('email', 'labelcand@test.com')
       .field('answers', '[]')

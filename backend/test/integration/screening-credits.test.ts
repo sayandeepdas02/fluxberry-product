@@ -32,6 +32,7 @@ async function apply() {
   const n = ++applicantN;
   const res = await request(app)
     .post(`/api/v1/public/jobs/${slug}/${jobSlug}/apply`)
+    .field('privacyConsent', 'true')
     .field('name', `Applicant ${n}`)
     .field('email', `applicant${n}@screen.test`)
     .field('answers', '[]')
