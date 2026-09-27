@@ -20,7 +20,7 @@ export default async function OpengraphImage({ params }: { params: Params }) {
   return new ImageResponse(
     <OGLayout
       bgSrc={publicAssetDataUri('og-background.png')}
-      logoSrc={publicAssetDataUri('logo-mark-white.png')}
+      logoSrc={publicAssetDataUri('logo-mark.png')}
       headline="AI Native Hiring Platform"
       subtitle={subtitle}
     />,

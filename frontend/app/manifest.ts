@@ -12,7 +12,10 @@ export default function manifest(): MetadataRoute.Manifest {
     background_color: '#ffffff',
     theme_color: '#0e2f7e',
     icons: [
-      { src: '/logo-mark.png', sizes: '1080x1080', type: 'image/png' },
+      { src: '/logo-mark-192.png', sizes: '192x192', type: 'image/png' },
+      { src: '/logo-mark.png', sizes: '512x512', type: 'image/png' },
+      // Full-bleed with the F centred, so the same file works as the maskable (adaptive) icon.
+      { src: '/logo-mark.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
     ],
   };
 }

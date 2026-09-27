@@ -15,7 +15,7 @@ const organizationJsonLd = {
   name: publicConfig.appName,
   alternateName: 'Fluxberry',
   url: publicConfig.appUrl,
-  logo: `${publicConfig.appUrl}/icon`,
+  logo: `${publicConfig.appUrl}/logo-mark.png`,
   description: 'AI Native Hiring Platform',
 };
 

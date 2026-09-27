@@ -9,7 +9,7 @@ export default function OpengraphImage() {
   return new ImageResponse(
     <OGLayout
       bgSrc={publicAssetDataUri('og-background.png')}
-      logoSrc={publicAssetDataUri('logo-mark-white.png')}
+      logoSrc={publicAssetDataUri('logo-mark.png')}
       headline="AI Native Hiring Platform"
       subtitle="Insights on modern hiring and AI recruitment."
     />,
