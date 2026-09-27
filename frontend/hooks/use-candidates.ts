@@ -91,11 +91,14 @@ function useAppMutation<TBody>(path: (id: string) => string, opts: { spendsCredi
       if (opts.spendsCredits) void queryClient.invalidateQueries({ queryKey: ['billing'] });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['candidates'] });
       queryClient.invalidateQueries({ queryKey: ['candidate'] });
       queryClient.invalidateQueries({ queryKey: ['application'] });
       queryClient.invalidateQueries({ queryKey: ['timeline'] });
       queryClient.invalidateQueries({ queryKey: ['jobs'] });
+      // Settle only once the candidate lists have refetched, so a caller that
+      // shows the change ahead of time (the Kanban board) can hand back to the
+      // server's data without the card flashing back to its old column.
+      return queryClient.invalidateQueries({ queryKey: ['candidates'] });
     },
   });
 }
