@@ -10,7 +10,7 @@ import { SectionHeader, TYPE } from '@/components/marketing/landing/primitives';
 import { BillingSwitch, PlanCard } from '@/components/marketing/landing/pricing-section';
 import { PRICING_COPY } from '@/components/marketing/landing/content';
 import { CurrentPlanCard } from '@/components/billing/current-plan-card';
-import { CreditsCard } from '@/components/billing/credits-card';
+import { CreditCostsCard, CreditsCard, TopUpCard } from '@/components/billing/credits-card';
 import { CreditUsageCard } from '@/components/billing/credit-usage-card';
 import { toast } from '@/components/ui/sonner';
 
@@ -106,15 +106,24 @@ export default function PricingPage() {
         )}
       </section>
 
-      <section id="billing" aria-labelledby="billing-heading" className="scroll-mt-8 space-y-6">
-        <h2 id="billing-heading" className="text-section-title text-foreground">
+      {/* In the landing's type, like the plans above; recruiters see their credits and what things cost. */}
+      <section id="billing" aria-labelledby="billing-heading" className={cn(landingFonts, 'scroll-mt-8')}>
+        <h2 id="billing-heading" className="font-manrope text-[26px] font-semibold tracking-[-0.02em] text-black">
           Billing
         </h2>
-        {canManage && <CurrentPlanCard />}
-        <div id="credits" className="scroll-mt-8">
-          <CreditsCard canManage={canManage} />
+        <p className={cn('mt-1.5 text-lp-gray-700', TYPE.body)}>Your plan, AI credits and where they go.</p>
+
+        {/*
+         * Breakpoints are the viewport's, and the sidebar takes 240px of it: two
+         * even columns from lg (a 736px content area), the 5/7 split from xl.
+         */}
+        <div className="mt-8 grid grid-cols-1 gap-5 lg:grid-cols-2 xl:grid-cols-12">
+          {canManage && <CurrentPlanCard className="xl:col-span-5" />}
+          <CreditsCard id="credits" canManage={canManage} className="xl:col-span-7" />
+          {canManage && <TopUpCard className="xl:col-span-7" />}
+          <CreditCostsCard className="xl:col-span-5" />
+          {canManage && <CreditUsageCard className="lg:col-span-2 xl:col-span-12" />}
         </div>
-        {canManage && <CreditUsageCard />}
       </section>
     </div>
   );
