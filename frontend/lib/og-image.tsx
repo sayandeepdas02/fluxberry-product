@@ -22,7 +22,7 @@ export function OGLayout({
         backgroundPosition: 'center',
       }}
     >
-      {/* Dark gradient at the bottom for text legibility */}
+      {/* Brand-blue (#2d81ff) gradient at the bottom for text legibility */}
       <div
         style={{
           position: 'absolute',
@@ -32,7 +32,7 @@ export function OGLayout({
           bottom: 0,
           display: 'flex',
           background:
-            'linear-gradient(to top, rgba(6,18,64,0.92) 0%, rgba(6,18,64,0.60) 42%, transparent 100%)',
+            'linear-gradient(to top, rgba(45,129,255,0.92) 0%, rgba(45,129,255,0.60) 42%, transparent 100%)',
         }}
       />
 
@@ -45,7 +45,7 @@ export function OGLayout({
           display: 'flex',
           alignItems: 'center',
           gap: 12,
-          background: 'rgba(6,18,64,0.60)',
+          background: 'rgba(45,129,255,0.60)',
           borderRadius: 100,
           padding: '10px 22px 10px 14px',
           border: '1px solid rgba(255,255,255,0.22)',
@@ -94,7 +94,7 @@ export function OGLayout({
           <div
             style={{
               display: 'flex',
-              color: 'rgba(255,255,255,0.72)',
+              color: 'rgba(255,255,255,0.88)',
               fontSize: 30,
               fontWeight: 400,
               maxWidth: 800,

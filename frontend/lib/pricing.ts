@@ -59,7 +59,3 @@ export const PLAN_FEATURES: Record<'PRO' | 'MAX', string[]> = {
     'Priority support',
   ],
 };
-
-export const PRO_FEATURES: string[] = PLAN_FEATURES.PRO;
-
-export const MAX_FEATURES: string[] = PLAN_FEATURES.MAX;

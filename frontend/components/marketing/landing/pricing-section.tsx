@@ -11,6 +11,9 @@ import { PRICING_COPY } from './content';
 
 type Plan = 'PRO' | 'MAX';
 
+/** What a plan card's button does: follow a link (the landing's sign-up) or run an action (the dashboard's checkout). */
+export type PlanCardAction = { label: string } & ({ href: string } | { onClick: () => void; disabled?: boolean });
+
 /** The Framer design's tick (15 × 11). */
 function Tick() {
   return (
@@ -20,18 +23,37 @@ function Tick() {
   );
 }
 
-function PlanCard({ plan, yearly }: { plan: Plan; yearly: boolean }) {
+/**
+ * One plan as the landing page shows it. The dashboard's pricing pages reuse it with their own
+ * `action` and `reveal={false}`, since the app doesn't animate content in on scroll.
+ */
+export function PlanCard({
+  plan,
+  yearly,
+  action = { label: 'Get Started', href: '/sign-up' },
+  reveal = true,
+  className,
+}: {
+  plan: Plan;
+  yearly: boolean;
+  action?: PlanCardAction;
+  reveal?: boolean;
+  className?: string;
+}) {
   const max = plan === 'MAX';
   const price = yearly ? PLAN_PRICING[plan].annual : PLAN_PRICING[plan].monthly;
   const period = yearly ? 'yearly' : 'month';
 
-  return (
-    <Reveal
-      className={cn(
-        'flex w-full flex-col gap-2.5 rounded-[27px] bg-white shadow-[2px_2px_10px_rgba(0,0,0,0.04)]',
-        'tablet:w-[55%] desktop:w-full',
-      )}
-    >
+  const buttonClass = cn(
+    'group flex items-center justify-center rounded-[15px] px-2.5 py-[15px] outline-none',
+    'focus-visible:ring-2 focus-visible:ring-lp-blue-400 focus-visible:ring-offset-2',
+    TYPE.button,
+    max ? cn(GRADIENT, 'text-white') : 'bg-[linear-gradient(180deg,#f6f6f6_0%,#eeeeee_100%)] text-black',
+  );
+  const buttonLabel = <RollText className="h-[1.3em]">{action.label}</RollText>;
+
+  const content = (
+    <>
       {/* Top: price panel, tagline and CTA on a raised block. */}
       <div className="flex flex-col gap-[23px] rounded-[27px] p-[18px] shadow-[2px_2px_10px_rgba(0,0,0,0.04)]">
         <div
@@ -63,17 +85,20 @@ function PlanCard({ plan, yearly }: { plan: Plan; yearly: boolean }) {
 
         <p className={cn('px-3 pb-[17px] text-black', TYPE.label)}>{PLAN_TAGLINE[plan]}</p>
 
-        <Link
-          href="/sign-up"
-          className={cn(
-            'group flex items-center justify-center rounded-[15px] px-2.5 py-[15px] outline-none',
-            'focus-visible:ring-2 focus-visible:ring-lp-blue-400 focus-visible:ring-offset-2',
-            TYPE.button,
-            max ? cn(GRADIENT, 'text-white') : 'bg-[linear-gradient(180deg,#f6f6f6_0%,#eeeeee_100%)] text-black',
-          )}
-        >
-          <RollText className="h-[1.3em]">Get Started</RollText>
-        </Link>
+        {'href' in action ? (
+          <Link href={action.href} className={buttonClass}>
+            {buttonLabel}
+          </Link>
+        ) : (
+          <button
+            type="button"
+            onClick={action.onClick}
+            disabled={action.disabled}
+            className={cn(buttonClass, 'disabled:pointer-events-none disabled:opacity-60')}
+          >
+            {buttonLabel}
+          </button>
+        )}
       </div>
 
       {/* Bottom: what the plan includes. Framer clips its cards to 648px, which
@@ -86,15 +111,59 @@ function PlanCard({ plan, yearly }: { plan: Plan; yearly: boolean }) {
           </li>
         ))}
       </ul>
-    </Reveal>
+    </>
+  );
+
+  const cardClass = cn('flex w-full flex-col gap-2.5 rounded-[27px] bg-white shadow-[2px_2px_10px_rgba(0,0,0,0.04)]', className);
+  return reveal ? <Reveal className={cardClass}>{content}</Reveal> : <div className={cardClass}>{content}</div>;
+}
+
+/** The Monthly/Yearly switch above the plan cards. */
+export function BillingSwitch({
+  yearly,
+  onChange,
+  className,
+}: {
+  yearly: boolean;
+  onChange: (yearly: boolean) => void;
+  className?: string;
+}) {
+  const label = (active: boolean) => cn('transition-colors', TYPE.label, active ? 'text-black' : 'text-lp-gray-500');
+
+  return (
+    <div className={cn('flex items-center gap-[15px]', className)}>
+      <button type="button" onClick={() => onChange(false)} className={label(!yearly)}>
+        Monthly
+      </button>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={yearly}
+        aria-label="Bill yearly"
+        onClick={() => onChange(!yearly)}
+        className={cn(
+          'relative h-[21px] w-[45px] shrink-0 rounded-[30px] p-[3px] outline-none focus-visible:ring-2 focus-visible:ring-lp-blue-400 focus-visible:ring-offset-2',
+          GRADIENT,
+        )}
+      >
+        <span
+          className={cn(
+            'block size-[15px] rounded-full bg-white transition-transform duration-[400ms] ease-[cubic-bezier(0.25,1.05,0.4,1)] motion-reduce:transition-none',
+            'shadow-[0.12px_0.6px_0.61px_-1.25px_rgba(0,0,0,0.18),0.46px_2.29px_2.33px_-2.5px_rgba(0,0,0,0.16),2px_10px_10.2px_-3.75px_rgba(0,0,0,0.06)]',
+            yearly && 'translate-x-6',
+          )}
+        />
+      </button>
+      <button type="button" onClick={() => onChange(true)} className={label(yearly)}>
+        Yearly (Save up to {maxAnnualDiscount()}%)
+      </button>
+    </div>
   );
 }
 
 /** Pricing: Monthly/Yearly switch over the Pro and Max cards. Prices come from lib/pricing. */
 export function PricingSection() {
   const [yearly, setYearly] = useState(false);
-
-  const label = (active: boolean) => cn('transition-colors', TYPE.label, active ? 'text-black' : 'text-lp-gray-500');
 
   return (
     <section id="pricing" className="scroll-mt-5 bg-white px-5 py-[70px] tablet:scroll-mt-0 tablet:px-[50px] tablet:py-[100px] desktop:px-[70px]">
@@ -117,40 +186,13 @@ export function PricingSection() {
           />
         </Reveal>
 
-        <div className="mt-10 flex items-center gap-[15px]">
-          <button type="button" onClick={() => setYearly(false)} className={label(!yearly)}>
-            Monthly
-          </button>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={yearly}
-            aria-label="Bill yearly"
-            onClick={() => setYearly((v) => !v)}
-            className={cn(
-              'relative h-[21px] w-[45px] shrink-0 rounded-[30px] p-[3px] outline-none focus-visible:ring-2 focus-visible:ring-lp-blue-400 focus-visible:ring-offset-2',
-              GRADIENT,
-            )}
-          >
-            <span
-              className={cn(
-                'block size-[15px] rounded-full bg-white transition-transform duration-[400ms] ease-[cubic-bezier(0.25,1.05,0.4,1)] motion-reduce:transition-none',
-                'shadow-[0.12px_0.6px_0.61px_-1.25px_rgba(0,0,0,0.18),0.46px_2.29px_2.33px_-2.5px_rgba(0,0,0,0.16),2px_10px_10.2px_-3.75px_rgba(0,0,0,0.06)]',
-                yearly && 'translate-x-6',
-              )}
-            />
-          </button>
-          <button type="button" onClick={() => setYearly(true)} className={label(yearly)}>
-            Yearly (Save up to {maxAnnualDiscount()}%)
-          </button>
-        </div>
+        <BillingSwitch yearly={yearly} onChange={setYearly} className="mt-10" />
 
         <div className="mt-10 flex w-full flex-col items-center gap-5 desktop:grid desktop:grid-cols-2 desktop:items-stretch">
-          <PlanCard plan="PRO" yearly={yearly} />
-          <PlanCard plan="MAX" yearly={yearly} />
+          <PlanCard plan="PRO" yearly={yearly} className="tablet:w-[55%] desktop:w-full" />
+          <PlanCard plan="MAX" yearly={yearly} className="tablet:w-[55%] desktop:w-full" />
         </div>
       </div>
     </section>
   );
 }
-
