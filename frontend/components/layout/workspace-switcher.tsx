@@ -74,7 +74,10 @@ export function WorkspaceSwitcher() {
           <DropdownMenuItem onSelect={() => setCreateOpen(true)}>
             <Plus className="size-4" /> New workspace
           </DropdownMenuItem>
-          <DropdownMenuItem asChild>
+          <DropdownMenuItem
+            asChild
+            className="my-1 bg-primary text-primary-foreground focus:bg-primary/90 focus:text-primary-foreground"
+          >
             <Link href="/app/pricing">
               <CreditCard className="size-4" /> Upgrade
             </Link>

@@ -36,7 +36,7 @@ export function FeatureGate({ feature, children }: { feature: FeatureFlag; child
         Upgrade your plan to {planName} to unlock {featureName.toLowerCase()}.
       </p>
       <Button asChild className="mt-2">
-        <Link href="/app/settings/billing">View plans</Link>
+        <Link href="/app/pricing">View plans</Link>
       </Button>
     </div>
   );
