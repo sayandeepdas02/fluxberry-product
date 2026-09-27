@@ -71,21 +71,10 @@ const config: Config = {
         },
 
         /*
-         * Marketing-only scales (landing, blog, auth). Flat hex on purpose: these pages are
+         * Marketing-only scale (landing, blog, auth). Flat hex on purpose: these pages are
          * light-only by design, so they don't participate in the dashboard's HSL theme tokens.
-         * `berry` is the Fluxberry brand (primary #0e2f7e) expanded into a usable ramp;
          * `ink` is the neutral/hairline ramp the ruled-paper layout is built from.
          */
-        berry: {
-          50: '#f0f4ff',
-          100: '#dde6ff',
-          200: '#b8ccff',
-          400: '#4f78d8',
-          500: '#2955b8',
-          600: '#0e2f7e',
-          700: '#0a2462',
-          900: '#061240',
-        },
         ink: {
           DEFAULT: '#202020',
           secondary: '#2a2a2a',

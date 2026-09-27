@@ -16,7 +16,7 @@ function layout(body: string): string {
 }
 
 function button(href: string, label: string): string {
-  return `<a href="${href}" style="display:inline-block;background:#EC4899;color:#fff;text-decoration:none;padding:11px 18px;border-radius:8px;font-weight:600;font-size:14px">${label}</a>`;
+  return `<a href="${href}" style="display:inline-block;background:#2d81ff;color:#fff;text-decoration:none;padding:11px 18px;border-radius:8px;font-weight:600;font-size:14px">${label}</a>`;
 }
 
 export type TemplateResult = { subject: string; html: string; text: string };

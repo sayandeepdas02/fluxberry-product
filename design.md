@@ -32,7 +32,9 @@ The product has two color worlds that never mix:
 
 **Dashboard** — HSL custom properties, light/dark aware, consumed via `hsl(var(--token))`. Class-based dark mode (`darkMode: ['class']`).
 
-**Marketing** — flat hex tokens (`berry-*`, `ink-*`), light-only, no dark mode.
+**Marketing** — flat hex tokens (`lp-*` on the landing, `ink-*` neutrals), light-only, no dark mode.
+
+**Brand colour:** `#2d81ff`, the logo's blue. The dashboard uses it as `--primary`, and the OG images, the web manifest's `theme_color` and the transactional email buttons use it as a hex value. The landing keeps the Framer design's own blues (`lp-blue-*`, gradient `#3787ff → #0d6eff`).
 
 #### Dashboard Palette
 
@@ -41,7 +43,7 @@ The product has two color worlds that never mix:
 | `--background` | `0 0% 100%` | `222 47% 7%` | Page surface |
 | `--foreground` | `222 47% 11%` | `210 40% 96%` | Body text |
 | `--card` | `0 0% 100%` | `222 47% 9%` | Card/panel surface |
-| `--primary` | `222 80% 27%` | `222 80% 55%` | Brand navy, CTAs, focus rings |
+| `--primary` | `216 100% 58.8%` | `216 100% 58.8%` | Brand blue `#2d81ff`, CTAs, focus rings |
 | `--primary-foreground` | `0 0% 100%` | `0 0% 100%` | Text on primary |
 | `--secondary` | `210 40% 96%` | `217 33% 17%` | Secondary surface, active nav |
 | `--muted` | `210 40% 98%` | `217 33% 15%` | Muted backgrounds |
@@ -52,7 +54,7 @@ The product has two color worlds that never mix:
 | `--warning` | `38 92% 50%` | `38 92% 55%` | Warning states |
 | `--border` | `214 32% 91%` | `217 33% 20%` | All borders |
 | `--input` | `214 32% 91%` | `217 33% 20%` | Input borders |
-| `--ring` | `222 80% 27%` | `222 80% 55%` | Focus ring (matches primary) |
+| `--ring` | `216 100% 58.8%` | `216 100% 58.8%` | Focus ring (matches primary) |
 | `--radius` | `0.6rem` | `0.6rem` | Base border-radius |
 
 **Rules:**
@@ -61,18 +63,7 @@ The product has two color worlds that never mix:
 
 #### Marketing Palette
 
-**Berry scale** (brand navy):
-
-| Token | Hex | Usage |
-|---|---|---|
-| `berry-50` | `#f0f4ff` | Kicker backgrounds, subtle fills |
-| `berry-100` | `#dde6ff` | Dot pattern tint |
-| `berry-200` | `#b8ccff` | Structural lines: rails, section borders, header rule, crosshairs |
-| `berry-400` | `#4f78d8` | Hatch pattern tint |
-| `berry-500` | `#2955b8` | List markers |
-| `berry-600` | `#0e2f7e` | Brand color. CTA button background, auth button, icons, hero headline |
-| `berry-700` | `#0a2462` | CTA button border, focus outline |
-| `berry-900` | `#061240` | Dark footer background |
+The old navy `berry-*` scale has been removed. Later sections that mention `berry-*` or `mk-*` classes (crosshairs, corner marks, dotted surfaces, the `cta` button) describe the retired ruled-paper marketing design, which no longer exists in the code.
 
 **Ink scale** (neutrals):
 
@@ -91,7 +82,7 @@ The product has two color worlds that never mix:
 | `ink-600` | `#646464` | Body text on marketing pages |
 
 **The two-weight line system is critical:**
-- `berry-200` (#b8ccff) for structural lines (frame rails, section borders, header rule, crosshairs)
+- `ink-200` (#e8e8e8) for structural lines (frame rails, section borders, header rule)
 - `ink-line` (#f0f0f0) for interior lines (the lighter rules between grid cells)
 - Never swap them. It collapses the visual hierarchy.
 
@@ -189,11 +180,11 @@ All lines are CSS — no SVG for rules.
 
 | Type | Color | Implementation |
 |---|---|---|
-| Structural border | `berry-200` (#b8ccff) | `border-berry-200` |
+| Structural border | `ink-200` (#e8e8e8) | `border-ink-200` |
 | Interior rule | `ink-line` (#f0f0f0) | `border-ink-line` or gap-px trick |
-| Dashed rule | `berry-200` (#b8ccff) | `.mk-dash-line`: `repeating-linear-gradient(to right, #b8ccff 0 4px, transparent 4px 8px)` |
-| Full-bleed dashed | `berry-200` | `.mk-screen-dashed-top/bottom`: pseudo-element, `width: 200vw; left: -100vw` |
-| Vertical dashed | `berry-200` | `bg-[repeating-linear-gradient(to_bottom,#b8ccff_0_4px,transparent_4px_8px)]` |
+| Dashed rule | `ink-200` (#e8e8e8) | `.mk-dash-line`: `repeating-linear-gradient(to right, #e8e8e8 0 4px, transparent 4px 8px)` |
+| Full-bleed dashed | `ink-200` | `.mk-screen-dashed-top/bottom`: pseudo-element, `width: 200vw; left: -100vw` |
+| Vertical dashed | `ink-200` | `bg-[repeating-linear-gradient(to_bottom,#e8e8e8_0_4px,transparent_4px_8px)]` |
 
 **Full-bleed mechanism** (`.mk-divider`): `position: relative; left: 50%; width: 100vw; transform: translateX(-50%)`.
 
@@ -302,7 +293,7 @@ All 26 components use `cn()` from `lib/utils.ts` for class merging. CVA (class-v
 - `PixelChevronRight`, `PixelChevronDown`, `PixelArrowRight`, `CrossMark`
 
 #### Logo
-- Logo mark: a white "F" on a full-bleed `#2d82ff` square. Master vector: `public/logo-mark.svg`. It is the only logo; there is no other mark.
+- Logo mark: a white "F" on a full-bleed `#2d81ff` square (the brand colour). Master vector: `public/logo-mark.svg`. It is the only logo; there is no other mark.
 - `Logo` (navbar, footer, auth pages): the text wordmark "Fluxberry" only, with no icon beside it
 - Favicon: `app/icon.svg` (the mark snapped to a 32px grid so it stays crisp in the tab) plus `app/favicon.ico` (16/32/48) for browsers without SVG favicons
 - `app/apple-icon.png` (180x180); `public/logo-mark-192.png` and `public/logo-mark.png` (512x512) for the web manifest, structured data, and the OG image badge

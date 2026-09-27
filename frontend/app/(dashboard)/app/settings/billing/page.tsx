@@ -1,12 +1,13 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Check, ExternalLink } from 'lucide-react';
-import type { WorkspacePlan, BillingCycle } from '@/lib/shared';
+import { ExternalLink } from 'lucide-react';
+import type { WorkspacePlan } from '@/lib/shared';
 import { useWorkspace } from '@/components/providers/workspace-provider';
 import { useBillingStatus, useCreateCheckout, useCreatePortalSession } from '@/hooks/use-billing';
-import { PLAN_LABELS, PLAN_TAGLINE, PRO_FEATURES, MAX_FEATURES, priceLabel, annualDiscount } from '@/lib/pricing';
-import { BillingCycleToggle } from '@/components/billing/billing-cycle-toggle';
+import { PLAN_LABELS, priceLabel } from '@/lib/pricing';
+import { landingFonts } from '@/components/marketing/landing/fonts';
+import { BillingSwitch, PlanCard } from '@/components/marketing/landing/pricing-section';
 import { CreditUsageCard } from '@/components/billing/credit-usage-card';
 import { CreditsCard } from '@/components/billing/credits-card';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,13 +18,12 @@ import { toast } from '@/components/ui/sonner';
 import { cn } from '@/lib/utils';
 
 const PAID_PLANS: Array<'PRO' | 'MAX'> = ['PRO', 'MAX'];
-const PLAN_FEATURE_COPY: Record<'PRO' | 'MAX', string[]> = { PRO: PRO_FEATURES, MAX: MAX_FEATURES };
 
 export default function BillingSettingsPage() {
   const { currentWorkspace } = useWorkspace();
   const canManage = currentWorkspace.role === 'owner' || currentWorkspace.role === 'admin';
   const isOwner = currentWorkspace.role === 'owner';
-  const [billingCycle, setBillingCycle] = useState<BillingCycle>('MONTHLY');
+  const [yearly, setYearly] = useState(false);
   const [pendingPlan, setPendingPlan] = useState<WorkspacePlan | null>(null);
 
   const { data: status, isLoading } = useBillingStatus();
@@ -50,7 +50,7 @@ export default function BillingSettingsPage() {
   const startCheckout = async (plan: WorkspacePlan) => {
     setPendingPlan(plan);
     try {
-      const { url } = await createCheckout.mutateAsync({ plan, billingCycle });
+      const { url } = await createCheckout.mutateAsync({ plan, billingCycle: yearly ? 'ANNUAL' : 'MONTHLY' });
       window.location.href = url;
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Could not start checkout');
@@ -116,101 +116,41 @@ export default function BillingSettingsPage() {
       <CreditsCard canManage={canManage} />
       {canManage && <CreditUsageCard />}
 
-      {/* Plans */}
+      {/* Plans: the landing page's cards, with checkout buttons. */}
       {isOwner ? (
-        <div className="space-y-4">
+        <div className={cn(landingFonts, 'space-y-4')}>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h3 className="text-sm font-semibold text-foreground">
               {currentPlan === 'FREE' ? 'Choose a plan' : 'Change plan'}
             </h3>
-            <BillingCycleToggle value={billingCycle} onChange={setBillingCycle} />
+            <BillingSwitch yearly={yearly} onChange={setYearly} />
           </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {PAID_PLANS.map((plan) => (
-              <PlanCard
-                key={plan}
-                plan={plan}
-                billingCycle={billingCycle}
-                isCurrent={currentPlan === plan}
-                loading={pendingPlan === plan}
-                onSelect={() => startCheckout(plan)}
-              />
-            ))}
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(320px,1fr))] gap-5">
+            {PAID_PLANS.map((plan) => {
+              const isCurrent = currentPlan === plan;
+              return (
+                <PlanCard
+                  key={plan}
+                  plan={plan}
+                  yearly={yearly}
+                  reveal={false}
+                  action={{
+                    label: isCurrent
+                      ? 'Current plan'
+                      : pendingPlan === plan
+                        ? 'Redirecting…'
+                        : `Choose ${PLAN_LABELS[plan]}`,
+                    onClick: () => startCheckout(plan),
+                    disabled: isCurrent || pendingPlan !== null,
+                  }}
+                />
+              );
+            })}
           </div>
         </div>
       ) : (
         <p className="text-sm text-muted-foreground">Only the workspace owner can change the plan.</p>
       )}
-    </div>
-  );
-}
-
-function PlanCard({
-  plan,
-  billingCycle,
-  isCurrent,
-  loading,
-  onSelect,
-}: {
-  plan: 'PRO' | 'MAX';
-  billingCycle: BillingCycle;
-  isCurrent: boolean;
-  loading: boolean;
-  onSelect: () => void;
-}) {
-  const featured = plan === 'MAX';
-  const discount = billingCycle === 'ANNUAL' ? annualDiscount(plan) : 0;
-
-  return (
-    <div
-      className={cn(
-        'flex flex-col rounded-xl border p-6',
-        featured ? 'border-primary' : 'border-border',
-        isCurrent && 'ring-1 ring-primary',
-      )}
-    >
-      <div className="flex items-start justify-between gap-2">
-        <div>
-          <h4 className="text-base font-semibold text-foreground">{PLAN_LABELS[plan]}</h4>
-          <p className="text-xs text-muted-foreground">{PLAN_TAGLINE[plan]}</p>
-        </div>
-        {featured && (
-          <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-medium text-primary">
-            Most powerful
-          </span>
-        )}
-      </div>
-
-      <div className="mt-4 flex items-end gap-1">
-        <span className="text-3xl font-semibold tracking-tight text-foreground">
-          {priceLabel(plan, billingCycle).split('/')[0]}
-        </span>
-        <span className="mb-1 text-sm text-muted-foreground">/{billingCycle === 'ANNUAL' ? 'yr' : 'mo'}</span>
-        {discount > 0 && (
-          <span className="mb-1 ml-2 rounded-full bg-success/10 px-2 py-0.5 text-[11px] font-semibold text-success">
-            {discount}% off
-          </span>
-        )}
-      </div>
-
-      <ul className="mt-5 flex-1 space-y-2 text-sm">
-        {PLAN_FEATURE_COPY[plan].map((f) => (
-          <li key={f} className="flex items-center gap-2 text-muted-foreground">
-            <Check className={cn('size-4 shrink-0', featured ? 'text-primary' : 'text-success')} />
-            {f}
-          </li>
-        ))}
-      </ul>
-
-      <Button
-        className="mt-6"
-        variant={featured ? 'default' : 'outline'}
-        disabled={isCurrent}
-        loading={loading}
-        onClick={onSelect}
-      >
-        {isCurrent ? 'Current plan' : `Choose ${PLAN_LABELS[plan]}`}
-      </Button>
     </div>
   );
 }

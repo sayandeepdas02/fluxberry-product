@@ -71,13 +71,13 @@ export function WorkspaceSwitcher() {
             </DropdownMenuItem>
           ))}
           <DropdownMenuSeparator />
-          <DropdownMenuItem asChild>
-            <Link href="/app/pricing">
-              <CreditCard className="size-4" /> Pricing
-            </Link>
-          </DropdownMenuItem>
           <DropdownMenuItem onSelect={() => setCreateOpen(true)}>
             <Plus className="size-4" /> New workspace
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/app/pricing">
+              <CreditCard className="size-4" /> Upgrade
+            </Link>
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={logout}>
             <LogOut className="size-4" /> Log out
