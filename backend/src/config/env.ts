@@ -72,13 +72,13 @@ const envSchema = z.object({
   DODO_WEBHOOK_SECRET: z.string().optional().default(''),
   /** Which Dodo host to hit: `test_mode` -> test.dodopayments.com, `live_mode` -> live.dodopayments.com. */
   DODO_ENVIRONMENT: z.enum(['test_mode', 'live_mode']).default('test_mode'),
-  /** Dodo product/price id billed for the PRO plan, monthly cycle ($40/mo). */
+  /** Dodo product/price id billed for the PRO plan, monthly cycle ($39/mo). */
   DODO_PRO_PRODUCT_ID: z.string().optional().default(''),
-  /** Dodo product/price id billed for the PRO plan, annual cycle ($200/yr). */
+  /** Dodo product/price id billed for the PRO plan, annual cycle ($199/yr). */
   DODO_PRO_PRODUCT_ID_ANNUAL: z.string().optional().default(''),
-  /** Dodo product/price id billed for the MAX plan, monthly cycle ($60/mo). */
+  /** Dodo product/price id billed for the MAX plan, monthly cycle ($59/mo). */
   DODO_MAX_PRODUCT_ID: z.string().optional().default(''),
-  /** Dodo product/price id billed for the MAX plan, annual cycle ($300/yr). */
+  /** Dodo product/price id billed for the MAX plan, annual cycle ($299/yr). */
   DODO_MAX_PRODUCT_ID_ANNUAL: z.string().optional().default(''),
   /** One-time Dodo product ids for AI-credit top-up packs (250/$60, 500/$90, 1000/$150). */
   DODO_CREDITS_250_PRODUCT_ID: z.string().optional().default(''),

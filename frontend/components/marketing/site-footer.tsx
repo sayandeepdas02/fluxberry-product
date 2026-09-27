@@ -1,110 +1,65 @@
 import Link from 'next/link';
-import { publicConfig } from '@/lib/config';
-import { LogoMark } from './logo';
+import { cn } from '@/lib/utils';
+import { Logo } from './site-header';
+import { Reveal } from './landing/motion';
+import { TYPE } from './landing/primitives';
+import { FOOTER } from './landing/content';
 
-const columns = [
-  {
-    heading: 'Product',
-    links: [
-      { label: 'Features', href: '/#features' },
-      { label: 'Pricing', href: '/#pricing' },
-      { label: 'Demo', href: '/#demo' },
-    ],
-  },
-  {
-    heading: 'Resources',
-    links: [
-      { label: 'Blog', href: '/blog' },
-    ],
-  },
-  {
-    heading: 'Account',
-    links: [
-      { label: 'Log in', href: '/sign-in' },
-      { label: 'Create account', href: '/sign-up' },
-    ],
-  },
-];
+/**
+ * Width of the wordmark's box in em: "Fluxberry" set in Manrope 600 at
+ * −0.04em measures 4.0937em in the browser, and Framer's fitted text box adds
+ * 0.0409em to the word (its trailing tracking) and centres the word in it.
+ * The font size is the container width divided by this, so the word spans the
+ * full content width at every size. Re-measure if the word or its style changes.
+ */
+const WORDMARK_EM_WIDTH = 4.1345;
 
-const aiLinks = [
-  { label: 'ChatGPT', href: 'https://chatgpt.com' },
-  { label: 'Claude', href: 'https://claude.ai' },
-  { label: 'Perplexity', href: 'https://perplexity.ai' },
-  { label: 'Gemini', href: 'https://gemini.google.com' },
-];
-
+/**
+ * Footer, converted from the Framer design: a blue panel inset 10px, logo and
+ * tagline on the left, a two-column link list on the right, and a giant
+ * wordmark fitted to the full width underneath.
+ */
 export function SiteFooter() {
   return (
-    <footer className="bg-white text-foreground">
-      <div className="mx-auto max-w-6xl px-6">
-        <div className="grid grid-cols-1 gap-px sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1fr]">
-          <div className="flex flex-col px-0 pb-10 pt-12 sm:col-span-2 lg:col-span-1 lg:pr-6">
-            <Link href="/" className="inline-flex items-center gap-2">
-              <LogoMark />
-              <span className="text-[17px] font-semibold tracking-tight text-foreground">{publicConfig.appName}</span>
-            </Link>
-            <p className="mt-[18px] max-w-[240px] text-sm text-muted-foreground">
-              AI-native applicant tracking for teams that would rather be hiring than sifting.
-            </p>
-          </div>
+    <footer className="p-2.5">
+      <div className="rounded-[15px] bg-lp-blue-100 desktop:px-2.5">
+        <Reveal className="flex flex-col gap-[100px] px-5 py-[30px] tablet:px-10 tablet:py-[50px] desktop:gap-[130px] desktop:px-[60px]">
+          <div className="flex flex-col gap-[60px] tablet:flex-row tablet:justify-between tablet:gap-0">
+            <div className="flex flex-col items-start gap-2.5">
+              <Logo />
+              <p className={cn('max-w-[240px] text-lp-gray-800', TYPE.body)}>{FOOTER.tagline}</p>
+            </div>
 
-          {columns.map(({ heading, links }) => (
-            <nav key={heading} className="px-0 pb-16 pt-12">
-              <p className="mb-4 text-sm font-semibold text-foreground">{heading}</p>
-              <ul className="flex list-none flex-col gap-2.5 p-0">
-                {links.map(({ label, href }) => (
-                  <li key={label}>
+            <nav aria-label="Footer" className="flex w-[250px] shrink-0 flex-col gap-5">
+              <p className={cn('text-lp-gray-600', TYPE.label)}>Links</p>
+              <ul className="grid grid-cols-[100px_100px] gap-x-[50px] gap-y-2.5">
+                {/* flex keeps each row at the link's own 18px line, not the body's 24px. */}
+                {FOOTER.links.map((l) => (
+                  <li key={l.label} className="flex">
                     <Link
-                      href={href}
-                      className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                      href={l.href}
+                      className={cn(
+                        'rounded-sm text-black outline-none hover:text-lp-blue-600 focus-visible:ring-2 focus-visible:ring-lp-blue-400',
+                        TYPE.pill,
+                      )}
                     >
-                      {label}
+                      {l.label}
                     </Link>
                   </li>
                 ))}
               </ul>
             </nav>
-          ))}
-        </div>
-
-        {/* AI summary links */}
-        <div className="border-t border-border py-6">
-          <p className="text-sm font-medium text-foreground">
-            Summarize what Fluxberry AI does with AI:
-          </p>
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            {aiLinks.map(({ label, href }) => (
-              <a
-                key={label}
-                href={href}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-white px-4 py-1.5 text-sm text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground"
-              >
-                {label}
-              </a>
-            ))}
           </div>
-        </div>
 
-        {/* Copyright bar */}
-        <div className="grid min-h-14 grid-cols-1 items-center gap-4 border-t border-border py-5 sm:grid-cols-[1fr_auto] sm:py-0">
-          <span className="text-sm text-muted-foreground">
-            &copy; 2026 Fluxberry AI, All rights reserved
-          </span>
-          <ul className="flex list-none items-center gap-6 p-0 sm:justify-self-end">
-            <li>
-              <Link href="/privacy" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-                Privacy Policy
-              </Link>
-            </li>
-            <li>
-              <Link href="/terms" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-                Terms and Conditions
-              </Link>
-            </li>
-          </ul>
-        </div>
+          <div className="[container-type:inline-size]" aria-hidden>
+            <p
+              className="whitespace-nowrap pb-[0.1427em] text-center font-manrope font-semibold leading-[0.9] tracking-[-0.04em] text-lp-blue-600"
+              style={{ fontSize: `calc(100cqw / ${WORDMARK_EM_WIDTH})` }}
+            >
+              Fluxberry
+            </p>
+          </div>
+        </Reveal>
       </div>
     </footer>
   );
