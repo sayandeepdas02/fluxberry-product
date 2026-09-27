@@ -27,7 +27,7 @@ export function SiteFooter() {
           <div className="flex flex-col gap-[60px] tablet:flex-row tablet:justify-between tablet:gap-0">
             <div className="flex flex-col items-start gap-2.5">
               <Logo />
-              <p className={cn('max-w-[240px] text-lp-gray-800', TYPE.body)}>{FOOTER.tagline}</p>
+              <p className={cn('text-pretty text-lp-gray-800 tablet:max-w-[240px]', TYPE.body)}>{FOOTER.tagline}</p>
             </div>
 
             <nav aria-label="Footer" className="flex w-[250px] shrink-0 flex-col gap-5">

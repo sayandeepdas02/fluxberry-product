@@ -30,7 +30,7 @@ export function ProductSection() {
               {/* Framer gives the text block a 100px floor, which only bites on phone. */}
               <div className="mt-[54px] flex min-h-[100px] flex-col gap-[13px]">
                 <h3 className={cn('text-black', TYPE.title)}>{title}</h3>
-                <p className={cn('max-w-[300px] text-lp-gray-600', TYPE.body)}>{body}</p>
+                <p className={cn('text-pretty text-lp-gray-600', TYPE.body)}>{body}</p>
               </div>
             </Reveal>
           ))}
