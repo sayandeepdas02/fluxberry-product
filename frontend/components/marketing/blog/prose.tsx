@@ -6,8 +6,9 @@ import { slugifyHeading } from '@/lib/blog-types';
 
 /**
  * Article body. Styles are written as an explicit component map rather than a
- * `prose` class so the measurements match the rest of the marketing pages
- * (18px/30px body, 44px space above an h2, hairline tables).
+ * `prose` class so they follow the landing page: Inter 18/30 body in the
+ * landing's greys, Manrope headings, blue links and list markers, and the
+ * soft 15px-radius panels for code and tables.
  *
  * Heading ids come from the same `slugifyHeading` the table of contents uses, so
  * the minimap and the anchors can never drift apart.
@@ -34,14 +35,14 @@ export function Prose({ content }: { content: string }) {
   }
 
   return (
-    <div className="text-[18px] leading-[30px] text-ink-600">
+    <div className="font-inter text-[18px] leading-[30px] text-lp-gray-700">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
           h2: ({ children }) => (
             <h2
               id={nextHeadingId(children)}
-              className="mb-4 mt-11 scroll-mt-24 text-mk-h4 text-ink"
+              className="mb-4 mt-12 scroll-mt-28 font-manrope text-[28px] font-semibold leading-[1.2] tracking-[-0.028em] text-black"
             >
               {children}
             </h2>
@@ -49,23 +50,26 @@ export function Prose({ content }: { content: string }) {
           h3: ({ children }) => (
             <h3
               id={nextHeadingId(children)}
-              className="mb-3.5 mt-9 scroll-mt-24 text-[22px] font-medium leading-[1.25] tracking-[-0.5px] text-ink"
+              className="mb-3 mt-9 scroll-mt-28 font-manrope text-[22px] font-semibold leading-[1.25] tracking-[-0.02em] text-black"
             >
               {children}
             </h3>
           ),
           p: ({ children }) => <p className="mb-5">{children}</p>,
           ul: ({ children }) => (
-            <ul className="mb-5 flex list-disc flex-col gap-2.5 pl-6 marker:text-berry-500">{children}</ul>
+            <ul className="mb-5 flex list-disc flex-col gap-2.5 pl-6 marker:text-lp-blue-400">{children}</ul>
           ),
           ol: ({ children }) => (
-            <ol className="mb-5 flex list-decimal flex-col gap-2.5 pl-6 marker:text-ink-400">{children}</ol>
+            <ol className="mb-5 flex list-decimal flex-col gap-2.5 pl-6 marker:font-manrope marker:font-semibold marker:text-lp-blue-400">
+              {children}
+            </ol>
           ),
-          li: ({ children }) => <li className="text-[18px] leading-7">{children}</li>,
+          li: ({ children }) => <li className="leading-7">{children}</li>,
           a: ({ href, children }) => {
             const target = href ?? '#';
             const isInternal = target.startsWith('/') || target.startsWith('#');
-            const className = 'text-berry-700 underline underline-offset-2 hover:text-berry-900';
+            const className =
+              'text-lp-blue-500 underline decoration-lp-blue-500/30 underline-offset-[3px] transition-colors hover:text-lp-blue-600 hover:decoration-lp-blue-600';
             return isInternal ? (
               <Link href={target} className={className}>
                 {children}
@@ -76,37 +80,39 @@ export function Prose({ content }: { content: string }) {
               </a>
             );
           },
-          strong: ({ children }) => <strong className="font-medium text-ink">{children}</strong>,
+          strong: ({ children }) => <strong className="font-semibold text-black">{children}</strong>,
           blockquote: ({ children }) => (
-            <blockquote className="my-8 border-l-2 border-berry-200 py-1 pl-6 text-[20px] font-normal not-italic leading-[1.4] text-ink [&>p]:mb-0">
+            <blockquote className="my-8 border-l-2 border-lp-blue-400 py-1 pl-6 font-manrope text-[20px] font-medium not-italic leading-[1.45] tracking-[-0.005em] text-black [&>p]:mb-0">
               {children}
             </blockquote>
           ),
-          hr: () => <hr className="my-10 border-ink-line" />,
+          hr: () => <hr className="my-10 border-lp-gray-150" />,
           code: ({ children, className }) =>
             className?.includes('language-') ? (
-              <code className="block font-mono text-[13px] leading-6 text-ink">{children}</code>
+              <code className="block font-mono text-[14px] leading-6 text-black">{children}</code>
             ) : (
-              <code className="whitespace-pre-wrap rounded-[4px] border border-ink-200 bg-ink-100/60 px-1 py-px font-mono text-[14px] font-normal text-ink-600 retina:border-[0.5px]">
+              <code className="whitespace-pre-wrap rounded-[5px] bg-lp-gray-100 px-1.5 py-0.5 font-mono text-[15px] text-black">
                 {children}
               </code>
             ),
           pre: ({ children }) => (
-            <pre className="my-8 overflow-x-auto border border-ink-200 bg-ink-50 p-4">{children}</pre>
+            <pre className="my-8 overflow-x-auto rounded-[15px] bg-lp-gray-50 p-5">{children}</pre>
           ),
           table: ({ children }) => (
-            <div className="my-8 overflow-x-auto border border-ink-200">
-              <table className="w-full border-collapse text-[15px] leading-[1.5] tabular-nums">{children}</table>
+            <div className="my-8 overflow-x-auto rounded-[15px] border border-lp-gray-150 bg-white">
+              <table className="w-full border-collapse text-[15px] leading-[1.5] tabular-nums [&_tr:last-child_td]:border-b-0">
+                {children}
+              </table>
             </div>
           ),
-          thead: ({ children }) => <thead className="bg-ink-100">{children}</thead>,
+          thead: ({ children }) => <thead className="bg-lp-gray-50">{children}</thead>,
           th: ({ children }) => (
-            <th className="whitespace-nowrap border-b border-ink-200 px-4 py-3 text-left align-top font-medium text-ink">
+            <th className="whitespace-nowrap border-b border-lp-gray-150 px-4 py-3 text-left align-top font-manrope text-[14px] font-semibold text-black">
               {children}
             </th>
           ),
           td: ({ children }) => (
-            <td className="border-b border-ink-line px-4 py-3 text-left align-top text-ink-600 first:font-medium first:text-ink">
+            <td className="border-b border-lp-gray-100 px-4 py-3 text-left align-top text-lp-gray-700 first:font-semibold first:text-black">
               {children}
             </td>
           ),

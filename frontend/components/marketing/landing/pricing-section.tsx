@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { PLAN_FEATURES, PLAN_LABELS, PLAN_PRICING, PLAN_TAGLINE, maxAnnualDiscount } from '@/lib/pricing';
+import { NumberTicker } from '@/components/ui/number-ticker';
 import { Reveal } from './motion';
 import { GRADIENT, RollText, SectionHeader, TYPE } from './primitives';
 import { PRICING_COPY } from './content';
@@ -22,6 +23,7 @@ function Tick() {
 function PlanCard({ plan, yearly }: { plan: Plan; yearly: boolean }) {
   const max = plan === 'MAX';
   const price = yearly ? PLAN_PRICING[plan].annual : PLAN_PRICING[plan].monthly;
+  const period = yearly ? 'yearly' : 'month';
 
   return (
     <Reveal
@@ -43,8 +45,19 @@ function PlanCard({ plan, yearly }: { plan: Plan; yearly: boolean }) {
             {max && <span className={cn('text-white', TYPE.pill)}>Most Popular</span>}
           </div>
           <p className="flex items-baseline">
-            <span className={TYPE.h2}>${price}</span>
-            <span className={TYPE.per}>/{yearly ? 'yearly' : 'month'}</span>
+            {/* The number counts between prices, so assistive tech reads the settled price instead. */}
+            <span className="sr-only">{`$${price}/${period}`}</span>
+            <span aria-hidden className={TYPE.h2}>
+              $
+              {/* Counts from the old price on the Monthly/Yearly switch. Digits stay tabular only
+                  while counting (no jitter) and use the font's own figures at rest (Framer's widths). */}
+              <NumberTicker
+                value={price}
+                startValue={price}
+                className="normal-nums tracking-[inherit] text-inherit data-[counting]:tabular-nums"
+              />
+            </span>
+            <span aria-hidden className={TYPE.per}>/{period}</span>
           </p>
         </div>
 

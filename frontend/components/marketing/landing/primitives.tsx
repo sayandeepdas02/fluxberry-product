@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
@@ -25,6 +26,28 @@ export const TYPE = {
   nav: 'font-manrope text-lp-nav-sm desktop:text-lp-nav',
   per: 'font-manrope text-lp-per-p tablet:text-lp-per-t desktop:text-lp-per',
 } as const;
+
+/**
+ * The landing hero's grid backdrop, for a `relative` parent. The artwork is
+ * always full width at its own proportions, so the grid cells match the hero
+ * everywhere. `section` also clips it to a shorter header and fades it out
+ * at the header's foot instead of stopping on a hard edge.
+ */
+export function GridBackdrop({ variant = 'image' }: { variant?: 'image' | 'section' }) {
+  return (
+    <div
+      aria-hidden
+      className={cn(
+        'pointer-events-none absolute inset-x-0 top-0',
+        variant === 'section' && 'bottom-0 overflow-hidden [mask-image:linear-gradient(to_bottom,#000_45%,transparent)]',
+      )}
+    >
+      <div className="relative aspect-[3963/2793] w-full">
+        <Image src="/landing/grid-bg.png" alt="" fill sizes="100vw" loading="eager" className="object-cover" />
+      </div>
+    </div>
+  );
+}
 
 /**
  * Text that rolls upward on hover: two stacked copies inside a clipped line,
@@ -63,13 +86,15 @@ export function Pill({ children, className }: { children: React.ReactNode; class
  * Pill + H2 + lead, centred (default) or left-aligned on desktop (FAQ).
  * Each section caps its heading and lead at its own widths (Framer sets them
  * per section and per breakpoint), so pass those in as classes.
- * `headingClassName` styles the pill + H2 group (Pricing fixes its height).
+ * `headingClassName` styles the pill + H2 group (Pricing fixes its height);
+ * `titleAs="h1"` makes the heading the page title (blog index).
  */
 export function SectionHeader({
   pill,
   title,
   lead,
   align = 'center',
+  titleAs: Title = 'h2',
   className,
   headingClassName,
   titleClassName = 'max-w-[500px]',
@@ -79,6 +104,7 @@ export function SectionHeader({
   title: React.ReactNode;
   lead: React.ReactNode;
   align?: 'center' | 'left';
+  titleAs?: 'h1' | 'h2';
   className?: string;
   headingClassName?: string;
   titleClassName?: string;
@@ -89,7 +115,7 @@ export function SectionHeader({
     <div className={cn('flex flex-col gap-5', alignItems, className)}>
       <div className={cn('flex w-full flex-col gap-2.5', alignItems, headingClassName)}>
         <Pill>{pill}</Pill>
-        <h2 className={cn('text-black', TYPE.h2, titleClassName)}>{title}</h2>
+        <Title className={cn('text-black', TYPE.h2, titleClassName)}>{title}</Title>
       </div>
       <p className={cn('text-lp-gray-700', TYPE.body, leadClassName)}>{lead}</p>
     </div>

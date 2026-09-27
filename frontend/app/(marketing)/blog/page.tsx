@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { getAllPosts, getCategories } from '@/lib/blog';
 import { publicPageMetadata } from '@/lib/seo';
-import { Badge } from '@/components/ui/badge';
+import { Appear } from '@/components/marketing/landing/motion';
+import { GridBackdrop, SectionHeader } from '@/components/marketing/landing/primitives';
 import { FeaturedPost } from '@/components/marketing/blog/featured-post';
 import { PostBrowser } from '@/components/marketing/blog/post-browser';
 
@@ -14,6 +15,11 @@ export const metadata: Metadata = publicPageMetadata({
   path: '/blog',
 });
 
+/**
+ * Blog index in the landing page's language: a hero-style header (the page
+ * content starts where the landing hero's does, under the floating nav), then
+ * the posts on the grey section background the landing uses for Solutions.
+ */
 export default function BlogIndexPage() {
   const posts = getAllPosts();
   const categories = getCategories();
@@ -22,29 +28,26 @@ export default function BlogIndexPage() {
 
   return (
     <>
-      <div className="mx-auto w-full max-w-6xl px-6 py-16 md:py-20">
-        {/* Page header */}
-        <div className="mb-10 flex flex-col items-center text-center">
-          <Badge
-            variant="outline"
-            className="rounded-md bg-card/70 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground"
-          >
-            Blog
-          </Badge>
-          <h1 className="mt-4 text-mk-h2 text-foreground">Hiring, with less noise.</h1>
-          <p className="mt-3 max-w-[480px] text-mk-body text-muted-foreground">{description}</p>
+      <section className="relative px-5 pb-[70px] pt-[140px] tablet:px-[50px] tablet:pb-[100px] tablet:pt-[200px] desktop:px-[70px]">
+        <GridBackdrop variant="section" />
+        <Appear className="relative mx-auto max-w-[1300px]">
+          <SectionHeader
+            pill="Blog"
+            title="Hiring, with less noise."
+            lead={description}
+            titleAs="h1"
+            titleClassName="max-w-[350px] tablet:max-w-[600px]"
+            leadClassName="max-w-[340px] tablet:max-w-[460px]"
+          />
+        </Appear>
+      </section>
+
+      <section className="bg-lp-gray-50 px-5 py-[70px] tablet:px-[50px] tablet:py-[100px] desktop:px-[70px]">
+        <div className="mx-auto flex max-w-[1300px] flex-col gap-[60px]">
+          {featured && <FeaturedPost post={featured} />}
+          <PostBrowser posts={rest} categories={categories} />
         </div>
-
-        {/* Featured post */}
-        {featured && (
-          <div className="mb-14">
-            <FeaturedPost post={featured} />
-          </div>
-        )}
-
-        {/* Filtered grid */}
-        <PostBrowser posts={rest} categories={categories} />
-      </div>
+      </section>
     </>
   );
 }

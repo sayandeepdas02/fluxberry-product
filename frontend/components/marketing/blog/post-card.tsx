@@ -1,34 +1,37 @@
 import Link from 'next/link';
+import { cn } from '@/lib/utils';
 import { formatPostDate, type PostMeta } from '@/lib/blog-types';
+import { Pill, TYPE } from '@/components/marketing/landing/primitives';
 import { PostThumb } from './post-thumb';
 
-export function PostCard({ post }: { post: PostMeta }) {
+/** Hover and focus treatment shared by the blog's clickable cards. */
+export const postCardClass = cn(
+  'group rounded-[15px] bg-white p-[15px] shadow-[2px_2px_10px_rgba(0,0,0,0.03)] outline-none',
+  'transition-shadow duration-300 hover:shadow-[2px_6px_20px_rgba(0,0,0,0.07)] focus-visible:ring-2 focus-visible:ring-lp-blue-400',
+);
+
+/** Category pill plus date and reading time, shared by the featured and grid cards. */
+export function PostMetaRow({ post }: { post: PostMeta }) {
   return (
-    <Link
-      href={`/blog/${post.slug}`}
-      className="group flex flex-col overflow-hidden rounded-xl border border-border bg-white no-underline transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-berry-500"
-    >
-      <PostThumb className="aspect-[16/10] w-full" />
-      <div className="flex flex-col gap-2.5 p-5">
-        <div className="flex items-center gap-2.5">
-          <span className="rounded-full border border-border px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
-            {post.category}
-          </span>
-          <span className="font-mono text-[11px] tabular-nums text-muted-foreground">
-            {formatPostDate(post.date)}
-          </span>
-        </div>
-        <h3 className="text-[15px] font-semibold leading-snug text-foreground group-hover:text-berry-600">
-          {post.title}
-        </h3>
-        <p className="line-clamp-2 text-[13px] leading-relaxed text-muted-foreground">
-          {post.description}
-        </p>
-      </div>
-    </Link>
+    <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
+      <Pill className="px-2.5 py-[3px]">{post.category}</Pill>
+      <span className="font-inter text-[14px] leading-5 text-lp-gray-500">
+        {formatPostDate(post.date)} · {post.readingTime} min read
+      </span>
+    </div>
   );
 }
 
-export function EmptyCard() {
-  return <span aria-hidden className="pointer-events-none hidden lg:block" />;
+/** A post in the grid, built like the landing's Solutions cards: artwork panel over the text. */
+export function PostCard({ post }: { post: PostMeta }) {
+  return (
+    <Link href={`/blog/${post.slug}`} className={cn(postCardClass, 'flex flex-col')}>
+      <PostThumb className="aspect-[16/10] w-full" />
+      <div className="mt-2.5 flex flex-1 flex-col gap-[15px] px-[5px] py-2.5">
+        <PostMetaRow post={post} />
+        <h3 className={cn('text-black transition-colors group-hover:text-lp-blue-500', TYPE.title)}>{post.title}</h3>
+        <p className={cn('line-clamp-2 text-lp-gray-600', TYPE.body)}>{post.description}</p>
+      </div>
+    </Link>
+  );
 }

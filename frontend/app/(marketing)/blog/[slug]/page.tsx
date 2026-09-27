@@ -2,11 +2,13 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { getAllPosts, getPost, formatPostDate } from '@/lib/blog';
 import { publicPageMetadata, toPlainDescription } from '@/lib/seo';
 import { publicConfig } from '@/lib/config';
-import { Frame } from '@/components/marketing/frame';
-import { EyebrowPill } from '@/components/marketing/bits';
+import { Appear } from '@/components/marketing/landing/motion';
+import { GridBackdrop, Pill, TYPE } from '@/components/marketing/landing/primitives';
+import { articleInter } from '@/components/marketing/blog/article-font';
 import { Prose } from '@/components/marketing/blog/prose';
 import { TocMinimap } from '@/components/marketing/blog/toc-minimap';
 
@@ -61,41 +63,42 @@ export default async function BlogPostPage({ params }: Params) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
       />
 
-      <div className="relative">
-        <TocMinimap headings={post.headings} />
+      <article className={articleInter.variable}>
+        {/* Header in the landing hero's language: grid backdrop, pill, centred heading. */}
+        <header className="relative px-5 pb-[50px] pt-[140px] tablet:px-[50px] tablet:pb-[60px] tablet:pt-[200px] desktop:px-[70px]">
+          <GridBackdrop variant="section" />
+          <Appear className="relative mx-auto flex max-w-[760px] flex-col items-center text-center">
+            <Link
+              href="/blog"
+              className={cn(
+                'group inline-flex items-center gap-1.5 rounded-sm text-lp-gray-600 outline-none transition-colors hover:text-black',
+                'focus-visible:ring-2 focus-visible:ring-lp-blue-400',
+                TYPE.nav,
+              )}
+            >
+              <ArrowLeft aria-hidden className="size-4 transition-transform duration-300 group-hover:-translate-x-0.5" />
+              Back to blog
+            </Link>
+            <Pill className="mt-6">{post.category}</Pill>
+            <h1 className={cn('mt-2.5 text-balance text-black', TYPE.h2)}>{post.title}</h1>
+            <p className={cn('mt-5 max-w-[620px] text-balance text-lp-gray-700', TYPE.body)}>{post.description}</p>
+            <p className="mt-6 flex flex-wrap items-center justify-center gap-x-2 font-inter text-[14px] leading-5 text-lp-gray-500">
+              <span className="text-black">{post.author}</span>
+              <span aria-hidden>·</span>
+              <time dateTime={post.date}>{formatPostDate(post.date)}</time>
+              <span aria-hidden>·</span>
+              <span>{post.readingTime} min read</span>
+            </p>
+          </Appear>
+        </header>
 
-        <Frame>
-          <article className="border-b border-ink-100 pb-24 pt-20">
-            {/* A dashed full-bleed rule closes the header off — a softer boundary
-                than the crosshair-pinned dividers used between page sections. */}
-            <header className="mk-screen-dashed-bottom mx-auto flex max-w-[min(720px,100%-48px)] flex-col items-center pb-12 text-center">
-              <Link
-                href="/blog"
-                className="mk-focus mb-6 inline-flex items-center gap-2 text-[14px] font-medium text-ink-500 transition-colors hover:text-ink"
-              >
-                <ArrowLeft className="size-4" />
-                Back to blog
-              </Link>
-              <EyebrowPill className="mb-4">{post.category}</EyebrowPill>
-              <h1 className="mt-2 max-w-[720px] text-balance text-mk-h1 text-ink">{post.title}</h1>
-              <p className="mt-5 max-w-[620px] text-balance text-[17px] leading-[27px] text-ink-600">
-                {post.description}
-              </p>
-              <p className="mt-8 flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.08em] tabular-nums text-ink-400">
-                <span className="text-ink-secondary">{post.author}</span>
-                <span aria-hidden className="text-ink-300">/</span>
-                {formatPostDate(post.date)}
-                <span aria-hidden className="text-ink-300">/</span>
-                {post.readingTime} min read
-              </p>
-            </header>
-
-            <div className="mx-auto mt-12 max-w-[min(680px,100%-48px)]">
-              <Prose content={post.content} />
-            </div>
-          </article>
-        </Frame>
-      </div>
+        <div className="relative px-5 pb-[70px] tablet:px-[50px] tablet:pb-[100px] desktop:px-[70px]">
+          <TocMinimap headings={post.headings} />
+          <div className="mx-auto max-w-[680px] border-t border-lp-gray-150 pt-[50px]">
+            <Prose content={post.content} />
+          </div>
+        </div>
+      </article>
     </>
   );
 }
