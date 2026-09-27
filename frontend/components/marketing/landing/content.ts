@@ -14,10 +14,15 @@ export const HERO = {
   title: 'The #1 AI Native Hiring Platform',
   lead: ['Fluxberry AI is an AI Native hiring tool that is fast, simple.', 'Built for founders & hiring managers.'],
   cta: { label: 'Get Started', href: '/sign-up' },
+  /** The product shot: the dashboard alone, edge to edge (8:5). */
   image: {
-    src: '/landing/hero-dashboard.jpg',
+    src: '/landing/dashboard.jpg',
     alt: 'SaaS dashboard interface with task management and performance metrics',
+    width: 1944,
+    height: 1215,
   },
+  /** Painted sky-and-valley scene behind the hero (decorative). */
+  backdrop: '/landing/hero-landscape.webp',
 };
 
 export interface ProductCard {

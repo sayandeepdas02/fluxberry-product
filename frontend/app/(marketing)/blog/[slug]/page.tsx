@@ -64,9 +64,9 @@ export default async function BlogPostPage({ params }: Params) {
       />
 
       <article className={articleInter.variable}>
-        {/* Header in the landing hero's language: grid backdrop, pill, centred heading. */}
+        {/* Header in the landing's language: grid backdrop, pill, centred heading. */}
         <header className="relative px-5 pb-[50px] pt-[140px] tablet:px-[50px] tablet:pb-[60px] tablet:pt-[200px] desktop:px-[70px]">
-          <GridBackdrop variant="section" />
+          <GridBackdrop />
           <Appear className="relative mx-auto flex max-w-[760px] flex-col items-center text-center">
             <Link
               href="/blog"
