@@ -1,5 +1,5 @@
 import type { WorkspacePlan, BillingCycle } from '@/lib/shared';
-import { PLAN_CREDIT_ALLOWANCE, PLAN_SCREENING_QUOTA } from '@/lib/shared';
+import { PLAN_CREDIT_ALLOWANCE } from '@/lib/shared';
 
 /** Human labels for each plan. */
 export const PLAN_LABELS: Record<WorkspacePlan, string> = {
@@ -32,30 +32,43 @@ export const PLAN_TAGLINE: Record<'PRO' | 'MAX', string> = {
   MAX: 'Pro, plus outbound sourcing & referrals',
 };
 
-/** Features shown on the Pro card. */
-export const PRO_FEATURES: string[] = [
-  'Unlimited job posts',
-  'Unlimited candidates',
-  `AI scoring for ${PLAN_SCREENING_QUOTA.PRO} applicants / month`,
-  'Custom pipeline stages',
-  'Application forms',
-  'Team collaboration',
-  'Advanced analytics',
-  'Bulk candidate import',
-  'GDPR tools',
-  'Outbound webhooks',
-  `${PLAN_CREDIT_ALLOWANCE.PRO} AI credits / month`,
+/**
+ * One row of the plan comparison. `true` = included, `false` = not included
+ * (shown crossed out, so buyers see what the next plan adds), a string = the
+ * plan's specific amount of it (e.g. its monthly AI credits).
+ */
+export interface PlanFeatureRow {
+  label: string;
+  /** Short qualifier shown after the label, e.g. "(outbound)". */
+  note?: string;
+  /** Unit shown after a per-plan amount, e.g. "/ month". */
+  suffix?: string;
+  PRO: boolean | string;
+  MAX: boolean | string;
+}
+
+/** The plan comparison — the single source for every pricing surface. */
+export const PLAN_FEATURE_MATRIX: PlanFeatureRow[] = [
+  { label: 'Job board', PRO: true, MAX: true },
+  { label: 'Applicant tracking system', PRO: true, MAX: true },
+  { label: 'Unlimited candidates', PRO: true, MAX: true },
+  { label: 'Unlimited team members', PRO: true, MAX: true },
+  { label: 'Careers page', PRO: true, MAX: true },
+  { label: 'Analytics', PRO: true, MAX: true },
+  { label: 'AI credits', suffix: '/ month', PRO: String(PLAN_CREDIT_ALLOWANCE.PRO), MAX: String(PLAN_CREDIT_ALLOWANCE.MAX) },
+  { label: 'Talent sourcing', note: '(outbound)', PRO: false, MAX: true },
+  { label: 'Candidate referrals', PRO: false, MAX: true },
+  { label: '24/7 priority customer support', PRO: false, MAX: true },
 ];
 
-/** Max = everything in Pro, plus the Max-only features and a bigger credit allowance. */
-export const MAX_EXTRA_FEATURES: string[] = [
-  'Talent Sourcing (outbound)',
-  'Employee referrals',
-  `AI scoring for ${PLAN_SCREENING_QUOTA.MAX} applicants / month`,
-  `${PLAN_CREDIT_ALLOWANCE.MAX} AI credits / month`,
-];
+/** Plain-text line for a row on a given plan, e.g. "250 AI credits / month". */
+export function featureText(row: PlanFeatureRow, plan: 'PRO' | 'MAX'): string {
+  const value = row[plan];
+  if (typeof value === 'string') return [value, row.label, row.suffix].filter(Boolean).join(' ');
+  return row.note ? `${row.label} ${row.note}` : row.label;
+}
 
-export const MAX_FEATURES: string[] = [
-  'Everything in Pro',
-  ...MAX_EXTRA_FEATURES,
-];
+/** Included features as plain lines (for compact check-list surfaces in the app). */
+export const PRO_FEATURES: string[] = PLAN_FEATURE_MATRIX.filter((r) => r.PRO !== false).map((r) => featureText(r, 'PRO'));
+
+export const MAX_FEATURES: string[] = PLAN_FEATURE_MATRIX.filter((r) => r.MAX !== false).map((r) => featureText(r, 'MAX'));

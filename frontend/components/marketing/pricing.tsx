@@ -1,14 +1,17 @@
 'use client';
 
 import { useState } from 'react';
-import { Check } from 'lucide-react';
+import { Check, X } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
-import { PLAN_PRICING, PRO_FEATURES, MAX_FEATURES } from '@/lib/pricing';
+import { CREDIT_PACKS } from '@/lib/shared';
+import { PLAN_PRICING, PLAN_TAGLINE, PLAN_FEATURE_MATRIX, annualDiscount, type PlanFeatureRow } from '@/lib/pricing';
 
 export function PricingSection() {
   const [annual, setAnnual] = useState(false);
+  const saving = Math.min(annualDiscount('PRO'), annualDiscount('MAX'));
+  const smallestPack = CREDIT_PACKS[0];
 
   return (
     <section id="pricing" tabIndex={-1} className="mx-auto w-full max-w-6xl scroll-mt-20 px-6 py-16 md:py-24">
@@ -33,6 +36,7 @@ export function PricingSection() {
           <button
             role="switch"
             aria-checked={annual}
+            aria-label="Bill annually"
             onClick={() => setAnnual((v) => !v)}
             className={cn(
               'relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-berry-600 focus-visible:ring-offset-2',
@@ -49,7 +53,7 @@ export function PricingSection() {
           <span className={cn('flex items-center gap-1.5 text-sm font-medium transition-colors', annual ? 'text-foreground' : 'text-muted-foreground')}>
             Annual
             <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">
-              Save 58%
+              Save {saving}%
             </span>
           </span>
         </div>
@@ -57,89 +61,65 @@ export function PricingSection() {
 
       <div className="mt-12 px-0 sm:px-4">
         <div className="mx-auto grid max-w-3xl grid-cols-1 gap-4 sm:grid-cols-2">
-          <PricingCard
-            label="Pro"
-            monthly={PLAN_PRICING.PRO.monthly}
-            annual={PLAN_PRICING.PRO.annual}
-            features={PRO_FEATURES}
-            showAnnual={annual}
-          />
-          <PricingCard
-            label="Max"
-            monthly={PLAN_PRICING.MAX.monthly}
-            annual={PLAN_PRICING.MAX.annual}
-            features={MAX_FEATURES}
-            featured
-            showAnnual={annual}
-          />
+          <PricingCard plan="PRO" showAnnual={annual} />
+          <PricingCard plan="MAX" featured showAnnual={annual} />
         </div>
+        <p className="mx-auto mt-6 max-w-3xl text-center text-xs text-muted-foreground">
+          Prices in USD. AI credits power sourcing, enrichment and AI drafting — need more? Top up anytime from $
+          {smallestPack.priceUsd} for {smallestPack.credits} credits. Purchased credits never expire.
+        </p>
       </div>
     </section>
   );
 }
 
 function PricingCard({
-  label,
-  monthly,
-  annual,
-  features,
+  plan,
   featured = false,
   showAnnual,
 }: {
-  label: string;
-  monthly: number;
-  annual: number;
-  features: string[];
+  plan: 'PRO' | 'MAX';
   featured?: boolean;
   showAnnual: boolean;
 }) {
+  const { monthly, annual } = PLAN_PRICING[plan];
   const displayPrice = showAnnual ? Math.round(annual / 12) : monthly;
 
   return (
     <div
       className={cn(
         'flex flex-col rounded-[12px] border p-6',
-        featured ? 'border-berry-600 bg-berry-600 text-white' : 'border-border bg-white',
+        featured ? 'border-berry-600 bg-berry-600 text-white shadow-lg shadow-berry-600/20' : 'border-border bg-white',
       )}
     >
       <div className="flex items-start justify-between gap-2">
         <div>
-          <h3 className={cn('text-mk-title', featured ? 'text-white' : 'text-foreground')}>{label}</h3>
+          <h3 className={cn('text-mk-title', featured ? 'text-white' : 'text-foreground')}>{plan === 'PRO' ? 'Pro' : 'Max'}</h3>
+          <p className={cn('mt-1 text-sm', featured ? 'text-white/70' : 'text-muted-foreground')}>{PLAN_TAGLINE[plan]}</p>
         </div>
         {featured && (
-          <span className="rounded-full bg-white/20 px-2.5 py-0.5 text-[11px] font-medium text-white">
+          <span className="shrink-0 rounded-full bg-white/20 px-2.5 py-0.5 text-[11px] font-medium text-white">
             Recommended
           </span>
         )}
       </div>
 
-      <div className="mt-4 flex items-end gap-1">
+      <div className="mt-5 flex items-end gap-1">
         <span className={cn('mb-1 text-xl', featured ? 'text-white/60' : 'text-muted-foreground')}>$</span>
         <span className={cn('text-5xl font-semibold leading-none tracking-tight', featured ? 'text-white' : 'text-foreground')}>
           {displayPrice}
         </span>
         <span className={cn('mb-1 text-sm', featured ? 'text-white/60' : 'text-muted-foreground')}>/ month</span>
       </div>
-
-      <div className={cn('my-5 border-t', featured ? 'border-white/20' : 'border-border')} />
-      <p
-        className={cn(
-          'mb-3 font-mono text-[11px] uppercase tracking-[0.08em]',
-          featured ? 'text-white/60' : 'text-muted-foreground',
-        )}
-      >
-        Includes
+      <p className={cn('mt-1.5 text-xs', featured ? 'text-white/60' : 'text-muted-foreground')}>
+        {showAnnual ? `Billed $${annual} yearly` : 'Billed monthly'}
       </p>
 
+      <div className={cn('my-5 border-t', featured ? 'border-white/20' : 'border-border')} />
+
       <ul className="flex-1 space-y-2.5">
-        {features.map((f) => (
-          <li
-            key={f}
-            className={cn('flex items-center gap-2.5 text-sm', featured ? 'text-white/90' : 'text-muted-foreground')}
-          >
-            <Check className={cn('size-4 shrink-0', featured ? 'text-white' : 'text-berry-600')} />
-            {f}
-          </li>
+        {PLAN_FEATURE_MATRIX.map((row) => (
+          <FeatureItem key={row.label} row={row} plan={plan} featured={featured} />
         ))}
       </ul>
 
@@ -154,5 +134,41 @@ function PricingCard({
         <span aria-hidden>→</span>
       </Link>
     </div>
+  );
+}
+
+function FeatureItem({ row, plan, featured }: { row: PlanFeatureRow; plan: 'PRO' | 'MAX'; featured: boolean }) {
+  const value = row[plan];
+  const included = value !== false;
+
+  return (
+    <li
+      className={cn(
+        'flex items-center gap-2.5 text-sm',
+        included ? (featured ? 'text-white/90' : 'text-foreground/80') : 'text-muted-foreground/60',
+      )}
+    >
+      {included ? (
+        <Check className={cn('size-4 shrink-0', featured ? 'text-white' : 'text-berry-600')} aria-hidden />
+      ) : (
+        <X className="size-4 shrink-0 text-muted-foreground/50" aria-hidden />
+      )}
+      <span className={cn(!included && 'line-through decoration-muted-foreground/40')}>
+        {typeof value === 'string' ? (
+          <>
+            <span className={cn('font-semibold', featured ? 'text-white' : 'text-foreground')}>{value}</span> {row.label}
+            {row.suffix && ` ${row.suffix}`}
+          </>
+        ) : (
+          <>
+            {row.label}
+            {row.note && (
+              <span className={cn(included && (featured ? 'text-white/60' : 'text-muted-foreground'))}> {row.note}</span>
+            )}
+          </>
+        )}
+      </span>
+      {!included && <span className="sr-only">(not included)</span>}
+    </li>
   );
 }
