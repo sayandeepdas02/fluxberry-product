@@ -18,7 +18,8 @@ import type {
   CampaignDraftDto,
   CompensationBandDto,
 } from '../shared';
-import { SOURCING_PAGE_SIZE, SOURCING_MAX_PAGE_SIZE } from '../shared';
+import { SOURCING_PAGE_SIZE, SOURCING_MAX_PAGE_SIZE, PLAN_DAILY_OUTREACH_CAP } from '../shared';
+import type { WorkspacePlan } from '../shared';
 import {
   sourcingSearchRepository,
   sourcedContactRepository,
@@ -796,6 +797,9 @@ export const sourcingService = {
 
     const account = await accountRepository.ensureForWorkspace(workspaceId);
     if (!account) throw notFound('Billing account not found');
+    if ((PLAN_DAILY_OUTREACH_CAP[(account.plan as WorkspacePlan) ?? 'FREE'] ?? 0) <= 0) {
+      throw badRequest('Your plan does not include outreach email sending');
+    }
 
     // Atomically claim the campaign (DRAFT/SCHEDULED/PAUSED/FAILED → SENDING) so two
     // concurrent sends can't both build recipients and double-email everyone.

@@ -170,8 +170,27 @@ export const sourcingRecipientRepository = {
   /** Pending recipients the fan-out hasn't queued yet (e.g. deferred past a full day's cap). */
   listUndispatched: (campaignId: string) =>
     SourcingCampaignRecipientModel.find({ campaignId, status: 'PENDING', dispatchedAt: null }).sort({ createdAt: 1 }).lean(),
-  markDispatched: (ids: unknown[]) =>
-    SourcingCampaignRecipientModel.updateMany({ _id: { $in: ids } }, { $set: { dispatchedAt: new Date() } }),
+  /**
+   * Persist a cap reservation onto recipients: stamp the still-undispatched ones
+   * among `ids` with this run's token, and return exactly the ones this run won
+   * (a concurrent run can't claim the same recipient twice).
+   */
+  claimForDispatch: async (ids: unknown[], token: string) => {
+    await SourcingCampaignRecipientModel.updateMany(
+      { _id: { $in: ids }, dispatchedAt: null },
+      { $set: { dispatchedAt: new Date(), dispatchToken: token } },
+    );
+    return SourcingCampaignRecipientModel.find({ dispatchToken: token }).sort({ createdAt: 1 }).lean();
+  },
+  /** Reserved (dispatched) but not yet sent — re-queued idempotently on a retried fan-out. */
+  listDispatchedPending: (campaignId: string) =>
+    SourcingCampaignRecipientModel.find({ campaignId, status: 'PENDING', dispatchedAt: { $ne: null } }).sort({ createdAt: 1 }).lean(),
+  /** Give up on recipients that can never be sent (e.g. the plan has no outreach allowance). */
+  skipUndispatched: (campaignId: string, reason: string) =>
+    SourcingCampaignRecipientModel.updateMany(
+      { campaignId, status: 'PENDING', dispatchedAt: null },
+      { $set: { status: 'SKIPPED', error: reason } },
+    ),
   countPending: (campaignId: string) => SourcingCampaignRecipientModel.countDocuments({ campaignId, status: 'PENDING' }),
   /** Emails actually handed to the provider for this campaign since `since` (the latest credit charge). */
   countSentSince: (campaignId: string, since: Date) =>

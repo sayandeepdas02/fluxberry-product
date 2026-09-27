@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import type { WorkspacePlan } from '../../shared';
 import { PLAN_DAILY_OUTREACH_CAP } from '../../shared';
 import {
@@ -47,24 +48,52 @@ export const sendSourcingCampaignHandler: JobHandler = async (payload, ctx) => {
     return;
   }
 
-  await sourcingCampaignRepository.update(campaignId, { status: 'SENDING' });
-
-  const pending = await sourcingRecipientRepository.listUndispatched(campaignId);
   const account = await accountRepository.ensureForWorkspace(workspaceId);
   const cap = PLAN_DAILY_OUTREACH_CAP[(account?.plan as WorkspacePlan) ?? 'FREE'] ?? 0;
-  const granted = await outreachUsageRepository.reserveUpTo(workspaceId, pending.length, cap);
-  const batch = pending.slice(0, granted);
-
-  let i = 0;
-  for (const r of batch) {
-    await jobQueue.enqueue(
-      'SEND_SOURCING_EMAIL',
-      { recipientId: String(r._id) },
-      { runAt: new Date(Date.now() + i * 2000), idempotencyKey: `sourcing-email-${r._id}` },
-    );
-    i++;
+  if (cap <= 0) {
+    // The plan has no outreach allowance (e.g. downgraded after scheduling) —
+    // deferring would loop forever. Stop, skip what's unsent, refund it.
+    await sourcingRecipientRepository.skipUndispatched(campaignId, 'Your plan has no outreach sending allowance');
+    await sourcingCampaignRepository.update(campaignId, { status: 'FAILED' });
+    await sourcingService.settleCampaignCredits(campaignId);
+    ctx.logger.warn({ campaignId }, 'send-sourcing-campaign: plan outreach cap is 0 — campaign failed, unsent refunded');
+    return;
   }
-  if (batch.length) await sourcingRecipientRepository.markDispatched(batch.map((r) => r._id));
+
+  await sourcingCampaignRepository.update(campaignId, { status: 'SENDING' });
+
+  const enqueueSends = async (recipients: { _id: unknown }[]) => {
+    let i = 0;
+    for (const r of recipients) {
+      await jobQueue.enqueue(
+        'SEND_SOURCING_EMAIL',
+        { recipientId: String(r._id) },
+        { runAt: new Date(Date.now() + i * 2000), idempotencyKey: `sourcing-email-${r._id}` },
+      );
+      i++;
+    }
+  };
+
+  // A previous attempt of this job may have reserved + claimed recipients and then
+  // failed while queueing: re-queue those (idempotent keys) without reserving again.
+  await enqueueSends(await sourcingRecipientRepository.listDispatchedPending(campaignId));
+
+  const pending = await sourcingRecipientRepository.listUndispatched(campaignId);
+  const granted = await outreachUsageRepository.reserveUpTo(workspaceId, pending.length, cap);
+  let batch: { _id: unknown }[] = [];
+  if (granted > 0) {
+    // Persist the reservation on the recipients before queueing anything, so a
+    // retry reuses it; hand back whatever a concurrent run claimed first.
+    const token = crypto.randomBytes(12).toString('hex');
+    try {
+      batch = await sourcingRecipientRepository.claimForDispatch(pending.slice(0, granted).map((r) => r._id), token);
+    } catch (err) {
+      await outreachUsageRepository.release(workspaceId, utcDay(), granted);
+      throw err;
+    }
+    if (batch.length < granted) await outreachUsageRepository.release(workspaceId, utcDay(), granted - batch.length);
+    await enqueueSends(batch);
+  }
 
   const deferred = pending.length - batch.length;
   if (deferred > 0) {

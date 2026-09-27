@@ -14,6 +14,7 @@ import { OutreachDailyUsageModel } from '../../src/models/outreach-daily-usage.m
 import { CreditTransactionModel } from '../../src/models/credit-transaction.model';
 import { getPeopleSourcingProvider } from '../../src/integrations';
 import { JobQueueModel } from '../../src/models/job-queue.model';
+import { jobQueue } from '../../src/queue/job-queue';
 import { WorkspaceModel } from '../../src/models/workspace.model';
 import { AccountModel } from '../../src/models/account.model';
 import { PLAN_DAILY_OUTREACH_CAP } from '../../src/shared';
@@ -425,6 +426,52 @@ describe('Talent Sourcing (integration)', () => {
     await sendSourcingCampaignHandler(cont!.payload as any, jobCtx);
     expect((await SourcingCampaignRecipientModel.find({ campaignId, dispatchedAt: null }).lean()).length).toBe(0);
     expect((await SourcingCampaignModel.findById(campaignId).lean())!.status).toBe('SENT');
+  });
+
+  it('keeps cap reservations retry-safe and stops (refunding) on a zero-cap plan', async () => {
+    const workspaceId = await onboard(token, 'Sourcing Retrysafe', 'Retrysafeco');
+    const ws = (r: request.Test) => r.set('Authorization', `Bearer ${token}`).set('X-Workspace-Id', workspaceId);
+    await activateSubscription(workspaceId, 'MAX');
+    const credits = async () => (await ws(request(app).get(`/api/v1/workspaces/${workspaceId}/credits`) as any)).body.data.total;
+    const search = await ws(request(app).post('/api/v1/sourcing/search').send({ prompt: PROMPT }) as any);
+    const three = (search.body.data.contacts as any[]).filter((c) => c.hasEmail).slice(0, 3);
+    const list = await ws(request(app).post('/api/v1/sourcing/lists').send({ name: 'Trio', contactIds: three.map((c) => c.id) }) as any);
+    const mk = async (name: string) =>
+      (await ws(request(app).post('/api/v1/sourcing/campaigns').send({ name, listId: list.body.data.id, subject: 'Hi', body: 'Hi {{firstName}}' }) as any)).body.data.id as string;
+    const day = new Date().toISOString().slice(0, 10);
+
+    // Fan-out fails mid-queueing, then the job retries: the day's counter must not double.
+    const campaignId = await mk('Retry');
+    await ws(request(app).post(`/api/v1/sourcing/campaigns/${campaignId}/send`).send({}) as any);
+    const realEnqueue = jobQueue.enqueue.bind(jobQueue);
+    let calls = 0;
+    const spy = vi.spyOn(jobQueue, 'enqueue').mockImplementation(async (type: any, payload: any, opts: any) => {
+      if (type === 'SEND_SOURCING_EMAIL' && ++calls === 2) throw new Error('queue hiccup');
+      return realEnqueue(type, payload, opts);
+    });
+    try {
+      await expect(sendSourcingCampaignHandler({ campaignId, workspaceId }, jobCtx)).rejects.toThrow('queue hiccup');
+    } finally {
+      spy.mockRestore();
+    }
+    expect((await OutreachDailyUsageModel.findOne({ workspaceId, day }).lean())!.count).toBe(three.length);
+    await sendSourcingCampaignHandler({ campaignId, workspaceId }, jobCtx); // the retry
+    expect((await OutreachDailyUsageModel.findOne({ workspaceId, day }).lean())!.count).toBe(three.length);
+    expect(await JobQueueModel.countDocuments({ type: 'SEND_SOURCING_EMAIL', 'payload.recipientId': { $in: (await SourcingCampaignRecipientModel.find({ campaignId }).lean()).map((r) => String(r._id)) } })).toBe(three.length);
+    expect((await SourcingCampaignModel.findById(campaignId).lean())!.status).toBe('SENT');
+
+    // Sent, then the plan drops to one with no outreach allowance before dispatch: fail + refund, no endless deferral.
+    const scheduledId = await mk('Downgraded');
+    const beforeSend = await credits();
+    await ws(request(app).post(`/api/v1/sourcing/campaigns/${scheduledId}/send`).send({}) as any);
+    expect(await credits()).toBe(beforeSend - 1);
+    const wsDoc = await WorkspaceModel.findById(workspaceId).select('accountId').lean();
+    await AccountModel.findByIdAndUpdate(wsDoc!.accountId, { plan: 'FREE' });
+    await sendSourcingCampaignHandler({ campaignId: scheduledId, workspaceId }, jobCtx);
+    expect((await SourcingCampaignModel.findById(scheduledId).lean())!.status).toBe('FAILED');
+    expect(await SourcingCampaignRecipientModel.countDocuments({ campaignId: scheduledId, status: 'SKIPPED' })).toBe(three.length);
+    expect(await JobQueueModel.countDocuments({ type: 'SEND_SOURCING_CAMPAIGN', 'payload.campaignId': scheduledId, runAt: { $gt: new Date() } })).toBe(0);
+    expect(await credits()).toBe(beforeSend); // refunded
   });
 
   it('settles the prior reservation before charging a resend, so held credits can fund it', async () => {
