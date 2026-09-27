@@ -195,20 +195,6 @@ export const FAQ = {
   ] satisfies FaqItem[],
 };
 
-export const FOOTER = {
-  tagline: 'The AI native hiring platform for founders & hiring managers.',
-  links: [
-    { label: 'Home', href: '/' },
-    { label: 'Product', href: '/#why-us' },
-    { label: 'Solutions', href: '/#features' },
-    { label: 'Pricing', href: '/#pricing' },
-    { label: 'FAQ', href: '/#faq' },
-    { label: 'Blog', href: '/blog' },
-    { label: 'Log in', href: '/sign-in' },
-    { label: 'Get started', href: '/sign-up' },
-  ],
-};
-
 export interface NavLinkItem {
   label: string;
   href: string;
@@ -239,3 +225,38 @@ export const NAV_LINKS: (NavLinkItem | NavGroup)[] = [
     ],
   },
 ];
+
+/** The address for support, privacy and refund requests (also listed on the legal pages). */
+export const CONTACT_EMAIL = 'sayandeep@fluxberry.in';
+
+/** Legal pages, each backed by a markdown file in `content/legal`. */
+export const LEGAL_LINKS: NavLinkItem[] = [
+  { label: 'Privacy Policy', href: '/privacy' },
+  { label: 'Terms of Service', href: '/terms' },
+  { label: 'Cookie Policy', href: '/cookies' },
+  { label: 'Refund Policy', href: '/refund-policy' },
+];
+
+/**
+ * Resources pages that exist today: the nav's Resources items minus the ones
+ * still marked "Coming soon". Dropping an item's `comingSoon` flag when its page
+ * ships adds it to the footer too, so the footer never links to a missing page.
+ */
+const LIVE_RESOURCES: NavLinkItem[] = NAV_LINKS.flatMap((l) =>
+  'items' in l ? l.items.filter((i) => !i.comingSoon).map(({ label, href }) => ({ label, href })) : [],
+);
+
+export const FOOTER = {
+  tagline: 'The AI native hiring platform for founders & hiring managers.',
+  links: [
+    { label: 'Home', href: '/' },
+    { label: 'Product', href: '/#why-us' },
+    { label: 'Solutions', href: '/#features' },
+    { label: 'Pricing', href: '/#pricing' },
+    { label: 'FAQ', href: '/#faq' },
+    ...LIVE_RESOURCES,
+    { label: 'Log in', href: '/sign-in' },
+    { label: 'Get started', href: '/sign-up' },
+  ] satisfies NavLinkItem[],
+  legal: LEGAL_LINKS,
+};

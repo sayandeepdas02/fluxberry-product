@@ -2,6 +2,7 @@ import type { MetadataRoute } from 'next';
 import { publicConfig } from '@/lib/config';
 import { getAllPosts } from '@/lib/blog';
 import { fetchSitemapEntries } from '@/lib/public-api';
+import { LEGAL_LINKS } from '@/components/marketing/landing/content';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const posts = getAllPosts();
@@ -15,6 +16,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
       lastModified: posts[0]?.date ? new Date(posts[0].date) : undefined,
     },
+    ...LEGAL_LINKS.map((link) => ({
+      url: `${publicConfig.appUrl}${link.href}`,
+      changeFrequency: 'yearly' as const,
+      priority: 0.3,
+    })),
     ...posts.map((post) => ({
       url: `${publicConfig.appUrl}/blog/${post.slug}`,
       changeFrequency: 'monthly' as const,

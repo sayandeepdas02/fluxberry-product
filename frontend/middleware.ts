@@ -5,6 +5,11 @@ const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
   '/sign-up(.*)',
   '/blog(.*)',
+  // Legal pages, linked from the footer and the auth pages.
+  '/privacy',
+  '/terms',
+  '/cookies',
+  '/refund-policy',
   // Marketing pages in the nav's Resources menu (shown as "Coming soon" until each page exists).
   '/careers',
   '/comparisons(.*)',
