@@ -3,8 +3,10 @@
 import { useMemo, useState } from 'react';
 import type { PostMeta } from '@/lib/blog-types';
 import { cn } from '@/lib/utils';
+import { TYPE } from '@/components/marketing/landing/primitives';
 import { PostCard } from './post-card';
 
+/** Category chips over a three-column grid (two on tablet, one on phone). */
 export function PostBrowser({ posts, categories }: { posts: PostMeta[]; categories: string[] }) {
   const [active, setActive] = useState<string>('All');
 
@@ -14,41 +16,39 @@ export function PostBrowser({ posts, categories }: { posts: PostMeta[]; categori
   );
 
   return (
-    <div className="space-y-10">
-      {/* Tab-style category filter */}
-      <div className="border-b border-border">
-        <nav className="-mb-px flex items-center gap-0 overflow-x-auto">
-          {['All', ...categories].map((category) => {
-            const isActive = category === active;
-            return (
-              <button
-                key={category}
-                type="button"
-                onClick={() => setActive(category)}
-                aria-pressed={isActive}
-                className={cn(
-                  'whitespace-nowrap border-b-2 px-4 py-3 text-sm font-medium transition-colors focus-visible:outline-none',
-                  isActive
-                    ? 'border-foreground text-foreground'
-                    : 'border-transparent text-muted-foreground hover:text-foreground',
-                )}
-              >
-                {category === 'All' ? 'All articles' : category}
-              </button>
-            );
-          })}
-        </nav>
+    <div className="flex flex-col gap-5">
+      {/* Chips in the landing's pill style; the selected one is the blue-tint pill. */}
+      <div role="group" aria-label="Filter posts by category" className="flex flex-wrap items-center gap-2.5">
+        {['All', ...categories].map((category) => {
+          const isActive = category === active;
+          return (
+            <button
+              key={category}
+              type="button"
+              onClick={() => setActive(category)}
+              aria-pressed={isActive}
+              className={cn(
+                'rounded-[30px] px-[13px] py-[6px] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-lp-blue-400',
+                TYPE.pill,
+                isActive
+                  ? 'bg-lp-blue-50 text-lp-blue-400'
+                  : 'bg-white text-lp-gray-600 shadow-[2px_2px_10px_rgba(0,0,0,0.03)] hover:text-black',
+              )}
+            >
+              {category === 'All' ? 'All articles' : category}
+            </button>
+          );
+        })}
       </div>
 
-      {/* Post grid */}
       {visible.length > 0 ? (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-5 tablet:grid-cols-2 desktop:grid-cols-3">
           {visible.map((post) => (
             <PostCard key={post.slug} post={post} />
           ))}
         </div>
       ) : (
-        <p className="py-16 text-center text-sm text-muted-foreground">No posts in this category yet.</p>
+        <p className={cn('py-16 text-center text-lp-gray-600', TYPE.body)}>No posts in this category yet.</p>
       )}
     </div>
   );

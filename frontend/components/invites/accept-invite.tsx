@@ -8,7 +8,7 @@ import { api, setWorkspaceId } from '@/lib/api-client';
 import { useSession } from '@/hooks/use-session';
 import { useClerk } from '@clerk/nextjs';
 import { clearLocalAuthState } from '@/lib/auth-actions';
-import { AuthHeading, authButtonClass } from '@/components/marketing/auth-shell';
+import { AuthHeading, authButtonClass, authSecondaryButtonClass } from '@/components/marketing/auth-shell';
 import { Button } from '@/components/ui/button';
 import { PageSpinner } from '@/components/ui/spinner';
 import { toast } from '@/components/ui/sonner';
@@ -89,9 +89,9 @@ export function AcceptInvite() {
         title={`Join ${invite.workspaceName}`}
         subtitle={
           <>
-            <strong className="text-ink">{invite.inviterName}</strong> invited you to join{' '}
-            <strong className="text-ink">{invite.workspaceName}</strong> as a{' '}
-            <strong className="text-ink">{capitalize(invite.role)}</strong>.
+            <strong className="font-semibold text-black">{invite.inviterName}</strong> invited you to join{' '}
+            <strong className="font-semibold text-black">{invite.workspaceName}</strong> as a{' '}
+            <strong className="font-semibold text-black">{capitalize(invite.role)}</strong>.
           </>
         }
       />
@@ -101,15 +101,15 @@ export function AcceptInvite() {
           <Button className={authButtonClass} onClick={() => router.push(`/sign-up${nextParam}`)}>
             Create account
           </Button>
-          <Button variant="outline" className="h-[42px] w-full rounded-[7px]" onClick={() => router.push(`/sign-in${nextParam}`)}>
+          <Button className={authSecondaryButtonClass} onClick={() => router.push(`/sign-in${nextParam}`)}>
             Log in
           </Button>
         </div>
       ) : emailMismatch ? (
         <div className="mt-7 space-y-3">
-          <p className="text-sm text-ink-500">
-            This invite is for <strong className="text-ink">{invite.email}</strong>. You&apos;re logged in as{' '}
-            <strong className="text-ink">{session.user.email}</strong>.
+          <p className="font-inter text-[15px] leading-6 text-lp-gray-700">
+            This invite is for <strong className="font-semibold text-black">{invite.email}</strong>. You&apos;re logged in as{' '}
+            <strong className="font-semibold text-black">{session.user.email}</strong>.
           </p>
           <Button
             className={authButtonClass}

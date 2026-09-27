@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { SignIn } from '@clerk/nextjs';
 import { noIndexMetadata } from '@/lib/seo';
 import { safeNextPath } from '@/lib/safe-path';
+import { AuthShell, clerkAppearance } from '@/components/marketing/auth-shell';
 
 export const metadata: Metadata = { title: 'Sign in', ...noIndexMetadata };
 
@@ -14,11 +15,12 @@ export default async function SignInPage({
   const next = safeNextPath(params.next);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
+    <AuthShell>
       <SignIn
+        appearance={clerkAppearance}
         {...(next ? { forceRedirectUrl: next } : {})}
         {...(params.email ? { initialValues: { emailAddress: params.email } } : {})}
       />
-    </div>
+    </AuthShell>
   );
 }

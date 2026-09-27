@@ -1,11 +1,11 @@
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { Appear } from './motion';
-import { GradientButton, Pill, TYPE } from './primitives';
+import { GradientButton, GridBackdrop, Pill, TYPE } from './primitives';
 import { HERO } from './content';
 
 /** Bootstrap's "people-fill", the glyph the Framer design uses in its hero badge (16×12). */
-function PeopleIcon() {
+export function PeopleIcon() {
   return (
     <svg viewBox="0 0 16 12" width={16} height={12} aria-hidden className="shrink-0 fill-lp-blue-400">
       <path d="M7 12s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6m-5.784 6A2.24 2.24 0 0 1 5 11c0-1.355.68-2.75 1.936-3.72A6.3 6.3 0 0 0 5 7c-4 0-5 3-5 4s1 1 1 1zM4.5 6a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5" />
@@ -23,10 +23,7 @@ const HERO_IMAGE_SHADOW =
 export function Hero() {
   return (
     <section id="hero" className="relative px-5 pb-[70px] pt-[140px] tablet:px-[50px] tablet:pb-[100px] tablet:pt-[200px] desktop:px-[70px]">
-      {/* Grid backdrop: a full-width image that fades to white at its foot. */}
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 aspect-[3963/2793] w-full">
-        <Image src="/landing/grid-bg.png" alt="" fill sizes="100vw" loading="eager" className="object-cover" />
-      </div>
+      <GridBackdrop />
 
       <div className="relative mx-auto flex max-w-[1300px] flex-col items-center">
         <Appear className="flex w-full flex-col items-center gap-[30px]">

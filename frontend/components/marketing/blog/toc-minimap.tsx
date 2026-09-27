@@ -39,25 +39,28 @@ export function TocMinimap({ headings }: { headings: Heading[] }) {
   return (
     <nav
       aria-label="On this page"
-      className="absolute bottom-0 left-4 top-14 hidden w-11 xl:block"
+      className="absolute bottom-0 left-4 top-[50px] hidden w-11 xl:block"
     >
       <ul className="sticky top-1/2 flex w-[38px] -translate-y-1/2 list-none flex-col gap-px p-0">
         {headings.map(({ id, text, depth }) => {
           const isActive = id === activeId;
           return (
             <li key={id} className="relative">
-              <a href={`#${id}`} className="mk-focus group flex items-center gap-3 py-[5px] no-underline">
+              <a
+                href={`#${id}`}
+                className="group flex items-center gap-3 rounded-sm py-[5px] no-underline outline-none focus-visible:ring-2 focus-visible:ring-lp-blue-400"
+              >
                 <span
                   className={cn(
                     'block h-0.5 shrink-0 rounded-[1px] transition-[width,background-color] duration-200',
                     depth === 2 ? 'w-[30px]' : 'w-[18px]',
-                    isActive ? 'w-[34px] bg-ink' : 'bg-ink-300 group-hover:w-[38px] group-hover:bg-ink-500',
+                    isActive ? 'w-[34px] bg-lp-blue-500' : 'bg-lp-gray-300 group-hover:w-[38px] group-hover:bg-lp-gray-600',
                   )}
                 />
                 <span
                   className={cn(
-                    'pointer-events-none absolute left-11 w-[220px] -translate-x-1 text-[14px] leading-[1.4] opacity-0 transition-[opacity,transform] duration-150 group-hover:translate-x-0 group-hover:opacity-100',
-                    isActive ? 'text-ink' : 'text-ink-600',
+                    'pointer-events-none absolute left-11 w-[220px] -translate-x-1 font-manrope text-[14px] font-medium leading-[1.4] opacity-0 transition-[opacity,transform] duration-150 group-hover:translate-x-0 group-hover:opacity-100',
+                    isActive ? 'text-black' : 'text-lp-gray-600',
                   )}
                 >
                   {text}
