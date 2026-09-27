@@ -216,7 +216,8 @@ export interface NavLinkItem {
 
 export interface NavGroup {
   label: string;
-  items: (NavLinkItem & { icon: LucideIcon })[];
+  /** `comingSoon` items show a locked "Coming soon" row instead of a link until their page launches. */
+  items: (NavLinkItem & { icon: LucideIcon; comingSoon?: boolean })[];
 }
 
 /**
@@ -231,10 +232,10 @@ export const NAV_LINKS: (NavLinkItem | NavGroup)[] = [
     label: 'Resources',
     items: [
       { label: 'Blog', href: '/blog', icon: Newspaper },
-      { label: 'Careers', href: '/careers', icon: BriefcaseBusiness },
-      { label: 'Comparisons', href: '/comparisons', icon: Scale },
-      { label: 'Knowledge Base', href: '/knowledge-base', icon: BookOpen },
-      { label: 'Integrations', href: '/integrations', icon: Blocks },
+      { label: 'Careers', href: '/careers', icon: BriefcaseBusiness, comingSoon: true },
+      { label: 'Comparisons', href: '/comparisons', icon: Scale, comingSoon: true },
+      { label: 'Knowledge Base', href: '/knowledge-base', icon: BookOpen, comingSoon: true },
+      { label: 'Integrations', href: '/integrations', icon: Blocks, comingSoon: true },
     ],
   },
 ];
