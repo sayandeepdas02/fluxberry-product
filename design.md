@@ -69,7 +69,7 @@ The product has two color worlds that never mix:
 | `berry-100` | `#dde6ff` | Dot pattern tint |
 | `berry-200` | `#b8ccff` | Structural lines: rails, section borders, header rule, crosshairs |
 | `berry-400` | `#4f78d8` | Hatch pattern tint |
-| `berry-500` | `#2955b8` | Logo mark accents, list markers |
+| `berry-500` | `#2955b8` | List markers |
 | `berry-600` | `#0e2f7e` | Brand color. CTA button background, auth button, icons, hero headline |
 | `berry-700` | `#0a2462` | CTA button border, focus outline |
 | `berry-900` | `#061240` | Dark footer background |
@@ -302,11 +302,11 @@ All 26 components use `cn()` from `lib/utils.ts` for class merging. CVA (class-v
 - `PixelChevronRight`, `PixelChevronDown`, `PixelArrowRight`, `CrossMark`
 
 #### Logo
-- `LogoMark`: Paper-plane icon rendered as an `<img>` tag (24x24):
-  - variant `"default"`: `/logo-mark.png` (navy plane on white — light backgrounds)
-  - variant `"light"`: `/logo-mark-white.png` (white plane on navy — dark backgrounds)
-- `Logo`: LogoMark + wordmark at `text-[17px] font-semibold tracking-tight text-ink`
-- Favicon: `app/icon.png` (white plane on navy, 1080x1080, browser-scaled)
+- Logo mark: a white "F" on a full-bleed `#2d82ff` square. Master vector: `public/logo-mark.svg`. It is the only logo; there is no other mark.
+- `Logo` (navbar, footer, auth pages): the text wordmark "Fluxberry" only, with no icon beside it
+- Favicon: `app/icon.svg` (the mark snapped to a 32px grid so it stays crisp in the tab) plus `app/favicon.ico` (16/32/48) for browsers without SVG favicons
+- `app/apple-icon.png` (180x180); `public/logo-mark-192.png` and `public/logo-mark.png` (512x512) for the web manifest, structured data, and the OG image badge
+- To change the mark, edit `public/logo-mark.svg`, then re-export the PNGs from it and re-snap `app/icon.svg` by hand
 
 ---
 
