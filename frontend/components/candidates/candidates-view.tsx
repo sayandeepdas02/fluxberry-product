@@ -74,10 +74,24 @@ export function CandidatesView({ jobId: fixedJobId }: { jobId?: string }) {
   const jobStagesQuery = useJobStages(fixedJobId ?? '');
   const stages: PipelineStage[] = fixedJobId ? jobStagesQuery.data ?? [] : defaultPipelineStages();
 
+  // Handed to the Kanban board: returning the save's promise keeps a dropped
+  // card in its new column while it saves (see CandidateBoard's onMove).
   const onMove = (applicationId: string, s: string) => {
-    moveStage.mutate(
-      { applicationId, body: { stage: s } },
-      { onSuccess: () => toast.success('Candidate moved') },
+    // Rejecting records a reason and emails the candidate, so a drop on
+    // Rejected opens the same dialog as the table's Reject action.
+    if (s === 'REJECTED') {
+      setRejectTarget(applicationId);
+      return;
+    }
+    const name = items.find((c) => c.applicationId === applicationId)?.name ?? 'Candidate';
+    const label = stages.find((st) => st.id === s)?.label ?? s;
+    return moveStage.mutateAsync({ applicationId, body: { stage: s } }).then(
+      () => {
+        toast.success(`${name} moved to ${label}`);
+      },
+      (e: unknown) => {
+        toast.error(`Couldn't move ${name} to ${label}. ${e instanceof Error ? e.message : 'Please try again.'}`);
+      },
     );
   };
 
