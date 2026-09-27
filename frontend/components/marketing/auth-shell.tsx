@@ -39,16 +39,25 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
           <div className="w-full max-w-[400px]">{children}</div>
         </main>
 
-        <footer className="flex items-center justify-between font-inter text-[14px] leading-5 text-lp-gray-500">
+        <footer className="flex items-center justify-between font-inter text-[14px] leading-5 text-lp-gray-600">
           <span>
             © {new Date().getFullYear()} {publicConfig.appName}
           </span>
-          <Link
-            href="/blog"
-            className="rounded-sm outline-none transition-colors hover:text-black focus-visible:ring-2 focus-visible:ring-lp-blue-400"
-          >
-            Blog
-          </Link>
+          <nav aria-label="Legal" className="flex items-center gap-4">
+            {[
+              { label: 'Privacy', href: '/privacy' },
+              { label: 'Terms', href: '/terms' },
+              { label: 'Blog', href: '/blog' },
+            ].map((l) => (
+              <Link
+                key={l.href}
+                href={l.href}
+                className="rounded-sm outline-none transition-colors hover:text-black focus-visible:ring-2 focus-visible:ring-lp-blue-400"
+              >
+                {l.label}
+              </Link>
+            ))}
+          </nav>
         </footer>
       </div>
 
