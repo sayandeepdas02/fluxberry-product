@@ -22,9 +22,9 @@ describe('credit catalog — 3× margin guard', () => {
 
   it('values a credit at or below every way one is actually bought', () => {
     for (const pack of CREDIT_PACKS) expect(pack.priceUsd / pack.credits).toBeGreaterThanOrEqual(CREDIT_VALUE_USD);
-    // Plan allowances, valued at the plan's monthly price ($40 Pro, $60 Max).
-    expect(40 / PLAN_CREDIT_ALLOWANCE.PRO).toBeGreaterThanOrEqual(CREDIT_VALUE_USD);
-    expect(60 / PLAN_CREDIT_ALLOWANCE.MAX).toBeGreaterThanOrEqual(CREDIT_VALUE_USD);
+    // Plan allowances, valued at the plan's monthly price ($39 Pro, $59 Max).
+    expect(39 / PLAN_CREDIT_ALLOWANCE.PRO).toBeGreaterThanOrEqual(CREDIT_VALUE_USD);
+    expect(59 / PLAN_CREDIT_ALLOWANCE.MAX).toBeGreaterThanOrEqual(CREDIT_VALUE_USD);
   });
 });
 

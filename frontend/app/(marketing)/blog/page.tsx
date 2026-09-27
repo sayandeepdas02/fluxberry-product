@@ -4,7 +4,6 @@ import { publicPageMetadata } from '@/lib/seo';
 import { Badge } from '@/components/ui/badge';
 import { FeaturedPost } from '@/components/marketing/blog/featured-post';
 import { PostBrowser } from '@/components/marketing/blog/post-browser';
-import { ClosingSection } from '@/components/marketing/landing/closing';
 
 const description =
   'Notes on hiring with less noise: screening, assessments, interviews, and how we build Fluxberry.';
@@ -46,8 +45,6 @@ export default function BlogIndexPage() {
         {/* Filtered grid */}
         <PostBrowser posts={rest} categories={categories} />
       </div>
-
-      <ClosingSection />
     </>
   );
 }

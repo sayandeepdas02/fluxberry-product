@@ -9,7 +9,6 @@ import { Frame } from '@/components/marketing/frame';
 import { EyebrowPill } from '@/components/marketing/bits';
 import { Prose } from '@/components/marketing/blog/prose';
 import { TocMinimap } from '@/components/marketing/blog/toc-minimap';
-import { ClosingSection } from '@/components/marketing/landing/closing';
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -97,8 +96,6 @@ export default async function BlogPostPage({ params }: Params) {
           </article>
         </Frame>
       </div>
-
-      <ClosingSection />
     </>
   );
 }

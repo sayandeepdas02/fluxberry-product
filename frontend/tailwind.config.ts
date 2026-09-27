@@ -17,6 +17,16 @@ const config: Config = {
       screens: { '2xl': '1200px' },
     },
     extend: {
+      /*
+       * Landing-page breakpoints, copied from the Framer design it's built from
+       * (Desktop ≥1200 / Tablet 810–1199 / Phone ≤809). Only the `lp-*` marketing
+       * components use these; don't mix them with the default sm/md/lg scale in
+       * one element, since extended screens are emitted after the defaults.
+       */
+      screens: {
+        tablet: '810px',
+        desktop: '1200px',
+      },
       colors: {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
@@ -96,6 +106,30 @@ const config: Config = {
           500: '#6b6b6b',
           600: '#646464',
         },
+
+        /*
+         * Landing page ("lp") palette, measured from the Framer design's colour tokens.
+         * Blue 400→500 is the gradient on every primary control; 600 is the footer wordmark.
+         */
+        'lp-blue': {
+          50: '#e8f2ff',
+          100: '#dceaff',
+          400: '#3787ff',
+          500: '#0d6eff',
+          600: '#1261d8',
+        },
+        'lp-gray': {
+          50: '#f6f6f6',
+          100: '#eeeeee',
+          150: '#e5e5e5',
+          200: '#dbdbdb',
+          300: '#cccccc',
+          400: '#aaaaaa',
+          500: '#888888',
+          600: '#666666',
+          700: '#555555',
+          800: '#333333',
+        },
       },
       borderRadius: {
         lg: 'var(--radius)',
@@ -105,6 +139,9 @@ const config: Config = {
       fontFamily: {
         sans: ['var(--font-geist-sans)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         mono: ['var(--font-geist-mono)', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+        // Landing page: Manrope for headings/UI, Inter for body copy (set on the marketing layout).
+        manrope: ['var(--font-manrope)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        inter: ['var(--font-inter)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       fontSize: {
         // deliberate type scale (spec §7) — named by role, not size, so meaning survives a rescale
@@ -132,6 +169,35 @@ const config: Config = {
         'mk-nav': ['13px', { lineHeight: '16px', fontWeight: '450' }],
         'mk-meta': ['13px', { lineHeight: '20px', fontWeight: '400' }],
         'mk-micro': ['12px', { lineHeight: '16px', fontWeight: '500', letterSpacing: '0.04em' }],
+
+        /*
+         * Landing page scale, measured from the Framer design. Headings step down per
+         * breakpoint rather than scaling fluidly (phone → tablet → desktop), exactly as
+         * Framer lays them out: apply `text-lp-h1-p tablet:text-lp-h1-t desktop:text-lp-h1`.
+         */
+        'lp-h1': ['59px', { lineHeight: '1.15', fontWeight: '600', letterSpacing: '-0.03em' }],
+        'lp-h1-t': ['46px', { lineHeight: '1.15', fontWeight: '600', letterSpacing: '-0.03em' }],
+        'lp-h1-p': ['34px', { lineHeight: '1.15', fontWeight: '600', letterSpacing: '-0.03em' }],
+        'lp-h2': ['45px', { lineHeight: '1.15', fontWeight: '600', letterSpacing: '-0.028em' }],
+        'lp-h2-t': ['36px', { lineHeight: '1.15', fontWeight: '600', letterSpacing: '-0.028em' }],
+        'lp-h2-p': ['28px', { lineHeight: '1.15', fontWeight: '600', letterSpacing: '-0.028em' }],
+        'lp-title': ['20px', { lineHeight: '1.15', fontWeight: '500', letterSpacing: '-0.005em' }],
+        'lp-title-t': ['18px', { lineHeight: '1.15', fontWeight: '500', letterSpacing: '-0.005em' }],
+        'lp-title-p': ['17px', { lineHeight: '1.15', fontWeight: '500', letterSpacing: '-0.005em' }],
+        'lp-body': ['16px', { lineHeight: '1.5', fontWeight: '400' }],
+        'lp-body-t': ['15px', { lineHeight: '1.5', fontWeight: '400' }],
+        'lp-body-p': ['14px', { lineHeight: '1.5', fontWeight: '400' }],
+        'lp-label': ['16px', { lineHeight: '1.5', fontWeight: '500', letterSpacing: '0.01em' }],
+        'lp-label-sm': ['15px', { lineHeight: '1.5', fontWeight: '500', letterSpacing: '0.01em' }],
+        'lp-nav': ['14px', { lineHeight: '1.3', fontWeight: '500' }],
+        'lp-nav-sm': ['13px', { lineHeight: '1.3', fontWeight: '500' }],
+        'lp-pill': ['13px', { lineHeight: '1.5', fontWeight: '600', letterSpacing: '-0.005em' }],
+        'lp-pill-sm': ['12px', { lineHeight: '1.5', fontWeight: '600', letterSpacing: '-0.005em' }],
+        'lp-button': ['13px', { lineHeight: '1.3', fontWeight: '600' }],
+        'lp-button-sm': ['12px', { lineHeight: '1.3', fontWeight: '600' }],
+        'lp-per': ['24px', { lineHeight: '1.15', fontWeight: '600', letterSpacing: '-0.03em' }],
+        'lp-per-t': ['22px', { lineHeight: '1.15', fontWeight: '600', letterSpacing: '-0.03em' }],
+        'lp-per-p': ['19px', { lineHeight: '1.15', fontWeight: '600', letterSpacing: '-0.03em' }],
       },
       typography: {
         DEFAULT: {

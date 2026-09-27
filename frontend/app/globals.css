@@ -40,11 +40,6 @@
     --ring: 222 80% 27%;
 
     --radius: 0.6rem;
-
-    /* Feature08 spotlight */
-    --warm: oklch(0.55 0.12 250);
-    --warm-foreground: oklch(0.22 0.016 256.8);
-    --warm-glow: oklch(0.55 0.12 250 / 10%);
   }
 
   .dark {
@@ -86,6 +81,28 @@
   /* subtle, restrained focus states (spec §104 accessibility) */
   :focus-visible {
     @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+}
+
+/*
+ * Landing fonts carry the Framer design's OpenType settings instead of the
+ * app's (body sets Geist's cv11/ss01, which would swap Inter's "a" and digits).
+ */
+@layer utilities {
+  .font-manrope {
+    font-feature-settings: normal;
+    text-rendering: auto;
+  }
+  .font-inter {
+    font-feature-settings: 'blwf', 'cv03', 'cv04', 'cv09', 'cv11';
+    text-rendering: auto;
+  }
+}
+
+/* In-page links on the landing page glide to their section, as in Framer. */
+@media (prefers-reduced-motion: no-preference) {
+  html:has(#hero) {
+    scroll-behavior: smooth;
   }
 }
 

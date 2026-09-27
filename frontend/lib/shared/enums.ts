@@ -52,7 +52,7 @@ export const ACTIVE_BILLING_STATUSES: readonly BillingSubscriptionStatus[] = [
   'on_hold',
 ];
 
-/** How often a paid subscription bills — same plan, two prices (e.g. Pro $40/mo or $200/yr, Max $60/mo or $300/yr). */
+/** How often a paid subscription bills — same plan, two prices (e.g. Pro $39/mo or $199/yr, Max $59/mo or $299/yr). */
 export const BILLING_CYCLES = ['MONTHLY', 'ANNUAL'] as const;
 export type BillingCycle = (typeof BILLING_CYCLES)[number];
 

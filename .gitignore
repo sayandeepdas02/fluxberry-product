@@ -45,3 +45,6 @@ npm-debug.log*
 
 # local reference clones (not part of the project)
 chanhdai.com-main/
+
+# Local MCP server config (contains secrets)
+.mcp.json

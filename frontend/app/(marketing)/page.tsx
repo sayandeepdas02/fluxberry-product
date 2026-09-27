@@ -1,13 +1,14 @@
 import type { Metadata } from 'next';
 import { publicConfig } from '@/lib/config';
-import { Hero02 } from '@/components/ui/hero-02';
-import Feature08 from '@/components/ui/feature-08';
-import { PricingSection } from '@/components/marketing/pricing';
-import { ClosingSection } from '@/components/marketing/landing/closing';
+import { Hero } from '@/components/marketing/landing/hero';
+import { ProductSection } from '@/components/marketing/landing/product-section';
+import { SolutionsSection } from '@/components/marketing/landing/solutions-section';
+import { PricingSection } from '@/components/marketing/landing/pricing-section';
+import { FaqSection } from '@/components/marketing/landing/faq-section';
 
 const title = `${publicConfig.appName} - AI Native Hiring Platform`;
 const description =
-  'Fluxberry AI scores every applicant on arrival, runs assessments and interviews, and moves your pipeline forward. The AI-native hiring platform for small teams.';
+  'Fluxberry AI scores every applicant against your job, runs your pipeline and careers page, and helps you source candidates. The AI native hiring platform for founders and hiring managers.';
 
 export const metadata: Metadata = {
   title: { absolute: title },
@@ -22,10 +23,11 @@ const jsonLd = {
   '@type': 'SoftwareApplication',
   name: publicConfig.appName,
   applicationCategory: 'BusinessApplication',
-  description: 'AI Native Hiring Platform. AI-native applicant tracking for small hiring teams.',
+  description: 'AI Native Hiring Platform. AI-native applicant tracking for founders and hiring managers.',
   offers: { '@type': 'Offer', category: 'SaaS' },
 };
 
+/** The public landing page, converted from the Framer design (sections top to bottom). */
 export default function LandingPage() {
   return (
     <>
@@ -33,16 +35,11 @@ export default function LandingPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
       />
-      <Hero02
-        title="The #1 AI Native Hiring Platform"
-        description="Fluxberry AI is an AI Native hiring tool that is fast, simple."
-        descriptionLine2="Built for founders & hiring managers."
-        washImage="/hero-bg.mp4"
-        animation="subtle"
-      />
-      <Feature08 />
+      <Hero />
+      <ProductSection />
+      <SolutionsSection />
       <PricingSection />
-      <ClosingSection />
+      <FaqSection />
     </>
   );
 }
