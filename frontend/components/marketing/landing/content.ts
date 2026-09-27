@@ -30,8 +30,8 @@ export const HERO = {
   image: {
     src: '/landing/dashboard.jpg',
     alt: 'Fluxberry dashboard with open jobs, the hiring pipeline, top candidates and the interview schedule',
-    width: 1556,
-    height: 959,
+    width: 1960,
+    height: 1208,
   },
   /** Painted sky-and-valley scene behind the hero (decorative). */
   backdrop: '/landing/hero-landscape.webp',
