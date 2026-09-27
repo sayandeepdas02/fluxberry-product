@@ -3,9 +3,10 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import Link from 'next/link';
 import { AnimatePresence, motion } from 'motion/react';
+import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { GradientButton, RollText, TYPE } from '@/components/marketing/landing/primitives';
-import { NAV_LINKS } from '@/components/marketing/landing/content';
+import { NAV_LINKS, type NavGroup } from '@/components/marketing/landing/content';
 
 /*
  * Floating pill navigation, converted from the Framer design: fixed 26px from
@@ -45,6 +46,178 @@ function NavLink({ href, label }: { href: string; label: string }) {
   );
 }
 
+function Chevron({ open }: { open: boolean }) {
+  return (
+    <ChevronDown
+      aria-hidden
+      strokeWidth={2.25}
+      className={cn('size-3.5 shrink-0 transition-transform duration-200', open && 'rotate-180')}
+    />
+  );
+}
+
+/** How long the pointer can be off the trigger and panel (crossing the gap between them) before it closes. */
+const HOVER_CLOSE_DELAY = 150;
+
+/**
+ * A nav group as a dropdown under the pill: a button that shows a list of
+ * links (the disclosure pattern). A mouse opens it on hover; a click or tap
+ * toggles it. Escape, a click outside or focus leaving it closes it.
+ */
+function NavDropdown({ group }: { group: NavGroup }) {
+  const [open, setOpen] = useState(false);
+  const panelId = useId();
+  const rootRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const closeTimer = useRef<number | undefined>(undefined);
+  // Set when hovering opened it, so the click that usually follows doesn't shut it again.
+  const openedByHover = useRef(false);
+
+  useEffect(() => () => window.clearTimeout(closeTimer.current), []);
+
+  useEffect(() => {
+    if (!open) {
+      openedByHover.current = false;
+      return;
+    }
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setOpen(false);
+        buttonRef.current?.focus();
+      }
+    };
+    const onPointerDown = (e: PointerEvent) => {
+      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    document.addEventListener('pointerdown', onPointerDown);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.removeEventListener('pointerdown', onPointerDown);
+    };
+  }, [open]);
+
+  return (
+    <div
+      ref={rootRef}
+      className="relative"
+      onPointerEnter={(e) => {
+        if (e.pointerType !== 'mouse') return;
+        window.clearTimeout(closeTimer.current);
+        if (!open) openedByHover.current = true;
+        setOpen(true);
+      }}
+      onPointerLeave={(e) => {
+        if (e.pointerType !== 'mouse') return;
+        closeTimer.current = window.setTimeout(() => setOpen(false), HOVER_CLOSE_DELAY);
+      }}
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setOpen(false);
+      }}
+    >
+      <button
+        ref={buttonRef}
+        type="button"
+        aria-expanded={open}
+        aria-controls={panelId}
+        onClick={() => {
+          if (openedByHover.current) openedByHover.current = false;
+          else setOpen((v) => !v);
+        }}
+        className={cn(
+          'group flex items-center gap-1 rounded-sm text-black outline-none focus-visible:ring-2 focus-visible:ring-lp-blue-400',
+          TYPE.nav,
+        )}
+      >
+        <RollText className="hidden h-[19px] desktop:block">{group.label}</RollText>
+        <span className="desktop:hidden">{group.label}</span>
+        <Chevron open={open} />
+      </button>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            id={panelId}
+            initial={{ opacity: 0, x: '-50%', y: -6 }}
+            animate={{ opacity: 1, x: '-50%', y: 0 }}
+            exit={{ opacity: 0, x: '-50%', y: -6 }}
+            transition={{ duration: 0.18, ease: MENU_EASE }}
+            // The top padding bridges the pill's lower half, so the panel starts 10px below the pill.
+            className="absolute left-1/2 top-full pt-[31px]"
+          >
+            <ul className="w-[236px] rounded-[15px] bg-white p-2 shadow-[0_16px_40px_-12px_rgba(0,0,0,0.16),0_2px_8px_rgba(0,0,0,0.04)] ring-1 ring-black/[0.04]">
+              {group.items.map(({ label, href, icon: Icon }) => (
+                <li key={href}>
+                  <Link
+                    href={href}
+                    onClick={() => setOpen(false)}
+                    className={cn(
+                      'flex items-center gap-3 rounded-[10px] p-1.5 text-black outline-none transition-colors',
+                      'hover:bg-lp-gray-50 focus-visible:bg-lp-gray-50 focus-visible:ring-2 focus-visible:ring-lp-blue-400',
+                      TYPE.nav,
+                    )}
+                  >
+                    <span className="flex size-8 shrink-0 items-center justify-center rounded-[8px] bg-lp-blue-50 text-lp-blue-500">
+                      <Icon aria-hidden className="size-4" strokeWidth={2} />
+                    </span>
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+/** A nav group in the phone menu: its label expands the links in place, beneath it. */
+function MobileNavGroup({ group, onNavigate }: { group: NavGroup; onNavigate: () => void }) {
+  const [open, setOpen] = useState(false);
+  const listId = useId();
+
+  return (
+    <div className="flex flex-col items-center">
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-controls={listId}
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center gap-1 rounded-sm font-manrope text-lp-nav-sm text-black outline-none focus-visible:ring-2 focus-visible:ring-lp-blue-400"
+      >
+        {group.label}
+        <Chevron open={open} />
+      </button>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.ul
+            id={listId}
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2, ease: MENU_EASE }}
+            // Padding keeps the links' focus rings inside the clip.
+            className="flex flex-col items-center gap-2.5 overflow-hidden px-1 pb-1 pt-3"
+          >
+            {group.items.map(({ label, href }) => (
+              <li key={href}>
+                <Link
+                  href={href}
+                  onClick={onNavigate}
+                  className="block rounded-sm font-manrope text-lp-nav-sm text-lp-gray-600 outline-none focus-visible:ring-2 focus-visible:ring-lp-blue-400"
+                >
+                  {label}
+                </Link>
+              </li>
+            ))}
+          </motion.ul>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const menuId = useId();
@@ -77,9 +250,7 @@ export function SiteHeader() {
           <Logo />
 
           <div className="hidden items-center gap-[30px] tablet:flex">
-            {NAV_LINKS.map((l) => (
-              <NavLink key={l.href} {...l} />
-            ))}
+            {NAV_LINKS.map((l) => ('items' in l ? <NavDropdown key={l.label} group={l} /> : <NavLink key={l.href} {...l} />))}
           </div>
 
           <div className="hidden items-center gap-5 tablet:flex">
@@ -129,17 +300,23 @@ export function SiteHeader() {
                 className="flex flex-col items-center pt-[33px]"
               >
                 <ul className="flex flex-col items-center gap-[15px]">
-                  {[...NAV_LINKS, { label: 'Log in', href: '/sign-in' }].map((l) => (
-                    <li key={l.href}>
-                      <Link
-                        href={l.href}
-                        onClick={() => setOpen(false)}
-                        className="block rounded-sm font-manrope text-lp-nav-sm text-black outline-none focus-visible:ring-2 focus-visible:ring-lp-blue-400"
-                      >
-                        {l.label}
-                      </Link>
-                    </li>
-                  ))}
+                  {[...NAV_LINKS, { label: 'Log in', href: '/sign-in' }].map((l) =>
+                    'items' in l ? (
+                      <li key={l.label}>
+                        <MobileNavGroup group={l} onNavigate={() => setOpen(false)} />
+                      </li>
+                    ) : (
+                      <li key={l.href}>
+                        <Link
+                          href={l.href}
+                          onClick={() => setOpen(false)}
+                          className="block rounded-sm font-manrope text-lp-nav-sm text-black outline-none focus-visible:ring-2 focus-visible:ring-lp-blue-400"
+                        >
+                          {l.label}
+                        </Link>
+                      </li>
+                    ),
+                  )}
                 </ul>
                 <GradientButton href="/sign-up" className="mt-10">
                   Get Started

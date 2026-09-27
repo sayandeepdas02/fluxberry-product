@@ -26,85 +26,83 @@ const SCRIM = [
   'linear-gradient(180deg, rgba(3,37,99,0.2), transparent 480px)',
 ].join(', ');
 
-/*
- * The product shot hangs 40% of its height below the scene card. Grid items
- * resolve percentage margins and padding against their column's width, so the
- * overhang is expressed as a share of the shot's width (25% at 8:5).
- */
-const OVERHANG = `${(40 * HERO.image.height) / HERO.image.width}%`;
+/** Share of the dashboard's height that shows above the card's foot. */
+const SHOT_VISIBLE = 0.6;
 
-/* Lifts the product shot off the scene and, where it hangs below the card, off the white page. */
-const DASHBOARD_SHADOW = [
-  '0 0 0 1px rgba(3,37,99,0.06)',
-  '0 2px 6px rgba(3,37,99,0.06)',
-  '0 18px 36px -12px rgba(3,37,99,0.18)',
-  '0 44px 88px -28px rgba(3,37,99,0.32)',
-].join(', ');
+/*
+ * The card cuts the framed shot SHOT_VISIBLE of the way down the dashboard:
+ * a negative margin pulls the rest out of the flow and the card clips it.
+ * That's (1 - SHOT_VISIBLE) of the image's height plus the frame's foot
+ * padding (--frame). The image spans the column less the padding each side,
+ * and margin percentages resolve against the column's width.
+ */
+const RATIO = HERO.image.height / HERO.image.width;
+const HIDDEN = 1 - SHOT_VISIBLE;
+const SHOT_CUT = `calc(${(-HIDDEN * RATIO * 100).toFixed(4)}% - ${(1 - 2 * HIDDEN * RATIO).toFixed(4)} * var(--frame))`;
 
 export function Hero() {
   return (
-    <section
-      id="hero"
-      className={cn(
-        'grid px-2 pb-[70px] pt-2 tablet:px-3 tablet:pb-[100px] tablet:pt-3',
-        // Gutters from the card's edge to the dashboard, either side of the content column.
-        'grid-cols-[12px_minmax(0,1fr)_12px] tablet:grid-cols-[38px_minmax(0,1fr)_38px]',
-        'desktop:grid-cols-[minmax(58px,1fr)_minmax(0,1160px)_minmax(58px,1fr)]',
-      )}
-    >
-      {/* The scene: a rounded card over rows 1–2, so it ends 60% of the way down the dashboard. */}
-      <div
-        aria-hidden
-        className="relative col-span-full row-start-1 row-end-3 overflow-hidden rounded-[20px] bg-[linear-gradient(180deg,#1084e5,#46aff9)] tablet:rounded-[27px]"
-      >
-        {/*
-         * Smaller screens stack the copy lower in a shorter card, so they zoom in
-         * from the top to keep it on the deeper upper sky, clear of the clouds.
-         */}
-        <div className="absolute inset-x-0 top-0 h-[150%] tablet:h-[120%] desktop:h-full">
-          {/* Cover-scaled, the scene is drawn about as wide as its 1672px source or wider at every size. */}
-          <Image src={HERO.backdrop} alt="" fill priority sizes="1672px" className="object-cover" />
-        </div>
-        <div
-          className="absolute inset-0 [--scrim-shape:ellipse_100%_250px_at_50%_280px] tablet:[--scrim-shape:ellipse_62%_280px_at_50%_350px] desktop:[--scrim-shape:ellipse_50%_240px_at_50%_320px]"
-          style={{ backgroundImage: SCRIM }}
-        />
-      </div>
-
-      <Appear className="relative col-start-2 row-start-1 flex flex-col items-center gap-[30px] pb-11 pt-[132px] tablet:pb-14 tablet:pt-[188px] desktop:pb-16">
-        <div className="flex w-full flex-col items-center gap-5 [text-shadow:0_1px_16px_rgba(3,37,99,0.28)]">
-          <div className="flex w-full flex-col items-center gap-2.5">
-            <Pill className="bg-white/5 text-white ring-1 ring-inset ring-white/30 backdrop-blur-md">
-              <PeopleIcon />
-              {HERO.badge}
-            </Pill>
-            <h1 className={cn('max-w-[600px] text-balance text-center text-white desktop:max-w-[850px]', TYPE.h1)}>{HERO.title}</h1>
+    <section id="hero" className="px-2 pt-2 tablet:px-3 tablet:pt-3">
+      {/* The scene card: the copy, then the framed dashboard, which the card's foot cuts off partway down. */}
+      <div className="relative overflow-hidden rounded-[20px] bg-[linear-gradient(180deg,#1084e5,#46aff9)] px-3 tablet:rounded-[27px] tablet:px-[38px] desktop:px-[58px]">
+        <div aria-hidden className="absolute inset-0">
+          {/*
+           * Smaller screens stack the copy lower in a shorter card, so they zoom in
+           * from the top to keep it on the deeper upper sky, clear of the clouds.
+           */}
+          <div className="absolute inset-x-0 top-0 h-[150%] tablet:h-[120%] desktop:h-full">
+            {/* Cover-scaled, the scene is drawn about as wide as its 1672px source or wider at every size. */}
+            <Image src={HERO.backdrop} alt="" fill priority sizes="1672px" className="object-cover" />
           </div>
-          <p className={cn('max-w-[340px] text-pretty text-center text-white tablet:max-w-[360px] desktop:max-w-[540px]', TYPE.body)}>
-            {HERO.lead[0]}
-            <br />
-            {HERO.lead[1]}
-          </p>
+          <div
+            className="absolute inset-0 [--scrim-shape:ellipse_100%_250px_at_50%_280px] tablet:[--scrim-shape:ellipse_62%_280px_at_50%_350px] desktop:[--scrim-shape:ellipse_50%_240px_at_50%_320px]"
+            style={{ backgroundImage: SCRIM }}
+          />
         </div>
-        <GradientButton href={HERO.cta.href} tone="light">
-          {HERO.cta.label}
-        </GradientButton>
-      </Appear>
 
-      {/* The negative margin takes the overhang out of row 2, where the card ends; the spacer in row 3 gives it back. */}
-      <Appear delay={0.2} className="relative col-start-2 row-start-2" style={{ marginBottom: `-${OVERHANG}` }}>
-        <Image
-          src={HERO.image.src}
-          alt={HERO.image.alt}
-          width={HERO.image.width}
-          height={HERO.image.height}
-          priority
-          sizes="(min-width: 1300px) 1160px, (min-width: 1200px) calc(100vw - 140px), (min-width: 810px) calc(100vw - 100px), calc(100vw - 40px)"
-          className="h-auto w-full rounded-[8px] tablet:rounded-[12px] desktop:rounded-[15px]"
-          style={{ boxShadow: DASHBOARD_SHADOW }}
-        />
-      </Appear>
-      <div aria-hidden className="col-start-2 row-start-3" style={{ paddingTop: OVERHANG }} />
+        <Appear className="relative flex flex-col items-center gap-[30px] pb-11 pt-[132px] tablet:pb-14 tablet:pt-[188px] desktop:pb-16">
+          <div className="flex w-full flex-col items-center gap-5 [text-shadow:0_1px_16px_rgba(3,37,99,0.28)]">
+            <div className="flex w-full flex-col items-center gap-2.5">
+              <Pill className="bg-white/5 text-white ring-1 ring-inset ring-white/30 backdrop-blur-md">
+                <PeopleIcon />
+                {HERO.badge}
+              </Pill>
+              <h1 className={cn('max-w-[600px] text-balance text-center text-white desktop:max-w-[850px]', TYPE.h1)}>{HERO.title}</h1>
+            </div>
+            <p className={cn('max-w-[340px] text-pretty text-center text-white tablet:max-w-[360px] desktop:max-w-[540px]', TYPE.body)}>
+              {HERO.lead[0]}
+              <br />
+              {HERO.lead[1]}
+            </p>
+          </div>
+          <GradientButton href={HERO.cta.href} tone="light">
+            {HERO.cta.label}
+          </GradientButton>
+        </Appear>
+
+        {/* The shot's column: SHOT_CUT's percentage resolves against its width. */}
+        <div className="relative mx-auto max-w-[1160px]">
+          {/* A frosted-glass frame; its radii are the shot's plus the padding, so the corners stay concentric. */}
+          <Appear
+            delay={0.2}
+            className={cn(
+              'rounded-[16px] bg-white/25 p-[var(--frame)] ring-1 ring-inset ring-white/50 backdrop-blur-md [--frame:6px]',
+              'shadow-[0_24px_60px_-20px_rgba(3,37,99,0.35)] tablet:rounded-[20px] tablet:[--frame:8px] desktop:rounded-[24px] desktop:[--frame:10px]',
+            )}
+            style={{ marginBottom: SHOT_CUT }}
+          >
+            <Image
+              src={HERO.image.src}
+              alt={HERO.image.alt}
+              width={HERO.image.width}
+              height={HERO.image.height}
+              priority
+              sizes="(min-width: 1300px) 1140px, (min-width: 1200px) calc(100vw - 160px), (min-width: 810px) calc(100vw - 116px), calc(100vw - 52px)"
+              className="h-auto w-full rounded-[10px] shadow-[0_0_0_1px_rgba(3,37,99,0.06),0_8px_24px_-10px_rgba(3,37,99,0.3)] tablet:rounded-[12px] desktop:rounded-[14px]"
+            />
+          </Appear>
+        </div>
+      </div>
     </section>
   );
 }

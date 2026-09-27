@@ -1,5 +1,17 @@
 import type { LucideIcon } from 'lucide-react';
-import { ChartNoAxesCombined, Lock, Settings, Timer, Users, Zap } from 'lucide-react';
+import {
+  Blocks,
+  BookOpen,
+  BriefcaseBusiness,
+  ChartNoAxesCombined,
+  Lock,
+  Newspaper,
+  Scale,
+  Settings,
+  Timer,
+  Users,
+  Zap,
+} from 'lucide-react';
 
 /*
  * Landing page copy. The layout (card counts, line lengths) is the Framer
@@ -14,12 +26,12 @@ export const HERO = {
   title: 'The #1 AI Native Hiring Platform',
   lead: ['Fluxberry AI is an AI Native hiring tool that is fast, simple.', 'Built for founders & hiring managers.'],
   cta: { label: 'Get Started', href: '/sign-up' },
-  /** The product shot: the dashboard alone, edge to edge (8:5). */
+  /** The product shot: the Fluxberry dashboard alone, edge to edge. */
   image: {
     src: '/landing/dashboard.jpg',
-    alt: 'SaaS dashboard interface with task management and performance metrics',
-    width: 1944,
-    height: 1215,
+    alt: 'Fluxberry dashboard with open jobs, the hiring pipeline, top candidates and the interview schedule',
+    width: 1556,
+    height: 959,
   },
   /** Painted sky-and-valley scene behind the hero (decorative). */
   backdrop: '/landing/hero-landscape.webp',
@@ -197,10 +209,32 @@ export const FOOTER = {
   ],
 };
 
-/** Nav links (desktop pill + mobile menu). */
-export const NAV_LINKS = [
+export interface NavLinkItem {
+  label: string;
+  href: string;
+}
+
+export interface NavGroup {
+  label: string;
+  items: (NavLinkItem & { icon: LucideIcon })[];
+}
+
+/**
+ * Nav links (desktop pill + mobile menu). A group opens as a dropdown in the
+ * pill and expands in place in the phone menu.
+ */
+export const NAV_LINKS: (NavLinkItem | NavGroup)[] = [
   { label: 'Products', href: '/#why-us' },
   { label: 'Solutions', href: '/#features' },
   { label: 'Pricing', href: '/#pricing' },
-  { label: 'Resources', href: '/blog' },
+  {
+    label: 'Resources',
+    items: [
+      { label: 'Blog', href: '/blog', icon: Newspaper },
+      { label: 'Careers', href: '/careers', icon: BriefcaseBusiness },
+      { label: 'Comparisons', href: '/comparisons', icon: Scale },
+      { label: 'Knowledge Base', href: '/knowledge-base', icon: BookOpen },
+      { label: 'Integrations', href: '/integrations', icon: Blocks },
+    ],
+  },
 ];
