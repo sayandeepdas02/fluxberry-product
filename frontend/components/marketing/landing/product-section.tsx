@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 import { Reveal } from './motion';
-import { GradientButton, IconTile, SectionHeader, TYPE } from './primitives';
+import { IconTile, SectionHeader, TYPE } from './primitives';
 import { PRODUCT } from './content';
 
 /** "Product" (Framer: Why Us) — six icon cards, 3 × 2 on desktop. */
@@ -35,10 +35,6 @@ export function ProductSection() {
             </Reveal>
           ))}
         </div>
-
-        <GradientButton href="/sign-up" className="mt-[50px]">
-          Get Started
-        </GradientButton>
       </div>
     </section>
   );

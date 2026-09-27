@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { Reveal } from './motion';
-import { GradientButton, SectionHeader, TYPE } from './primitives';
+import { SectionHeader, TYPE } from './primitives';
 import { SOLUTIONS, type SolutionCard } from './content';
 
 /** Pairs the cards into bento rows (two per row). */
@@ -62,10 +62,6 @@ export function SolutionsSection() {
             </div>
           ))}
         </div>
-
-        <GradientButton href="/sign-up" className="mt-[50px]">
-          Get Started
-        </GradientButton>
       </div>
     </section>
   );
