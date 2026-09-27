@@ -3,7 +3,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import Link from 'next/link';
 import { AnimatePresence, motion } from 'motion/react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Lock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { GradientButton, RollText, TYPE } from '@/components/marketing/landing/primitives';
 import { NAV_LINKS, type NavGroup } from '@/components/marketing/landing/content';
@@ -53,6 +53,22 @@ function Chevron({ open }: { open: boolean }) {
       strokeWidth={2.25}
       className={cn('size-3.5 shrink-0 transition-transform duration-200', open && 'rotate-180')}
     />
+  );
+}
+
+/** Marks a nav item whose page isn't live yet; its row is plain text, not a link. */
+function ComingSoon({ className }: { className?: string }) {
+  return (
+    <span
+      className={cn(
+        'inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-lp-blue-50 px-2 py-0.5',
+        'font-manrope text-[11px] font-semibold leading-4 text-lp-blue-600',
+        className,
+      )}
+    >
+      <Lock aria-hidden className="size-2.5" strokeWidth={2.75} />
+      Coming soon
+    </span>
   );
 }
 
@@ -145,23 +161,33 @@ function NavDropdown({ group }: { group: NavGroup }) {
             // The top padding bridges the pill's lower half, so the panel starts 10px below the pill.
             className="absolute left-1/2 top-full pt-[31px]"
           >
-            <ul className="w-[236px] rounded-[15px] bg-white p-2 shadow-[0_16px_40px_-12px_rgba(0,0,0,0.16),0_2px_8px_rgba(0,0,0,0.04)] ring-1 ring-black/[0.04]">
-              {group.items.map(({ label, href, icon: Icon }) => (
+            <ul className="w-max min-w-[236px] rounded-[15px] bg-white p-2 shadow-[0_16px_40px_-12px_rgba(0,0,0,0.16),0_2px_8px_rgba(0,0,0,0.04)] ring-1 ring-black/[0.04]">
+              {group.items.map(({ label, href, icon: Icon, comingSoon }) => (
                 <li key={href}>
-                  <Link
-                    href={href}
-                    onClick={() => setOpen(false)}
-                    className={cn(
-                      'flex items-center gap-3 rounded-[10px] p-1.5 text-black outline-none transition-colors',
-                      'hover:bg-lp-gray-50 focus-visible:bg-lp-gray-50 focus-visible:ring-2 focus-visible:ring-lp-blue-400',
-                      TYPE.nav,
-                    )}
-                  >
-                    <span className="flex size-8 shrink-0 items-center justify-center rounded-[8px] bg-lp-blue-50 text-lp-blue-500">
-                      <Icon aria-hidden className="size-4" strokeWidth={2} />
-                    </span>
-                    {label}
-                  </Link>
+                  {comingSoon ? (
+                    <div className={cn('flex cursor-default items-center gap-3 rounded-[10px] p-1.5 text-lp-gray-600', TYPE.nav)}>
+                      <span className="flex size-8 shrink-0 items-center justify-center rounded-[8px] bg-lp-gray-50 text-lp-gray-400">
+                        <Icon aria-hidden className="size-4" strokeWidth={2} />
+                      </span>
+                      {label}
+                      <ComingSoon className="ml-auto" />
+                    </div>
+                  ) : (
+                    <Link
+                      href={href}
+                      onClick={() => setOpen(false)}
+                      className={cn(
+                        'flex items-center gap-3 rounded-[10px] p-1.5 text-black outline-none transition-colors',
+                        'hover:bg-lp-gray-50 focus-visible:bg-lp-gray-50 focus-visible:ring-2 focus-visible:ring-lp-blue-400',
+                        TYPE.nav,
+                      )}
+                    >
+                      <span className="flex size-8 shrink-0 items-center justify-center rounded-[8px] bg-lp-blue-50 text-lp-blue-500">
+                        <Icon aria-hidden className="size-4" strokeWidth={2} />
+                      </span>
+                      {label}
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>
@@ -200,15 +226,22 @@ function MobileNavGroup({ group, onNavigate }: { group: NavGroup; onNavigate: ()
             // Padding keeps the links' focus rings inside the clip.
             className="flex flex-col items-center gap-2.5 overflow-hidden px-1 pb-1 pt-3"
           >
-            {group.items.map(({ label, href }) => (
+            {group.items.map(({ label, href, comingSoon }) => (
               <li key={href}>
-                <Link
-                  href={href}
-                  onClick={onNavigate}
-                  className="block rounded-sm font-manrope text-lp-nav-sm text-lp-gray-600 outline-none focus-visible:ring-2 focus-visible:ring-lp-blue-400"
-                >
-                  {label}
-                </Link>
+                {comingSoon ? (
+                  <span className="flex items-center gap-2 font-manrope text-lp-nav-sm text-lp-gray-500">
+                    {label}
+                    <ComingSoon />
+                  </span>
+                ) : (
+                  <Link
+                    href={href}
+                    onClick={onNavigate}
+                    className="block rounded-sm font-manrope text-lp-nav-sm text-lp-gray-600 outline-none focus-visible:ring-2 focus-visible:ring-lp-blue-400"
+                  >
+                    {label}
+                  </Link>
+                )}
               </li>
             ))}
           </motion.ul>
