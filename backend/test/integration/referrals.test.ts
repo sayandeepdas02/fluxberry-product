@@ -90,6 +90,7 @@ describe('employee referrals (integration)', () => {
     // A stray/unknown ref code never blocks the application, and never gets attributed.
     const strayApply = await request(app)
       .post(`/api/v1/public/jobs/${workspaceSlug}/${jobSlug}/apply`)
+      .field('privacyConsent', 'true')
       .field('name', 'Stray Candidate')
       .field('email', 'straycand@test.com')
       .field('source', 'DIRECT')
@@ -104,6 +105,7 @@ describe('employee referrals (integration)', () => {
     // A real code attributes the application as REFERRAL, overriding a client-claimed source.
     const apply = await request(app)
       .post(`/api/v1/public/jobs/${workspaceSlug}/${jobSlug}/apply`)
+      .field('privacyConsent', 'true')
       .field('name', 'Referred Candidate')
       .field('email', 'referredcand@test.com')
       .field('source', 'DIRECT')
@@ -181,6 +183,7 @@ describe('employee referrals (integration)', () => {
     const spy = vi.spyOn(referralRepository, 'addApplication').mockRejectedValueOnce(new Error('transient write failure'));
     const retryApply = await request(app)
       .post(`/api/v1/public/jobs/${workspaceSlug}/${jobSlug}/apply`)
+      .field('privacyConsent', 'true')
       .field('name', 'Retry Candidate')
       .field('email', 'retrycand@test.com')
       .field('source', 'DIRECT')

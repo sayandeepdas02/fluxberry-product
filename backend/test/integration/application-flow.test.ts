@@ -59,6 +59,7 @@ describe('core application flow (integration)', () => {
     // Candidate applies (no auth) with a resume
     const applied = await request(app)
       .post(`/api/v1/public/jobs/${slug}/${jobSlug}/apply`)
+      .field('privacyConsent', 'true')
       .field('name', 'Test Candidate')
       .field('email', 'cand@test.com')
       .field('answers', '[]')
@@ -68,11 +69,21 @@ describe('core application flow (integration)', () => {
     // Duplicate application is rejected
     const dup = await request(app)
       .post(`/api/v1/public/jobs/${slug}/${jobSlug}/apply`)
+      .field('privacyConsent', 'true')
       .field('name', 'Test Candidate')
       .field('email', 'cand@test.com')
       .field('answers', '[]')
       .attach('resume', PDF, { filename: 'resume.pdf', contentType: 'application/pdf' });
     expect(dup.status).toBe(409);
+
+    // An application without the privacy notice agreement is refused
+    const noConsent = await request(app)
+      .post(`/api/v1/public/jobs/${slug}/${jobSlug}/apply`)
+      .field('name', 'No Consent')
+      .field('email', 'noconsent@test.com')
+      .field('answers', '[]')
+      .attach('resume', PDF, { filename: 'resume.pdf', contentType: 'application/pdf' });
+    expect(noConsent.status).toBe(422);
 
     // Recruiter sees the candidate
     const list = await ws(request(app).get('/api/v1/candidates') as any);
@@ -99,6 +110,7 @@ describe('core application flow (integration)', () => {
 
     const applied = await request(app)
       .post(`/api/v1/public/jobs/${slug}/${jobSlug}/apply`)
+      .field('privacyConsent', 'true')
       .field('name', 'LinkedIn Candidate')
       .field('email', 'li-cand@test.com')
       .field('linkedinUrl', 'https://linkedin.com/in/li-cand')

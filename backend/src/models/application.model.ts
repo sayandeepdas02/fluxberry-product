@@ -52,6 +52,8 @@ const applicationSchema = new Schema(
       note: { type: String, default: null },
     },
     appliedAt: { type: Date, default: () => new Date() },
+    /** When the applicant agreed to the apply form's privacy notice (null for imported or sourced candidates). */
+    privacyConsentAt: { type: Date, default: null },
   },
   { timestamps: true, collection: 'applications' },
 );

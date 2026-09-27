@@ -122,6 +122,7 @@ export const applicationService = {
         source: effectiveSource,
         referralCode: referralId ? input.referralCode : null,
         appliedAt: new Date(),
+        privacyConsentAt: new Date(),
       });
     } catch (err) {
       if (isDup(err)) throw conflict("You've already applied to this role");

@@ -77,6 +77,14 @@ export const publicApplicationSchema = z.object({
    * file in `questionFiles` answers `questionFileMeta[N].questionId`.
    */
   questionFileMeta: z.array(z.object({ questionId: z.string().min(1) })).default([]),
+  /**
+   * The applicant ticked the privacy notice on the apply form. Required: we only
+   * accept an application with that agreement on record (multipart sends 'true').
+   */
+  privacyConsent: z.preprocess(
+    (v) => v === true || v === 'true',
+    z.literal(true, { errorMap: () => ({ message: 'Please agree to the privacy notice to apply' }) }),
+  ),
 });
 export type PublicApplicationInput = z.infer<typeof publicApplicationSchema>;
 
