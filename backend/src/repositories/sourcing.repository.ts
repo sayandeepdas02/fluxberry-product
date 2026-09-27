@@ -145,7 +145,7 @@ export const sourcingCampaignRepository = {
     SourcingCampaignModel.findOneAndUpdate(
       { _id: id, workspaceId, status: { $in: ['DRAFT', 'SCHEDULED', 'PAUSED', 'FAILED'] } },
       { $set: { status: 'SENDING' } },
-      { new: true },
+      { new: false }, // the pre-claim doc, so a failed send can restore its status
     ),
   listByWorkspace: (workspaceId: string) =>
     SourcingCampaignModel.find({ workspaceId }).sort({ createdAt: -1 }).lean(),
@@ -167,6 +167,11 @@ export const sourcingRecipientRepository = {
   deleteByCampaign: (campaignId: string) => SourcingCampaignRecipientModel.deleteMany({ campaignId }),
   deletePendingByCampaign: (campaignId: string) =>
     SourcingCampaignRecipientModel.deleteMany({ campaignId, status: 'PENDING' }),
+  /** Pending recipients the fan-out hasn't queued yet (e.g. deferred past a full day's cap). */
+  listUndispatched: (campaignId: string) =>
+    SourcingCampaignRecipientModel.find({ campaignId, status: 'PENDING', dispatchedAt: null }).sort({ createdAt: 1 }).lean(),
+  markDispatched: (ids: unknown[]) =>
+    SourcingCampaignRecipientModel.updateMany({ _id: { $in: ids } }, { $set: { dispatchedAt: new Date() } }),
   countPending: (campaignId: string) => SourcingCampaignRecipientModel.countDocuments({ campaignId, status: 'PENDING' }),
   /** Emails actually handed to the provider for this campaign since `since` (the latest credit charge). */
   countSentSince: (campaignId: string, since: Date) =>
@@ -265,17 +270,17 @@ export const compensationBandCacheRepository = {
     ),
 };
 
-const utcDay = (d = new Date()) => d.toISOString().slice(0, 10);
+export const utcDay = (d = new Date()) => d.toISOString().slice(0, 10);
 
 /** Atomic per-workspace, per-UTC-day outreach counter backing the daily sending cap. */
 export const outreachUsageRepository = {
   /**
-   * Reserve `n` sends against today's cap. Succeeds only if count + n ≤ cap,
-   * atomically, so concurrent sends can't jointly overshoot. Returns the day key
-   * to release with on success, or null (with today's count) when over the cap.
+   * Atomically take up to `n` sends from `day`'s cap (compare-and-set on the
+   * counter, retried on contention) and return how many were granted — 0 when
+   * the day is full. Concurrent dispatchers can never jointly exceed the cap.
    */
-  async reserve(workspaceId: string, n: number, cap: number): Promise<{ day: string | null; used: number }> {
-    const day = utcDay();
+  async reserveUpTo(workspaceId: string, n: number, cap: number, day = utcDay()): Promise<number> {
+    if (n <= 0 || cap <= 0) return 0;
     try {
       await OutreachDailyUsageModel.updateOne(
         { workspaceId, day },
@@ -285,17 +290,18 @@ export const outreachUsageRepository = {
     } catch (err) {
       if ((err as { code?: number }).code !== 11000) throw err; // lost the upsert race — row exists now
     }
-    const reserved = await OutreachDailyUsageModel.findOneAndUpdate(
-      { workspaceId, day, count: { $lte: cap - n } },
-      { $inc: { count: n } },
-      { new: true },
-    ).lean();
-    if (reserved) return { day, used: reserved.count };
-    const current = await OutreachDailyUsageModel.findOne({ workspaceId, day }).lean();
-    return { day: null, used: current?.count ?? 0 };
+    for (let attempt = 0; attempt < 10; attempt++) {
+      const row = await OutreachDailyUsageModel.findOne({ workspaceId, day }).lean();
+      const used = row?.count ?? 0;
+      const grant = Math.min(n, cap - used);
+      if (grant <= 0) return 0;
+      const res = await OutreachDailyUsageModel.updateOne({ workspaceId, day, count: used }, { $inc: { count: grant } });
+      if (res.modifiedCount === 1) return grant;
+    }
+    return 0; // heavy contention — dispatch nothing now; the caller retries later
   },
 
-  /** Give back a reservation (the send aborted before queueing anything). */
+  /** Give back part of a reservation that wasn't used. */
   release: (workspaceId: string, day: string, n: number) =>
     OutreachDailyUsageModel.updateOne({ workspaceId, day }, { $inc: { count: -n } }),
 };

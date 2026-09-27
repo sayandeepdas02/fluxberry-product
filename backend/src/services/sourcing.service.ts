@@ -18,8 +18,7 @@ import type {
   CampaignDraftDto,
   CompensationBandDto,
 } from '../shared';
-import { SOURCING_PAGE_SIZE, SOURCING_MAX_PAGE_SIZE, PLAN_DAILY_OUTREACH_CAP } from '../shared';
-import type { WorkspacePlan } from '../shared';
+import { SOURCING_PAGE_SIZE, SOURCING_MAX_PAGE_SIZE } from '../shared';
 import {
   sourcingSearchRepository,
   sourcedContactRepository,
@@ -29,7 +28,6 @@ import {
   sourcingRecipientRepository,
   sourcingSuppressionRepository,
   compensationBandCacheRepository,
-  outreachUsageRepository,
 } from '../repositories/sourcing.repository';
 import { accountRepository } from '../repositories/account.repository';
 import { jobRepository } from '../repositories/job.repository';
@@ -796,22 +794,25 @@ export const sourcingService = {
     );
     const toInsert = eligible.filter((x) => !alreadyProcessed.has(String(x.c._id)));
 
-    // Daily sending cap per plan (UTC day) — protects sender-domain reputation.
-    // Reserved atomically so concurrent sends can't jointly overshoot it.
     const account = await accountRepository.ensureForWorkspace(workspaceId);
     if (!account) throw notFound('Billing account not found');
-    const cap = PLAN_DAILY_OUTREACH_CAP[(account.plan as WorkspacePlan) ?? 'FREE'] ?? 0;
-    const capHold = await outreachUsageRepository.reserve(workspaceId, toInsert.length, cap);
-    if (!capHold.day) {
-      throw badRequest(
-        `Daily sending limit reached: your plan allows ${cap} outreach emails per day (UTC) ` +
-          `(${Math.max(0, cap - capHold.used)} left today). Schedule this campaign later or send to a smaller list.`,
-      );
+
+    // Atomically claim the campaign (DRAFT/SCHEDULED/PAUSED/FAILED → SENDING) so two
+    // concurrent sends can't both build recipients and double-email everyone.
+    const previous = await sourcingCampaignRepository.claimForSend(workspaceId, campaignId);
+    if (!previous) throw conflict('This campaign is already sending or has been sent');
+
+    // A resend (from PAUSED/FAILED) replaces the previous reservation. Settle it
+    // FIRST, to the emails it actually sent, so the credits it held for unsent
+    // recipients are back in the balance before the new charge checks it.
+    if (campaign.creditTxId && campaign.creditChargedAt) {
+      const sentUnderPrior = await sourcingRecipientRepository.countSentSince(campaignId, campaign.creditChargedAt);
+      await creditsService.settle(campaign.creditTxId, sentUnderPrior);
     }
-    const releaseCap = () => outreachUsageRepository.release(workspaceId, capHold.day!, toInsert.length);
 
     // Reserve OUTREACH_EMAIL credits for every recipient about to be queued; settled
     // down to emails actually sent once the fan-out finishes (settleCampaignCredits).
+    // The daily sending cap is enforced at dispatch time, on the day emails go out.
     let charge;
     try {
       charge = await creditsService.charge(String(account._id), 'OUTREACH_EMAIL', toInsert.length, {
@@ -819,25 +820,9 @@ export const sourcingService = {
         meta: { campaignId },
       });
     } catch (err) {
-      await releaseCap();
+      // Recover: hand the claim back so the campaign can be resent after a top-up.
+      await sourcingCampaignRepository.update(campaignId, { status: previous.status, creditTxId: null, creditChargedAt: null });
       throw err;
-    }
-
-    // Atomically claim the campaign (DRAFT/SCHEDULED/PAUSED/FAILED → SENDING) so two
-    // concurrent sends can't both build recipients and double-email everyone.
-    const claimed = await sourcingCampaignRepository.claimForSend(workspaceId, campaignId);
-    if (!claimed) {
-      await creditsService.refund(charge.txId);
-      await releaseCap();
-      throw conflict('This campaign is already sending or has been sent');
-    }
-
-    // A resend (from PAUSED/FAILED) replaces the previous reservation — settle
-    // that one first to the emails it actually sent, so its unsent (still
-    // pending, about to be re-queued) recipients aren't paid for twice.
-    if (campaign.creditTxId && campaign.creditChargedAt) {
-      const sentUnderPrior = await sourcingRecipientRepository.countSentSince(campaignId, campaign.creditChargedAt);
-      await creditsService.settle(campaign.creditTxId, sentUnderPrior);
     }
     await sourcingRecipientRepository.deletePendingByCampaign(campaignId);
     if (toInsert.length) {
@@ -870,7 +855,7 @@ export const sourcingService = {
     // job can be recognized as stale by the handler and skipped.
     await jobQueue.enqueue(
       'SEND_SOURCING_CAMPAIGN',
-      { campaignId, workspaceId, scheduledAt: scheduledAt ? scheduledAt.toISOString() : null },
+      { campaignId, workspaceId, scheduledAt: scheduledAt ? scheduledAt.toISOString() : null, run: charge.txId },
       {
         runAt: scheduled ? scheduledAt! : undefined,
         idempotencyKey: `sourcing-campaign-${campaignId}-${scheduledAt?.getTime() ?? 'now'}`,

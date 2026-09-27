@@ -23,6 +23,8 @@ import {
   useSendCampaign,
 } from '@/hooks/use-talent-sourcing';
 import { useCreditErrorHandler } from '@/components/billing/credits-provider';
+import { useWorkspace } from '@/components/providers/workspace-provider';
+import { PLAN_DAILY_OUTREACH_CAP } from '@/lib/shared';
 import { CostLabel, costOf, creditsText } from '@/components/billing/cost-label';
 import { EmailEditor } from './email-editor';
 
@@ -36,6 +38,7 @@ export function CampaignComposer({ campaignId }: { campaignId?: string }) {
   const testCampaign = useTestCampaign();
   const sendCampaign = useSendCampaign();
   const handleCreditError = useCreditErrorHandler();
+  const { currentWorkspace } = useWorkspace();
 
   const [name, setName] = useState('');
   const [listId, setListId] = useState('');
@@ -132,6 +135,7 @@ export function CampaignComposer({ campaignId }: { campaignId?: string }) {
   };
 
   const listSize = lists?.find((l) => l.id === listId)?.contactCount ?? 0;
+  const dailyCap = PLAN_DAILY_OUTREACH_CAP[currentWorkspace.plan];
 
   if (campaignId && isLoading) return <Skeleton className="h-96 w-full" />;
 
@@ -226,7 +230,8 @@ export function CampaignComposer({ campaignId }: { campaignId?: string }) {
           {listSize > 0 && (
             <p className="rounded-md bg-muted/50 px-3 py-2 text-sm text-muted-foreground">
               Up to {creditsText(costOf('OUTREACH_EMAIL', listSize))} for {listSize.toLocaleString()} recipients (1 credit
-              per 25 emails). Skipped recipients are refunded.
+              per 25 emails). Skipped recipients are refunded. Your plan sends up to {dailyCap.toLocaleString()} outreach
+              emails per day (UTC); larger campaigns continue automatically the next day.
             </p>
           )}
           <Field label="Schedule for later (optional)">

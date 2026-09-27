@@ -13,6 +13,9 @@ import { SourcingCampaignModel } from '../../src/models/sourcing-campaign.model'
 import { OutreachDailyUsageModel } from '../../src/models/outreach-daily-usage.model';
 import { CreditTransactionModel } from '../../src/models/credit-transaction.model';
 import { getPeopleSourcingProvider } from '../../src/integrations';
+import { JobQueueModel } from '../../src/models/job-queue.model';
+import { WorkspaceModel } from '../../src/models/workspace.model';
+import { AccountModel } from '../../src/models/account.model';
 import { PLAN_DAILY_OUTREACH_CAP } from '../../src/shared';
 
 const jobCtx = { jobId: 'test', attempts: 1, logger } as any;
@@ -391,38 +394,72 @@ describe('Talent Sourcing (integration)', () => {
     expect(await credits()).toBe(beforeSend);
   });
 
-  it('enforces the daily cap atomically and settles a prior reservation on resend', async () => {
+  it('applies the daily cap on the day emails go out, deferring the rest to the next day', async () => {
     const workspaceId = await onboard(token, 'Sourcing Cap', 'Capco');
     const ws = (r: request.Test) => r.set('Authorization', `Bearer ${token}`).set('X-Workspace-Id', workspaceId);
     await activateSubscription(workspaceId, 'MAX');
     const search = await ws(request(app).post('/api/v1/sourcing/search').send({ prompt: PROMPT }) as any);
     const two = (search.body.data.contacts as any[]).filter((c) => c.hasEmail).slice(0, 2);
     const list = await ws(request(app).post('/api/v1/sourcing/lists').send({ name: 'Pair', contactIds: two.map((c) => c.id) }) as any);
-    const mk = async (name: string) =>
-      (await ws(request(app).post('/api/v1/sourcing/campaigns').send({ name, listId: list.body.data.id, subject: 'Hi', body: 'Hi {{firstName}}' }) as any)).body.data.id as string;
+    const campaign = await ws(
+      request(app).post('/api/v1/sourcing/campaigns').send({ name: 'Capped', listId: list.body.data.id, subject: 'Hi', body: 'Hi {{firstName}}' }) as any,
+    );
+    const campaignId = campaign.body.data.id as string;
 
-    // At the cap → rejected before any credit is taken.
+    // One send left today: pressing Send succeeds; the cap is checked at dispatch.
     const day = new Date().toISOString().slice(0, 10);
     await OutreachDailyUsageModel.create({ workspaceId, day, count: PLAN_DAILY_OUTREACH_CAP.MAX - 1 });
-    const blocked = await ws(request(app).post(`/api/v1/sourcing/campaigns/${await mk('Over')}/send`).send({}) as any);
-    expect(blocked.status).toBe(400);
-    expect(blocked.body.error.message).toMatch(/Daily sending limit/);
-    await OutreachDailyUsageModel.updateOne({ workspaceId, day }, { count: 0 });
+    const sent = await ws(request(app).post(`/api/v1/sourcing/campaigns/${campaignId}/send`).send({}) as any);
+    expect(sent.status).toBe(200);
 
-    // Send, deliver only one of two, then resend after a failure: the first
-    // reservation is settled to the 1 email it actually sent.
-    const campaignId = await mk('Resend');
+    await sendSourcingCampaignHandler({ campaignId, workspaceId }, jobCtx);
+    const recs = await SourcingCampaignRecipientModel.find({ campaignId }).lean();
+    expect(recs.filter((r) => r.dispatchedAt).length).toBe(1); // only today's remaining allowance
+    expect((await OutreachDailyUsageModel.findOne({ workspaceId, day }).lean())!.count).toBe(PLAN_DAILY_OUTREACH_CAP.MAX);
+    const cont = await JobQueueModel.findOne({ type: 'SEND_SOURCING_CAMPAIGN', 'payload.campaignId': campaignId, runAt: { $gt: new Date() } }).lean();
+    expect(cont).toBeTruthy(); // the rest continues when the next UTC day opens
+    expect((await SourcingCampaignModel.findById(campaignId).lean())!.status).toBe('SENDING');
+
+    // Next day: the continuation dispatches the deferred recipient and finishes.
+    await OutreachDailyUsageModel.deleteMany({ workspaceId });
+    await sendSourcingCampaignHandler(cont!.payload as any, jobCtx);
+    expect((await SourcingCampaignRecipientModel.find({ campaignId, dispatchedAt: null }).lean()).length).toBe(0);
+    expect((await SourcingCampaignModel.findById(campaignId).lean())!.status).toBe('SENT');
+  });
+
+  it('settles the prior reservation before charging a resend, so held credits can fund it', async () => {
+    const workspaceId = await onboard(token, 'Sourcing Resend', 'Resendco');
+    const ws = (r: request.Test) => r.set('Authorization', `Bearer ${token}`).set('X-Workspace-Id', workspaceId);
+    await activateSubscription(workspaceId, 'MAX');
+    const search = await ws(request(app).post('/api/v1/sourcing/search').send({ prompt: PROMPT }) as any);
+    const two = (search.body.data.contacts as any[]).filter((c) => c.hasEmail).slice(0, 2);
+    const list = await ws(request(app).post('/api/v1/sourcing/lists').send({ name: 'Pair', contactIds: two.map((c) => c.id) }) as any);
+    const campaign = await ws(
+      request(app).post('/api/v1/sourcing/campaigns').send({ name: 'Resend', listId: list.body.data.id, subject: 'Hi', body: 'Hi {{firstName}}' }) as any,
+    );
+    const campaignId = campaign.body.data.id as string;
+
     await ws(request(app).post(`/api/v1/sourcing/campaigns/${campaignId}/send`).send({}) as any);
     const firstTx = (await SourcingCampaignModel.findById(campaignId).lean())!.creditTxId!;
-    await sendSourcingCampaignHandler({ campaignId, workspaceId }, jobCtx);
-    const recs = (await ws(request(app).get(`/api/v1/sourcing/campaigns/${campaignId}/recipients`) as any)).body.data;
-    await sendSourcingEmailHandler({ recipientId: recs[0].id }, jobCtx);
+    // Nothing went out, the campaign failed, and the only credit left is the one the reservation holds.
+    const ws2 = await WorkspaceModel.findById(workspaceId).select('accountId').lean();
+    await AccountModel.findByIdAndUpdate(ws2!.accountId, { 'credits.allowanceRemaining': 0, 'credits.purchasedBalance': 0 });
     await SourcingCampaignModel.findByIdAndUpdate(campaignId, { status: 'FAILED' });
+
     const resend = await ws(request(app).post(`/api/v1/sourcing/campaigns/${campaignId}/send`).send({}) as any);
-    expect(resend.status).toBe(200);
-    const settled = await CreditTransactionModel.findById(firstTx).lean();
-    expect((settled!.meta as any).quantity).toBe(1);
-    expect((await OutreachDailyUsageModel.findOne({ workspaceId, day }).lean())!.count).toBe(3); // 2 + 1 re-queued
+    expect(resend.status).toBe(200); // funded by settling the prior reservation first
+    expect((await CreditTransactionModel.findById(firstTx).lean())!.meta).toMatchObject({ quantity: 0 });
+    expect((await SourcingCampaignModel.findById(campaignId).lean())!.creditTxId).not.toBe(firstTx);
+
+    // A resend that genuinely can't be funded hands the campaign back, un-claimed.
+    // (One email did go out under the current reservation, so settling it returns nothing.)
+    const [firstRec] = await SourcingCampaignRecipientModel.find({ campaignId, status: 'PENDING' }).lean();
+    await SourcingCampaignRecipientModel.findByIdAndUpdate(firstRec._id, { status: 'SENT', sentAt: new Date() });
+    await AccountModel.findByIdAndUpdate(ws2!.accountId, { 'credits.allowanceRemaining': 0, 'credits.purchasedBalance': 0 });
+    await SourcingCampaignModel.findByIdAndUpdate(campaignId, { status: 'PAUSED' });
+    const broke = await ws(request(app).post(`/api/v1/sourcing/campaigns/${campaignId}/send`).send({}) as any);
+    expect(broke.status).toBe(402);
+    expect((await SourcingCampaignModel.findById(campaignId).lean())!.status).toBe('PAUSED');
   });
 
   it('charges a load-more retry again after a failed (refunded) attempt', async () => {
