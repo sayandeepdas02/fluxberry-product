@@ -55,7 +55,7 @@ export function SolutionsSection() {
                   </div>
                   <div className="mt-2.5 flex flex-col gap-[15px] px-[5px] py-2.5">
                     <h3 className={cn('text-black', TYPE.title)}>{card.title}</h3>
-                    <p className={cn('max-w-[280px] text-lp-gray-600', TYPE.body)}>{card.body}</p>
+                    <p className={cn('text-pretty text-lp-gray-600', TYPE.body)}>{card.body}</p>
                   </div>
                 </Reveal>
               ))}

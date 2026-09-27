@@ -56,7 +56,7 @@ export function PlanUpgradeModal({ open, onOpenChange, flag }: PlanUpgradeModalP
             Not now
           </Button>
           <Button asChild>
-            <Link href="/app/settings/billing" onClick={() => onOpenChange(false)}>
+            <Link href="/app/pricing" onClick={() => onOpenChange(false)}>
               View plans
             </Link>
           </Button>

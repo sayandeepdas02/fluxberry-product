@@ -1,31 +1,23 @@
 'use client';
 
+import { useState } from 'react';
 import { Sparkles } from 'lucide-react';
 import { CREDIT_PACKS, CREDIT_CATALOG, creditsFor, type CreditAction } from '@/lib/shared';
 import { useCredits, useBuyCreditPack } from '@/hooks/use-billing';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Slider } from '@/components/ui/slider';
 import { toast } from '@/components/ui/sonner';
 import { cn } from '@/lib/utils';
 
 /**
- * Billing-page card: the account's pooled AI-credit balance (monthly allowance
+ * Billing card on the pricing page: the account's pooled AI-credit balance (monthly allowance
  * that resets vs. never-expiring purchased top-ups) plus the buy-more packs.
  * Purchases are owner/admin-only (the parent gates on `canManage`).
  */
 export function CreditsCard({ canManage }: { canManage: boolean }) {
   const { credits, isLoading } = useCredits();
-  const buyPack = useBuyCreditPack();
-
-  const buy = async (packId: string) => {
-    try {
-      const { url } = await buyPack.mutateAsync(packId);
-      window.location.href = url;
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Could not start checkout');
-    }
-  };
 
   return (
     <Card>
@@ -84,36 +76,87 @@ export function CreditsCard({ canManage }: { canManage: boolean }) {
               </p>
             )}
 
-            {canManage && (
-              <div>
-                <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
-                  Buy more credits
-                </p>
-                <div className="grid gap-3 sm:grid-cols-3">
-                  {CREDIT_PACKS.map((pack) => (
-                    <button
-                      key={pack.id}
-                      onClick={() => buy(pack.id)}
-                      disabled={buyPack.isPending}
-                      className={cn(
-                        'flex flex-col items-start rounded-lg border border-border bg-white p-4 text-left transition-colors',
-                        'hover:border-primary hover:bg-accent disabled:opacity-60',
-                      )}
-                    >
-                      <span className="text-lg font-semibold tabular-nums text-foreground">
-                        {pack.credits.toLocaleString()}
-                      </span>
-                      <span className="text-xs text-muted-foreground">credits</span>
-                      <span className="mt-2 text-sm font-medium text-primary">${pack.priceUsd}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
+            {canManage && <BuyCredits />}
           </>
         )}
       </CardContent>
     </Card>
+  );
+}
+
+/** The smallest pack's price per credit, the baseline the bigger packs' savings are measured against. */
+const BASE_RATE = CREDIT_PACKS[0].priceUsd / CREDIT_PACKS[0].credits;
+
+/** Top-up picker: a slider across the credit packs, the chosen pack's price, and a buy button. */
+function BuyCredits() {
+  const [index, setIndex] = useState(Math.min(1, CREDIT_PACKS.length - 1));
+  const buyPack = useBuyCreditPack();
+  const pack = CREDIT_PACKS[index];
+  const rate = pack.priceUsd / pack.credits;
+  const saving = Math.round((1 - rate / BASE_RATE) * 100);
+
+  const buy = async () => {
+    try {
+      const { url } = await buyPack.mutateAsync(pack.id);
+      window.location.href = url;
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Could not start checkout');
+    }
+  };
+
+  return (
+    <div>
+      <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
+        Buy more credits
+      </p>
+      <div className="rounded-lg border border-border p-4 sm:p-5">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-2xl font-semibold tabular-nums text-foreground">
+              {pack.credits.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">credits</span>
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              ${rate.toFixed(2)} per credit
+              {saving > 0 && <span className="font-medium text-success"> · save {saving}%</span>}
+            </p>
+          </div>
+          <p className="text-2xl font-semibold tabular-nums text-foreground">${pack.priceUsd}</p>
+        </div>
+
+        <Slider
+          className="mt-5"
+          min={0}
+          max={CREDIT_PACKS.length - 1}
+          step={1}
+          value={index}
+          onValueChange={(v) => setIndex(Array.isArray(v) ? v[0] : (v as number))}
+          getAriaLabel={() => 'Credit pack'}
+          getAriaValueText={(_, v) => `${CREDIT_PACKS[v].credits.toLocaleString()} credits for $${CREDIT_PACKS[v].priceUsd}`}
+        />
+        {/* Stop labels, spread like the slider's stops (the thumbs sit flush with the track's ends). */}
+        <div className="mt-1 flex justify-between">
+          {CREDIT_PACKS.map((p, i) => (
+            <button
+              key={p.id}
+              type="button"
+              onClick={() => setIndex(i)}
+              aria-hidden
+              tabIndex={-1}
+              className={cn(
+                'text-xs tabular-nums transition-colors hover:text-foreground',
+                i === index ? 'font-medium text-foreground' : 'text-muted-foreground',
+              )}
+            >
+              {p.credits.toLocaleString()}
+            </button>
+          ))}
+        </div>
+
+        <Button className="mt-5 w-full" loading={buyPack.isPending} onClick={buy}>
+          Buy {pack.credits.toLocaleString()} credits for ${pack.priceUsd}
+        </Button>
+      </div>
+    </div>
   );
 }
 

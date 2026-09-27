@@ -158,7 +158,7 @@ export const FAQ = {
     },
     {
       q: 'Can I change my plan later?',
-      a: 'Absolutely. You can upgrade, downgrade, or cancel your plan at any time from your billing settings.',
+      a: 'Absolutely. You can upgrade, downgrade, or cancel your plan at any time from the Upgrade page in your dashboard.',
     },
     {
       q: 'What are AI credits?',

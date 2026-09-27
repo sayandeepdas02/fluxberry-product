@@ -47,7 +47,7 @@ function FaqRow({ item }: { item: FaqItem }) {
       >
         <div className="overflow-hidden">
           <div className="mt-5 border-t border-lp-gray-300 pt-[17px]">
-            <p className={cn('max-w-[310px] text-lp-gray-700', TYPE.body)}>{item.a}</p>
+            <p className={cn('text-pretty text-lp-gray-700', TYPE.body)}>{item.a}</p>
           </div>
         </div>
       </div>
@@ -68,7 +68,15 @@ export function FaqSection() {
     >
       <div className="mx-auto flex max-w-[1300px] flex-col items-center gap-[30px] tablet:gap-[60px] desktop:flex-row desktop:items-start desktop:justify-center">
         <Reveal className="w-full desktop:w-[620px] desktop:shrink-0">
-          <SectionHeader pill={FAQ.pill} title={FAQ.title} lead={FAQ.lead} align="left" />
+          {/* Centred (tablet/phone) keeps the 500px measure; left-aligned in its 620px desktop column, the
+              title takes the full width so it sits on one line instead of breaking early. */}
+          <SectionHeader
+            pill={FAQ.pill}
+            title={FAQ.title}
+            lead={FAQ.lead}
+            align="left"
+            titleClassName="max-w-[500px] desktop:max-w-none"
+          />
         </Reveal>
         <Reveal className="flex w-full flex-col gap-2.5 pt-2.5 tablet:max-w-[560px] desktop:w-[620px] desktop:max-w-none desktop:shrink-0">
           {FAQ.items.map((item) => (

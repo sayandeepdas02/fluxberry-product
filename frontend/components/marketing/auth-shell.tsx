@@ -59,7 +59,7 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
             {HERO.badge}
           </Pill>
           <p className={cn('max-w-[520px] text-black', TYPE.h2)}>{HERO.title}</p>
-          <p className={cn('max-w-[420px] text-lp-gray-700', TYPE.body)}>{HERO.lead.join(' ')}</p>
+          <p className={cn('text-pretty text-lp-gray-700', TYPE.body)}>{HERO.lead.join(' ')}</p>
         </div>
         {/* The hero's product shot in its tinted frame, bleeding off the panel's corner. */}
         <div className="relative -mb-[100px] mt-auto pl-[60px] pt-[50px]">

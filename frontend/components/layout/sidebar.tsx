@@ -14,6 +14,7 @@ import {
   Gift,
   Mail,
   UserSearch,
+  CreditCard,
 } from 'lucide-react';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
@@ -95,6 +96,14 @@ export function Sidebar() {
         >
           <Megaphone className="size-4" />
           Careers page
+        </Link>
+        <Link
+          href="/app/pricing"
+          aria-current={isActive('/app/pricing') ? 'page' : undefined}
+          className="my-1 flex items-center gap-2.5 rounded-md bg-primary px-2.5 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+        >
+          <CreditCard className="size-4" />
+          Upgrade
         </Link>
         <Link
           href="/app/settings"
