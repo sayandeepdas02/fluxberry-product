@@ -10,7 +10,7 @@ import { ChartNoAxesCombined, Lock, Settings, Timer, Users, Zap } from 'lucide-r
  */
 
 export const HERO = {
-  badge: 'Built for small hiring teams',
+  badge: 'Built for fast moving teams',
   title: 'The #1 AI Native Hiring Platform',
   lead: ['Fluxberry AI is an AI Native hiring tool that is fast, simple.', 'Built for founders & hiring managers.'],
   cta: { label: 'Get Started', href: '/sign-up' },
