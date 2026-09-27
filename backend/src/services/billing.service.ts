@@ -34,8 +34,8 @@ export const billingService = {
       plan,
       billingCycle,
       customerEmail: user.email,
-      successUrl: `${config.publicAppUrl}/app/settings/billing?checkout=success`,
-      cancelUrl: `${config.publicAppUrl}/app/settings/billing?checkout=cancel`,
+      successUrl: `${config.publicAppUrl}/app/pricing?checkout=success`,
+      cancelUrl: `${config.publicAppUrl}/app/pricing?checkout=cancel`,
     });
     return { url: session.url };
   },
@@ -59,8 +59,8 @@ export const billingService = {
       credits: pack.credits,
       productId: config.providers.billing.creditPackProductIds[pack.id] ?? '',
       customerEmail: user.email,
-      successUrl: `${config.publicAppUrl}/app/settings/billing?checkout=credits_success`,
-      cancelUrl: `${config.publicAppUrl}/app/settings/billing?checkout=cancel`,
+      successUrl: `${config.publicAppUrl}/app/pricing?checkout=credits_success`,
+      cancelUrl: `${config.publicAppUrl}/app/pricing?checkout=cancel`,
     });
     return { url: session.url };
   },
@@ -88,7 +88,7 @@ export const billingService = {
 
     const session = await getBillingProvider().createPortalSession({
       customerId: account.billing.customerId,
-      returnUrl: `${config.publicAppUrl}/app/settings/billing`,
+      returnUrl: `${config.publicAppUrl}/app/pricing`,
     });
     return { url: session.url };
   },

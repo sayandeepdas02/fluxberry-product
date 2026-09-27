@@ -30,16 +30,21 @@ export const TYPE = {
 /**
  * The landing hero's grid backdrop, for a `relative` parent. The artwork is
  * always full width at its own proportions, so the grid cells match the hero
- * everywhere. `section` also clips it to a shorter header and fades it out
- * at the header's foot instead of stopping on a hard edge.
+ * everywhere. It's clipped to the parent and fades out at the parent's foot:
+ * the artwork's height grows with the viewport while the hero's stops at its
+ * 1300px content width, so on very wide screens it would otherwise run past
+ * the hero and paint over the next section. `section` fades it out sooner, for
+ * a shorter header.
  */
 export function GridBackdrop({ variant = 'image' }: { variant?: 'image' | 'section' }) {
   return (
     <div
       aria-hidden
       className={cn(
-        'pointer-events-none absolute inset-x-0 top-0',
-        variant === 'section' && 'bottom-0 overflow-hidden [mask-image:linear-gradient(to_bottom,#000_45%,transparent)]',
+        'pointer-events-none absolute inset-0 overflow-hidden',
+        variant === 'section'
+          ? '[mask-image:linear-gradient(to_bottom,#000_45%,transparent)]'
+          : '[mask-image:linear-gradient(to_bottom,#000_80%,transparent)]',
       )}
     >
       <div className="relative aspect-[3963/2793] w-full">

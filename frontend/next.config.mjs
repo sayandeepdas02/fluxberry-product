@@ -33,6 +33,9 @@ const nextConfig = {
         destination: 'https://fluxberry.in/:path*',
         permanent: true,
       },
+      // Billing moved onto the pricing page. Keeps old links, bookmarks and in-flight
+      // checkout returns working (the query string, e.g. ?checkout=success, carries over).
+      { source: '/app/settings/billing', destination: '/app/pricing', permanent: false },
     ];
   },
   webpack: (config, { dev }) => {

@@ -51,7 +51,7 @@ export function OutOfCreditsModal({ open, onOpenChange, needed, available, canBu
           </Button>
           {canBuy && (
             <Button asChild>
-              <Link href="/app/settings/billing" onClick={() => onOpenChange(false)}>
+              <Link href="/app/pricing#credits" onClick={() => onOpenChange(false)}>
                 Buy credits
               </Link>
             </Button>
