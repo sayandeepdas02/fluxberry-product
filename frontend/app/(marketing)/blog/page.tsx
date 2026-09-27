@@ -29,7 +29,7 @@ export default function BlogIndexPage() {
   return (
     <>
       <section className="relative px-5 pb-[70px] pt-[140px] tablet:px-[50px] tablet:pb-[100px] tablet:pt-[200px] desktop:px-[70px]">
-        <GridBackdrop variant="section" />
+        <GridBackdrop />
         <Appear className="relative mx-auto max-w-[1300px]">
           <SectionHeader
             pill="Blog"

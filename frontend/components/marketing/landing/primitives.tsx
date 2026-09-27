@@ -28,24 +28,15 @@ export const TYPE = {
 } as const;
 
 /**
- * The landing hero's grid backdrop, for a `relative` parent. The artwork is
- * always full width at its own proportions, so the grid cells match the hero
- * everywhere. It's clipped to the parent and fades out at the parent's foot:
- * the artwork's height grows with the viewport while the hero's stops at its
- * 1300px content width, so on very wide screens it would otherwise run past
- * the hero and paint over the next section. `section` fades it out sooner, for
- * a shorter header.
+ * Grid backdrop for a page header (blog index and articles), for a `relative`
+ * parent. The artwork is full width at its own proportions, clipped to the
+ * header and faded out at its foot instead of stopping on a hard edge.
  */
-export function GridBackdrop({ variant = 'image' }: { variant?: 'image' | 'section' }) {
+export function GridBackdrop() {
   return (
     <div
       aria-hidden
-      className={cn(
-        'pointer-events-none absolute inset-0 overflow-hidden',
-        variant === 'section'
-          ? '[mask-image:linear-gradient(to_bottom,#000_45%,transparent)]'
-          : '[mask-image:linear-gradient(to_bottom,#000_80%,transparent)]',
-      )}
+      className="pointer-events-none absolute inset-0 overflow-hidden [mask-image:linear-gradient(to_bottom,#000_45%,transparent)]"
     >
       <div className="relative aspect-[3963/2793] w-full">
         <Image src="/landing/grid-bg.png" alt="" fill sizes="100vw" loading="eager" className="object-cover" />
@@ -129,24 +120,34 @@ export function SectionHeader({
 
 const GRADIENT = 'bg-[linear-gradient(180deg,#3787ff_0%,#0d6eff_100%)]';
 
-/** The pill-shaped gradient CTA ("Get Started"), with the rolling label. */
+const BUTTON_TONES = {
+  gradient: `${GRADIENT} text-white focus-visible:ring-2 focus-visible:ring-lp-blue-400 focus-visible:ring-offset-2`,
+  // On the hero's sky the blue gradient disappears, so the CTA turns white, lifted by a soft sky-toned shadow.
+  light: 'bg-white text-black shadow-[0_8px_24px_-8px_rgba(3,37,99,0.55)] focus-visible:ring-4 focus-visible:ring-white/50',
+};
+
+/**
+ * The pill-shaped CTA ("Get Started"), with the rolling label. Gradient by
+ * default; `tone="light"` is the white version for image backgrounds.
+ */
 export function GradientButton({
   href,
   children,
   className,
+  tone = 'gradient',
 }: {
   href: string;
   children: string;
   className?: string;
+  tone?: keyof typeof BUTTON_TONES;
 }) {
   return (
     <Link
       href={href}
       className={cn(
-        'group inline-flex items-center justify-center rounded-[40px] px-[18px] py-[10px] text-white',
+        'group inline-flex items-center justify-center rounded-[40px] px-[18px] py-[10px] outline-none',
         TYPE.button,
-        'outline-none focus-visible:ring-2 focus-visible:ring-lp-blue-400 focus-visible:ring-offset-2',
-        GRADIENT,
+        BUTTON_TONES[tone],
         className,
       )}
     >

@@ -67,8 +67,8 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
             <Image
               src={HERO.image.src}
               alt=""
-              width={2400}
-              height={1620}
+              width={HERO.image.width}
+              height={HERO.image.height}
               sizes="880px"
               className="h-auto w-full rounded-[12px]"
             />
