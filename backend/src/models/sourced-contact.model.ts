@@ -72,6 +72,8 @@ const sourcedContactSchema = new Schema(
      * $0.30 on every subsequent detail-view open. See hasEnrichmentGap.
      */
     backfillAttemptedAt: { type: Date, default: null },
+    /** Set once the workspace paid (COMPENSATION_LOOKUP) to see this contact's market band; later views are free. */
+    compensationUnlockedAt: { type: Date, default: null },
     matchScore: { type: Number, default: 0 },
     matchReasons: { type: [String], default: [] },
     /** Set once the contact has been converted into a Candidate + Application. */

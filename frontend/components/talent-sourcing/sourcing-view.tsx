@@ -3,14 +3,15 @@
 import { useMemo, useState } from 'react';
 import { ArrowLeft, Search, Sparkles, Users, Plus } from 'lucide-react';
 import type { SourcingCriteria, SourcingSearchResultDto } from '@/lib/shared';
-import { CREDIT_COSTS } from '@/lib/shared';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/ui/empty-state';
 import { toast } from '@/components/ui/sonner';
-import { getInsufficientCredits, getPlanUpgradeFlag } from '@/lib/api-client';
+import { getPlanUpgradeFlag } from '@/lib/api-client';
 import { useCredits } from '@/hooks/use-billing';
+import { useCreditErrorHandler } from '@/components/billing/credits-provider';
+import { CostLabel } from '@/components/billing/cost-label';
 import {
   useParsePrompt,
   useRunSearch,
@@ -23,7 +24,8 @@ import { SearchHero } from './search-hero';
 import { CriteriaChips } from './criteria-chips';
 import { ContactResultsPanel } from './contact-results-panel';
 
-const PAGE_COST = CREDIT_COSTS.SOURCING_SEARCH;
+/** Profiles fetched per page; only profiles new to the workspace are billed. */
+const PAGE_SIZE = 25;
 
 export function SourcingView() {
   const [prompt, setPrompt] = useState('');
@@ -36,6 +38,7 @@ export function SourcingView() {
   const loadMore = useLoadMore();
   const { data: recentSearches } = useSearches();
   const { credits } = useCredits();
+  const handleCreditError = useCreditErrorHandler();
 
   const contacts = result?.contacts ?? [];
   const dirty = useMemo(
@@ -44,12 +47,8 @@ export function SourcingView() {
   );
 
   const handleError = (err: unknown) => {
-    if (getInsufficientCredits(err)) {
-      toast.error('Not enough AI credits', {
-        description: 'Top up or upgrade your plan to keep sourcing.',
-        action: { label: 'Billing', onClick: () => (window.location.href = '/app/settings/billing') },
-      });
-    } else if (getPlanUpgradeFlag(err)) {
+    if (handleCreditError(err)) return;
+    if (getPlanUpgradeFlag(err)) {
       toast.error('Talent Sourcing is a Max feature', { description: 'Upgrade to the Max plan to source candidates.' });
     } else {
       toast.error(err instanceof Error ? err.message : 'Something went wrong');
@@ -114,14 +113,19 @@ export function SourcingView() {
           <Sparkles className="size-3.5 text-primary" /> Review filters — edit any chip, then search
         </div>
         <CriteriaChips criteria={criteria} onChange={setCriteria} disabled={runSearch.isPending || updateCriteria.isPending} />
+        <p className="text-xs text-muted-foreground">
+          1.5 credits per new profile · people already in your contacts are free
+        </p>
         <div className="flex items-center gap-2 pt-1">
           {!result ? (
             <Button onClick={onSearch} loading={runSearch.isPending}>
-              <Search className="size-4" /> Search 25 profiles · {PAGE_COST} credits
+              <Search className="size-4" /> Search {PAGE_SIZE} profiles
+              <CostLabel action="SOURCING_PROFILE" quantity={PAGE_SIZE} upTo />
             </Button>
           ) : dirty ? (
             <Button onClick={onRerun} loading={updateCriteria.isPending}>
-              <Search className="size-4" /> Re-run search · {PAGE_COST} credits
+              <Search className="size-4" /> Re-run search
+              <CostLabel action="SOURCING_PROFILE" quantity={PAGE_SIZE} upTo />
             </Button>
           ) : (
             <span className="text-xs text-muted-foreground">
@@ -146,7 +150,8 @@ export function SourcingView() {
             result.search.canLoadMore ? (
               <div className="flex justify-center">
                 <Button variant="outline" onClick={onLoadMore} loading={loadMore.isPending}>
-                  <Plus className="size-4" /> Load 25 more · {PAGE_COST} credits
+                  <Plus className="size-4" /> Load {PAGE_SIZE} more
+                  <CostLabel action="SOURCING_PROFILE" quantity={PAGE_SIZE} upTo />
                 </Button>
               </div>
             ) : null

@@ -9,13 +9,13 @@ let instance: AIProvider | null = null;
 
 function create(): AIProvider {
   if (config.providers.mockAll) return new MockAIProvider();
-  const { provider, apiKey, model } = config.providers.ai;
+  const { provider, apiKey, model, fastModel } = config.providers.ai;
   if (provider === 'mock' || !apiKey) {
     if (provider !== 'mock') logger.warn('AI_API_KEY missing — using mock AI provider');
     return new MockAIProvider();
   }
-  if (provider === 'anthropic') return new AnthropicProvider(apiKey, model || undefined);
-  if (provider === 'openai') return new OpenAIProvider(apiKey, model || undefined);
+  if (provider === 'anthropic') return new AnthropicProvider(apiKey, model || undefined, fastModel || undefined);
+  if (provider === 'openai') return new OpenAIProvider(apiKey, model || undefined, fastModel || undefined);
   return new MockAIProvider();
 }
 

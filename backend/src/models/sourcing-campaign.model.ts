@@ -31,6 +31,9 @@ const sourcingCampaignSchema = new Schema(
     scheduledAt: { type: Date, default: null },
     sentAt: { type: Date, default: null },
     stats: { type: statsSchema, default: () => ({}) },
+    /** OUTREACH_EMAIL credit reservation for the latest send; settled to emails actually sent once none are pending. */
+    creditTxId: { type: String, default: null },
+    creditChargedAt: { type: Date, default: null },
   },
   { timestamps: true, collection: 'sourcing_campaigns' },
 );

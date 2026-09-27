@@ -6,6 +6,7 @@ import { SCORE_DIMENSION_LABELS, SCORE_DIMENSIONS } from '@/lib/shared';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
 import { Button } from '@/components/ui/button';
+import { CostLabel } from '@/components/billing/cost-label';
 import { cn } from '@/lib/utils';
 
 export function ScreeningCard({
@@ -24,9 +25,26 @@ export function ScreeningCard({
       <CardHeader className="flex-row items-center gap-2">
         <Sparkles className="size-4 text-primary" />
         <CardTitle>AI screening</CardTitle>
+        {status === 'COMPLETED' && onRetry && (
+          <Button size="sm" variant="ghost" className="ml-auto h-7 text-xs" onClick={onRetry} loading={retrying}>
+            Re-screen <CostLabel action="APPLICANT_SCREENING" />
+          </Button>
+        )}
       </CardHeader>
       <CardContent>
-        {status === 'PENDING' || status === 'PROCESSING' ? (
+        {status === 'AWAITING_CREDITS' ? (
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              AI screening is paused for this applicant: your plan&apos;s included screenings for this period are used
+              up and there are no AI credits left. The application itself was received normally.
+            </p>
+            {onRetry && (
+              <Button size="sm" variant="outline" onClick={onRetry} loading={retrying}>
+                Screen now <CostLabel action="APPLICANT_SCREENING" />
+              </Button>
+            )}
+          </div>
+        ) : status === 'PENDING' || status === 'PROCESSING' ? (
           <div className="flex items-center gap-2 py-3 text-sm text-muted-foreground">
             <Spinner className="size-4" /> Analyzing candidate…
           </div>

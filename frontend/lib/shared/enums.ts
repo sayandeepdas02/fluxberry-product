@@ -155,8 +155,13 @@ export type Difficulty = (typeof DIFFICULTIES)[number];
 export const CALENDAR_PROVIDERS = ['GOOGLE', 'MOCK'] as const;
 export type CalendarProviderName = (typeof CALENDAR_PROVIDERS)[number];
 
-/** Generic async processing status used by resume parsing & screening. */
-export const PROCESSING_STATUSES = ['PENDING', 'PROCESSING', 'COMPLETED', 'FAILED'] as const;
+/**
+ * Generic async processing status used by resume parsing & screening.
+ * AWAITING_CREDITS: the applicant was accepted but AI screening is paused — the
+ * plan's included quota is used up and the account has no credits left (or no
+ * active subscription). A recruiter can screen them later.
+ */
+export const PROCESSING_STATUSES = ['PENDING', 'PROCESSING', 'COMPLETED', 'FAILED', 'AWAITING_CREDITS'] as const;
 export type ProcessingStatus = (typeof PROCESSING_STATUSES)[number];
 
 export const AV_SCAN_STATUSES = ['PENDING', 'CLEAN', 'INFECTED', 'SCAN_FAILED'] as const;

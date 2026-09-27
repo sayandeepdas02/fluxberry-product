@@ -9,6 +9,7 @@ import { formService } from './form.service';
 import { toPublicJobDto } from '../serializers/job.serializer';
 import { getStorageProvider, emailTemplates } from '../integrations';
 import { assertValidResume } from '../utils/file-validation';
+import { screeningService } from './screening.service';
 import { eventBus } from '../events/event-bus';
 import { jobQueue } from '../queue/job-queue';
 import { referralService } from './referral.service';
@@ -176,12 +177,18 @@ export const applicationService = {
       actorLabel: 'candidate',
       payload: { jobId, source: effectiveSource },
     });
-    const resumeJobType = config.features.AV_SCANNING ? 'SCAN_RESUME' : 'PARSE_RESUME';
-    await jobQueue.enqueue(
-      resumeJobType,
-      { workspaceId, candidateId: String(candidate._id), applicationId: String(application._id) },
-      { idempotencyKey: `${resumeJobType.toLowerCase()}:${application._id}` },
-    );
+    // AI screening is paid from the plan's included quota, then credits. When
+    // neither is available the applicant is still accepted, just left
+    // unscored (AWAITING_CREDITS) — intake never blocks on billing.
+    if ((await screeningService.authorizeScreening(workspaceId, String(application._id))) === 'BILLED') {
+      const resumeJobType = config.features.AV_SCANNING ? 'SCAN_RESUME' : 'PARSE_RESUME';
+      // Never throws: an enqueue failure marks the screening FAILED (free retry)
+      // instead of failing an application that was already saved.
+      await screeningService.queueScreening(workspaceId, String(candidate._id), String(application._id), {
+        jobType: resumeJobType,
+        idempotencyKey: `${resumeJobType.toLowerCase()}:${application._id}`,
+      });
+    }
 
     // Send confirmation email to the candidate (fire-and-forget, never blocks apply response).
     void (async () => {

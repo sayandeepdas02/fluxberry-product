@@ -9,7 +9,7 @@ import {
   requirePlanFeature,
 } from '../middleware/auth';
 import { validateBody, validateQuery } from '../middleware/validate';
-import { aiLimiter } from '../middleware/rate-limit';
+import { aiLimiter, testEmailLimiter } from '../middleware/rate-limit';
 import { sourcingController } from '../controllers/sourcing.controller';
 import {
   sourcingParseInputSchema,
@@ -80,7 +80,14 @@ sourcingRouter.post(
   sourcingController.exportContacts,
 );
 sourcingRouter.get('/sourcing/contacts/:contactId', sourcingController.getContact);
+sourcingRouter.post('/sourcing/contacts/:contactId/enrich', requireRole('recruiter'), aiLimiter, sourcingController.enrichContact);
 sourcingRouter.get('/sourcing/contacts/:contactId/compensation', sourcingController.getCompensation);
+sourcingRouter.post(
+  '/sourcing/contacts/:contactId/compensation/unlock',
+  requireRole('recruiter'),
+  aiLimiter,
+  sourcingController.unlockCompensation,
+);
 sourcingRouter.post(
   '/sourcing/contacts/:contactId/convert',
   requireRole('recruiter'),
@@ -134,6 +141,7 @@ sourcingRouter.get('/sourcing/campaigns/:campaignId/recipients', sourcingControl
 sourcingRouter.post(
   '/sourcing/campaigns/:campaignId/test',
   requireRole('recruiter'),
+  testEmailLimiter,
   validateBody(testCampaignSchema),
   sourcingController.testCampaign,
 );

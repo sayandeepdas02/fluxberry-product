@@ -133,15 +133,20 @@ export class MockPeopleSourcingProvider implements PeopleSourcingProvider {
 
     const remaining = Math.max(0, total - offset);
     const count = Math.min(size, remaining);
-    const people: SourcedPerson[] = [];
+    const page: SourcedPerson[] = [];
     for (let i = 0; i < count; i++) {
-      people.push(makePerson(criteria, seedBase, offset + i));
+      page.push(makePerson(criteria, seedBase, offset + i));
     }
+    const known = input.resolveKnown
+      ? await input.resolveKnown(page.map((p) => p.providerId).filter((id): id is string => Boolean(id)))
+      : new Set<string>();
+    const people = page.filter((p) => !p.providerId || !known.has(p.providerId));
+    const knownIds = page.map((p) => p.providerId).filter((id): id is string => Boolean(id) && known.has(id!));
 
     const nextOffset = offset + count;
     const scrollToken = nextOffset < total ? encodeToken(nextOffset) : null;
 
-    return { people, total, scrollToken, creditsUsed: people.length };
+    return { people, knownIds, total, scrollToken, creditsUsed: people.length };
   }
 
   /** Deterministic mock backfill — exercises the same lazy-enrichment code path as the live PDL backfill, seeded from the person's identity so it's stable and reproducible. */
@@ -151,6 +156,7 @@ export class MockPeopleSourcingProvider implements PeopleSourcingProvider {
       skills: buildSkills(rng, []),
       githubUrl: `https://github.com/${person.fullName.toLowerCase().replace(/\s+/g, '-')}-mock`,
       personalEmail: `${person.fullName.toLowerCase().replace(/\s+/g, '.')}@example.org`,
+      phone: `+1 555 ${String(Math.floor(rng() * 9000) + 1000)}`,
       education: [buildEducation(rng)],
       yearsExperience: 2 + Math.floor(rng() * 10),
     };

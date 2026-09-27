@@ -30,4 +30,5 @@ export { SourcingListMemberModel } from './sourcing-list-member.model';
 export { SourcingCampaignModel } from './sourcing-campaign.model';
 export { SourcingCampaignRecipientModel } from './sourcing-campaign-recipient.model';
 export { SourcingSuppressionModel } from './sourcing-suppression.model';
+export { OutreachDailyUsageModel } from './outreach-daily-usage.model';
 // Later: JobAnalytics (precomputed) ...

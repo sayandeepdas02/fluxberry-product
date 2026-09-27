@@ -35,6 +35,8 @@ const creditsSchema = new Schema(
     /** When the allowance next resets — anchored to billing.currentPeriodEnd. */
     periodResetAt: { type: Date, default: null },
     purchasedBalance: { type: Number, default: 0, min: 0 },
+    /** AI-screened applicants used this period against PLAN_SCREENING_QUOTA; resets with the allowance. */
+    screeningsUsed: { type: Number, default: 0, min: 0 },
   },
   { _id: false },
 );

@@ -34,13 +34,13 @@ export const sourcingController = {
   }),
 
   loadMore: asyncHandler(async (req, res) => {
-    const result = await sourcingService.loadMore(req.auth!.workspaceId!, req.params.searchId);
+    const result = await sourcingService.loadMore(req.auth!.workspaceId!, req.params.searchId, req.auth!.user.id);
     ok(res, result);
   }),
 
   updateCriteria: asyncHandler(async (req, res) => {
     const { criteria } = req.body as UpdateSearchCriteriaInput;
-    const result = await sourcingService.updateCriteria(req.auth!.workspaceId!, req.params.searchId, criteria);
+    const result = await sourcingService.updateCriteria(req.auth!.workspaceId!, req.params.searchId, criteria, req.auth!.user.id);
     ok(res, result);
   }),
 
@@ -59,10 +59,19 @@ export const sourcingController = {
     ok(res, contact);
   }),
 
-  /** Estimated market compensation band (Levels.fyi) — null when unresolvable, not an error. */
+  /** Paid PDL enrichment (PROFILE_ENRICH credits, refunded on no-match). */
+  enrichContact: asyncHandler(async (req, res) => {
+    ok(res, await sourcingService.enrichContact(req.auth!.workspaceId!, req.params.contactId, req.auth!.user.id));
+  }),
+
+  /** Estimated market compensation band (Levels.fyi) — free once unlocked; null band = no coverage, not an error. */
   getCompensation: asyncHandler(async (req, res) => {
-    const band = await sourcingService.getCompensationBand(req.auth!.workspaceId!, req.params.contactId);
-    ok(res, { band });
+    ok(res, await sourcingService.getCompensationBand(req.auth!.workspaceId!, req.params.contactId));
+  }),
+
+  /** First view of a contact's band — spends COMPENSATION_LOOKUP credits (refunded when there's no coverage). */
+  unlockCompensation: asyncHandler(async (req, res) => {
+    ok(res, await sourcingService.getCompensationBand(req.auth!.workspaceId!, req.params.contactId, { unlock: true, userId: req.auth!.user.id }));
   }),
 
   exportContacts: asyncHandler(async (req, res) => {
@@ -173,7 +182,7 @@ export const sourcingController = {
   }),
 
   draftEmail: asyncHandler(async (req, res) => {
-    ok(res, await sourcingService.draftEmail(req.auth!.workspaceId!, req.body as DraftCampaignInput));
+    ok(res, await sourcingService.draftEmail(req.auth!.workspaceId!, req.body as DraftCampaignInput, req.auth!.user.id));
   }),
 
   testCampaign: asyncHandler(async (req, res) => {
@@ -184,7 +193,7 @@ export const sourcingController = {
 
   sendCampaign: asyncHandler(async (req, res) => {
     const { scheduledAt } = req.body as SendCampaignInput;
-    const campaign = await sourcingService.sendCampaign(req.auth!.workspaceId!, req.params.campaignId, scheduledAt);
+    const campaign = await sourcingService.sendCampaign(req.auth!.workspaceId!, req.params.campaignId, scheduledAt, req.auth!.user.id);
     ok(res, campaign);
   }),
 

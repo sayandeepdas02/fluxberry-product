@@ -18,7 +18,8 @@ import type {
   CampaignDraftDto,
   CompensationBandDto,
 } from '../shared';
-import { SOURCING_PAGE_SIZE, SOURCING_MAX_PAGE_SIZE, CREDIT_COSTS } from '../shared';
+import { SOURCING_PAGE_SIZE, SOURCING_MAX_PAGE_SIZE, PLAN_DAILY_OUTREACH_CAP } from '../shared';
+import type { WorkspacePlan } from '../shared';
 import {
   sourcingSearchRepository,
   sourcedContactRepository,
@@ -33,6 +34,8 @@ import { accountRepository } from '../repositories/account.repository';
 import { jobRepository } from '../repositories/job.repository';
 import { applicationRepository } from '../repositories/application.repository';
 import { WorkspaceModel } from '../models/workspace.model';
+import { UserModel } from '../models/user.model';
+import { memberRepository } from '../repositories/member.repository';
 import { candidateService } from './candidate.service';
 import { getAIProvider, getPeopleSourcingProvider, getCompensationProvider, getEmailProvider } from '../integrations';
 import { hasEnrichmentGap } from '../integrations/monid/types';
@@ -51,10 +54,6 @@ import { renderTemplate, firstNameOf, outreachHtml, type MergeContext } from '..
 import { config } from '../config/env';
 import { notFound, badRequest, conflict, providerError } from '../utils/errors';
 import { logger } from '../utils/logger';
-
-const SEARCH_ACTION = 'SOURCING_SEARCH' as const;
-/** Credits charged per search page — reported usage always matches the real charge. */
-const SEARCH_COST = CREDIT_COSTS[SEARCH_ACTION];
 
 function providerName(): 'MONID' | 'MOCK' {
   return config.providers.sourcing.apiKey && !config.providers.mockAll ? 'MONID' : 'MOCK';
@@ -134,6 +133,67 @@ function rescore(criteria: SourcingCriteria, contacts: any[]): any[] {
     .sort((a, b) => b.matchScore - a.matchScore);
 }
 
+/**
+ * Retrieve one provider page, paying only for people this workspace doesn't
+ * already have: previously cached contacts are resolved from Mongo and never
+ * re-enriched upstream. Returns the page ranked best-fit first, plus how many
+ * profiles were newly retrieved (the billable quantity).
+ */
+async function fetchPage(
+  workspaceId: string,
+  criteria: SourcingCriteria,
+  size: number,
+  scrollToken: string | null,
+) {
+  const knownById = new Map<string, any>();
+  const result = await getPeopleSourcingProvider().search({
+    criteria,
+    size,
+    scrollToken,
+    resolveKnown: async (ids) => {
+      const found = await sourcedContactRepository.findManyByPdlIds(workspaceId, ids);
+      found.forEach((doc, id) => knownById.set(id, doc));
+      return new Set(found.keys());
+    },
+  });
+  const fresh = await cacheAndScore(workspaceId, criteria, result.people);
+  const known = result.knownIds.map((id) => knownById.get(id)).filter(Boolean);
+  const contacts = rescore(criteria, [...fresh.map((d) => d.toObject()), ...known]);
+  return { result, contacts, newCount: result.people.length };
+}
+
+/**
+ * Charge-then-fetch for one sourcing page: reserve credits for the full page
+ * size, fetch, then settle down to the profiles actually retrieved new (so a
+ * page of already-owned people costs 0). Refunds everything if the provider fails.
+ */
+async function chargedFetchPage(opts: {
+  workspaceId: string;
+  userId: string | null;
+  searchId: string;
+  idempotencyKey: string;
+  criteria: SourcingCriteria;
+  size: number;
+  scrollToken: string | null;
+}) {
+  const accountId = await resolveAccountId(opts.workspaceId);
+  const charge = await creditsService.charge(accountId, 'SOURCING_PROFILE', opts.size, {
+    idempotencyKey: opts.idempotencyKey,
+    actorUserId: opts.userId,
+    meta: { searchId: opts.searchId },
+  });
+  let page;
+  try {
+    page = await fetchPage(opts.workspaceId, opts.criteria, opts.size, opts.scrollToken);
+  } catch (err) {
+    if (!charge.replayed) await creditsService.refund(charge.txId);
+    logger.error({ err, searchId: opts.searchId }, 'Sourcing provider search failed');
+    throw providerError('People search provider failed. Your credits were refunded.');
+  }
+  const refunded = charge.replayed ? 0 : await creditsService.settle(charge.txId, page.newCount);
+  return { ...page, creditsCharged: charge.replayed ? 0 : charge.credits - refunded };
+}
+
 export const sourcingService = {
   /** Free step: turn a natural-language prompt into editable criteria (no PDL spend). */
   async parse(prompt: string): Promise<SourcingCriteria> {
@@ -142,9 +202,10 @@ export const sourcingService = {
   },
 
   /**
-   * Run a new search: parse (unless edited criteria are supplied) → PDL page →
-   * cache + score → persist. Spends SOURCING_SEARCH credits (refunded if the
-   * provider fails), so the search doc is created first for a stable spend key.
+   * Run a new search: parse (unless edited criteria are supplied) → provider page →
+   * cache + score → persist. Charges SOURCING_PROFILE credits per NEW profile
+   * (already-owned ones are free; everything refunded if the provider fails),
+   * so the search doc is created first for a stable spend key.
    */
   async search(
     workspaceId: string,
@@ -153,7 +214,6 @@ export const sourcingService = {
   ): Promise<SourcingSearchResultDto> {
     const criteria = input.criteria ?? (await this.parse(input.prompt));
     const size = pageSize(input.size);
-    const accountId = await resolveAccountId(workspaceId);
 
     const search = await sourcingSearchRepository.create({
       workspaceId,
@@ -164,37 +224,35 @@ export const sourcingService = {
     });
     const searchId = String(search._id);
 
-    await creditsService.consume(accountId, SEARCH_ACTION, `sourcing-search-${searchId}-p1`);
-
-    let result;
+    let page;
     try {
-      result = await getPeopleSourcingProvider().search({ criteria, size, scrollToken: null });
+      page = await chargedFetchPage({
+        workspaceId, userId: createdBy, searchId, idempotencyKey: `sourcing-search-${searchId}-p1`,
+        criteria, size, scrollToken: null,
+      });
     } catch (err) {
-      await creditsService.refund(accountId, SEARCH_ACTION, { searchId });
       await sourcingSearchRepository.update(searchId, { status: 'FAILED' });
-      logger.error({ err, searchId }, 'Sourcing provider search failed');
-      throw providerError('People search provider failed. Your credits were refunded.');
+      throw err;
     }
 
-    const docs = await cacheAndScore(workspaceId, criteria, result.people);
     const updated = await sourcingSearchRepository.update(searchId, {
       status: 'COMPLETED',
-      total: result.total,
-      fetched: docs.length,
-      creditsUsed: search.creditsUsed + SEARCH_COST,
-      scrollToken: result.scrollToken,
-      contactIds: docs.map((d) => d._id),
+      total: page.result.total,
+      fetched: page.contacts.length,
+      creditsUsed: (search.creditsUsed ?? 0) + page.creditsCharged,
+      scrollToken: page.result.scrollToken,
+      contactIds: page.contacts.map((c) => c._id),
       lastRunAt: new Date(),
     });
 
     return {
       search: toSourcingSearchDto(updated ?? search),
-      contacts: docs.map((d) => toSourcedContactDto(d.toObject(), { reveal: false })),
+      contacts: page.contacts.map((c) => toSourcedContactDto(c, { reveal: false })),
     };
   },
 
-  /** Fetch the next page for an existing search (costs credits); appends + re-ranks. */
-  async loadMore(workspaceId: string, searchId: string): Promise<SourcingSearchResultDto> {
+  /** Fetch the next page for an existing search (costs credits per new profile); appends + re-ranks. */
+  async loadMore(workspaceId: string, searchId: string, userId: string | null = null): Promise<SourcingSearchResultDto> {
     const search = await sourcingSearchRepository.findInWorkspace(workspaceId, searchId);
     if (!search) throw notFound('Search not found');
     if (!search.scrollToken) throw badRequest('No more results to load for this search');
@@ -202,36 +260,24 @@ export const sourcingService = {
       throw badRequest('This search has reached its result cap');
     }
     const criteria = search.criteria as SourcingCriteria;
-    const accountId = await resolveAccountId(workspaceId);
-    // Derive the spend key from credits already charged (not `fetched`, which can
-    // stay flat when a page returns only duplicates) so every charge is distinct.
-    const charge = Math.floor((search.creditsUsed ?? 0) / SEARCH_COST) + 1;
 
-    await creditsService.consume(accountId, SEARCH_ACTION, `sourcing-search-${searchId}-c${charge}`);
+    // Keyed by the cursor being consumed: a retried load-more for the same page
+    // replays the original charge instead of debiting again.
+    const page = await chargedFetchPage({
+      workspaceId, userId, searchId,
+      idempotencyKey: `sourcing-search-${searchId}-more-${search.scrollToken}`,
+      criteria, size: pageSize(), scrollToken: search.scrollToken,
+    });
 
-    let result;
-    try {
-      result = await getPeopleSourcingProvider().search({
-        criteria,
-        size: pageSize(),
-        scrollToken: search.scrollToken,
-      });
-    } catch (err) {
-      await creditsService.refund(accountId, SEARCH_ACTION, { searchId });
-      logger.error({ err, searchId }, 'Sourcing load-more failed');
-      throw providerError('People search provider failed. Your credits were refunded.');
-    }
-
-    const newDocs = await cacheAndScore(workspaceId, criteria, result.people);
     const existing = new Set((search.contactIds ?? []).map((id) => String(id)));
     const mergedIds = [...(search.contactIds ?? [])];
-    for (const d of newDocs) if (!existing.has(String(d._id))) mergedIds.push(d._id);
+    for (const c of page.contacts) if (!existing.has(String(c._id))) mergedIds.push(c._id);
 
     const updated = await sourcingSearchRepository.update(searchId, {
-      total: result.total,
+      total: page.result.total,
       fetched: mergedIds.length,
-      creditsUsed: (search.creditsUsed ?? 0) + SEARCH_COST,
-      scrollToken: result.scrollToken,
+      creditsUsed: (search.creditsUsed ?? 0) + page.creditsCharged,
+      scrollToken: page.result.scrollToken,
       contactIds: mergedIds,
       lastRunAt: new Date(),
     });
@@ -239,43 +285,37 @@ export const sourcingService = {
     return this.getSearch(workspaceId, searchId, updated);
   },
 
-  /** Re-run a search with recruiter-edited criteria — no AI re-parse; costs credits. */
+  /** Re-run a search with recruiter-edited criteria — no AI re-parse; costs credits per new profile. */
   async updateCriteria(
     workspaceId: string,
     searchId: string,
     criteria: SourcingCriteria,
+    userId: string | null = null,
   ): Promise<SourcingSearchResultDto> {
     const search = await sourcingSearchRepository.findInWorkspace(workspaceId, searchId);
     if (!search) throw notFound('Search not found');
-    const accountId = await resolveAccountId(workspaceId);
 
     // Idempotent per run so a retried PATCH doesn't double-charge.
-    const runKey = `sourcing-search-${searchId}-rerun-${search.lastRunAt?.getTime() ?? 0}`;
-    await creditsService.consume(accountId, SEARCH_ACTION, runKey);
+    const page = await chargedFetchPage({
+      workspaceId, userId, searchId,
+      idempotencyKey: `sourcing-search-${searchId}-rerun-${search.lastRunAt?.getTime() ?? 0}`,
+      criteria, size: pageSize(), scrollToken: null,
+    });
 
-    let result;
-    try {
-      result = await getPeopleSourcingProvider().search({ criteria, size: pageSize(), scrollToken: null });
-    } catch (err) {
-      await creditsService.refund(accountId, SEARCH_ACTION, { searchId });
-      throw providerError('People search provider failed. Your credits were refunded.');
-    }
-
-    const docs = await cacheAndScore(workspaceId, criteria, result.people);
     const updated = await sourcingSearchRepository.update(searchId, {
       criteria,
       status: 'COMPLETED',
-      total: result.total,
-      fetched: docs.length,
-      creditsUsed: (search.creditsUsed ?? 0) + SEARCH_COST,
-      scrollToken: result.scrollToken,
-      contactIds: docs.map((d) => d._id),
+      total: page.result.total,
+      fetched: page.contacts.length,
+      creditsUsed: (search.creditsUsed ?? 0) + page.creditsCharged,
+      scrollToken: page.result.scrollToken,
+      contactIds: page.contacts.map((c) => c._id),
       lastRunAt: new Date(),
     });
 
     return {
       search: toSourcingSearchDto(updated ?? search),
-      contacts: docs.map((d) => toSourcedContactDto(d.toObject(), { reveal: false })),
+      contacts: page.contacts.map((c) => toSourcedContactDto(c, { reveal: false })),
     };
   },
 
@@ -308,53 +348,80 @@ export const sourcingService = {
    * permanent gap (no GitHub/personal email anywhere) is never re-billed
    * $0.30 on every later open.
    */
+  /** Full profile detail (reveals email). Free — enrichment is an explicit, paid action (enrichContact). */
   async getContact(workspaceId: string, contactId: string): Promise<SourcedContactDto> {
     const contact = await sourcedContactRepository.findInWorkspace(workspaceId, contactId);
     if (!contact) throw notFound('Contact not found');
+    return toSourcedContactDto(contact.toObject(), { reveal: true });
+  },
 
-    let doc = contact.toObject();
-    if (!doc.backfillAttemptedAt && hasEnrichmentGap(doc)) {
-      // Atomically claim the right to backfill this contact — the conditional
-      // filter (backfillAttemptedAt: null) means only ONE concurrent detail-view
-      // open can win this; a second request gets null back and skips straight
-      // through without a duplicate paid PDL call.
-      const claimed = await sourcedContactRepository.claimBackfill(contactId);
-      if (claimed) {
-        let patch: Record<string, unknown> | null = null;
-        try {
-          const backfilled = await getPeopleSourcingProvider().backfill({
-            fullName: doc.fullName,
-            company: doc.company ?? undefined,
-            workEmail: doc.workEmail ?? undefined,
-            linkedinUrl: doc.linkedinUrl ?? undefined,
-          });
-          if (backfilled) {
-            patch = {
-              skills: backfilled.skills.length ? backfilled.skills : doc.skills,
-              githubUrl: backfilled.githubUrl ?? doc.githubUrl,
-              personalEmail: backfilled.personalEmail ?? doc.personalEmail,
-              education: backfilled.education.length ? backfilled.education : doc.education,
-              yearsExperience: backfilled.yearsExperience ?? doc.yearsExperience,
-            };
-          }
-        } catch (err) {
-          if (err instanceof MonidOperationalError) {
-            // Not a real attempt — release the claim so a later open can retry.
-            await sourcedContactRepository.update(contactId, { backfillAttemptedAt: null });
-            logger.warn({ err, contactId }, 'PDL backfill hit a Monid outage — will retry on next open');
-          } else {
-            logger.warn({ err, contactId }, 'PDL backfill failed — showing contact with the gap unfilled');
-          }
-        }
-        const updated = patch ? await sourcedContactRepository.update(contactId, patch) : claimed;
-        doc = (updated ?? claimed).toObject();
-      }
-      // If claimed is null, another request already won the race (or completed
-      // with a permanent gap) — proceed with `doc` as-is, no extra PDL spend.
+  /**
+   * "Enrich profile": a PDL backfill (skills/education/GitHub/personal email)
+   * charged PROFILE_ENRICH credits. Charged at most once per contact per
+   * workspace (the backfillAttemptedAt claim), refunded when PDL has no match
+   * or the provider fails. A no-op (free) when there's no gap to fill.
+   */
+  async enrichContact(workspaceId: string, contactId: string, userId: string | null): Promise<SourcedContactDto> {
+    const contact = await sourcedContactRepository.findInWorkspace(workspaceId, contactId);
+    if (!contact) throw notFound('Contact not found');
+    const doc = contact.toObject();
+    if (doc.backfillAttemptedAt || !hasEnrichmentGap(doc)) return toSourcedContactDto(doc, { reveal: true });
+
+    // Atomically claim the attempt so concurrent clicks can't double-charge or
+    // double-call PDL; the loser just returns the contact as-is.
+    const claimed = await sourcedContactRepository.claimBackfill(contactId);
+    if (!claimed) return toSourcedContactDto((await sourcedContactRepository.findInWorkspace(workspaceId, contactId))!.toObject(), { reveal: true });
+
+    const accountId = await resolveAccountId(workspaceId);
+    let charge;
+    try {
+      charge = await creditsService.charge(accountId, 'PROFILE_ENRICH', 1, {
+        idempotencyKey: `enrich-${contactId}-${claimed.backfillAttemptedAt!.getTime()}`,
+        actorUserId: userId,
+        meta: { contactId },
+      });
+    } catch (err) {
+      await sourcedContactRepository.update(contactId, { backfillAttemptedAt: null }); // release — not a real attempt
+      throw err;
     }
 
-    return toSourcedContactDto(doc, { reveal: true });
+    let backfilled;
+    try {
+      backfilled = await getPeopleSourcingProvider().backfill({
+        fullName: doc.fullName,
+        company: doc.company ?? undefined,
+        workEmail: doc.workEmail ?? undefined,
+        linkedinUrl: doc.linkedinUrl ?? undefined,
+      });
+    } catch (err) {
+      await creditsService.refund(charge.txId);
+      await sourcedContactRepository.update(contactId, { backfillAttemptedAt: null });
+      logger.warn({ err, contactId }, 'PDL enrichment failed — refunded, can be retried');
+      throw providerError(
+        err instanceof MonidOperationalError
+          ? 'The enrichment provider is temporarily unavailable. Your credits were refunded.'
+          : 'Enrichment failed. Your credits were refunded.',
+      );
+    }
+
+    if (!backfilled) {
+      // PDL had no match (Monid doesn't bill empty results) — refund, and keep the
+      // attempt stamped so the button doesn't invite a pointless paid retry.
+      await creditsService.refund(charge.txId);
+      return toSourcedContactDto(claimed.toObject(), { reveal: true });
+    }
+
+    const updated = await sourcedContactRepository.update(contactId, {
+      skills: backfilled.skills.length ? backfilled.skills : doc.skills,
+      githubUrl: backfilled.githubUrl ?? doc.githubUrl,
+      personalEmail: backfilled.personalEmail ?? doc.personalEmail,
+      phone: backfilled.phone ?? doc.phone,
+      education: backfilled.education.length ? backfilled.education : doc.education,
+      yearsExperience: backfilled.yearsExperience ?? doc.yearsExperience,
+    });
+    return toSourcedContactDto((updated ?? claimed).toObject(), { reveal: true });
   },
+
 
   /**
    * Estimated market compensation band for this contact's company + title
@@ -363,22 +430,54 @@ export const sourcingService = {
    * the same company are free. Returns null when unresolvable — a normal,
    * expected outcome for smaller/less-known employers, not an error.
    */
-  async getCompensationBand(workspaceId: string, contactId: string): Promise<CompensationBandDto | null> {
+  /**
+   * Estimated market compensation (Levels.fyi). Viewing is free once the
+   * workspace has unlocked this contact; `unlock: true` spends
+   * COMPENSATION_LOOKUP credits the first time (refunded when there's no
+   * coverage or the provider fails). A null band is a normal "no data" outcome.
+   */
+  async getCompensationBand(
+    workspaceId: string,
+    contactId: string,
+    opts: { unlock?: boolean; userId?: string | null } = {},
+  ): Promise<{ unlocked: boolean; band: CompensationBandDto | null }> {
     const contact = await sourcedContactRepository.findInWorkspace(workspaceId, contactId);
     if (!contact) throw notFound('Contact not found');
-    if (!contact.company) return null;
+    if (!contact.company) return { unlocked: true, band: null };
 
-    const cached = await compensationBandCacheRepository.find(contact.company, contact.title ?? undefined, contact.location ?? undefined);
-    if (cached) return cached.band;
+    const lookup = { company: contact.company, title: contact.title ?? undefined, location: contact.location ?? undefined };
+    const fetchBand = async (): Promise<CompensationBandDto | null> => {
+      const cached = await compensationBandCacheRepository.find(lookup.company, lookup.title, lookup.location);
+      if (cached) return cached.band;
+      const band = await getCompensationProvider().getSalaryBand(lookup);
+      await compensationBandCacheRepository.save(lookup.company, lookup.title, lookup.location, band);
+      return band;
+    };
 
-    const band = await getCompensationProvider().getSalaryBand({
-      company: contact.company,
-      title: contact.title ?? undefined,
-      location: contact.location ?? undefined,
+    if (contact.compensationUnlockedAt) return { unlocked: true, band: await fetchBand() };
+    if (!opts.unlock) return { unlocked: false, band: null };
+
+    const accountId = await resolveAccountId(workspaceId);
+    const charge = await creditsService.charge(accountId, 'COMPENSATION_LOOKUP', 1, {
+      idempotencyKey: `compensation-${contactId}`,
+      actorUserId: opts.userId ?? null,
+      meta: { contactId },
     });
-    await compensationBandCacheRepository.save(contact.company, contact.title ?? undefined, contact.location ?? undefined, band);
-    return band;
+    let band;
+    try {
+      band = await fetchBand();
+    } catch (err) {
+      if (!charge.replayed) await creditsService.refund(charge.txId);
+      throw err;
+    }
+    if (!band) {
+      if (!charge.replayed) await creditsService.refund(charge.txId);
+      return { unlocked: true, band: null };
+    }
+    await sourcedContactRepository.update(contactId, { compensationUnlockedAt: new Date() });
+    return { unlocked: true, band };
   },
+
 
   /** Build a CSV of the given contacts (emails revealed) for download. */
   async exportContactsCsv(workspaceId: string, contactIds: string[]): Promise<string> {
@@ -603,22 +702,51 @@ export const sourcingService = {
   },
 
   /** AI draft (or refine) for the composer — free, rate-limited by aiLimiter. */
-  async draftEmail(workspaceId: string, input: DraftCampaignInput): Promise<CampaignDraftDto> {
+  /** AI outreach draft/refine — spends OUTREACH_DRAFT credits (refunded if the AI call fails). */
+  async draftEmail(workspaceId: string, input: DraftCampaignInput, userId: string | null = null): Promise<CampaignDraftDto> {
     const ws = await WorkspaceModel.findById(workspaceId).select('name').lean();
-    const { subject, body } = await getAIProvider().draftOutreachEmail({
-      role: input.role,
-      company: ws?.name ?? 'our team',
-      tone: input.tone,
-      brief: input.brief,
-      refine: input.refine,
-    });
-    return { subject, body };
+    const accountId = await resolveAccountId(workspaceId);
+    const charge = await creditsService.charge(accountId, 'OUTREACH_DRAFT', 1, { actorUserId: userId });
+    try {
+      const { subject, body } = await getAIProvider().draftOutreachEmail({
+        role: input.role,
+        company: ws?.name ?? 'our team',
+        tone: input.tone,
+        brief: input.brief,
+        refine: input.refine,
+      });
+      return { subject, body };
+    } catch (err) {
+      await creditsService.refund(charge.txId);
+      throw err;
+    }
   },
 
+
   /** Send a one-off preview of the campaign to the recruiter's own address. */
+  /**
+   * Once a campaign has no PENDING recipients left, settle its OUTREACH_EMAIL
+   * reservation down to the emails actually sent (suppressed/skipped ones are
+   * refunded). Safe to call repeatedly — settle() is net of prior refunds.
+   */
+  async settleCampaignCredits(campaignId: string): Promise<void> {
+    const campaign = await sourcingCampaignRepository.findById(campaignId);
+    if (!campaign?.creditTxId || !campaign.creditChargedAt) return;
+    if ((await sourcingRecipientRepository.countPending(campaignId)) > 0) return;
+    const sent = await sourcingRecipientRepository.countSentSince(campaignId, campaign.creditChargedAt);
+    await creditsService.settle(campaign.creditTxId, sent);
+  },
+
+  /** Send a test to a workspace member's own address (never arbitrary recipients). */
   async testCampaign(workspaceId: string, campaignId: string, toEmail: string): Promise<void> {
     const campaign = await sourcingCampaignRepository.findInWorkspace(workspaceId, campaignId);
     if (!campaign) throw notFound('Campaign not found');
+    const members = await memberRepository.listByWorkspace(workspaceId);
+    const users = await UserModel.find({ _id: { $in: members.map((m) => m.userId) } }).select('email').lean();
+    const allowed = new Set(users.map((u) => String(u.email ?? '').toLowerCase()));
+    if (!allowed.has(toEmail.trim().toLowerCase())) {
+      throw badRequest('Test emails can only be sent to members of this workspace');
+    }
     const ctx: MergeContext = { firstName: 'there', fullName: 'there', company: 'their company', title: 'their role' };
     const subject = renderTemplate(campaign.subject, ctx, 'test');
     const body = renderTemplate(campaign.body, ctx, 'test');
@@ -635,7 +763,12 @@ export const sourcingService = {
    * Build the recipient set (skipping no-email + suppressed contacts) and hand
    * the campaign off to the queue for send (now) or at `scheduledAt`.
    */
-  async sendCampaign(workspaceId: string, campaignId: string, scheduledAtIso?: string): Promise<SourcingCampaignDto> {
+  async sendCampaign(
+    workspaceId: string,
+    campaignId: string,
+    scheduledAtIso?: string,
+    userId: string | null = null,
+  ): Promise<SourcingCampaignDto> {
     const campaign = await sourcingCampaignRepository.findInWorkspace(workspaceId, campaignId);
     if (!campaign) throw notFound('Campaign not found');
     if (campaign.status === 'SENDING' || campaign.status === 'SENT') {
@@ -653,11 +786,6 @@ export const sourcingService = {
       throw badRequest('No contactable recipients — every contact lacks an email or is unsubscribed');
     }
 
-    // Atomically claim the campaign (DRAFT/SCHEDULED/PAUSED/FAILED → SENDING) so two
-    // concurrent sends can't both build recipients and double-email everyone.
-    const claimed = await sourcingCampaignRepository.claimForSend(workspaceId, campaignId);
-    if (!claimed) throw conflict('This campaign is already sending or has been sent');
-
     // Reuse recipients by contact: preserve rows that already progressed past PENDING
     // (a retry from PAUSED/FAILED must never re-email an already-contacted person),
     // and only (re)insert PENDING rows for the rest.
@@ -665,8 +793,42 @@ export const sourcingService = {
     const alreadyProcessed = new Set(
       existing.filter((r: any) => r.status !== 'PENDING').map((r: any) => String(r.contactId)),
     );
-    await sourcingRecipientRepository.deletePendingByCampaign(campaignId);
     const toInsert = eligible.filter((x) => !alreadyProcessed.has(String(x.c._id)));
+
+    const account = await accountRepository.ensureForWorkspace(workspaceId);
+    if (!account) throw notFound('Billing account not found');
+    if ((PLAN_DAILY_OUTREACH_CAP[(account.plan as WorkspacePlan) ?? 'FREE'] ?? 0) <= 0) {
+      throw badRequest('Your plan does not include outreach email sending');
+    }
+
+    // Atomically claim the campaign (DRAFT/SCHEDULED/PAUSED/FAILED → SENDING) so two
+    // concurrent sends can't both build recipients and double-email everyone.
+    const previous = await sourcingCampaignRepository.claimForSend(workspaceId, campaignId);
+    if (!previous) throw conflict('This campaign is already sending or has been sent');
+
+    // A resend (from PAUSED/FAILED) replaces the previous reservation. Settle it
+    // FIRST, to the emails it actually sent, so the credits it held for unsent
+    // recipients are back in the balance before the new charge checks it.
+    if (campaign.creditTxId && campaign.creditChargedAt) {
+      const sentUnderPrior = await sourcingRecipientRepository.countSentSince(campaignId, campaign.creditChargedAt);
+      await creditsService.settle(campaign.creditTxId, sentUnderPrior);
+    }
+
+    // Reserve OUTREACH_EMAIL credits for every recipient about to be queued; settled
+    // down to emails actually sent once the fan-out finishes (settleCampaignCredits).
+    // The daily sending cap is enforced at dispatch time, on the day emails go out.
+    let charge;
+    try {
+      charge = await creditsService.charge(String(account._id), 'OUTREACH_EMAIL', toInsert.length, {
+        actorUserId: userId,
+        meta: { campaignId },
+      });
+    } catch (err) {
+      // Recover: hand the claim back so the campaign can be resent after a top-up.
+      await sourcingCampaignRepository.update(campaignId, { status: previous.status, creditTxId: null, creditChargedAt: null });
+      throw err;
+    }
+    await sourcingRecipientRepository.deletePendingByCampaign(campaignId);
     if (toInsert.length) {
       await sourcingRecipientRepository.insertMany(
         toInsert.map((x) => ({
@@ -689,13 +851,15 @@ export const sourcingService = {
       status: scheduled ? 'SCHEDULED' : 'SENDING',
       scheduledAt: scheduledAt ?? null,
       'stats.recipients': alreadyProcessed.size + toInsert.length,
+      creditTxId: charge.txId,
+      creditChargedAt: new Date(),
     });
 
     // Stamp the effective scheduled time on the job so a superseded (rescheduled)
     // job can be recognized as stale by the handler and skipped.
     await jobQueue.enqueue(
       'SEND_SOURCING_CAMPAIGN',
-      { campaignId, workspaceId, scheduledAt: scheduledAt ? scheduledAt.toISOString() : null },
+      { campaignId, workspaceId, scheduledAt: scheduledAt ? scheduledAt.toISOString() : null, run: charge.txId },
       {
         runAt: scheduled ? scheduledAt! : undefined,
         idempotencyKey: `sourcing-campaign-${campaignId}-${scheduledAt?.getTime() ?? 'now'}`,

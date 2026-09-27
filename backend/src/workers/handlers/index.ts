@@ -3,13 +3,21 @@ import type { Logger } from '../../utils/logger';
 
 export interface JobContext {
   jobId: string;
+  /** Attempts so far, including this one (1 on the first run). */
   attempts: number;
+  /** The job's retry budget; when attempts >= maxAttempts, a throw dead-letters the job. */
+  maxAttempts?: number;
   logger: Logger;
   /** The job's dedupe key, if any — handlers can forward it as a provider-level idempotency key. */
   idempotencyKey?: string;
 }
 
 export type JobHandler = (payload: any, ctx: JobContext) => Promise<unknown>;
+
+/** True when this run is the job's last chance — a failure now is permanent (dead-lettered, never retried). */
+export function isFinalAttempt(ctx: JobContext): boolean {
+  return ctx.maxAttempts != null && ctx.attempts >= ctx.maxAttempts;
+}
 
 /**
  * Worker task registry (spec: WORKER TASK TYPES). Each slice registers its

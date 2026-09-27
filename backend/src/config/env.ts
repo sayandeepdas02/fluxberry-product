@@ -54,6 +54,8 @@ const envSchema = z.object({
   AI_PROVIDER: z.enum(['anthropic', 'openai', 'mock']).default('anthropic'),
   AI_API_KEY: z.string().optional().default(''),
   AI_MODEL: z.string().optional().default(''),
+  /** Cheaper model for high-volume extraction (resume parse, screening, search-prompt parse). Blank → provider default (Anthropic: claude-haiku-4-5). */
+  AI_MODEL_FAST: z.string().optional().default(''),
 
   RESEND_API_KEY: z.string().optional().default(''),
   EMAIL_FROM: z.string().default('Fluxberry <noreply@example.com>'),
@@ -205,7 +207,7 @@ export const config = {
 
   providers: {
     mockAll: e.MOCK_EXTERNAL_SERVICES,
-    ai: { provider: e.AI_PROVIDER, apiKey: e.AI_API_KEY, model: e.AI_MODEL },
+    ai: { provider: e.AI_PROVIDER, apiKey: e.AI_API_KEY, model: e.AI_MODEL, fastModel: e.AI_MODEL_FAST },
     email: { resendApiKey: e.RESEND_API_KEY, from: e.EMAIL_FROM },
     messaging: { inboundDomain: e.INBOUND_EMAIL_DOMAIN, inboundSecret: e.INBOUND_EMAIL_SECRET },
     billing: {

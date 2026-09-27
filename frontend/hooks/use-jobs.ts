@@ -141,3 +141,26 @@ export function useUpdateJobStages(jobId: string) {
     },
   });
 }
+
+/** How many of a job's applicants are waiting on credits for AI screening. */
+export function useScreenPendingCount(jobId: string) {
+  const { currentWorkspace } = useWorkspace();
+  return useQuery({
+    queryKey: ['jobs', 'screen-pending', currentWorkspace.id, jobId],
+    queryFn: () => api.get<{ pending: number }>(`/api/v1/jobs/${jobId}/screen-pending`),
+    enabled: Boolean(jobId),
+  });
+}
+
+/** Screen waiting applicants now (quota first, then 1 credit each, until funds run out). */
+export function useScreenPending(jobId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => api.post<{ queued: number; remaining: number }>(`/api/v1/jobs/${jobId}/screen-pending`),
+    onSettled: () => {
+      void queryClient.invalidateQueries({ queryKey: ['jobs', 'screen-pending'] });
+      void queryClient.invalidateQueries({ queryKey: ['candidates'] });
+      void queryClient.invalidateQueries({ queryKey: ['billing'] });
+    },
+  });
+}

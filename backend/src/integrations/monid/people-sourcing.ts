@@ -35,7 +35,12 @@ export class MonidPeopleSourcingProvider implements PeopleSourcingProvider {
 
     const { previews, total, nextCursor } = await searchApollo(this.client, input.criteria, cursor, perPage);
 
-    const enriched = await mapWithConcurrency(previews, ENRICH_CONCURRENCY, async (preview) => {
+    // Apollo's search is free; /people/match is the paid step ($0.05). Skip it
+    // for people the workspace already has cached — they come back as knownIds.
+    const known = input.resolveKnown ? await input.resolveKnown(previews.map((p) => p.id)) : new Set<string>();
+    const toEnrich = previews.filter((p) => !known.has(p.id));
+
+    const enriched = await mapWithConcurrency(toEnrich, ENRICH_CONCURRENCY, async (preview) => {
       try {
         return await enrichApolloPerson(this.client, preview.id);
       } catch (err) {
@@ -48,6 +53,7 @@ export class MonidPeopleSourcingProvider implements PeopleSourcingProvider {
 
     return {
       people,
+      knownIds: previews.filter((p) => known.has(p.id)).map((p) => p.id),
       total,
       // Driven by Apollo's real page-exhaustion signal, not `total` — `total` is
       // an unfiltered upper bound whenever a company filter is active (see

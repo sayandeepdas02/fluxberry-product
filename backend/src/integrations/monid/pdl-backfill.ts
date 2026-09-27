@@ -23,6 +23,8 @@ interface PdlPerson {
   skills?: string[];
   github_url?: string;
   personal_emails?: string[];
+  mobile_phone?: string | null;
+  phone_numbers?: string[];
   emails?: Array<{ address?: string; type?: string }>;
   education?: Array<{
     degrees?: string[];
@@ -77,6 +79,7 @@ export async function backfillFromPdl(
     skills: (p.skills ?? []).slice(0, 20),
     githubUrl: p.github_url ? ensureHttps(p.github_url) : undefined,
     personalEmail: personalEmail ?? undefined,
+    phone: p.mobile_phone ?? p.phone_numbers?.[0] ?? undefined,
     education: (p.education ?? []).slice(0, 3).map((e) => ({
       degree: e.degrees?.[0],
       school: e.school?.name,

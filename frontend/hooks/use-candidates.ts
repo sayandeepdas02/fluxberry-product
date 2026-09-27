@@ -82,11 +82,14 @@ export function useApplicationTimeline(applicationId: string) {
   });
 }
 
-function useAppMutation<TBody>(path: (id: string) => string, method: 'post' = 'post') {
+function useAppMutation<TBody>(path: (id: string) => string, opts: { spendsCredits?: boolean } = {}) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (v: { applicationId: string; body?: TBody }) =>
-      api[method]<ApplicationDto>(path(v.applicationId), v.body),
+      api.post<ApplicationDto>(path(v.applicationId), v.body),
+    onSettled: () => {
+      if (opts.spendsCredits) void queryClient.invalidateQueries({ queryKey: ['billing'] });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['candidates'] });
       queryClient.invalidateQueries({ queryKey: ['candidate'] });
@@ -109,8 +112,9 @@ export function useHire() {
 export function useReject() {
   return useAppMutation<RejectApplicationInput>((id) => `/api/v1/applications/${id}/reject`);
 }
+/** Re-screen (or screen a waiting applicant) — may spend an APPLICANT_SCREENING credit. */
 export function useRescreen() {
-  return useAppMutation<undefined>((id) => `/api/v1/applications/${id}/rescreen`);
+  return useAppMutation<undefined>((id) => `/api/v1/applications/${id}/rescreen`, { spendsCredits: true });
 }
 
 export function useBulkAction() {

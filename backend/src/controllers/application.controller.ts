@@ -71,7 +71,7 @@ export const applicationController = {
   }),
 
   rescreen: asyncHandler(async (req, res) => {
-    await screeningService.retry(req.auth!.workspaceId!, req.params.applicationId);
+    await screeningService.retry(req.auth!.workspaceId!, req.params.applicationId, req.auth!.user.id);
     ok(res, { status: 'queued' });
   }),
 

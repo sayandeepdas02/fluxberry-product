@@ -15,6 +15,10 @@ export const billingController = {
     ok(res, result);
   }),
 
+  getCredits: asyncHandler(async (req, res) => {
+    ok(res, await billingService.getCredits(req.auth!.workspaceId!));
+  }),
+
   creditHistory: asyncHandler(async (req, res) => {
     const items = await billingService.getCreditHistory(req.auth!.workspaceId!);
     ok(res, { items });

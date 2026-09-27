@@ -20,6 +20,10 @@ const sourcingCampaignRecipientSchema = new Schema(
      * monotonic even after a later status change (e.g. an unsubscribe must not
      * lower the sent/opened/replied counts).
      */
+    /** When the fan-out queued this recipient's send (counted against that UTC day's cap); null = not yet queued. */
+    dispatchedAt: { type: Date, default: null },
+    /** Which fan-out run claimed this recipient (with its cap reservation) — makes dispatch retry-safe. */
+    dispatchToken: { type: String, default: null },
     sentAt: { type: Date, default: null },
     deliveredAt: { type: Date, default: null },
     openedAt: { type: Date, default: null },

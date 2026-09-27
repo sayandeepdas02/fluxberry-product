@@ -14,6 +14,7 @@ import { ScreeningCard } from '@/components/candidates/screening-card';
 import { Timeline } from '@/components/candidates/timeline';
 import { MessageThread } from '@/components/candidates/message-thread';
 import { toast } from '@/components/ui/sonner';
+import { useCreditErrorHandler } from '@/components/billing/credits-provider';
 import { formatSalary, initials, reserveTab } from '@/lib/utils';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
@@ -38,6 +39,7 @@ export function CandidateDetailBody({ state }: { state: CandidateDetailState }) 
     resumeOpen,
     setResumeOpen,
   } = state;
+  const handleCreditError = useCreditErrorHandler();
 
   if (isLoading || !profile) return <Skeleton className="h-96 w-full" />;
 
@@ -92,7 +94,16 @@ export function CandidateDetailBody({ state }: { state: CandidateDetailState }) 
             retrying={rescreen.isPending}
             onRetry={
               activeApp
-                ? () => rescreen.mutate({ applicationId: activeApp.id }, { onSuccess: () => toast.success('Re-screening queued') })
+                ? () =>
+                    rescreen.mutate(
+                      { applicationId: activeApp.id },
+                      {
+                        onSuccess: () => toast.success('Screening queued'),
+                        onError: (err) => {
+                          if (!handleCreditError(err)) toast.error(err instanceof Error ? err.message : 'Could not screen');
+                        },
+                      },
+                    )
                 : undefined
             }
           />
