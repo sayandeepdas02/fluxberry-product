@@ -5,7 +5,7 @@ const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
   '/sign-up(.*)',
   '/blog(.*)',
-  // Marketing pages linked from the nav's Resources menu.
+  // Marketing pages in the nav's Resources menu (shown as "Coming soon" until each page exists).
   '/careers',
   '/comparisons(.*)',
   '/knowledge-base(.*)',
