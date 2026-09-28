@@ -81,13 +81,13 @@ export const PRODUCT = {
   ] satisfies ProductCard[],
 };
 
+/** Which animated mockup a Solutions card shows (see ./solutions). */
+export type SolutionVisualKind = 'dashboard' | 'collaboration' | 'screening' | 'analytics' | 'security' | 'integrations';
+
 export interface SolutionCard {
   title: string;
   body: string;
-  image: string;
-  /** Intrinsic size of the image, for next/image. */
-  width: number;
-  height: number;
+  visual: SolutionVisualKind;
   /** Wide cards take 750px of the 1300px row; narrow ones 530px. */
   wide: boolean;
 }
@@ -100,49 +100,37 @@ export const SOLUTIONS = {
     {
       title: 'Hiring Dashboard',
       body: 'See every open role, new applicants and pipeline progress at a glance in one simple view.',
-      image: '/landing/feature-smart-dashboard.jpg',
-      width: 866,
-      height: 660,
+      visual: 'dashboard',
       wide: false,
     },
     {
       title: 'Team Collaboration',
       body: 'Review candidates together, share notes and move people through stages as a team.',
-      image: '/landing/feature-team-collaboration.jpg',
-      width: 1254,
-      height: 660,
+      visual: 'collaboration',
       wide: true,
     },
     {
       title: 'AI Screening',
       body: 'Every resume is parsed and scored against your job, with clear strengths and concerns.',
-      image: '/landing/feature-automated-workflows.jpg',
-      width: 1254,
-      height: 660,
+      visual: 'screening',
       wide: true,
     },
     {
       title: 'Hiring Analytics',
       body: 'Track pipeline conversion, time in each stage and the sources that bring your best hires.',
-      image: '/landing/feature-advanced-analytics.jpg',
-      width: 866,
-      height: 660,
+      visual: 'analytics',
       wide: false,
     },
     {
       title: 'Secure by Default',
       body: 'Role-based access, per-job permissions and GDPR tools keep candidate data private.',
-      image: '/landing/feature-secure-by-default.jpg',
-      width: 866,
-      height: 660,
+      visual: 'security',
       wide: false,
     },
     {
       title: 'Works With Your Tools',
       body: 'Check availability in Google Calendar, share roles on LinkedIn and email candidates directly.',
-      image: '/landing/feature-integrations.jpg',
-      width: 1254,
-      height: 660,
+      visual: 'integrations',
       wide: true,
     },
   ] satisfies SolutionCard[],
