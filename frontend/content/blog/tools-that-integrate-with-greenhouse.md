@@ -1,7 +1,7 @@
 ---
 title: 'Top tools that integrate with Greenhouse to improve hiring workflows'
 description: 'Greenhouse supports 500+ integrations across sourcing, scheduling, assessment, background checks, and HRIS. Here are the strongest tools in each category.'
-date: '2026-09-23'
+date: '2026-09-21'
 author: 'The Fluxberry team'
 category: 'Integrations'
 featured: false

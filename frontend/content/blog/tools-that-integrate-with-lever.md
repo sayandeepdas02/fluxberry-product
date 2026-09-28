@@ -1,7 +1,7 @@
 ---
 title: '9 Lever integrations across the hiring stack'
 description: 'Lever supports 300+ integrations across sourcing, scheduling, assessment, and analytics. Here are the strongest tools in each category.'
-date: '2026-09-23'
+date: '2026-09-24'
 author: 'The Fluxberry team'
 category: 'Integrations'
 featured: false

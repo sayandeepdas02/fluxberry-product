@@ -1,7 +1,7 @@
 ---
 title: '12 top tools that integrate with SAP SuccessFactors'
 description: 'Already using SAP SuccessFactors? Here are the strongest sourcing, assessment, background check, and document tools that integrate with it.'
-date: '2026-09-23'
+date: '2026-09-27'
 author: 'The Fluxberry team'
 category: 'Integrations'
 featured: false

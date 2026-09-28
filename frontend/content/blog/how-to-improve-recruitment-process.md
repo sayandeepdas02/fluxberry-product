@@ -1,7 +1,7 @@
 ---
 title: 'How to improve your hiring process: speed and quality'
 description: 'Practical steps, templates, and tools to make your recruitment process faster without sacrificing candidate quality. A guide for founders and hiring managers.'
-date: '2026-09-23'
+date: '2026-09-29'
 author: 'The Fluxberry team'
 category: 'Hiring Tips'
 featured: true

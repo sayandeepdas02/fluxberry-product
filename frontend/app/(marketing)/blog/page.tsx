@@ -6,8 +6,7 @@ import { GridBackdrop, SectionHeader } from '@/components/marketing/landing/prim
 import { FeaturedPost } from '@/components/marketing/blog/featured-post';
 import { PostBrowser } from '@/components/marketing/blog/post-browser';
 
-const description =
-  'Notes on hiring with less noise: screening, assessments, interviews, and how we build Fluxberry.';
+const description = 'Case Studies, discussions, blogs, notes on hiring the best AI talent with Fluxberry';
 
 export const metadata: Metadata = publicPageMetadata({
   title: 'Blog',
@@ -33,11 +32,11 @@ export default function BlogIndexPage() {
         <Appear className="relative mx-auto max-w-[1300px]">
           <SectionHeader
             pill="Blog"
-            title="Hiring, with less noise."
+            title="Insights on hiring AI Talent"
             lead={description}
             titleAs="h1"
-            titleClassName="max-w-[350px] tablet:max-w-[600px]"
-            leadClassName="max-w-[340px] tablet:max-w-[460px]"
+            titleClassName="max-w-none text-balance"
+            leadClassName="max-w-none text-balance"
           />
         </Appear>
       </section>
