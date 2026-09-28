@@ -11,6 +11,7 @@ import { GridBackdrop, Pill, TYPE } from '@/components/marketing/landing/primiti
 import { articleInter } from '@/components/marketing/blog/article-font';
 import { Prose } from '@/components/marketing/blog/prose';
 import { TocMinimap } from '@/components/marketing/blog/toc-minimap';
+import { PostCover } from '@/components/marketing/blog/covers/cover';
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -92,9 +93,21 @@ export default async function BlogPostPage({ params }: Params) {
           </Appear>
         </header>
 
+        {/* The post's cover as a banner, in the hero card's radius. */}
+        <div className="px-5 tablet:px-[50px] desktop:px-[70px]">
+          <Appear delay={0.15} className="mx-auto max-w-[1100px]">
+            <PostCover
+              slug={post.slug}
+              title={post.title}
+              sizes="(min-width: 1240px) 1100px, 100vw"
+              className="aspect-[16/10] rounded-[15px] tablet:aspect-[2/1] tablet:rounded-[20px] desktop:rounded-[27px]"
+            />
+          </Appear>
+        </div>
+
         <div className="relative px-5 pb-[70px] tablet:px-[50px] tablet:pb-[100px] desktop:px-[70px]">
           <TocMinimap headings={post.headings} />
-          <div className="mx-auto max-w-[680px] border-t border-lp-gray-150 pt-[50px]">
+          <div className="mx-auto max-w-[680px] pt-[50px]">
             <Prose content={post.content} />
           </div>
         </div>

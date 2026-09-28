@@ -1,7 +1,7 @@
 ---
 title: '10 tools that integrate with Ashby to streamline hiring'
 description: "Ashby's API-first architecture supports deep integrations across sourcing, assessment, HRIS, and collaboration. Here are the strongest connections by category."
-date: '2026-09-23'
+date: '2026-09-15'
 author: 'The Fluxberry team'
 category: 'Integrations'
 featured: false

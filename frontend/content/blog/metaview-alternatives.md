@@ -1,7 +1,7 @@
 ---
 title: 'The 9 best Metaview alternatives by tool type'
 description: 'Metaview handles interview notes, but most teams need more. Here are nine alternatives across sourcing, screening, interview intelligence, and ATS — organised by what they actually replace.'
-date: '2026-09-23'
+date: '2026-09-12'
 author: 'The Fluxberry team'
 category: 'Hiring Tools'
 featured: false

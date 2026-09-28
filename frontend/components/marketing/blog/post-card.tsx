@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { formatPostDate, type PostMeta } from '@/lib/blog-types';
 import { Pill, TYPE } from '@/components/marketing/landing/primitives';
-import { PostThumb } from './post-thumb';
+import { PostCover } from './covers/cover';
 
 /** Hover and focus treatment shared by the blog's clickable cards. */
 export const postCardClass = cn(
@@ -22,11 +22,16 @@ export function PostMetaRow({ post }: { post: PostMeta }) {
   );
 }
 
-/** A post in the grid, built like the landing's Solutions cards: artwork panel over the text. */
+/** A post in the grid, built like the landing's Solutions cards: the cover over the text. */
 export function PostCard({ post }: { post: PostMeta }) {
   return (
     <Link href={`/blog/${post.slug}`} className={cn(postCardClass, 'flex flex-col')}>
-      <PostThumb className="aspect-[16/10] w-full" />
+      <PostCover
+        slug={post.slug}
+        title={post.title}
+        sizes="(min-width: 1200px) 640px, (min-width: 810px) 70vw, 100vw"
+        className="aspect-[16/10] w-full rounded-[7px]"
+      />
       <div className="mt-2.5 flex flex-1 flex-col gap-[15px] px-[5px] py-2.5">
         <PostMetaRow post={post} />
         <h3 className={cn('text-black transition-colors group-hover:text-lp-blue-500', TYPE.title)}>{post.title}</h3>

@@ -1,21 +1,32 @@
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { Logo } from './site-header';
+import { ComingSoon, Logo } from './site-header';
+import { SummarizeWithAI } from './summarize-with-ai';
 import { Reveal } from './landing/motion';
 import { TYPE } from './landing/primitives';
-import { CONTACT_EMAIL, FOOTER } from './landing/content';
+import { CONTACT_EMAIL, FOOTER, type FooterItem } from './landing/content';
 import { publicConfig } from '@/lib/config';
 
-function FooterLink({ href, children }: { href: string; children: React.ReactNode }) {
-  return (
-    <Link
-      href={href}
-      className={cn(
-        'rounded-sm text-black outline-none hover:text-lp-blue-600 focus-visible:ring-2 focus-visible:ring-lp-blue-400',
-        TYPE.pill,
-      )}
-    >
-      {children}
+function FooterEntry({ item }: { item: FooterItem }) {
+  if (item.comingSoon) {
+    return (
+      <span className={cn('flex flex-wrap items-center gap-x-2 gap-y-1 text-lp-gray-500', TYPE.pill)}>
+        {item.label}
+        <ComingSoon label="Soon" />
+      </span>
+    );
+  }
+  const className = cn(
+    'rounded-sm text-black outline-none hover:text-lp-blue-600 focus-visible:ring-2 focus-visible:ring-lp-blue-400',
+    TYPE.pill,
+  );
+  return item.href.startsWith('mailto:') ? (
+    <a href={item.href} className={className}>
+      {item.label}
+    </a>
+  ) : (
+    <Link href={item.href} className={className}>
+      {item.label}
     </Link>
   );
 }
@@ -30,9 +41,9 @@ function FooterLink({ href, children }: { href: string; children: React.ReactNod
 const WORDMARK_EM_WIDTH = 4.1345;
 
 /**
- * Footer, converted from the Framer design: a blue panel inset 10px, logo and
- * tagline on the left, a two-column link list on the right, and a giant
- * wordmark fitted to the full width underneath.
+ * Footer, converted from the Framer design: a blue panel inset 10px, then the
+ * brand and a four-column link directory (Product, Resources, Company, Legal),
+ * the copyright line, and a giant wordmark fitted to the full width underneath.
  */
 export function SiteFooter() {
   return (
@@ -40,36 +51,29 @@ export function SiteFooter() {
       <div className="rounded-[15px] bg-lp-blue-100 desktop:px-2.5">
         <Reveal className="flex flex-col gap-[100px] px-5 py-[30px] tablet:px-10 tablet:py-[50px] desktop:gap-[130px] desktop:px-[60px]">
           <div className="flex flex-col gap-[60px] tablet:gap-[50px]">
-            <div className="flex flex-col gap-[60px] tablet:flex-row tablet:justify-between tablet:gap-0">
-              <div className="flex flex-col items-start gap-2.5">
-                <Logo />
-                <p className={cn('text-pretty text-lp-gray-800 tablet:max-w-[240px]', TYPE.body)}>{FOOTER.tagline}</p>
+            {/* The brand row (with the ask-an-AI buttons on its right from desktop), then the four link columns. */}
+            <div className="grid grid-cols-2 gap-x-5 gap-y-[50px] tablet:grid-cols-4">
+              <div className="col-span-full flex flex-col gap-[30px] desktop:flex-row desktop:items-start desktop:justify-between desktop:gap-10">
+                <div className="flex flex-col items-start gap-2.5">
+                  <Logo />
+                  <p className={cn('text-pretty text-lp-gray-800', TYPE.body)}>{FOOTER.tagline}</p>
+                </div>
+                <SummarizeWithAI />
               </div>
 
-              <div className="flex flex-col gap-10 tablet:flex-row tablet:gap-[50px]">
-                <nav aria-label="Footer" className="flex w-[250px] shrink-0 flex-col gap-5">
-                  <p className={cn('text-lp-gray-600', TYPE.label)}>Links</p>
-                  <ul className="grid grid-cols-[100px_100px] gap-x-[50px] gap-y-2.5">
-                    {/* flex keeps each row at the link's own 18px line, not the body's 24px. */}
-                    {FOOTER.links.map((l) => (
-                      <li key={l.label} className="flex">
-                        <FooterLink href={l.href}>{l.label}</FooterLink>
-                      </li>
-                    ))}
-                  </ul>
-                </nav>
-
-                <nav aria-label="Legal" className="flex shrink-0 flex-col gap-5">
-                  <p className={cn('text-lp-gray-600', TYPE.label)}>Legal</p>
+              {FOOTER.columns.map((column) => (
+                <nav key={column.title} aria-label={column.title} className="flex flex-col gap-5">
+                  <p className={cn('text-lp-gray-600', TYPE.label)}>{column.title}</p>
+                  {/* flex keeps each row at the link's own 18px line, not the body's 24px. */}
                   <ul className="flex flex-col gap-2.5">
-                    {FOOTER.legal.map((l) => (
-                      <li key={l.href} className="flex">
-                        <FooterLink href={l.href}>{l.label}</FooterLink>
+                    {column.links.map((item) => (
+                      <li key={item.label} className="flex">
+                        <FooterEntry item={item} />
                       </li>
                     ))}
                   </ul>
                 </nav>
-              </div>
+              ))}
             </div>
 
             <div

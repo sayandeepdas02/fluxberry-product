@@ -229,25 +229,76 @@ export const LEGAL_LINKS: NavLinkItem[] = [
 ];
 
 /**
- * Resources pages that exist today: the nav's Resources items minus the ones
- * still marked "Coming soon". Dropping an item's `comingSoon` flag when its page
- * ships adds it to the footer too, so the footer never links to a missing page.
+ * The footer's "Summarize what Fluxberry does with AI" buttons: each opens the
+ * assistant with this prompt filled in (the URL ends in its query parameter,
+ * the encoded prompt is appended). The prompt names the live site, which the
+ * assistants can read; keep its claims true to the product. Gemini's own app
+ * can't be prefilled, so its button opens Google's Gemini-powered AI Mode.
  */
-const LIVE_RESOURCES: NavLinkItem[] = NAV_LINKS.flatMap((l) =>
-  'items' in l ? l.items.filter((i) => !i.comingSoon).map(({ label, href }) => ({ label, href })) : [],
-);
+export const SUMMARIZE_WITH_AI = {
+  label: 'Summarize what Fluxberry does with AI:',
+  prompt:
+    "I'm a founder or hiring manager building my team. I want to understand how Fluxberry, the AI native hiring platform, helps me post jobs, screen and rank applicants with AI, source candidates with TalentGPT, and run my whole hiring pipeline in one place. Summarize the highlights from Fluxberry's website: https://fluxberry.in/",
+  assistants: [
+    { name: 'ChatGPT', url: 'https://chatgpt.com/?hints=search&q=' },
+    { name: 'Claude', url: 'https://claude.ai/new?q=' },
+    { name: 'Perplexity', url: 'https://www.perplexity.ai/search?q=' },
+    { name: 'Gemini', url: 'https://www.google.com/search?udm=50&q=' },
+  ],
+} as const;
+
+/** A footer link. `comingSoon` rows are shown locked, not linked, until their page launches. */
+export interface FooterItem extends NavLinkItem {
+  comingSoon?: boolean;
+}
+
+/**
+ * A Resources item from the nav, with its "Coming soon" flag. The footer reads
+ * these rather than repeating them, so dropping an item's flag when its page
+ * ships turns it into a link in the nav and the footer at once.
+ */
+function navResource(label: string): FooterItem {
+  const group = NAV_LINKS.find((l): l is NavGroup => 'items' in l && l.label === 'Resources');
+  const item = group?.items.find((i) => i.label === label);
+  if (!item) throw new Error(`No Resources nav item named "${label}"`);
+  return { label: item.label, href: item.href, comingSoon: item.comingSoon };
+}
 
 export const FOOTER = {
   tagline: 'The AI native hiring platform for founders & hiring managers.',
-  links: [
-    { label: 'Home', href: '/' },
-    { label: 'Product', href: '/#why-us' },
-    { label: 'Solutions', href: '/#features' },
-    { label: 'Pricing', href: '/#pricing' },
-    { label: 'FAQ', href: '/#faq' },
-    ...LIVE_RESOURCES,
-    { label: 'Log in', href: '/sign-in' },
-    { label: 'Get started', href: '/sign-up' },
-  ] satisfies NavLinkItem[],
-  legal: LEGAL_LINKS,
+  /** The link directory: four columns, only pages that exist (or are locked as coming soon). */
+  columns: [
+    {
+      title: 'Product',
+      // No product has its own page yet, so each points at the landing's Solutions section until one ships.
+      links: [
+        { label: 'Job Board', href: '/#features' },
+        { label: 'ATS (Applicant Tracking System)', href: '/#features' },
+        { label: 'Talent Sourcing (TalentGPT)', href: '/#features' },
+        { label: 'Analytics', href: '/#features' },
+        { label: 'Referrals', href: '/#features' },
+      ],
+    },
+    {
+      title: 'Resources',
+      links: [
+        navResource('Blog'),
+        { label: 'Pricing', href: '/#pricing' },
+        { label: 'FAQ', href: '/#faq' },
+        navResource('Knowledge Base'),
+        navResource('Comparisons'),
+        navResource('Integrations'),
+      ],
+    },
+    {
+      title: 'Company',
+      links: [
+        navResource('Careers'),
+        { label: 'Contact', href: `mailto:${CONTACT_EMAIL}` },
+        { label: 'Log in', href: '/sign-in' },
+        { label: 'Get started', href: '/sign-up' },
+      ],
+    },
+    { title: 'Legal', links: LEGAL_LINKS },
+  ] satisfies { title: string; links: FooterItem[] }[],
 };
