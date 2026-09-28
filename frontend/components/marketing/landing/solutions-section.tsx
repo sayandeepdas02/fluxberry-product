@@ -1,8 +1,8 @@
-import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { Reveal } from './motion';
 import { SectionHeader, TYPE } from './primitives';
 import { SOLUTIONS, type SolutionCard } from './content';
+import { SolutionVisual } from './solutions';
 
 /** Pairs the cards into bento rows (two per row). */
 function rows(cards: SolutionCard[]): SolutionCard[][] {
@@ -12,8 +12,9 @@ function rows(cards: SolutionCard[]): SolutionCard[][] {
 }
 
 /**
- * "Solutions" (Framer: Features) — a bento of six image cards. On desktop the
- * rows alternate narrow/wide (530 + 750 of a 1300px row); below 1200px they stack.
+ * "Solutions" (Framer: Features) — a bento of six cards, each with an animated
+ * mockup. On desktop the rows alternate narrow/wide (530 + 750 of a 1300px
+ * row); below 1200px they stack. Hovering a card lifts its mockup.
  */
 export function SolutionsSection() {
   return (
@@ -42,17 +43,11 @@ export function SolutionsSection() {
               {row.map((card) => (
                 <Reveal
                   key={card.title}
+                  whileHover="hover"
                   className="flex flex-col rounded-[15px] bg-white p-[15px] shadow-[2px_2px_10px_rgba(0,0,0,0.03)]"
                 >
-                  {/* The shots are painted on brand blue; matching it keeps the object-contain letterbox invisible. */}
                   <div className="relative h-[300px] overflow-hidden rounded-[7px] bg-[#2d81ff] tablet:h-[360px] desktop:h-[330px]">
-                    <Image
-                      src={card.image}
-                      alt=""
-                      fill
-                      sizes={card.wide ? '(min-width: 1200px) 720px, calc(100vw - 70px)' : '(min-width: 1200px) 500px, calc(100vw - 70px)'}
-                      className="object-contain"
-                    />
+                    <SolutionVisual kind={card.visual} />
                   </div>
                   <div className="mt-2.5 flex flex-col gap-[15px] px-[5px] py-2.5">
                     <h3 className={cn('text-black', TYPE.title)}>{card.title}</h3>
