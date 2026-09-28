@@ -51,10 +51,11 @@ const envSchema = z.object({
 
   MOCK_EXTERNAL_SERVICES: bool(false),
 
-  AI_PROVIDER: z.enum(['anthropic', 'openai', 'mock']).default('anthropic'),
+  AI_PROVIDER: z.enum(['anthropic', 'openai', 'openrouter', 'mock']).default('anthropic'),
   AI_API_KEY: z.string().optional().default(''),
+  /** Blank → provider default (Anthropic: claude-sonnet-5; OpenAI: gpt-4o-mini; OpenRouter: deepseek/deepseek-v4.1-flash). */
   AI_MODEL: z.string().optional().default(''),
-  /** Cheaper model for high-volume extraction (resume parse, screening, search-prompt parse). Blank → provider default (Anthropic: claude-haiku-4-5). */
+  /** Cheaper model for high-volume extraction (resume parse, screening, search-prompt parse). Blank → provider default (Anthropic: claude-haiku-4-5; OpenAI/OpenRouter: AI_MODEL). */
   AI_MODEL_FAST: z.string().optional().default(''),
 
   RESEND_API_KEY: z.string().optional().default(''),
