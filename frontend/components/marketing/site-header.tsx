@@ -57,7 +57,8 @@ function Chevron({ open }: { open: boolean }) {
 }
 
 /** Marks a nav item whose page isn't live yet; its row is plain text, not a link. */
-function ComingSoon({ className }: { className?: string }) {
+/** The locked "Coming soon" badge, shared by the nav and the footer (which shortens it to "Soon"). */
+export function ComingSoon({ className, label = 'Coming soon' }: { className?: string; label?: string }) {
   return (
     <span
       className={cn(
@@ -67,7 +68,7 @@ function ComingSoon({ className }: { className?: string }) {
       )}
     >
       <Lock aria-hidden className="size-2.5" strokeWidth={2.75} />
-      Coming soon
+      {label}
     </span>
   );
 }
