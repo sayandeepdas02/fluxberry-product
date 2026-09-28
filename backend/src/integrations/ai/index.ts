@@ -3,6 +3,7 @@ import { logger } from '../../utils/logger';
 import { MockAIProvider } from './mock';
 import { AnthropicProvider } from './anthropic';
 import { OpenAIProvider } from './openai';
+import { OpenRouterProvider } from './openrouter';
 import type { AIProvider } from './types';
 
 let instance: AIProvider | null = null;
@@ -16,6 +17,7 @@ function create(): AIProvider {
   }
   if (provider === 'anthropic') return new AnthropicProvider(apiKey, model || undefined, fastModel || undefined);
   if (provider === 'openai') return new OpenAIProvider(apiKey, model || undefined, fastModel || undefined);
+  if (provider === 'openrouter') return new OpenRouterProvider(apiKey, model || undefined, fastModel || undefined);
   return new MockAIProvider();
 }
 

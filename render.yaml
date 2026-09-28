@@ -40,14 +40,17 @@ envVarGroups:
       - key: EMAIL_FROM
         sync: false
       - key: AI_PROVIDER
-        value: anthropic
+        value: openrouter
+      # An OpenRouter key (sk-or-...).
       - key: AI_API_KEY
         sync: false
+      # Optional. Leave unset for deepseek/deepseek-v4.1-flash, or set any
+      # OpenRouter model slug.
       - key: AI_MODEL
         sync: false
       # Optional. Leave unset to use the provider's own fast default (Anthropic:
-      # claude-haiku-4-5; OpenAI: same as AI_MODEL). Only set it to a model id
-      # that matches AI_PROVIDER.
+      # claude-haiku-4-5; OpenAI/OpenRouter: same as AI_MODEL). Only set it to a
+      # model id that matches AI_PROVIDER.
       - key: AI_MODEL_FAST
         sync: false
       - key: SENTRY_DSN

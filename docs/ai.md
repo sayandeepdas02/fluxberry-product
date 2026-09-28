@@ -1,6 +1,6 @@
 # AI
 
-All AI goes through the `AIProvider` interface (`backend/src/integrations/ai`). Adapters: `AnthropicProvider`, `OpenAIProvider`, `MockAIProvider`. Selected by `AI_PROVIDER`; falls back to mock when no key is set (so the product runs and tests pass offline).
+All AI goes through the `AIProvider` interface (`backend/src/integrations/ai`). Adapters: `AnthropicProvider`, `OpenAIProvider`, `OpenRouterProvider` (default model `deepseek/deepseek-v4.1-flash`, reasoning off), `MockAIProvider`. Selected by `AI_PROVIDER`; falls back to mock when no key is set (so the product runs and tests pass offline).
 
 ## Capabilities
 
