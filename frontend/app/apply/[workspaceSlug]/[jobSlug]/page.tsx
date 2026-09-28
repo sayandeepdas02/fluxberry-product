@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   if (!data) return { title: 'Job not found' };
   const title = `${data.job.title} · ${data.job.workspace.name}`;
   const description = toPlainDescription(data.job.description);
-  return publicPageMetadata({ title, description, path: `/apply/${workspaceSlug}/${jobSlug}` });
+  return publicPageMetadata({ title, description, path: `/apply/${workspaceSlug}/${jobSlug}`, ownImage: true });
 }
 
 export default async function PublicJobPage({ params }: { params: Params }) {

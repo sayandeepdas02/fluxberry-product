@@ -1,19 +1,11 @@
-import { ImageResponse } from 'next/og';
-import { OGLayout, publicAssetDataUri } from '@/lib/og-image';
+import { OG_SIZE, OGLayout, ogImage } from '@/lib/og-image';
 
 export const runtime = 'nodejs';
-export const size = { width: 1200, height: 630 };
+export const size = OG_SIZE;
 export const contentType = 'image/png';
+export const alt = 'Fluxberry, the AI native hiring platform for founders and hiring managers';
 
-/** Default social share image — homepage and any page without its own opengraph-image. */
+/** Default social share image: the homepage and every page without its own opengraph-image. */
 export default function OpengraphImage() {
-  return new ImageResponse(
-    <OGLayout
-      bgSrc={publicAssetDataUri('og-background.png')}
-      logoSrc={publicAssetDataUri('logo-mark.png')}
-      headline="AI Native Hiring Platform"
-      subtitle="Hire smarter, faster — with AI at every step."
-    />,
-    { ...size },
-  );
+  return ogImage(<OGLayout headline="The AI Native Hiring Platform" subtitle="Built for founders & hiring managers." />);
 }

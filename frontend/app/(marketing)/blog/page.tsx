@@ -12,6 +12,7 @@ export const metadata: Metadata = publicPageMetadata({
   title: 'Blog',
   description,
   path: '/blog',
+  ownImage: true,
 });
 
 /**

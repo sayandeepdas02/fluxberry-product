@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const description = toPlainDescription(
     data.about.enabled && data.about.content ? data.about.content : `Open roles at ${data.company.name}`,
   );
-  return publicPageMetadata({ title, description, path: `/${careersSlug}/careers` });
+  return publicPageMetadata({ title, description, path: `/${careersSlug}/careers`, ownImage: true });
 }
 
 export default async function PublicCareersPage({ params, searchParams }: { params: Params; searchParams: SearchParams }) {
