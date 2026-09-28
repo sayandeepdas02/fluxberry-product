@@ -15,6 +15,9 @@ if (fs.existsSync(rootEnv)) {
   }
 }
 
+/** Files lib/og-image.tsx reads at runtime. */
+const OG_ASSETS = ['./assets/og-fonts/*.woff', './public/og/sky.jpg', './public/logo-mark.png'];
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -22,6 +25,14 @@ const nextConfig = {
   // workspace symlink to its real path (outside node_modules), which would otherwise
   // apply the React-Refresh loader and inject import.meta into a CJS module.
   eslint: { ignoreDuringBuilds: true },
+  // The share images rendered per request (careers pages, job apply pages) read their
+  // fonts and artwork from disk (lib/og-image.tsx). File tracing can't follow those
+  // computed paths, so without this they're missing from the serverless function and the
+  // image 500s. The static share images are rendered at build time and don't need it.
+  outputFileTracingIncludes: {
+    '/[careersSlug]/careers/opengraph-image': OG_ASSETS,
+    '/apply/[workspaceSlug]/[jobSlug]/opengraph-image': OG_ASSETS,
+  },
   // fluxberry.in (apex) is canonical — both hosts resolve at the DNS/CORS layer today,
   // which risks duplicate-content indexing. Redirect www to apex at the app level so it
   // works regardless of hosting provider.

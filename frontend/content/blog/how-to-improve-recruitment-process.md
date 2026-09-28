@@ -2,7 +2,7 @@
 title: 'How to improve your hiring process: speed and quality'
 description: 'Practical steps, templates, and tools to make your recruitment process faster without sacrificing candidate quality. A guide for founders and hiring managers.'
 date: '2026-09-29'
-author: 'The Fluxberry team'
+author: 'Sayandeep Das'
 category: 'Hiring Tips'
 featured: true
 ---
@@ -136,9 +136,9 @@ Review these monthly. A single month's data is noise; three months of trend is s
 
 ## Design a better hiring process with Fluxberry
 
-Fluxberry is built for the workflow described above. Every applicant gets scored on arrival, assessments auto-grade, interviews book themselves, and analytics show you where candidates drop out.
+Fluxberry is built for the workflow described above. Every applicant gets scored on arrival, interviews go straight onto your Google Calendar, offers go out from the same place, and analytics show you where candidates drop out.
 
-If your current process involves reading every application by hand and tracking candidates across tabs, [create a free workspace](/sign-up) and try it on your next role.
+If your current process involves reading every application by hand and tracking candidates across tabs, [set up Fluxberry](/sign-up) and try it on your next role.
 
 ## Frequently asked questions
 

@@ -1,18 +1,10 @@
-import { ImageResponse } from 'next/og';
-import { OGLayout, publicAssetDataUri } from '@/lib/og-image';
+import { OG_SIZE, OGLayout, ogImage } from '@/lib/og-image';
 
 export const runtime = 'nodejs';
-export const size = { width: 1200, height: 630 };
+export const size = OG_SIZE;
 export const contentType = 'image/png';
+export const alt = 'The Fluxberry blog: insights on hiring AI talent';
 
 export default function OpengraphImage() {
-  return new ImageResponse(
-    <OGLayout
-      bgSrc={publicAssetDataUri('og-background.png')}
-      logoSrc={publicAssetDataUri('logo-mark.png')}
-      headline="AI Native Hiring Platform"
-      subtitle="Insights on modern hiring and AI recruitment."
-    />,
-    { ...size },
-  );
+  return ogImage(<OGLayout headline="Insights on hiring AI Talent" subtitle="Case studies, discussions and notes from the Fluxberry blog." />);
 }

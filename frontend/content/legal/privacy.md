@@ -1,10 +1,10 @@
 ---
 title: Privacy Policy
-description: What personal data Fluxberry AI collects, why we use it, who we share it with, and the choices and rights you have.
+description: What personal data Fluxberry collects, why we use it, who we share it with, and the choices and rights you have.
 updated: '2026-09-28'
 ---
 
-This Privacy Policy explains how Fluxberry AI ("Fluxberry", "we", "us") handles personal data when you visit fluxberry.in, create an account, or apply for a job through a careers page or application form that runs on Fluxberry.
+This Privacy Policy explains how Fluxberry ("we", "us") handles personal data when you visit fluxberry.in, create an account, or apply for a job through a careers page or application form that runs on Fluxberry.
 
 If you have a question about this policy or want to exercise a right described below, email us at [sayandeep@fluxberry.in](mailto:sayandeep@fluxberry.in).
 

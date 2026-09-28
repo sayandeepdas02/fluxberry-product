@@ -2,7 +2,7 @@
 title: '12 top tools that integrate with SAP SuccessFactors'
 description: 'Already using SAP SuccessFactors? Here are the strongest sourcing, assessment, background check, and document tools that integrate with it.'
 date: '2026-09-27'
-author: 'The Fluxberry team'
+author: 'Sayandeep Das'
 category: 'Integrations'
 featured: false
 ---
@@ -23,18 +23,18 @@ A strong SuccessFactors integration should:
 
 ## Sourcing integrations
 
-### 1. Fluxberry AI
+### 1. Fluxberry
 
 Fluxberry is an AI-native hiring platform that scores every applicant against your role requirements the moment they apply. For SuccessFactors users, it fills the gap between "requisition approved" and "candidates in the pipeline" — the sourcing and screening work that SuccessFactors does not do natively.
 
-**How it connects:** Candidates screened and shortlisted in Fluxberry can be pushed to SuccessFactors requisitions via API. Scores and summaries travel with the candidate record.
+**How it connects:** There is no native SuccessFactors integration yet. Fluxberry runs its own pipeline and careers page, and sends a signed webhook when a candidate is shortlisted, changes stage or is hired. Route those events into SuccessFactors with an automation tool such as Zapier or Make, or a short script against the SuccessFactors API, and your shortlist reaches SuccessFactors without anyone rereading resumes.
 
 **Why it fits:**
 - AI scoring means no manual resume triage, even at enterprise volume
 - Custom pipeline stages let recruiters work in Fluxberry while SuccessFactors stays the system of record
-- Built-in assessments and careers page reduce tool sprawl
+- A built-in careers page and custom application forms reduce tool sprawl
 
-**Pricing:** Starts at $40/month. [Try Fluxberry free →](/sign-up)
+**Pricing:** Starts at {{price:pro:monthly}}/month. [Get started with Fluxberry →](/sign-up)
 
 ### 2. LinkedIn Recruiter
 
@@ -112,15 +112,15 @@ Adobe Sign (now Adobe Acrobat Sign) provides similar e-signature functionality w
 
 ## Add Fluxberry to your SAP SuccessFactors stack
 
-If your SuccessFactors recruiting pipeline starts with unscreened applications and ends with manual triage, Fluxberry fills the gap. Every applicant gets scored on arrival, assessments run automatically, and your shortlist is ready before a recruiter opens the queue.
+If your SuccessFactors recruiting pipeline starts with unscreened applications and ends with manual triage, Fluxberry fills the gap. Every applicant gets scored on arrival, and your shortlist is ready before a recruiter opens the queue.
 
-[Create a free workspace](/sign-up) and see what your pipeline looks like when screening is already done.
+[Get started with Fluxberry](/sign-up) and see what your pipeline looks like when screening is already done.
 
 ## Frequently asked questions
 
 ### Does SAP SuccessFactors have built-in sourcing?
 
-SuccessFactors Recruiting supports job posting distribution and internal job boards, but it does not include outbound sourcing, AI-powered candidate matching, or automated screening. These capabilities come from integrations with tools like Fluxberry, LinkedIn Recruiter, or Eightfold.
+SuccessFactors Recruiting supports job posting distribution and internal job boards, but it does not include outbound sourcing, AI-powered candidate matching, or automated screening. These capabilities come from separate tools such as Fluxberry, LinkedIn Recruiter, or Eightfold.
 
 ### How do SuccessFactors integrations handle data privacy?
 
@@ -128,4 +128,4 @@ SAP provides a data integration framework with role-based access, audit logging,
 
 ### Can I use Fluxberry without replacing SuccessFactors?
 
-Yes. Fluxberry works alongside SuccessFactors — it handles the sourcing, screening, and assessment work, then pushes qualified candidates into your SuccessFactors pipeline. SuccessFactors stays the system of record for requisitions, approvals, and hire records.
+Yes. Fluxberry works alongside SuccessFactors: it handles sourcing and screening, and its webhooks, for example when a candidate is shortlisted or hired, let your team pass qualified candidates on to SuccessFactors through your own integration or an automation tool. SuccessFactors stays the system of record for requisitions, approvals, and hire records.

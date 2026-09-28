@@ -5,12 +5,13 @@ import { publicPageMetadata } from '@/lib/seo';
 import { formatPostDate } from '@/lib/blog';
 import { Appear } from './landing/motion';
 import { GridBackdrop, Pill, TYPE } from './landing/primitives';
+import { BRAND } from './landing/content';
 import { articleInter } from './blog/article-font';
 import { Prose } from './blog/prose';
 
 export function legalMetadata(slug: LegalSlug): Metadata {
   const doc = getLegalDoc(slug);
-  return publicPageMetadata({ title: doc.title, description: doc.description, path: `/${slug}` });
+  return publicPageMetadata({ title: doc.title, description: doc.description, path: `/${slug}`, siteName: BRAND });
 }
 
 /** A legal document in the blog article's frame: grid-backdrop header, then the markdown body. */

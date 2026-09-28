@@ -2,7 +2,7 @@
 title: '10 useful tools that integrate with BambooHR'
 description: 'Already using BambooHR? Here are the strongest sourcing, assessment, background check, communication, and payroll tools that integrate with it.'
 date: '2026-09-18'
-author: 'The Fluxberry team'
+author: 'Sayandeep Das'
 category: 'Integrations'
 featured: false
 ---
@@ -24,18 +24,18 @@ Integrations solve these gaps without replacing BambooHR as the HR system of rec
 
 ## Sourcing integrations
 
-### 1. Fluxberry AI
+### 1. Fluxberry
 
 Fluxberry is an AI-native hiring platform that scores every applicant against your job requirements the moment they apply. For BambooHR users, it replaces the manual resume-reading step — you open a ranked shortlist with scores, summaries, and reasoning instead of an unfiltered pile.
 
-**How it connects:** Candidates screened in Fluxberry can be synced to BambooHR's applicant tracking. Scores and shortlist status travel with the candidate record so your BambooHR pipeline reflects Fluxberry's screening.
+**How it connects:** There is no native BambooHR integration yet. Fluxberry runs its own pipeline and careers page, and sends a signed webhook when a candidate is shortlisted, changes stage or is hired. Route those events into BambooHR with an automation tool such as Zapier or Make, or a short script against BambooHR's API, and your shortlist reaches BambooHR without anyone rereading resumes.
 
 **Why it fits BambooHR teams:**
 - Small teams using BambooHR typically lack a dedicated recruiter — Fluxberry's AI scoring saves the 4-6 hours per role spent on manual triage
-- Built-in careers page, assessments, and team scorecards reduce the number of additional tools needed
+- A built-in careers page, custom application forms, and shared notes for your team reduce the number of additional tools needed
 - Pipeline stages are customisable to mirror your BambooHR workflow
 
-**Pricing:** Starts at $40/month. [Try Fluxberry free →](/sign-up)
+**Pricing:** Starts at {{price:pro:monthly}}/month. [Get started with Fluxberry →](/sign-up)
 
 ### 2. Indeed
 
@@ -101,9 +101,9 @@ TriNet is a professional employer organisation (PEO) that bundles payroll, benef
 
 ## Add Fluxberry to your BambooHR stack
 
-BambooHR collects applications. Fluxberry tells you which ones are worth reading. Together, they give small teams a full hiring workflow — AI screening, assessments, pipeline management, and a clean handoff to BambooHR's HR module once the hire is made.
+BambooHR collects applications. Fluxberry tells you which ones are worth reading. Together, they give small teams a full hiring workflow: AI screening, pipeline management, and offers in Fluxberry, then BambooHR's HR module once the hire is made.
 
-[Create a free workspace](/sign-up) and try Fluxberry on your next open role.
+[Get started with Fluxberry](/sign-up) and try it on your next open role.
 
 ## Frequently asked questions
 
@@ -113,7 +113,7 @@ No. BambooHR's applicant tracking collects and organises applications, but it do
 
 ### Can I use Fluxberry as my main ATS instead of BambooHR's recruiting module?
 
-Yes. Many small teams use Fluxberry for the full hiring workflow — sourcing, screening, assessments, interviews — and sync hires to BambooHR for onboarding and HR management. You get a purpose-built ATS without leaving the BambooHR ecosystem for HR.
+Yes. Fluxberry covers the full hiring workflow: sourcing on the Max plan, AI screening, interviews on your Google Calendar, and offers. When someone is hired, its `candidate.hired` webhook can hand them to BambooHR for onboarding through an automation tool. You get a purpose-built ATS while BambooHR stays your HR system.
 
 ### How many integrations does BambooHR support?
 

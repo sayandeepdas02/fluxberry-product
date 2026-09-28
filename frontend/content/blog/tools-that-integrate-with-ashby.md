@@ -2,7 +2,7 @@
 title: '10 tools that integrate with Ashby to streamline hiring'
 description: "Ashby's API-first architecture supports deep integrations across sourcing, assessment, HRIS, and collaboration. Here are the strongest connections by category."
 date: '2026-09-15'
-author: 'The Fluxberry team'
+author: 'Sayandeep Das'
 category: 'Integrations'
 featured: false
 ---
@@ -23,19 +23,19 @@ Three areas where integrations add the most value:
 
 ## Sourcing integrations
 
-### 1. Fluxberry AI
+### 1. Fluxberry
 
 Fluxberry is an AI-native hiring platform that scores every applicant against your job requirements on arrival. For Ashby users, it adds AI-powered screening to the top of the funnel — the one capability Ashby's native feature set does not include.
 
-**How it connects:** Candidates screened and shortlisted in Fluxberry sync to Ashby with scores and AI summaries attached. Ashby takes over from pipeline management onward, while Fluxberry handles the screening that happens before.
+**How it connects:** There is no native Ashby integration yet. Fluxberry runs its own pipeline and careers page, and sends a signed webhook when a candidate is shortlisted, changes stage or is hired. Route those events into Ashby with an automation tool such as Zapier or Make, or a short script against Ashby's API, and your shortlist reaches Ashby without anyone rereading resumes. Ashby takes over from pipeline management onward, while Fluxberry handles the screening that happens before.
 
 **Why it fits Ashby teams:**
 - Ashby users tend to be opinionated about tooling — Fluxberry's focused, no-bloat approach matches that mindset
 - AI scoring eliminates manual resume triage without adding another enterprise platform
-- Built-in assessments mean one fewer integration to manage
-- Analytics layer complements Ashby's native reporting with screening-specific metrics
+- Custom application forms and a careers page are included, so there is one fewer tool to manage
+- Analytics on sources, funnel drop-off and time to hire complement Ashby's native reporting
 
-**Pricing:** Starts at $40/month. [Try Fluxberry free →](/sign-up)
+**Pricing:** Starts at {{price:pro:monthly}}/month. [Get started with Fluxberry →](/sign-up)
 
 ### 2. hireEZ
 
@@ -101,15 +101,15 @@ Zoom's Ashby integration generates unique meeting links for every scheduled inte
 
 ## Add Fluxberry to your Ashby stack
 
-Ashby gives you a modern ATS with strong analytics and structured workflows. Fluxberry gives you AI screening that scores every applicant before they enter that workflow. Together, they mean your Ashby pipeline starts with a ranked shortlist instead of an unfiltered applicant pool.
+Ashby gives you a modern ATS with strong analytics and structured workflows. Fluxberry gives you AI screening that scores every applicant before they enter that workflow. Together, you start from a ranked shortlist instead of an unfiltered applicant pool.
 
-[Create a free workspace](/sign-up) and connect it to Ashby.
+[Create your Fluxberry workspace](/sign-up) and run it alongside Ashby.
 
 ## Frequently asked questions
 
 ### Does Ashby have built-in AI screening?
 
-Ashby does not natively score or rank applicants with AI. Its built-in features focus on pipeline management, scheduling, scorecards, and analytics. AI-powered screening comes from integrations like Fluxberry that evaluate candidates upstream and push results into Ashby.
+Ashby does not natively score or rank applicants with AI. Its built-in features focus on pipeline management, scheduling, scorecards, and analytics. AI-powered screening comes from separate tools like Fluxberry that evaluate candidates before they reach Ashby.
 
 ### Is Ashby's integration ecosystem large enough?
 
@@ -117,4 +117,4 @@ Ashby has fewer integrations than Greenhouse or Lever, but the integrations it s
 
 ### Can I use Fluxberry instead of Ashby?
 
-Yes. Fluxberry is a standalone AI-native ATS with pipeline management, a careers page, team collaboration, assessments, and analytics. Teams that want AI screening built into the ATS rather than bolted on often use Fluxberry as their primary hiring tool. [Start free →](/sign-up)
+Yes. Fluxberry is a standalone AI-native ATS with pipeline management, a careers page, team collaboration, and analytics. If you want AI screening built into the ATS rather than bolted on, Fluxberry can be your primary hiring tool. [Get started →](/sign-up)

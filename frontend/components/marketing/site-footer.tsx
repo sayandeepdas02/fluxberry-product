@@ -4,7 +4,7 @@ import { ComingSoon, Logo } from './site-header';
 import { SummarizeWithAI } from './summarize-with-ai';
 import { Reveal } from './landing/motion';
 import { TYPE } from './landing/primitives';
-import { CONTACT_EMAIL, FOOTER, type FooterItem } from './landing/content';
+import { BRAND, CONTACT_EMAIL, FOOTER, type FooterItem } from './landing/content';
 import { publicConfig } from '@/lib/config';
 
 function FooterEntry({ item }: { item: FooterItem }) {
@@ -20,6 +20,13 @@ function FooterEntry({ item }: { item: FooterItem }) {
     'rounded-sm text-black outline-none hover:text-lp-blue-600 focus-visible:ring-2 focus-visible:ring-lp-blue-400',
     TYPE.pill,
   );
+  if (/^https?:\/\//.test(item.href)) {
+    return (
+      <a href={item.href} target="_blank" rel="noopener noreferrer" className={className}>
+        {item.label}
+      </a>
+    );
+  }
   return item.href.startsWith('mailto:') ? (
     <a href={item.href} className={className}>
       {item.label}
@@ -83,7 +90,7 @@ export function SiteFooter() {
               )}
             >
               <p>
-                © {new Date().getFullYear()} {publicConfig.appName}. All rights reserved.
+                © {new Date().getFullYear()} {BRAND}. All rights reserved.
               </p>
               <a
                 href={`mailto:${CONTACT_EMAIL}`}

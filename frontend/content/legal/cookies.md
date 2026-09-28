@@ -1,10 +1,10 @@
 ---
 title: Cookie Policy
-description: The cookies and similar technologies Fluxberry AI uses, what each one is for, and how to control them.
+description: The cookies and similar technologies Fluxberry uses, what each one is for, and how to control them.
 updated: '2026-09-28'
 ---
 
-This Cookie Policy explains how Fluxberry AI ("Fluxberry", "we", "us") uses cookies and similar technologies, such as browser local storage, on fluxberry.in. It should be read together with our [Privacy Policy](/privacy).
+This Cookie Policy explains how Fluxberry ("we", "us") uses cookies and similar technologies, such as browser local storage, on fluxberry.in. It should be read together with our [Privacy Policy](/privacy).
 
 ## What cookies are
 

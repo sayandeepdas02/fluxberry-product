@@ -1,10 +1,10 @@
 ---
 title: Refund Policy
-description: How cancellations, refunds and AI credits work for Fluxberry AI subscriptions and top-up packs.
+description: How cancellations, refunds and AI credits work for Fluxberry subscriptions and top-up packs.
 updated: '2026-09-28'
 ---
 
-This Refund Policy explains how cancellations and refunds work for purchases from Fluxberry AI ("Fluxberry", "we", "us"). It is part of our [Terms of Service](/terms).
+This Refund Policy explains how cancellations and refunds work for purchases from Fluxberry ("we", "us"). It is part of our [Terms of Service](/terms).
 
 Payments are processed by Dodo Payments, our merchant of record, so your receipt and any refund come from Dodo Payments.
 
