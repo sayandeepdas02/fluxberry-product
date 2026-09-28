@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { publicConfig } from './config';
 import { FOUNDER } from './founder';
 
 /**
@@ -49,14 +48,16 @@ export function publicPageMetadata({
   description,
   path,
   ownImage = false,
+  siteName,
 }: {
   title: string;
   description: string;
   path: string;
   ownImage?: boolean;
+  /** Marketing pages pass the brand: previews then carry it ("Blog · Fluxberry") and the X handle. */
+  siteName?: string;
 }): Metadata {
-  // Share previews carry the site name, as the tab title does ("Blog · Fluxberry").
-  const shareTitle = `${title} · ${publicConfig.appName}`;
+  const shareTitle = siteName ? `${title} · ${siteName}` : title;
   return {
     title,
     description,
@@ -66,11 +67,15 @@ export function publicPageMetadata({
       description,
       type: 'website',
       url: path,
-      siteName: publicConfig.appName,
-      locale: 'en_US',
+      ...(siteName ? { siteName, locale: 'en_US' } : {}),
       ...(ownImage ? {} : { images: [DEFAULT_SHARE_IMAGE] }),
     },
     // No images here: X inherits the page's final og:image, which may be its own file.
-    twitter: { card: 'summary_large_image', site: FOUNDER.xHandle, creator: FOUNDER.xHandle, title: shareTitle, description },
+    twitter: {
+      card: 'summary_large_image',
+      ...(siteName ? { site: FOUNDER.xHandle, creator: FOUNDER.xHandle } : {}),
+      title: shareTitle,
+      description,
+    },
   };
 }

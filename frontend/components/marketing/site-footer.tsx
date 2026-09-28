@@ -4,7 +4,7 @@ import { ComingSoon, Logo } from './site-header';
 import { SummarizeWithAI } from './summarize-with-ai';
 import { Reveal } from './landing/motion';
 import { TYPE } from './landing/primitives';
-import { CONTACT_EMAIL, FOOTER, type FooterItem } from './landing/content';
+import { BRAND, CONTACT_EMAIL, FOOTER, type FooterItem } from './landing/content';
 import { publicConfig } from '@/lib/config';
 
 function FooterEntry({ item }: { item: FooterItem }) {
@@ -90,7 +90,7 @@ export function SiteFooter() {
               )}
             >
               <p>
-                © {new Date().getFullYear()} {publicConfig.appName}. All rights reserved.
+                © {new Date().getFullYear()} {BRAND}. All rights reserved.
               </p>
               <a
                 href={`mailto:${CONTACT_EMAIL}`}

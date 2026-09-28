@@ -22,6 +22,12 @@ import {
  * true to the product. House style: no em dashes in user-facing copy.
  */
 
+/**
+ * The product's name on the marketing site. Marketing pages spell it out rather than
+ * reading publicConfig.appName, which stays as configured for the app and auth pages.
+ */
+export const BRAND = 'Fluxberry';
+
 export const HERO = {
   badge: 'Built for fast moving teams',
   title: 'The #1 AI Native Hiring Platform',

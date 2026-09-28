@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { getAllPosts, getCategories } from '@/lib/blog';
 import { publicPageMetadata } from '@/lib/seo';
+import { BRAND } from '@/components/marketing/landing/content';
 import { Appear } from '@/components/marketing/landing/motion';
 import { GridBackdrop, SectionHeader } from '@/components/marketing/landing/primitives';
 import { FeaturedPost } from '@/components/marketing/blog/featured-post';
@@ -13,6 +14,7 @@ export const metadata: Metadata = publicPageMetadata({
   description,
   path: '/blog',
   ownImage: true,
+  siteName: BRAND,
 });
 
 /**

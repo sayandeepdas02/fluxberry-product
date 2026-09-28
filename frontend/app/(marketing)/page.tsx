@@ -8,8 +8,9 @@ import { ProductSection } from '@/components/marketing/landing/product-section';
 import { SolutionsSection } from '@/components/marketing/landing/solutions-section';
 import { PricingSection } from '@/components/marketing/landing/pricing-section';
 import { FaqSection } from '@/components/marketing/landing/faq-section';
+import { BRAND } from '@/components/marketing/landing/content';
 
-const title = `${publicConfig.appName} - AI Native Hiring Platform`;
+const title = `${BRAND} - AI Native Hiring Platform`;
 const description =
   'Fluxberry scores every applicant against your job, runs your pipeline and careers page, and helps you source candidates. The AI native hiring platform for founders and hiring managers.';
 
@@ -17,14 +18,14 @@ export const metadata: Metadata = {
   title: { absolute: title },
   description,
   alternates: { canonical: '/' },
-  openGraph: { title, description, type: 'website', url: '/', siteName: publicConfig.appName, locale: 'en_US', images: [DEFAULT_SHARE_IMAGE] },
+  openGraph: { title, description, type: 'website', url: '/', siteName: BRAND, locale: 'en_US', images: [DEFAULT_SHARE_IMAGE] },
   twitter: { card: 'summary_large_image', site: FOUNDER.xHandle, creator: FOUNDER.xHandle, title, description },
 };
 
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'SoftwareApplication',
-  name: publicConfig.appName,
+  name: BRAND,
   applicationCategory: 'BusinessApplication',
   description: 'AI Native Hiring Platform. AI-native applicant tracking for founders and hiring managers.',
   // The plans' monthly prices, from lib/pricing, so search results can't show a stale price.

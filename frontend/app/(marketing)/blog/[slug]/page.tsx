@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { getAllPosts, getPost, formatPostDate } from '@/lib/blog';
 import { publicPageMetadata, toPlainDescription } from '@/lib/seo';
 import { publicConfig } from '@/lib/config';
+import { BRAND } from '@/components/marketing/landing/content';
 import { FOUNDER, FOUNDER_PERSON } from '@/lib/founder';
 import { Appear } from '@/components/marketing/landing/motion';
 import { GridBackdrop, Pill, TYPE } from '@/components/marketing/landing/primitives';
@@ -31,6 +32,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
       description: toPlainDescription(post.description),
       path: `/blog/${post.slug}`,
       ownImage: true,
+      siteName: BRAND,
     }),
     // The share image is this post's own opengraph-image (title, category, byline).
     openGraph: {
@@ -38,7 +40,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
       description: toPlainDescription(post.description),
       type: 'article',
       url: `/blog/${post.slug}`,
-      siteName: publicConfig.appName,
+      siteName: BRAND,
       locale: 'en_US',
       publishedTime: post.date,
       authors: [post.author],
@@ -68,7 +70,7 @@ export default async function BlogPostPage({ params }: Params) {
     author: post.author === FOUNDER.name ? FOUNDER_PERSON : { '@type': 'Person', name: post.author },
     publisher: {
       '@type': 'Organization',
-      name: publicConfig.appName,
+      name: BRAND,
       logo: { '@type': 'ImageObject', url: `${publicConfig.appUrl}/logo-mark.png` },
     },
     mainEntityOfPage: `${publicConfig.appUrl}/blog/${post.slug}`,

@@ -42,7 +42,7 @@ export function ogImage(element: ReactElement): ImageResponse {
 }
 
 /** The sky, the wash and the brand lockup; the content sits centred under the lockup. */
-function Frame({ children }: { children: ReactNode }) {
+function Frame({ wordmark = 'Fluxberry', children }: { wordmark?: string; children: ReactNode }) {
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex', position: 'relative', fontFamily: 'Manrope' }}>
       <img src={publicAssetDataUri('og/sky.jpg')} width={OG_SIZE.width} height={OG_SIZE.height} alt="" style={{ position: 'absolute', top: 0, left: 0 }} />
@@ -75,7 +75,7 @@ function Frame({ children }: { children: ReactNode }) {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
           <img src={publicAssetDataUri('logo-mark.png')} width={48} height={48} alt="" style={{ borderRadius: 12 }} />
-          <div style={{ display: 'flex', fontSize: 34, fontWeight: 700, letterSpacing: '-0.03em' }}>Fluxberry</div>
+          <div style={{ display: 'flex', fontSize: 34, fontWeight: 700, letterSpacing: '-0.03em' }}>{wordmark}</div>
         </div>
         {children}
       </div>
@@ -83,10 +83,13 @@ function Frame({ children }: { children: ReactNode }) {
   );
 }
 
-/** A page's share image: a headline and an optional line under it. */
-export function OGLayout({ headline, subtitle }: { headline: string; subtitle?: string }) {
+/**
+ * A page's share image: a headline and an optional line under it. `wordmark` is the
+ * name beside the F-mark: the brand by default; the app's pages pass their configured name.
+ */
+export function OGLayout({ headline, subtitle, wordmark }: { headline: string; subtitle?: string; wordmark?: string }) {
   return (
-    <Frame>
+    <Frame wordmark={wordmark}>
       <div
         style={{
           display: 'flex',
