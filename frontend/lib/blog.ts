@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import matter from 'gray-matter';
 import { slugifyHeading, type Heading, type Post, type PostMeta } from './blog-types';
+import { PLAN_PRICING } from './pricing';
 
 export type { Heading, Post, PostMeta } from './blog-types';
 export { slugifyHeading, formatPostDate } from './blog-types';
@@ -56,6 +57,17 @@ export function extractHeadings(markdown: string): Heading[] {
   return headings;
 }
 
+/**
+ * Posts quote prices as tokens, e.g. `{{price:pro:monthly}}` for "$39", filled in
+ * from lib/pricing at build time, so a price change can never leave a post quoting
+ * an old price. Write every price in a post this way.
+ */
+function fillPrices(markdown: string): string {
+  return markdown.replace(/\{\{price:(pro|max):(monthly|annual)\}\}/g, (_, plan: string, cycle: 'monthly' | 'annual') => {
+    return `$${PLAN_PRICING[plan.toUpperCase() as 'PRO' | 'MAX'][cycle]}`;
+  });
+}
+
 function readingTimeMinutes(markdown: string): number {
   const words = markdown.trim().split(/\s+/).length;
   return Math.max(1, Math.round(words / 220));
@@ -64,15 +76,16 @@ function readingTimeMinutes(markdown: string): number {
 function parse(slug: string, raw: string): Post {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const yaml = require('js-yaml');
-  const { data, content } = matter(raw, {
+  const { data, content: source } = matter(raw, {
     engines: { yaml: { parse: (s: string) => yaml.load(s) as Record<string, unknown> } },
   });
+  const content = fillPrices(source);
   return {
     slug,
     title: String(data.title ?? slug),
     description: String(data.description ?? ''),
     date: String(data.date ?? ''),
-    author: String(data.author ?? 'Fluxberry'),
+    author: String(data.author ?? 'Sayandeep Das'),
     category: String(data.category ?? 'Product'),
     featured: Boolean(data.featured),
     readingTime: readingTimeMinutes(content),

@@ -2,7 +2,7 @@
 title: 'The 9 best Metaview alternatives by tool type'
 description: 'Metaview handles interview notes, but most teams need more. Here are nine alternatives across sourcing, screening, interview intelligence, and ATS — organised by what they actually replace.'
 date: '2026-09-12'
-author: 'The Fluxberry team'
+author: 'Sayandeep Das'
 category: 'Hiring Tools'
 featured: false
 ---
@@ -25,7 +25,7 @@ Three patterns come up repeatedly:
 
 ### Sourcing and screening
 
-#### 1. Fluxberry AI
+#### 1. Fluxberry
 
 Fluxberry is an AI-native applicant tracking system that scores every application the moment it arrives. Instead of reading 200 resumes to find the eight worth a call, you open a ranked shortlist with scores, summaries, and the reasoning behind each.
 
@@ -33,14 +33,14 @@ Fluxberry is an AI-native applicant tracking system that scores every applicatio
 
 - AI scoring against your actual job requirements
 - Custom pipeline stages with drag-and-drop
-- Built-in assessments that auto-grade on submit
+- A summary, strengths, and concerns with every score
 - Careers page, analytics, and team collaboration included
 
-**Pricing:** Starts at $40/month. Free workspace available.
+**Pricing:** Pro starts at {{price:pro:monthly}}/month. Max, which adds talent sourcing and referrals, is {{price:max:monthly}}/month.
 
 **Best for:** Founders, hiring managers, and small teams who need the full pipeline — not just interview notes.
 
-[Try Fluxberry free →](/sign-up)
+[Get started with Fluxberry →](/sign-up)
 
 #### 2. BrightHire
 
@@ -108,7 +108,7 @@ Greenhouse supports structured hiring out of the box — interview kits, scoreca
 
 | Use case | Best alternative | Why |
 |---|---|---|
-| Screening and shortlisting | **Fluxberry AI** | Solves the upstream problem — scoring applicants before interviews happen |
+| Screening and shortlisting | **Fluxberry** | Solves the upstream problem — scoring applicants before interviews happen |
 | Interview recording and notes | **BrightHire** | Closest feature parity with better ATS integration |
 | General meeting transcription | **Fireflies.ai** | Works across all meetings, not just interviews |
 | Async first-round screening | **Hireflix** | Eliminates the live interview entirely for early stages |
@@ -127,7 +127,7 @@ Metaview integrates with most major ATS platforms including Greenhouse, Lever, a
 
 ### What is the best free Metaview alternative?
 
-Zoom AI Companion is free on paid Zoom plans and covers basic meeting summaries. For a free-tier screening and pipeline tool, [Fluxberry offers a free workspace](/sign-up) that includes AI scoring, pipeline management, and a careers page.
+Zoom AI Companion is free on paid Zoom plans and covers basic meeting summaries. Fluxberry is not free, but from {{price:pro:monthly}}/month [it covers](/sign-up) AI scoring, pipeline management, and a careers page in one tool.
 
 ### Do I need interview recording if I have AI screening?
 

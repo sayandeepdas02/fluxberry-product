@@ -1,10 +1,10 @@
 ---
 title: Terms of Service
-description: The terms that apply when you create a Fluxberry AI account or use Fluxberry to hire.
+description: The terms that apply when you create a Fluxberry account or use Fluxberry to hire.
 updated: '2026-09-28'
 ---
 
-These Terms of Service ("Terms") are an agreement between you and Fluxberry AI ("Fluxberry", "we", "us") and apply when you create an account on fluxberry.in or use Fluxberry. If you use Fluxberry for a company, you accept these Terms on its behalf and confirm that you are allowed to do so. In these Terms, "you" means you and that company.
+These Terms of Service ("Terms") are an agreement between you and Fluxberry ("we", "us") and apply when you create an account on fluxberry.in or use Fluxberry. If you use Fluxberry for a company, you accept these Terms on its behalf and confirm that you are allowed to do so. In these Terms, "you" means you and that company.
 
 If you do not agree to these Terms, do not use Fluxberry.
 

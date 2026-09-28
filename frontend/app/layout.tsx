@@ -5,17 +5,18 @@ import { GeistMono } from 'geist/font/mono';
 import './globals.css';
 import { Providers } from './providers';
 import { publicConfig } from '@/lib/config';
+import { FOUNDER, FOUNDER_PERSON } from '@/lib/founder';
 
 const description =
-  'Fluxberry AI is the AI-native hiring platform for small teams — screen, interview, and hire faster without the bloat of a legacy ATS.';
+  'Fluxberry is the AI native hiring platform for founders and hiring managers. Screen applicants with AI, run your pipeline and careers page, and hire faster without the bloat of a legacy ATS.';
 
 const organizationJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
   name: publicConfig.appName,
-  alternateName: 'Fluxberry',
   url: publicConfig.appUrl,
   logo: `${publicConfig.appUrl}/logo-mark.png`,
+  founder: FOUNDER_PERSON,
   description: 'AI Native Hiring Platform',
 };
 
@@ -37,6 +38,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
+    site: FOUNDER.xHandle,
+    creator: FOUNDER.xHandle,
     title: `${publicConfig.appName} - AI Native Hiring Platform`,
     description,
   },

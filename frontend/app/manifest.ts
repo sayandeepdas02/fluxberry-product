@@ -6,7 +6,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: publicConfig.appName,
     short_name: 'Fluxberry',
     description:
-      'Fluxberry AI is the AI-native hiring platform for small teams — screen, interview, and hire faster without the bloat of a legacy ATS.',
+      'Fluxberry is the AI native hiring platform for founders and hiring managers. Screen applicants with AI, run your pipeline and careers page, and hire faster without the bloat of a legacy ATS.',
     start_url: '/',
     display: 'standalone',
     background_color: '#ffffff',

@@ -203,7 +203,7 @@ export function EmbedJobBoard({ company, openings, appUrl, accentColor, intro, j
           rel="noreferrer"
           style={{ color: '#111827', fontWeight: 500, textDecoration: 'none' }}
         >
-          Fluxberry AI
+          Fluxberry
         </a>
       </div>
     </div>

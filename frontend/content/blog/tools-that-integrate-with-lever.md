@@ -2,7 +2,7 @@
 title: '9 Lever integrations across the hiring stack'
 description: 'Lever supports 300+ integrations across sourcing, scheduling, assessment, and analytics. Here are the strongest tools in each category.'
 date: '2026-09-24'
-author: 'The Fluxberry team'
+author: 'Sayandeep Das'
 category: 'Integrations'
 featured: false
 ---
@@ -25,18 +25,18 @@ The best Lever integrations reduce tab-switching without creating data silos. Le
 
 ### Sourcing and candidate discovery
 
-#### 1. Fluxberry AI
+#### 1. Fluxberry
 
 Fluxberry is an AI-native hiring platform that scores every applicant against your job requirements on arrival. For Lever users, it adds an AI screening layer upstream — candidates are scored, summarised, and ranked before they enter Lever's pipeline.
 
-**How it connects:** Shortlisted candidates from Fluxberry sync to Lever opportunities with scores and screening summaries attached. Lever stays the pipeline owner; Fluxberry handles the screening work.
+**How it connects:** There is no native Lever integration yet. Fluxberry runs its own pipeline and careers page, and sends a signed webhook when a candidate is shortlisted, changes stage or is hired. Route those events into Lever with an automation tool such as Zapier or Make, or a short script against Lever's API, and your shortlist reaches Lever without anyone rereading resumes. Lever stays the pipeline owner; Fluxberry handles the screening work.
 
 **Why it fits Lever teams:**
 - Lever's CRM strength is nurturing relationships, but it does not score or screen inbound applicants — Fluxberry fills that gap
-- Built-in assessments replace the need for a separate testing tool
+- Custom application questions and a careers page are included, so there is one fewer tool to run
 - Small teams using Lever get AI screening without enterprise pricing
 
-**Pricing:** Starts at $40/month. [Try Fluxberry free →](/sign-up)
+**Pricing:** Starts at {{price:pro:monthly}}/month. [Get started with Fluxberry →](/sign-up)
 
 #### 2. Gem
 
@@ -104,11 +104,11 @@ Three questions to guide your stack:
 
 3. **Does it overlap with something Lever already does?** Lever has native scheduling, email sequences, and basic reporting. Only add external tools when they are meaningfully better than the native feature.
 
-## Start with sourcing: connect Fluxberry
+## Start with sourcing: add Fluxberry
 
 Most Lever teams have good pipeline management and scheduling. The gap is at the top — too many applicants, not enough signal on who to talk to first. Fluxberry fills that gap with AI screening that scores every candidate before they enter your pipeline.
 
-[Create a free workspace](/sign-up) and connect it to Lever.
+[Create your Fluxberry workspace](/sign-up) and run it alongside Lever.
 
 ## Frequently asked questions
 
@@ -118,8 +118,8 @@ Lever's marketplace lists 300+ integrations across sourcing, assessment, schedul
 
 ### Can I use Fluxberry as my ATS and replace Lever?
 
-Yes. Fluxberry includes full pipeline management, a careers page, team collaboration, and analytics. Teams that find Lever's pricing too high for their size often switch to Fluxberry for the full workflow at a fraction of the cost.
+Yes. Fluxberry includes full pipeline management, a careers page, team collaboration, and analytics. If Lever's pricing is too high for your team's size, Fluxberry covers the full workflow from {{price:pro:monthly}}/month.
 
 ### What is the best free Lever integration?
 
-Zoom (for interview links), Google Sheets (for custom reporting), and Zapier's free tier (for basic automations) are all available at no additional cost. For AI-powered screening, [Fluxberry offers a free workspace](/sign-up) to get started.
+Zoom (for interview links), Google Sheets (for custom reporting), and Zapier's free tier (for basic automations) are all available at no additional cost. AI-powered screening is a paid add-on: [Fluxberry](/sign-up) starts at {{price:pro:monthly}}/month.

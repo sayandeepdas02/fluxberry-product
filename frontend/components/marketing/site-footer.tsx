@@ -20,6 +20,13 @@ function FooterEntry({ item }: { item: FooterItem }) {
     'rounded-sm text-black outline-none hover:text-lp-blue-600 focus-visible:ring-2 focus-visible:ring-lp-blue-400',
     TYPE.pill,
   );
+  if (/^https?:\/\//.test(item.href)) {
+    return (
+      <a href={item.href} target="_blank" rel="noopener noreferrer" className={className}>
+        {item.label}
+      </a>
+    );
+  }
   return item.href.startsWith('mailto:') ? (
     <a href={item.href} className={className}>
       {item.label}

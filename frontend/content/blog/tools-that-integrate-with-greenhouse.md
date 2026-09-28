@@ -2,7 +2,7 @@
 title: 'Top tools that integrate with Greenhouse to improve hiring workflows'
 description: 'Greenhouse supports 500+ integrations across sourcing, scheduling, assessment, background checks, and HRIS. Here are the strongest tools in each category.'
 date: '2026-09-21'
-author: 'The Fluxberry team'
+author: 'Sayandeep Das'
 category: 'Integrations'
 featured: false
 ---
@@ -23,18 +23,18 @@ Three characteristics of a strong Greenhouse integration:
 
 ## Sourcing integrations
 
-### 1. Fluxberry AI
+### 1. Fluxberry
 
 Fluxberry is an AI-native hiring platform that scores every applicant against your job requirements the moment they apply. For Greenhouse users, it adds an AI screening layer that Greenhouse does not provide natively — by the time a recruiter opens the pipeline, every candidate has a score, a summary, and the reasoning behind it.
 
-**How it connects:** Candidates screened in Fluxberry sync to Greenhouse as prospects or candidates, with scores and AI summaries attached to the profile. Stage changes in Greenhouse can trigger assessment workflows in Fluxberry.
+**How it connects:** There is no native Greenhouse integration yet. Fluxberry runs its own pipeline and careers page, and sends a signed webhook when a candidate is shortlisted, changes stage or is hired. Route those events into Greenhouse with an automation tool such as Zapier or Make, or a short script against Greenhouse's API, and your shortlist reaches Greenhouse without anyone rereading resumes.
 
 **Why it fits Greenhouse teams:**
 - Greenhouse excels at structured interviewing but does not screen inbound applicants — Fluxberry handles the upstream triage
-- Built-in assessments and auto-grading replace the need for a separate testing platform
+- Every score comes with a summary, strengths and concerns, so reviewers can see why a candidate ranked where they did
 - Analytics complement Greenhouse's reporting with channel attribution and drop-off analysis
 
-**Pricing:** Starts at $40/month. [Try Fluxberry free →](/sign-up)
+**Pricing:** Starts at {{price:pro:monthly}}/month. [Get started with Fluxberry →](/sign-up)
 
 ### 2. LinkedIn Recruiter System Connect
 
@@ -108,13 +108,13 @@ BambooHR's Greenhouse integration syncs new hires from Greenhouse into BambooHR'
 
 Greenhouse gives you structured hiring. Fluxberry gives you AI-powered screening so the candidates entering that structure are already the right ones. Together, they reduce time-to-shortlist from days to minutes — without changing how your team uses Greenhouse.
 
-[Create a free workspace](/sign-up) and connect it to your Greenhouse instance.
+[Create your Fluxberry workspace](/sign-up) and run it alongside your Greenhouse instance.
 
 ## Frequently asked questions
 
 ### Does Greenhouse have built-in AI screening?
 
-Greenhouse does not natively score or rank applicants with AI. Its strength is structured interviewing and pipeline management. AI screening comes from integrations — tools like Fluxberry that score candidates against role requirements and push ranked shortlists into Greenhouse.
+Greenhouse does not natively score or rank applicants with AI. Its strength is structured interviewing and pipeline management. AI screening comes from separate tools, like Fluxberry, that score candidates against role requirements before they reach Greenhouse.
 
 ### How do I choose between Greenhouse integrations in the same category?
 
@@ -122,4 +122,4 @@ Evaluate three things: integration depth (bidirectional vs. one-way), pricing at
 
 ### Can I use Fluxberry without Greenhouse?
 
-Yes. Fluxberry is a standalone AI-native ATS with its own pipeline, careers page, assessments, and analytics. Teams that find Greenhouse's pricing too high — or that do not need its enterprise features — often use Fluxberry as their primary hiring tool. [Start free →](/sign-up)
+Yes. Fluxberry is a standalone AI-native ATS with its own pipeline, careers page, and analytics. If Greenhouse's pricing is too high for your team, or you do not need its enterprise features, Fluxberry can be your primary hiring tool. [Get started →](/sign-up)

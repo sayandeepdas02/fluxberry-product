@@ -1,4 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
+import { FOUNDER } from '@/lib/founder';
 import {
   Blocks,
   BookOpen,
@@ -24,7 +25,7 @@ import {
 export const HERO = {
   badge: 'Built for fast moving teams',
   title: 'The #1 AI Native Hiring Platform',
-  lead: ['Fluxberry AI is an AI Native hiring tool that is fast, simple.', 'Built for founders & hiring managers.'],
+  lead: ['Fluxberry is an AI Native hiring tool that is fast, simple.', 'Built for founders & hiring managers.'],
   cta: { label: 'Get Started', href: '/sign-up' },
   /**
    * The product shot: the Fluxberry dashboard alone, edge to edge. The hero draws it live
@@ -295,6 +296,8 @@ export const FOOTER = {
       links: [
         navResource('Careers'),
         { label: 'Contact', href: `mailto:${CONTACT_EMAIL}` },
+        { label: 'LinkedIn', href: FOUNDER.linkedinUrl },
+        { label: 'X (Twitter)', href: FOUNDER.xUrl },
         { label: 'Log in', href: '/sign-in' },
         { label: 'Get started', href: '/sign-up' },
       ],

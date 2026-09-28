@@ -136,7 +136,7 @@ function HelpPopover() {
         <div>
           <p className="text-sm font-semibold text-foreground">We&apos;re here to help</p>
           <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-            We&apos;re a lean team building Fluxberry AI. For any questions or issues, reach out directly.
+            We&apos;re a lean team building Fluxberry. For any questions or issues, reach out directly.
           </p>
         </div>
         <div className="space-y-2">

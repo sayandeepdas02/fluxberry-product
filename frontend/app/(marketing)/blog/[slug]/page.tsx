@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { getAllPosts, getPost, formatPostDate } from '@/lib/blog';
 import { publicPageMetadata, toPlainDescription } from '@/lib/seo';
 import { publicConfig } from '@/lib/config';
+import { FOUNDER, FOUNDER_PERSON } from '@/lib/founder';
 import { Appear } from '@/components/marketing/landing/motion';
 import { GridBackdrop, Pill, TYPE } from '@/components/marketing/landing/primitives';
 import { articleInter } from '@/components/marketing/blog/article-font';
@@ -29,14 +30,26 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
       title: post.title,
       description: toPlainDescription(post.description),
       path: `/blog/${post.slug}`,
+      ownImage: true,
     }),
+    // The share image is this post's own opengraph-image (title, category, byline).
     openGraph: {
       title: post.title,
       description: toPlainDescription(post.description),
       type: 'article',
       url: `/blog/${post.slug}`,
+      siteName: publicConfig.appName,
+      locale: 'en_US',
       publishedTime: post.date,
       authors: [post.author],
+      section: post.category,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      site: FOUNDER.xHandle,
+      creator: FOUNDER.xHandle,
+      title: post.title,
+      description: toPlainDescription(post.description),
     },
   };
 }
@@ -52,8 +65,12 @@ export default async function BlogPostPage({ params }: Params) {
     headline: post.title,
     description: toPlainDescription(post.description),
     datePublished: post.date,
-    author: { '@type': 'Organization', name: post.author },
-    publisher: { '@type': 'Organization', name: publicConfig.appName },
+    author: post.author === FOUNDER.name ? FOUNDER_PERSON : { '@type': 'Person', name: post.author },
+    publisher: {
+      '@type': 'Organization',
+      name: publicConfig.appName,
+      logo: { '@type': 'ImageObject', url: `${publicConfig.appUrl}/logo-mark.png` },
+    },
     mainEntityOfPage: `${publicConfig.appUrl}/blog/${post.slug}`,
   };
 
@@ -84,7 +101,18 @@ export default async function BlogPostPage({ params }: Params) {
             <h1 className={cn('mt-2.5 text-balance text-black', TYPE.h2)}>{post.title}</h1>
             <p className={cn('mt-5 max-w-[620px] text-balance text-lp-gray-700', TYPE.body)}>{post.description}</p>
             <p className="mt-6 flex flex-wrap items-center justify-center gap-x-2 font-inter text-[14px] leading-5 text-lp-gray-500">
-              <span className="text-black">{post.author}</span>
+              {post.author === FOUNDER.name ? (
+                <a
+                  href={FOUNDER.linkedinUrl}
+                  target="_blank"
+                  rel="author noopener noreferrer"
+                  className="rounded-sm text-black outline-none hover:text-lp-blue-500 focus-visible:ring-2 focus-visible:ring-lp-blue-400"
+                >
+                  {post.author}
+                </a>
+              ) : (
+                <span className="text-black">{post.author}</span>
+              )}
               <span aria-hidden>·</span>
               <time dateTime={post.date}>{formatPostDate(post.date)}</time>
               <span aria-hidden>·</span>
