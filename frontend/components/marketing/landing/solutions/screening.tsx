@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { EASE_OUT, GLIDE, LEAD, POP, Stage, Surface, enter, useAfter, usePhases, useVisual, type VisualState } from './stage';
+import { EASE_OUT, GLIDE, LEAD, POP, Stage, Surface, enter, useAfter, usePhases, useVisual, type VisualState } from '../stage';
 
 /*
  * "AI Screening": a three-step workflow that runs on a loop. Each step lights

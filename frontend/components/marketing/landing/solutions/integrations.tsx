@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { motion, useAnimationFrame, useMotionValue, useSpring, wrap, type MotionValue } from 'motion/react';
-import { LEAD, POP, Stage, enter, useVisual, type VisualState } from './stage';
+import { LEAD, POP, Stage, enter, useVisual, type VisualState } from '../stage';
 
 /*
  * "Works With Your Tools": two rows of logo tiles drifting in opposite

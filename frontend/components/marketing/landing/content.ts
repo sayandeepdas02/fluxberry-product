@@ -26,7 +26,10 @@ export const HERO = {
   title: 'The #1 AI Native Hiring Platform',
   lead: ['Fluxberry AI is an AI Native hiring tool that is fast, simple.', 'Built for founders & hiring managers.'],
   cta: { label: 'Get Started', href: '/sign-up' },
-  /** The product shot: the Fluxberry dashboard alone, edge to edge. */
+  /**
+   * The product shot: the Fluxberry dashboard alone, edge to edge. The hero draws it live
+   * (HeroDashboard, on this image's pixel grid); the sign-in and sign-up pages show the image.
+   */
   image: {
     src: '/landing/dashboard.jpg',
     alt: 'Fluxberry dashboard with open jobs, the hiring pipeline, top candidates and the interview schedule',

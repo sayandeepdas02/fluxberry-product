@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { EASE_OUT, LEAD, POP, Stage, Surface, enter, useVisual } from './stage';
+import { EASE_OUT, LEAD, POP, Stage, Surface, enter, useVisual } from '../stage';
 
 /*
  * "Secure by Default": protections verify one by one ("Checking" → "Enabled"),

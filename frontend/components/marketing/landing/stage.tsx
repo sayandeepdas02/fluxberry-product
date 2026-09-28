@@ -15,13 +15,14 @@ import {
 import { cn } from '@/lib/utils';
 
 /*
- * Shared pieces for the Solutions card visuals: live rebuilds of the mockups
- * that used to be flat screenshots, animated with Motion.
+ * Shared pieces for the landing page's animated mockups (the hero dashboard
+ * and the Solutions card visuals): live rebuilds of what used to be flat
+ * screenshots, animated with Motion.
  *
  * Each visual is drawn on a fixed design canvas, the screenshot's own pixel
- * grid (866×660 or 1254×660), and scaled to fit its frame the way
- * `object-contain` fitted the images. So every coordinate in the visuals is a
- * screenshot pixel, and the mockups keep their proportions at every width.
+ * grid (e.g. 866×660, or 1960×1208 for the hero), and scaled to fit its frame
+ * the way `object-contain` fitted the images. So every coordinate in a visual
+ * is a screenshot pixel, and the mockups keep their proportions at every width.
  */
 
 /** Fast out, long soft landing: for things that draw or settle. */
@@ -44,12 +45,19 @@ export interface VisualState {
   reduced: boolean;
 }
 
-/** Scroll, visibility and motion-preference state for one visual. Attach `ref` via <Stage>. */
-export function useVisual(): VisualState {
+/**
+ * Scroll, visibility and motion-preference state for one visual. Attach `ref` via <Stage>.
+ * By default the entrance waits until the visual is half in view (the same trigger as the
+ * Solutions cards' Reveal); `onMount` starts it as soon as the page is interactive, for
+ * content that's already on screen when the page loads.
+ */
+export function useVisual({ onMount = false }: { onMount?: boolean } = {}): VisualState {
   const ref = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion() ?? false;
-  // Same trigger as the card's Reveal (half in view), so the two stay in step.
-  const entered = useInView(ref, { once: true, amount: 0.5 });
+  const inView = useInView(ref, { once: true, amount: 0.5 });
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const entered = onMount ? mounted : inView;
   const onScreen = useInView(ref, { amount: 0.15 });
   const pageVisible = usePageInView();
   return { ref, reduced, started: entered || reduced, looping: entered && onScreen && pageVisible && !reduced };

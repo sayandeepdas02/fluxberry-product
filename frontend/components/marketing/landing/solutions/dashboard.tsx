@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useState } from 'react';
 import { animate, motion, transform, useMotionValue, useSpring, useTransform } from 'motion/react';
-import { CountUp, EASE_IN_OUT, EASE_OUT, LEAD, POP, Stage, Surface, enter, useVisual } from './stage';
+import { CountUp, EASE_IN_OUT, EASE_OUT, LEAD, POP, Stage, Surface, enter, useVisual } from '../stage';
 
 /*
  * "Hiring Dashboard": an overview line chart. Coordinates inside the card are
