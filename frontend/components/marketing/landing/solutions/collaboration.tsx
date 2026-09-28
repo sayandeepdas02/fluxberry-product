@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'motion/react';
-import { EASE_OUT, GLIDE, LEAD, POP, Stage, Surface, enter, useAfter, usePhases, useVisual } from './stage';
+import { EASE_OUT, GLIDE, LEAD, POP, Stage, Surface, enter, useAfter, usePhases, useVisual } from '../stage';
 
 /*
  * "Team Collaboration": shared project notes. Collaborators take turns editing

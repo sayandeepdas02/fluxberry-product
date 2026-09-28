@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { Appear } from './motion';
+import { HeroDashboard } from './hero-dashboard';
 import { GradientButton, Pill, TYPE } from './primitives';
 import { HERO } from './content';
 
@@ -91,15 +92,15 @@ export function Hero() {
             )}
             style={{ marginBottom: SHOT_CUT }}
           >
-            <Image
-              src={HERO.image.src}
-              alt={HERO.image.alt}
-              width={HERO.image.width}
-              height={HERO.image.height}
-              priority
-              sizes="(min-width: 1300px) 1140px, (min-width: 1200px) calc(100vw - 160px), (min-width: 810px) calc(100vw - 116px), calc(100vw - 52px)"
-              className="h-auto w-full rounded-[10px] shadow-[0_0_0_1px_rgba(3,37,99,0.06),0_8px_24px_-10px_rgba(3,37,99,0.3)] tablet:rounded-[12px] desktop:rounded-[14px]"
-            />
+            {/* The dashboard, live: drawn on the mockup's pixel grid at the mockup's proportions. */}
+            <div
+              role="img"
+              aria-label={HERO.image.alt}
+              className="relative w-full overflow-hidden rounded-[10px] bg-[#fcfcfd] shadow-[0_0_0_1px_rgba(3,37,99,0.06),0_8px_24px_-10px_rgba(3,37,99,0.3)] tablet:rounded-[12px] desktop:rounded-[14px]"
+              style={{ aspectRatio: `${HERO.image.width} / ${HERO.image.height}` }}
+            >
+              <HeroDashboard />
+            </div>
           </Appear>
         </div>
       </div>

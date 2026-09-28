@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { animate, motion, useMotionValue, useTransform } from 'motion/react';
-import { CountUp, EASE_OUT, GLIDE, LEAD, POP, Stage, Surface, enter, useAfter, useVisual } from './stage';
+import { CountUp, EASE_OUT, GLIDE, LEAD, POP, Stage, Surface, enter, useAfter, useVisual } from '../stage';
 
 /*
  * "Hiring Analytics": sessions per hour over a day. The bars grow in as a
