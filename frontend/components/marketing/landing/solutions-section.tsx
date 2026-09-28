@@ -44,7 +44,8 @@ export function SolutionsSection() {
                   key={card.title}
                   className="flex flex-col rounded-[15px] bg-white p-[15px] shadow-[2px_2px_10px_rgba(0,0,0,0.03)]"
                 >
-                  <div className="relative h-[300px] overflow-hidden rounded-[7px] bg-lp-gray-50 tablet:h-[360px] desktop:h-[330px]">
+                  {/* The shots are painted on brand blue; matching it keeps the object-contain letterbox invisible. */}
+                  <div className="relative h-[300px] overflow-hidden rounded-[7px] bg-[#2d81ff] tablet:h-[360px] desktop:h-[330px]">
                     <Image
                       src={card.image}
                       alt=""
