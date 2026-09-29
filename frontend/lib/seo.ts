@@ -29,10 +29,10 @@ export function toPlainDescription(markdown: string, maxLength = 160): string {
  * fetch the new one instead of their cached copy.
  */
 export const DEFAULT_SHARE_IMAGE = {
-  url: '/opengraph-image?v=2',
+  url: '/opengraph-image?v=3',
   width: 1200,
   height: 630,
-  alt: 'Fluxberry, the AI native hiring platform for founders and hiring managers',
+  alt: 'Fluxberry, the AI native hiring platform: its hiring dashboard on the landing page sky',
 };
 
 /** Every auth, dashboard, and token-gated route spreads this into its metadata export. */
