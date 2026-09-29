@@ -113,7 +113,9 @@ function check(slug) {
   // Images.
   for (const [, alt, src] of body.matchAll(/!\[([^\]]*)\]\(([^)\s]+)[^)]*\)/g)) {
     if (!alt.trim()) errors.push(`image ${src} has no alt text`);
-    else if (alt.length > 125) warnings.push(`image ${src}: alt text is ${alt.length} chars (aim ≤ 125)`);
+    else if (alt.replace(/\{\{price:[a-z:]+\}\}/g, '$00').length > 125) {
+      warnings.push(`image ${src}: alt text is over 125 chars`);
+    }
     if (src.startsWith('/')) {
       if (!fs.existsSync(path.join(PUBLIC_DIR, src.split(/[?#]/)[0]))) errors.push(`image ${src} is not in public/`);
       if (!src.startsWith(`/blog/${slug}/`)) warnings.push(`image ${src} should live in public/blog/${slug}/`);
@@ -135,13 +137,15 @@ function check(slug) {
     if (!opening.includes(primary)) warnings.push(`primary keyword "${primary}" is not in the first 120 words`);
     if (!h2s.some((h) => h.toLowerCase().includes(primary))) warnings.push(`primary keyword "${primary}" is in no H2`);
   }
+  // Price and "free" checks only fire on lines about Fluxberry: other vendors' prices and free plans are facts.
   lines.forEach((line, index) => {
+    if (!/Fluxberry|\b(Pro|Max) (plan|is|costs|starts)\b/.test(line)) return;
     for (const price of planPrices) {
       if (new RegExp(`\\$${price}\\b`).test(line)) {
         warnings.push(`line ${index + 1 + offset}: "$${price}" looks like a Fluxberry price; write it as a {{price:…}} token`);
       }
     }
-    if (/\bfree\b/i.test(line)) warnings.push(`line ${index + 1 + offset}: says "free"; Fluxberry has no free plan, check the context`);
+    if (/\bfree\b/i.test(line)) warnings.push(`line ${index + 1 + offset}: says "free" next to Fluxberry, which has no free plan; check the context`);
   });
 
   return { errors, warnings };

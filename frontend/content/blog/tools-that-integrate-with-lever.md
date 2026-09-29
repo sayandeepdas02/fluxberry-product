@@ -2,7 +2,7 @@
 title: '9 Lever integrations across the hiring stack'
 description: 'Lever supports 300+ integrations across sourcing, scheduling, assessment, and analytics. Here are the strongest tools in each category.'
 date: '2026-09-24'
-updated: '2026-09-29'
+updated: '2026-09-30'
 author: 'Sayandeep Das'
 category: 'Integrations'
 featured: false
@@ -30,7 +30,7 @@ This guide covers nine Lever integrations across five categories, chosen for the
 | Fluxberry | Sourcing and AI screening | Scoring applicants on your own careers page before Lever |
 | Gem | Sourcing | High-volume outbound sourcing on LinkedIn |
 | Sense | Outreach and engagement | Automated candidate nurturing at scale |
-| Prelude (now Calendly for Recruiting) | Scheduling | Multi-round and panel interviews |
+| GoodTime | Scheduling | Multi-round and panel interviews |
 | Zoom | Interviews | Video interview links and recordings |
 | TestGorilla | Assessment | Skills tests for non-traditional candidates |
 | CoderPad | Assessment | Live coding interviews |
@@ -78,9 +78,9 @@ Sense provides candidate engagement automation — drip sequences, event invitat
 
 ## Scheduling and interviews
 
-### 4. Prelude (now Calendly for Recruiting)
+### 4. GoodTime
 
-Prelude automates complex interview scheduling — panel interviews, multi-day onsites, interviewer load balancing. Its Lever integration reads availability from Lever and creates events automatically, eliminating the back-and-forth that adds days to every hiring process.
+[GoodTime](https://goodtime.io/) automates complex interview scheduling — panel interviews, multi-day onsites, interviewer load balancing and automatic replacement when an interviewer drops out. It syncs both ways with Lever, so interview plans come from Lever and booked slots go back to the candidate record. It is priced on the number of candidates a year rather than per user. If you are looking for Prelude, Calendly [acquired it in 2022](https://calendly.com/newsroom/press-release/calendly-acquires-prelude).
 
 **Best for:** Teams with multi-round interview processes and panel interviews where scheduling coordination is a bottleneck.
 
@@ -142,7 +142,7 @@ Lever's [marketplace](https://marketplace.lever.co/) lists 300+ integrations acr
 
 ### Can I use Fluxberry as my ATS and replace Lever?
 
-Yes. Fluxberry includes full pipeline management, a careers page, team collaboration, and analytics. If Lever's pricing is too high for your team's size, Fluxberry covers the full workflow from {{price:pro:monthly}}/month.
+Yes. Fluxberry includes full pipeline management, a careers page, team collaboration, and analytics. If Lever's pricing is too high for your team's size, Fluxberry covers the full workflow from {{price:pro:monthly}}/month. For more options, see the [best applicant tracking systems for small businesses](/blog/best-applicant-tracking-systems).
 
 ### What is the best free Lever integration?
 

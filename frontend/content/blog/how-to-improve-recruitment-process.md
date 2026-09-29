@@ -124,7 +124,7 @@ The right tool saves hours. The wrong tool adds complexity without reducing work
 - **Application screening.** AI scoring turns a six-hour reading session into a ten-minute review of a ranked shortlist. [Fluxberry does this automatically](/sign-up) for every applicant.
 - **Scheduling.** Calendar links eliminate the three-email scheduling dance. Calendly, Cal.com, or your ATS's native scheduling all work.
 - **Assessments.** Auto-graded skills tests give you signal before the interview, not after.
-- **Pipeline management.** A shared view of where every candidate stands, with history. This is table stakes — if you are tracking candidates in a spreadsheet, move to a proper ATS. If you already have one, the right integrations fill its gaps: see our guides for [Greenhouse](/blog/tools-that-integrate-with-greenhouse), [Lever](/blog/tools-that-integrate-with-lever) and [BambooHR](/blog/tools-that-integrate-with-bamboohr).
+- **Pipeline management.** A shared view of where every candidate stands, with history. This is table stakes — if you are tracking candidates in a spreadsheet, [move to a proper ATS](/blog/best-applicant-tracking-systems). If you already have one, the right integrations fill its gaps: see our guides for [Greenhouse](/blog/tools-that-integrate-with-greenhouse), [Lever](/blog/tools-that-integrate-with-lever) and [BambooHR](/blog/tools-that-integrate-with-bamboohr).
 
 **Where tools do not help:**
 

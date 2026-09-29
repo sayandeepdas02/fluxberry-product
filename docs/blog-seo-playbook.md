@@ -110,5 +110,6 @@ The existing seven posts use this template.
 ## Refreshing
 
 - **Re-check prices, counts and capability claims every quarter**, and whenever a vendor ships something big. Bump `updated` only for substantive changes: Google compares the date with what changed.
+- **Regenerate charts with prices baked in** (`ats-monthly-cost-comparison.webp`, from `frontend/scripts/blog-images/chart.py`) whenever a price changes, including Fluxberry's.
 - **Keep the slug and H1 stable.** Change `metaTitle` for the new year.
 - **After a refresh, confirm the Vercel production deployment finished**, then request reindexing of the URL in Search Console.
