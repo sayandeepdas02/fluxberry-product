@@ -1,5 +1,7 @@
 # Blog content plan: the next four posts
 
+**Status (2026-09-30):** all four are written and dated 17, 20, 26 and 28 September 2026. Images are in `frontend/public/blog/<slug>/`; their sources are in `frontend/scripts/blog-images/`.
+
 These are planned 2026-09-29 from a teardown of the pages that rank for the terms we want: SAP, Zapier, greytHR, Metaview, Lever (Ashby and Greenhouse alternatives), People Managing People (PMP; Greenhouse competitors and recruiting software) and SelectSoftware Reviews (SSR). Every post follows [`blog-seo-playbook.md`](blog-seo-playbook.md) and must pass `npm run blog:check`.
 
 Search volumes weren't measured, because no keyword tool was available. The keyword choices follow what the ranking pages target. Confirm them in Google Keyword Planner or Ahrefs, and in Search Console once the posts are live.
@@ -28,7 +30,7 @@ Search volumes weren't measured, because no keyword tool was available. The keyw
 
 Say these, because they're true (see `docs/ai.md` and `lib/pricing.ts`):
 - **AI screening you can read.** Every applicant gets a 0–10 score built from fixed weights (skills 35%, experience 20%, relevance 20%, location 10%, compensation 10%, education 5%), with a written summary, strengths and concerns. Ashby's AI marks criteria met or not met and deliberately doesn't rank applicants. Greenhouse's and Lever's rank, but their weights aren't public in this form.
-- **Flat price, unlimited team members.** Pro $39/month and Max $59/month (September 2026; `lib/pricing.ts` is the source, and posts write them as `{{price:…}}` tokens), against per-seat or headcount-tier pricing: Ashby from $400/month for up to 100 employees, Workable from $299/month, Greenhouse quote-only (checked September 2026).
+- **Flat price, unlimited team members.** Pro $39/month and Max $59/month (September 2026; `lib/pricing.ts` is the source, and posts write them as `{{price:…}}` tokens), against per-seat or headcount-tier pricing: Ashby's Foundations plan from $300/month (1–10 employees) to $900/month (76–100), Workable from $299/month, Greenhouse quote-only (checked September 2026).
 - **One tool for small teams:** ATS, careers page, analytics and Google Calendar interviews. Max adds sourcing and referrals.
 
 Say these as well, because the credibility depends on it:
@@ -79,7 +81,7 @@ After these, next in line:
 - **Category:** Hiring Tools.
 
 **Angle.** Ashby is excellent for analytics-led, scaling tech teams; say so first. The alternatives are for three kinds of team:
-- teams for whom a $400/month floor (under 100 employees, per its pricing page) is a lot
+- teams for whom $300–$900 a month (its Foundations plan, priced by headcount up to 100 employees) is a lot
 - teams that don't need its analytics depth
 - teams that want AI that ranks applicants rather than marking criteria met or not met
 

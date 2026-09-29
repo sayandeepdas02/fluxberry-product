@@ -32,7 +32,7 @@ Three patterns come up repeatedly:
 
 2. **Per-seat pricing adds up.** Metaview prices its paid plans per user. Its AI sourcing plans, for example, start at $100 per user per month on its [pricing page](https://www.metaview.ai/pricing) (as of September 2026). A small team hiring for a few roles a year pays for seats it rarely uses.
 
-3. **They only need one piece of it.** If the real gap is interview documentation, a dedicated interview intelligence tool, or the AI already in your video platform, may cover it for less.
+3. **They only need one piece of it.** If the real gap is interview documentation, a dedicated interview intelligence tool, or the AI already in your video platform, may cover it for less. Our map of [recruiting software by type](/blog/recruiting-software) shows where each kind of tool fits.
 
 ## The 9 best Metaview alternatives at a glance
 

@@ -10,6 +10,10 @@ import { EventStreamScene } from './event-stream';
 import { StackScene } from './stack';
 import { SystemOfRecordScene } from './system-of-record';
 import { FallbackScene } from './fallback';
+import { SwitchScene, type SwitchPick } from './switch';
+import { ShortlistScene } from './shortlist';
+import { StackTypesScene } from './stack-types';
+import { ChartNoAxesColumn, ClipboardList, HeartHandshake, Megaphone, Sparkles } from 'lucide-react';
 
 /**
  * Which part of the painting a cover shows: `x`/`y` are the object-position
@@ -32,6 +36,20 @@ export interface CoverSpec {
   sky: Sky;
   Scene: (props: { v: VisualState }) => ReactNode;
 }
+
+/** The shortlists on the two "alternatives" covers, with each pick's "best for" tag from the article. */
+const ASHBY_PICKS: readonly SwitchPick[] = [
+  { name: 'Fluxberry', tag: 'Flat price', hue: 'blue', icon: Sparkles },
+  { name: 'Greenhouse', tag: 'Structured hiring', hue: 'violet', icon: ClipboardList },
+  { name: 'Lever', tag: 'ATS plus CRM', hue: 'teal', icon: HeartHandshake },
+  { name: 'Workable', tag: 'Job-board reach', hue: 'orange', icon: Megaphone },
+];
+const GREENHOUSE_PICKS: readonly SwitchPick[] = [
+  { name: 'Fluxberry', tag: 'AI scoring', hue: 'blue', icon: Sparkles },
+  { name: 'Ashby', tag: 'Analytics-led', hue: 'violet', icon: ChartNoAxesColumn },
+  { name: 'Lever', tag: 'ATS plus CRM', hue: 'teal', icon: HeartHandshake },
+  { name: 'Workable', tag: 'Job-board reach', hue: 'orange', icon: Megaphone },
+];
 
 /** Covers by post slug. A post without one gets `fallbackCover`. */
 export const COVERS: Record<string, CoverSpec> = {
@@ -64,6 +82,26 @@ export const COVERS: Record<string, CoverSpec> = {
     lines: ['BambooHR,', 'fully stacked.'],
     sky: { x: 75, y: 0, zoom: 1.35, flip: true },
     Scene: StackScene,
+  },
+  'ashby-alternatives': {
+    lines: ['Life after', 'Ashby.'],
+    sky: { x: 10, y: 0, zoom: 1.5 },
+    Scene: ({ v }) => <SwitchScene v={v} from="Ashby" note="ATS · analytics-led" picks={ASHBY_PICKS} />,
+  },
+  'greenhouse-alternatives': {
+    lines: ['Life after', 'Greenhouse.'],
+    sky: { x: 65, y: 0, zoom: 1.45, flip: true },
+    Scene: ({ v }) => <SwitchScene v={v} from="Greenhouse" note="ATS · structured hiring" picks={GREENHOUSE_PICKS} />,
+  },
+  'best-applicant-tracking-systems': {
+    lines: ['Ten ATS,', 'one shortlist.'],
+    sky: { x: 40, y: 0, zoom: 1.55, flip: true },
+    Scene: ShortlistScene,
+  },
+  'recruiting-software': {
+    lines: ['Eight tools,', 'one hiring stack.'],
+    sky: { x: 90, y: 0, zoom: 1.35 },
+    Scene: StackTypesScene,
   },
   'tools-that-integrate-with-sap-successfactors': {
     lines: ['12 tools for', 'SuccessFactors.'],

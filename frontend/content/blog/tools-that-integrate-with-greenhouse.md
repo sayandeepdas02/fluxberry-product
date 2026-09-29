@@ -151,4 +151,4 @@ Evaluate three things: integration depth (bidirectional vs. one-way), pricing at
 
 ### Can I use Fluxberry without Greenhouse?
 
-Yes. Fluxberry is a standalone AI-native ATS with its own pipeline, careers page, and analytics. If Greenhouse's pricing is too high for your team, or you do not need its enterprise features, Fluxberry can be your primary hiring tool. [Get started →](/sign-up)
+Yes. Fluxberry is a standalone AI-native ATS with its own pipeline, careers page, and analytics. If Greenhouse's pricing is too high for your team, or you do not need its enterprise features, Fluxberry can be your primary hiring tool. Our [Greenhouse alternatives](/blog/greenhouse-alternatives) guide compares it with nine other options. [Get started →](/sign-up)

@@ -158,4 +158,4 @@ SAP provides a data integration framework with role-based access, audit logging,
 
 ### Can I use Fluxberry without replacing SuccessFactors?
 
-Yes. Fluxberry works alongside SuccessFactors: it handles sourcing and screening, and its webhooks, for example when a candidate is shortlisted or hired, let your team pass qualified candidates on to SuccessFactors through your own integration or an automation tool. SuccessFactors stays the system of record for requisitions, approvals, and hire records.
+Yes. Fluxberry works alongside SuccessFactors: it handles sourcing and screening, and its webhooks, for example when a candidate is shortlisted or hired, let your team pass qualified candidates on to SuccessFactors through your own integration or an automation tool. SuccessFactors stays the system of record for requisitions, approvals, and hire records. For the wider landscape of hiring tools, see our map of [recruiting software by type](/blog/recruiting-software).
