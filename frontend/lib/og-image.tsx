@@ -42,7 +42,7 @@ export function ogImage(element: ReactElement): ImageResponse {
 }
 
 /** The sky, the wash and the brand lockup; the content sits centred under the lockup. */
-function Frame({ wordmark = 'Fluxberry', children }: { wordmark?: string; children: ReactNode }) {
+function Frame({ wordmark = 'Fluxberry', top = 58, children }: { wordmark?: string; top?: number; children: ReactNode }) {
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex', position: 'relative', fontFamily: 'Manrope' }}>
       <img src={publicAssetDataUri('og/sky.jpg')} width={OG_SIZE.width} height={OG_SIZE.height} alt="" style={{ position: 'absolute', top: 0, left: 0 }} />
@@ -68,12 +68,12 @@ function Frame({ wordmark = 'Fluxberry', children }: { wordmark?: string; childr
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          padding: '58px 80px 0',
+          padding: `${top}px 80px 0`,
           color: 'white',
           textAlign: 'center',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+        <div style={{ display: 'flex', flexShrink: 0, alignItems: 'center', gap: 14 }}>
           <img src={publicAssetDataUri('logo-mark.png')} width={48} height={48} alt="" style={{ borderRadius: 12 }} />
           <div style={{ display: 'flex', fontSize: 34, fontWeight: 700, letterSpacing: '-0.03em' }}>{wordmark}</div>
         </div>
@@ -146,6 +146,60 @@ export function OGPostLayout({ category, title, byline }: { category: string; ti
         {title}
       </div>
       <div style={{ display: 'flex', marginTop: 26, fontFamily: 'Inter', fontSize: 26, color: 'rgba(255,255,255,0.92)' }}>{byline}</div>
+    </Frame>
+  );
+}
+
+/** The dashboard shot's pixel size (public/landing/dashboard.jpg, the hero's product image). */
+const SHOT = { src: 'landing/dashboard.jpg', width: 1960, height: 1208 };
+/** Width of the shot in the card; the card's foot cuts it about two-thirds of the way down, as the hero does. */
+const SHOT_WIDTH = 960;
+
+/**
+ * The homepage's share image: the hero in miniature. The headline and a line
+ * under it, then the Fluxberry dashboard in the hero's frosted-glass frame,
+ * running off the card's foot.
+ */
+export function OGHeroLayout({ headline, subtitle }: { headline: string; subtitle: string }) {
+  return (
+    <Frame top={36}>
+      <div
+        style={{
+          display: 'flex',
+          flexShrink: 0,
+          marginTop: 26,
+          fontSize: 60,
+          fontWeight: 600,
+          lineHeight: 1.06,
+          letterSpacing: '-0.035em',
+          textShadow: '0 2px 24px rgba(3,37,99,0.35)',
+        }}
+      >
+        {headline}
+      </div>
+      <div style={{ display: 'flex', flexShrink: 0, marginTop: 14, fontFamily: 'Inter', fontSize: 24, color: 'rgba(255,255,255,0.92)' }}>{subtitle}</div>
+      {/* The hero's glass frame (no backdrop blur in the renderer, so a white tint and a hairline stand in). */}
+      <div
+        style={{
+          display: 'flex',
+          flexShrink: 0,
+          marginTop: 30,
+          padding: 10,
+          borderRadius: 24,
+          backgroundColor: 'rgba(255,255,255,0.25)',
+          border: '1px solid rgba(255,255,255,0.5)',
+          boxShadow: '0 24px 60px -20px rgba(3,37,99,0.45)',
+        }}
+      >
+        <div style={{ display: 'flex', flexShrink: 0, borderRadius: 14, overflow: 'hidden', backgroundColor: '#fcfcfd' }}>
+          <img
+            src={publicAssetDataUri(SHOT.src)}
+            width={SHOT_WIDTH}
+            height={Math.round((SHOT_WIDTH * SHOT.height) / SHOT.width)}
+            alt=""
+          />
+        </div>
+      </div>
     </Frame>
   );
 }
