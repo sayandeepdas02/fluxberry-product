@@ -105,7 +105,7 @@ export function HubScene({ v }: { v: VisualState }) {
             <IconTile icon={Briefcase} size={66} />
             <span className="flex flex-col gap-[6px]">
               <span className="font-manrope text-[33px] font-semibold leading-none tracking-[-0.02em] text-[#0b0d17]">Greenhouse</span>
-              <span className="font-inter text-[17px] leading-none text-[#6b7390]">ATS · 500+ integrations</span>
+              <span className="font-inter text-[17px] leading-none text-[#6b7390]">ATS · 400+ integrations</span>
             </span>
           </Card>
         </Glass>

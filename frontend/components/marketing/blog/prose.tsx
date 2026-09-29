@@ -1,8 +1,10 @@
 import type { ReactNode } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import Image from 'next/image';
 import Link from 'next/link';
 import { slugifyHeading } from '@/lib/blog-types';
+import { publicImageSize } from '@/lib/image-size';
 
 /**
  * Article body. Styles are written as an explicit component map rather than a
@@ -12,7 +14,45 @@ import { slugifyHeading } from '@/lib/blog-types';
  *
  * Heading ids come from the same `slugifyHeading` the table of contents uses, so
  * the minimap and the anchors can never drift apart.
+ *
+ * Images are written `![alt text](/blog/<slug>/<descriptive-name>.webp "Caption")`
+ * and render as a figure: the alt text describes the image for screen readers
+ * and image search, the optional title becomes the visible caption. Local files
+ * go through next/image with their real size read at build time.
  */
+
+/** A paragraph holding nothing but one image, which renders as a figure instead of inside a <p>. */
+function isImageOnly(node: unknown): boolean {
+  const children = (node as { children?: { type: string; tagName?: string; value?: string }[] } | undefined)?.children;
+  if (!children) return false;
+  const meaningful = children.filter((child) => !(child.type === 'text' && !child.value?.trim()));
+  return meaningful.length === 1 && meaningful[0].tagName === 'img';
+}
+
+function Figure({ src, alt, title }: { src: string; alt: string; title?: string }) {
+  const size = publicImageSize(src);
+  const imageClass = 'h-auto w-full rounded-[15px] border border-lp-gray-150 bg-lp-gray-50';
+  return (
+    <figure className="my-10">
+      {size ? (
+        <Image
+          src={src}
+          alt={alt}
+          width={size.width}
+          height={size.height}
+          sizes="(min-width: 760px) 680px, 100vw"
+          className={imageClass}
+        />
+      ) : (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={src} alt={alt} loading="lazy" decoding="async" className={imageClass} />
+      )}
+      {title && (
+        <figcaption className="mt-3 text-center text-[14px] leading-[22px] text-lp-gray-500">{title}</figcaption>
+      )}
+    </figure>
+  );
+}
 
 function toText(children: ReactNode): string {
   if (typeof children === 'string' || typeof children === 'number') return String(children);
@@ -55,7 +95,9 @@ export function Prose({ content }: { content: string }) {
               {children}
             </h3>
           ),
-          p: ({ children }) => <p className="mb-5">{children}</p>,
+          p: ({ node, children }) => (isImageOnly(node) ? <>{children}</> : <p className="mb-5">{children}</p>),
+          img: ({ src, alt, title }) =>
+            typeof src === 'string' ? <Figure src={src} alt={alt ?? ''} title={title ?? undefined} /> : null,
           ul: ({ children }) => (
             <ul className="mb-5 flex list-disc flex-col gap-2.5 pl-6 marker:text-lp-blue-400">{children}</ul>
           ),

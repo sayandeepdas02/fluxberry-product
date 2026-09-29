@@ -1,24 +1,52 @@
 ---
 title: '10 useful tools that integrate with BambooHR'
+metaTitle: '10 best BambooHR integrations for recruiting'
 description: 'Already using BambooHR? Here are the strongest sourcing, assessment, background check, communication, and payroll tools that integrate with it.'
 date: '2026-09-18'
+updated: '2026-09-29'
 author: 'Sayandeep Das'
 category: 'Integrations'
 featured: false
+keywords:
+  - 'bamboohr integrations'
+  - 'tools that integrate with bamboohr'
+  - 'bamboohr marketplace'
+  - 'bamboohr applicant tracking'
+  - 'bamboohr recruiting'
+takeaways:
+  - "BambooHR's recruiting module is deliberately light: job posts, applications and a basic pipeline, with no AI screening, assessments or outbound sourcing."
+  - 'Its marketplace lists over 150 integrations. For hiring, the gaps worth filling are screening, sourcing, skills tests and background checks.'
+  - 'Keep BambooHR as the HR system of record and let hired candidates flow into it automatically.'
+  - 'Fluxberry can run the whole hiring workflow and hand hires to BambooHR through a webhook and an automation tool.'
 ---
 
 BambooHR is built for small-to-mid-market companies that want HR, time tracking, and basic recruiting in one platform. It does the core job well — employee records, PTO, onboarding — but its recruiting module is intentionally lightweight. That is a feature, not a bug, as long as you connect the right tools to fill the gaps.
 
-This guide covers 10 tools across five categories that integrate with BambooHR and extend it into a full hiring stack.
+This guide covers 10 BambooHR integrations across five categories that extend it into a full hiring stack. If you recruit in Greenhouse and run HR in BambooHR, our [Greenhouse integrations guide](/blog/tools-that-integrate-with-greenhouse) covers the recruiting side, and our guide to [improving your hiring process](/blog/how-to-improve-recruitment-process) covers the process itself.
 
-## How integrations expand BambooHR's hiring capabilities
+## BambooHR integrations at a glance
 
-BambooHR's applicant tracking handles job postings, application collection, and basic pipeline management. Where it stops short:
+| Tool | Category | Best for |
+|---|---|---|
+| Fluxberry | Sourcing and AI screening | A ranked shortlist instead of an unread pile |
+| Indeed | Job board | Applicant volume landing straight in BambooHR |
+| Criteria Corp | Assessment | Aptitude and personality testing |
+| eSkill | Assessment | Measurable skills for high-volume roles |
+| Checkr | Background checks | Quick checks at scale |
+| GoodHire | Background checks | Small teams without in-house compliance |
+| DocuSign | E-signature | Offer letters signed in hours, not days |
+| Slack | Communication | Hiring updates in team channels |
+| Gusto | Payroll | Small companies running payroll on Gusto |
+| TriNet | PEO | Payroll and benefits through a PEO |
+
+## How BambooHR integrations expand its hiring tools
+
+BambooHR's [applicant tracking](https://www.bamboohr.com/platform/applicant-tracking-system/) handles job postings, application collection, and basic pipeline management. Where it stops short (as of September 2026):
 
 - **No AI screening.** Applications arrive and sit until someone reads them.
 - **No built-in assessments.** Skills tests and take-homes require a separate tool.
 - **No outbound sourcing.** BambooHR collects inbound applicants but does not help you find people who have not applied.
-- **Limited analytics.** Basic pipeline counts, but no channel attribution or funnel conversion rates.
+- **Lighter analytics.** Standard hiring reports, with less depth on stage-by-stage conversion than a dedicated ATS.
 
 Integrations solve these gaps without replacing BambooHR as the HR system of record. Candidate data flows from specialised tools into BambooHR's pipeline, and hired employees flow into BambooHR's HR module automatically.
 
@@ -31,7 +59,7 @@ Fluxberry is an AI-native hiring platform that scores every applicant against yo
 **How it connects:** There is no native BambooHR integration yet. Fluxberry runs its own pipeline and careers page, and sends a signed webhook when a candidate is shortlisted, changes stage or is hired. Route those events into BambooHR with an automation tool such as Zapier or Make, or a short script against BambooHR's API, and your shortlist reaches BambooHR without anyone rereading resumes.
 
 **Why it fits BambooHR teams:**
-- Small teams using BambooHR typically lack a dedicated recruiter — Fluxberry's AI scoring saves the 4-6 hours per role spent on manual triage
+- Small teams using BambooHR often have no dedicated recruiter, and AI scoring takes the first pass through every application so nobody has to read the whole pile
 - A built-in careers page, custom application forms, and shared notes for your team reduce the number of additional tools needed
 - Pipeline stages are customisable to mirror your BambooHR workflow
 
@@ -109,7 +137,7 @@ BambooHR collects applications. Fluxberry tells you which ones are worth reading
 
 ### Does BambooHR have built-in AI screening?
 
-No. BambooHR's applicant tracking collects and organises applications, but it does not score, rank, or summarise them. Tools like Fluxberry add an AI screening layer that works alongside BambooHR's pipeline.
+Not as of September 2026. BambooHR's applicant tracking collects and organises applications, but it does not score, rank, or summarise them. Tools like Fluxberry add an AI screening layer that works alongside BambooHR's pipeline.
 
 ### Can I use Fluxberry as my main ATS instead of BambooHR's recruiting module?
 
@@ -117,4 +145,4 @@ Yes. Fluxberry covers the full hiring workflow: sourcing on the Max plan, AI scr
 
 ### How many integrations does BambooHR support?
 
-BambooHR's marketplace lists 125+ integrations across recruiting, payroll, benefits, time tracking, and performance management. The quality and depth of each integration varies — some are bidirectional syncs, others are one-way data pushes.
+BambooHR's [marketplace](https://www.bamboohr.com/integrations/) lists over 150 integrations across recruiting, payroll, benefits, time tracking, and performance management. The quality and depth of each integration varies — some are bidirectional syncs, others are one-way data pushes.

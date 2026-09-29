@@ -35,6 +35,20 @@ export const DEFAULT_SHARE_IMAGE = {
   alt: 'Fluxberry, the AI native hiring platform: its hiring dashboard on the landing page sky',
 };
 
+/**
+ * Public path of a post's share image (app/(marketing)/blog/[slug]/opengraph-image.tsx),
+ * for structured data, which can't read the og:image Next writes. Next suffixes
+ * image routes inside a route group with a hash of the route's folder so they
+ * can't collide (`getMetadataRouteSuffix` in next/dist/lib/metadata): djb2 of
+ * the folder path, base 36, six characters. Update ROUTE if the file moves.
+ */
+export function postShareImagePath(slug: string): string {
+  const ROUTE = '/(marketing)/blog/[slug]';
+  let hash = 5381;
+  for (let i = 0; i < ROUTE.length; i++) hash = ((hash << 5) + hash + ROUTE.charCodeAt(i)) & 0xffffffff;
+  return `/blog/${slug}/opengraph-image-${(hash >>> 0).toString(36).slice(0, 6)}`;
+}
+
 /** Every auth, dashboard, and token-gated route spreads this into its metadata export. */
 export const noIndexMetadata: Metadata = { robots: { index: false, follow: false } };
 
