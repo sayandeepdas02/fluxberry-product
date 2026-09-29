@@ -3,8 +3,8 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { getAllPosts, getPost, formatPostDate } from '@/lib/blog';
-import { publicPageMetadata, toPlainDescription } from '@/lib/seo';
+import { getAllPosts, getPost, getRelatedPosts, formatPostDate, type Post } from '@/lib/blog';
+import { postShareImagePath, publicPageMetadata, toPlainDescription } from '@/lib/seo';
 import { publicConfig } from '@/lib/config';
 import { BRAND } from '@/components/marketing/landing/content';
 import { FOUNDER, FOUNDER_PERSON } from '@/lib/founder';
@@ -14,6 +14,8 @@ import { articleInter } from '@/components/marketing/blog/article-font';
 import { Prose } from '@/components/marketing/blog/prose';
 import { TocMinimap } from '@/components/marketing/blog/toc-minimap';
 import { PostCover } from '@/components/marketing/blog/covers/cover';
+import { ArticleToc, AuthorBox, KeyTakeaways } from '@/components/marketing/blog/article-aside';
+import { PostCard } from '@/components/marketing/blog/post-card';
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -28,7 +30,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 
   return {
     ...publicPageMetadata({
-      title: post.title,
+      title: post.metaTitle ?? post.title,
       description: toPlainDescription(post.description),
       path: `/blog/${post.slug}`,
       ownImage: true,
@@ -43,8 +45,10 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
       siteName: BRAND,
       locale: 'en_US',
       publishedTime: post.date,
+      modifiedTime: post.updated,
       authors: [post.author],
       section: post.category,
+      tags: post.keywords,
     },
     twitter: {
       card: 'summary_large_image',
@@ -61,20 +65,10 @@ export default async function BlogPostPage({ params }: Params) {
   const post = getPost(slug);
   if (!post) notFound();
 
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'BlogPosting',
-    headline: post.title,
-    description: toPlainDescription(post.description),
-    datePublished: post.date,
-    author: post.author === FOUNDER.name ? FOUNDER_PERSON : { '@type': 'Person', name: post.author },
-    publisher: {
-      '@type': 'Organization',
-      name: BRAND,
-      logo: { '@type': 'ImageObject', url: `${publicConfig.appUrl}/logo-mark.png` },
-    },
-    mainEntityOfPage: `${publicConfig.appUrl}/blog/${post.slug}`,
-  };
+  const jsonLd = articleJsonLd(post);
+  const related = getRelatedPosts(post.slug);
+  const revised = post.updated > post.date;
+  const listsFluxberry = numberedItems(post).some(({ name }) => name === BRAND);
 
   return (
     <>
@@ -116,10 +110,22 @@ export default async function BlogPostPage({ params }: Params) {
                 <span className="text-black">{post.author}</span>
               )}
               <span aria-hidden>·</span>
-              <time dateTime={post.date}>{formatPostDate(post.date)}</time>
+              {revised ? (
+                <span>
+                  Updated <time dateTime={post.updated}>{formatPostDate(post.updated)}</time>
+                </span>
+              ) : (
+                <time dateTime={post.date}>{formatPostDate(post.date)}</time>
+              )}
               <span aria-hidden>·</span>
               <span>{post.readingTime} min read</span>
             </p>
+            {listsFluxberry && (
+              <p className="mt-3 max-w-[560px] text-balance font-inter text-[14px] leading-5 text-lp-gray-500">
+                Fluxberry is our product and is on this list. Check each vendor&rsquo;s pricing and features before you
+                buy.
+              </p>
+            )}
           </Appear>
         </header>
 
@@ -138,10 +144,119 @@ export default async function BlogPostPage({ params }: Params) {
         <div className="relative px-5 pb-[70px] tablet:px-[50px] tablet:pb-[100px] desktop:px-[70px]">
           <TocMinimap headings={post.headings} />
           <div className="mx-auto max-w-[680px] pt-[50px]">
+            <KeyTakeaways items={post.takeaways} />
+            <ArticleToc headings={post.headings} />
             <Prose content={post.content} />
+            <AuthorBox author={post.author} />
           </div>
         </div>
       </article>
+
+      {related.length > 0 && (
+        <section
+          aria-labelledby="keep-reading"
+          className="bg-lp-gray-50 px-5 py-[70px] tablet:px-[50px] tablet:py-[100px] desktop:px-[70px]"
+        >
+          <div className="mx-auto max-w-[1300px]">
+            <h2 id="keep-reading" className={cn('text-black', TYPE.h2)}>
+              Keep reading
+            </h2>
+            <div className="mt-8 grid gap-5 tablet:grid-cols-2 desktop:grid-cols-3">
+              {related.map((item) => (
+                <PostCard key={item.slug} post={item} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
     </>
   );
+}
+
+/**
+ * The numbered H3s ("1. Fluxberry", "2. Gem"): the tools in a list post, or the
+ * steps in a guide. They become the page's ItemList, and tell the header
+ * whether the post ranks Fluxberry and so needs the disclosure.
+ */
+function numberedItems(post: Post) {
+  return post.headings
+    .filter(({ depth, text }) => depth === 3 && /^\d+\.\s/.test(text))
+    .map(({ id, text }) => ({ id, name: text.replace(/^\d+\.\s+/, '') }));
+}
+
+/**
+ * The article's structured data as one graph: the post itself, its place in the
+ * site (breadcrumbs), and its FAQ, read from the same markdown the page renders
+ * so the markup can never claim what the page doesn't say.
+ */
+function articleJsonLd(post: Post) {
+  const site = publicConfig.appUrl;
+  const url = `${site}/blog/${post.slug}`;
+  const description = toPlainDescription(post.description);
+
+  const graph: Record<string, unknown>[] = [
+    {
+      '@type': 'BlogPosting',
+      '@id': `${url}#article`,
+      headline: post.title,
+      description,
+      url,
+      mainEntityOfPage: url,
+      image: `${site}${postShareImagePath(post.slug)}`,
+      datePublished: post.date,
+      dateModified: post.updated,
+      author: post.author === FOUNDER.name ? FOUNDER_PERSON : { '@type': 'Person', name: post.author },
+      publisher: {
+        '@type': 'Organization',
+        name: BRAND,
+        url: site,
+        logo: { '@type': 'ImageObject', url: `${site}/logo-mark.png` },
+      },
+      articleSection: post.category,
+      ...(post.keywords.length > 0 ? { keywords: post.keywords } : {}),
+      wordCount: post.wordCount,
+      inLanguage: 'en',
+      isPartOf: { '@type': 'Blog', name: `${BRAND} blog`, url: `${site}/blog` },
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: site },
+        { '@type': 'ListItem', position: 2, name: 'Blog', item: `${site}/blog` },
+        { '@type': 'ListItem', position: 3, name: post.title, item: url },
+      ],
+    },
+  ];
+
+  // No ratings or reviews: self-serving review markup on a vendor's own list breaks Google's guidelines.
+  const items = numberedItems(post);
+  if (items.length >= 3) {
+    graph.push({
+      '@type': 'ItemList',
+      '@id': `${url}#list`,
+      name: post.title,
+      itemListOrder: 'https://schema.org/ItemListOrderAscending',
+      numberOfItems: items.length,
+      itemListElement: items.map(({ id, name }, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        name,
+        url: `${url}#${id}`,
+      })),
+    });
+  }
+
+  if (post.faqs.length > 0) {
+    graph.push({
+      '@type': 'FAQPage',
+      '@id': `${url}#faq`,
+      mainEntity: post.faqs.map(({ question, answer }) => ({
+        '@type': 'Question',
+        name: question,
+        acceptedAnswer: { '@type': 'Answer', text: answer },
+      })),
+    });
+  }
+
+  return { '@context': 'https://schema.org', '@graph': graph };
 }

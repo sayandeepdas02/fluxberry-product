@@ -27,8 +27,8 @@ const BODY_Y = 70;
 
 /** The nine tools, as (lane, place in lane), in the article's order. */
 const TOOLS = [
-  [0, 0], [0, 1], [0, 2],
-  [1, 0], [1, 1], [1, 2],
+  [0, 0],
+  [1, 0], [1, 1], [1, 2], [1, 3], [1, 4],
   [2, 0],
   [3, 0], [3, 1],
 ] as const;

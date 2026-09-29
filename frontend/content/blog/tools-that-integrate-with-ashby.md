@@ -1,23 +1,51 @@
 ---
 title: '10 tools that integrate with Ashby to streamline hiring'
+metaTitle: '10 best Ashby integrations for hiring teams'
 description: "Ashby's API-first architecture supports deep integrations across sourcing, assessment, HRIS, and collaboration. Here are the strongest connections by category."
 date: '2026-09-15'
+updated: '2026-09-29'
 author: 'Sayandeep Das'
 category: 'Integrations'
 featured: false
+keywords:
+  - 'ashby integrations'
+  - 'tools that integrate with ashby'
+  - 'ashby ats integrations'
+  - 'ashby api'
+  - 'ashby marketplace'
+takeaways:
+  - 'Ashby lists 250+ integrations, fewer than Greenhouse or Lever, and a public API for anything missing.'
+  - 'Ashby already covers scheduling, scorecards, analytics and AI-assisted application review, so add tools only where it stops: sourcing, skills tests, background checks and HRIS.'
+  - "Ashby's AI marks each resume as meeting or not meeting your criteria but never ranks applicants. Fluxberry ranks them, with a score, summary, strengths and concerns."
+  - 'Fluxberry connects to Ashby through signed webhooks and an automation tool, not a native app.'
 ---
 
-Ashby is a modern ATS built with an API-first architecture and unusually strong native analytics. It appeals to high-growth tech companies that want structured hiring without the enterprise bloat of legacy platforms. Its integration ecosystem is smaller than Greenhouse's or Lever's, but the integrations that exist tend to be deeper — Ashby's API supports more granular data exchange than most competitors.
+Ashby is a modern ATS built with an API-first architecture and unusually strong native analytics. It appeals to high-growth tech companies that want structured hiring without the enterprise bloat of legacy platforms. Its [integration directory](https://www.ashbyhq.com/integrations) of 250+ integrations is smaller than Greenhouse's or Lever's, and its [public API](https://developers.ashbyhq.com/) covers what the directory doesn't.
 
-This guide covers 10 tools that integrate with Ashby across five categories, chosen for integration quality and the specific gap they fill.
+This guide covers 10 Ashby integrations across five categories, chosen for integration quality and the specific gap they fill. Running Greenhouse or Lever instead? See our [Greenhouse integrations](/blog/tools-that-integrate-with-greenhouse) and [Lever integrations](/blog/tools-that-integrate-with-lever) guides.
 
-## Integrating with Ashby to extend native depth
+## Ashby integrations at a glance
 
-Ashby already covers more ground natively than most ATS platforms — built-in scheduling, structured scorecards, custom workflows, and advanced analytics. This means integrations should extend Ashby into areas it intentionally does not cover, rather than duplicating features it already has.
+| Tool | Category | Best for |
+|---|---|---|
+| Fluxberry | Sourcing and AI screening | A ranked, scored shortlist before candidates reach Ashby |
+| hireEZ | Sourcing | Outbound sourcing for hard-to-fill technical roles |
+| HackerRank | Assessment | Verifying coding ability before interviews |
+| CodeSignal | Assessment | A standardised technical benchmark |
+| Checkr | Background checks | Fast checks without slowing the offer |
+| Sterling | Background checks | Global and regulated-industry screening |
+| Rippling | HRIS | Automated hire-to-onboard handoff |
+| Workday | HRIS | Larger organisations on Workday |
+| Slack | Communication | Hiring updates where the team already works |
+| Zoom | Communication | Video interview links and recordings |
+
+## How Ashby integrations extend the platform
+
+Ashby already covers more ground natively than most ATS platforms — built-in scheduling, structured scorecards, custom workflows, advanced analytics, and AI-assisted application review. This means integrations should extend Ashby into areas it intentionally does not cover, rather than duplicating features it already has.
 
 Three areas where integrations add the most value:
 
-1. **Upstream sourcing and screening.** Ashby manages candidates from pipeline entry onward. Tools that find and screen candidates before they enter the pipeline fill the biggest gap.
+1. **Upstream sourcing and screening.** Ashby manages candidates from pipeline entry onward. Tools that find people who have not applied yet, or rank applicants before they enter the pipeline, add the most.
 2. **Specialised assessment.** Ashby's native scorecards handle interview evaluation, but standardised skills tests and coding challenges require dedicated platforms.
 3. **Post-offer handoff.** Moving hired candidates from Ashby into HRIS and payroll systems eliminates the manual data entry that slows onboarding.
 
@@ -25,7 +53,7 @@ Three areas where integrations add the most value:
 
 ### 1. Fluxberry
 
-Fluxberry is an AI-native hiring platform that scores every applicant against your job requirements on arrival. For Ashby users, it adds AI-powered screening to the top of the funnel — the one capability Ashby's native feature set does not include.
+Fluxberry is an AI-native hiring platform that scores every applicant against your job requirements on arrival. Ashby has AI screening of its own, [AI-Assisted Application Review](https://www.ashbyhq.com/product-updates/ai-assisted-application-review), which marks each resume as meeting or not meeting criteria you define. By design it never ranks applicants or gives them a score. Fluxberry does: every applicant gets a score, a written summary, strengths and concerns, so you start from a ranked shortlist.
 
 **How it connects:** There is no native Ashby integration yet. Fluxberry runs its own pipeline and careers page, and sends a signed webhook when a candidate is shortlisted, changes stage or is hired. Route those events into Ashby with an automation tool such as Zapier or Make, or a short script against Ashby's API, and your shortlist reaches Ashby without anyone rereading resumes. Ashby takes over from pipeline management onward, while Fluxberry handles the screening that happens before.
 
@@ -109,11 +137,11 @@ Ashby gives you a modern ATS with strong analytics and structured workflows. Flu
 
 ### Does Ashby have built-in AI screening?
 
-Ashby does not natively score or rank applicants with AI. Its built-in features focus on pipeline management, scheduling, scorecards, and analytics. AI-powered screening comes from separate tools like Fluxberry that evaluate candidates before they reach Ashby.
+Yes. Ashby's [AI-Assisted Application Review](https://docs.ashbyhq.com/ai-assisted-application-review) checks each resume against criteria you set and marks it "Meets" or "Does not meet" for each one. It deliberately does not rank applicants or give them a numerical score, and a person makes every decision. If you want a ranked shortlist with a score and written reasoning for every applicant, that is where a tool like Fluxberry fits.
 
 ### Is Ashby's integration ecosystem large enough?
 
-Ashby has fewer integrations than Greenhouse or Lever, but the integrations it supports tend to be deeper thanks to its API-first architecture. For most teams, the key categories — sourcing, assessment, background checks, HRIS, and communication — are well covered. If you need a niche tool, check whether it supports Ashby's API or can connect through Zapier.
+Ashby lists 250+ integrations, fewer than Greenhouse or Lever, and its API-first design lets you build what is missing. For most teams, the key categories — sourcing, assessment, background checks, HRIS, and communication — are well covered. If you need a niche tool, check whether it supports Ashby's API or can connect through Zapier.
 
 ### Can I use Fluxberry instead of Ashby?
 

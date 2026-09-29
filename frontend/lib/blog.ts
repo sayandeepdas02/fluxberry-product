@@ -1,10 +1,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import matter from 'gray-matter';
-import { slugifyHeading, type Heading, type Post, type PostMeta } from './blog-types';
+import { slugifyHeading, type Faq, type Heading, type Post, type PostMeta } from './blog-types';
 import { PLAN_PRICING } from './pricing';
+import { toPlainDescription } from './seo';
 
-export type { Heading, Post, PostMeta } from './blog-types';
+export type { Faq, Heading, Post, PostMeta } from './blog-types';
 export { slugifyHeading, formatPostDate } from './blog-types';
 
 /**
@@ -58,6 +59,43 @@ export function extractHeadings(markdown: string): Heading[] {
 }
 
 /**
+ * The Q&As under a post's "Frequently asked questions" H2: each H3 is a
+ * question, the text up to the next heading its answer. They feed the post's
+ * FAQPage structured data, so the markup always says what the page says.
+ */
+export function extractFaqs(markdown: string): Faq[] {
+  const faqs: Faq[] = [];
+  let inSection = false;
+  let current: { question: string; lines: string[] } | null = null;
+
+  const flush = () => {
+    if (!current) return;
+    const answer = toPlainDescription(current.lines.join('\n'), Number.POSITIVE_INFINITY);
+    if (answer) faqs.push({ question: current.question, answer });
+    current = null;
+  };
+
+  for (const line of markdown.split('\n')) {
+    const h2 = /^##\s+(.*)$/.exec(line);
+    if (h2) {
+      flush();
+      inSection = /^(frequently asked questions|faqs?)\b/i.test(cleanInline(h2[1]));
+      continue;
+    }
+    if (!inSection) continue;
+    const h3 = /^###\s+(.*)$/.exec(line);
+    if (h3) {
+      flush();
+      current = { question: cleanInline(h3[1]), lines: [] };
+    } else if (current) {
+      current.lines.push(line);
+    }
+  }
+  flush();
+  return faqs;
+}
+
+/**
  * Posts quote prices as tokens, e.g. `{{price:pro:monthly}}` for "$39", filled in
  * from lib/pricing at build time, so a price change can never leave a post quoting
  * an old price. Write every price in a post this way.
@@ -68,9 +106,12 @@ function fillPrices(markdown: string): string {
   });
 }
 
-function readingTimeMinutes(markdown: string): number {
-  const words = markdown.trim().split(/\s+/).length;
-  return Math.max(1, Math.round(words / 220));
+function countWords(markdown: string): number {
+  return markdown.trim().split(/\s+/).length;
+}
+
+function stringList(value: unknown): string[] {
+  return Array.isArray(value) ? value.map(String).filter(Boolean) : [];
 }
 
 function parse(slug: string, raw: string): Post {
@@ -80,17 +121,25 @@ function parse(slug: string, raw: string): Post {
     engines: { yaml: { parse: (s: string) => yaml.load(s) as Record<string, unknown> } },
   });
   const content = fillPrices(source);
+  const date = String(data.date ?? '');
+  const wordCount = countWords(content);
   return {
     slug,
     title: String(data.title ?? slug),
+    ...(data.metaTitle ? { metaTitle: String(data.metaTitle) } : {}),
     description: String(data.description ?? ''),
-    date: String(data.date ?? ''),
+    date,
+    updated: String(data.updated ?? date),
     author: String(data.author ?? 'Sayandeep Das'),
     category: String(data.category ?? 'Product'),
+    keywords: stringList(data.keywords),
     featured: Boolean(data.featured),
-    readingTime: readingTimeMinutes(content),
+    readingTime: Math.max(1, Math.round(wordCount / 220)),
     content,
     headings: extractHeadings(content),
+    takeaways: stringList(data.takeaways).map(fillPrices),
+    faqs: extractFaqs(content),
+    wordCount,
   };
 }
 
@@ -103,9 +152,35 @@ function loadAll(): Post[] {
     .sort((a, b) => (a.date < b.date ? 1 : -1));
 }
 
-export function getAllPosts(): PostMeta[] {
+function toMeta(post: Post): PostMeta {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  return loadAll().map(({ content, headings, ...meta }) => meta);
+  const { content, headings, takeaways, faqs, wordCount, ...meta } = post;
+  return meta;
+}
+
+export function getAllPosts(): PostMeta[] {
+  return loadAll().map(toMeta);
+}
+
+/**
+ * Posts to read next: the same category first, then those sharing the most
+ * target keywords, newest first on a tie. Every article links to a few others,
+ * so no post is an orphan that crawlers only reach from the index.
+ */
+export function getRelatedPosts(slug: string, limit = 3): PostMeta[] {
+  const all = loadAll();
+  const post = all.find((p) => p.slug === slug);
+  if (!post) return [];
+  const keywords = new Set(post.keywords.map((k) => k.toLowerCase()));
+  const score = (other: Post) =>
+    (other.category === post.category ? 10 : 0) + other.keywords.filter((k) => keywords.has(k.toLowerCase())).length;
+
+  return all
+    .filter((other) => other.slug !== slug)
+    .map((other, index) => ({ other, index, score: score(other) }))
+    .sort((a, b) => b.score - a.score || a.index - b.index)
+    .slice(0, limit)
+    .map(({ other }) => toMeta(other));
 }
 
 export function getPost(slug: string): Post | null {

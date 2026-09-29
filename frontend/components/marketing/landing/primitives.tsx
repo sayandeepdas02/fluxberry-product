@@ -39,7 +39,7 @@ export function GridBackdrop() {
       className="pointer-events-none absolute inset-0 overflow-hidden [mask-image:linear-gradient(to_bottom,#000_45%,transparent)]"
     >
       <div className="relative aspect-[3963/2793] w-full">
-        <Image src="/landing/grid-bg.png" alt="" fill sizes="100vw" loading="eager" className="object-cover" />
+        <Image src="/landing/grid-bg.png" alt="" fill sizes="100vw" priority className="object-cover" />
       </div>
     </div>
   );

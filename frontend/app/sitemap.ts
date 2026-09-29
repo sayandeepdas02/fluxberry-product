@@ -6,6 +6,7 @@ import { LEGAL_LINKS } from '@/components/marketing/landing/content';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const posts = getAllPosts();
+  const blogUpdated = posts.reduce((latest, post) => (post.updated > latest ? post.updated : latest), '');
   const { careers, jobs } = await fetchSitemapEntries();
 
   return [
@@ -14,7 +15,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${publicConfig.appUrl}/blog`,
       changeFrequency: 'weekly',
       priority: 0.8,
-      lastModified: posts[0]?.date ? new Date(posts[0].date) : undefined,
+      lastModified: blogUpdated ? new Date(blogUpdated) : undefined,
     },
     ...LEGAL_LINKS.map((link) => ({
       url: `${publicConfig.appUrl}${link.href}`,
@@ -25,7 +26,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${publicConfig.appUrl}/blog/${post.slug}`,
       changeFrequency: 'monthly' as const,
       priority: 0.6,
-      lastModified: post.date ? new Date(post.date) : undefined,
+      lastModified: post.updated ? new Date(post.updated) : undefined,
     })),
     ...careers.map((page) => ({
       url: `${publicConfig.appUrl}/${page.slug}/careers`,
