@@ -39,6 +39,20 @@ const nextConfig = {
   // fluxberry.in (apex) is canonical — both hosts resolve at the DNS/CORS layer today,
   // which risks duplicate-content indexing. Redirect www to apex at the app level so it
   // works regardless of hosting provider.
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+          { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains' },
+        ],
+      },
+    ];
+  },
   async redirects() {
     return [
       {
