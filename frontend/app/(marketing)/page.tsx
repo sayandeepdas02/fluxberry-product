@@ -8,7 +8,7 @@ import { ProductSection } from '@/components/marketing/landing/product-section';
 import { SolutionsSection } from '@/components/marketing/landing/solutions-section';
 import { PricingSection } from '@/components/marketing/landing/pricing-section';
 import { FaqSection } from '@/components/marketing/landing/faq-section';
-import { BRAND, FAQ } from '@/components/marketing/landing/content';
+import { BRAND, FAQ, PRODUCT } from '@/components/marketing/landing/content';
 
 const title = `${BRAND} - AI Native Hiring Platform`;
 const description =
@@ -27,6 +27,7 @@ const softwareJsonLd = {
   name: BRAND,
   applicationCategory: 'BusinessApplication',
   description: 'AI Native Hiring Platform. AI-native applicant tracking for founders and hiring managers.',
+  featureList: PRODUCT.cards.map((card) => card.title),
   // The plans' monthly prices, from lib/pricing, so search results can't show a stale price.
   offers: {
     '@type': 'AggregateOffer',
