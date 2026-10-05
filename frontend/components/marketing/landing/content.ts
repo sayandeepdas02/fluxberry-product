@@ -87,61 +87,6 @@ export const PRODUCT = {
   ] satisfies ProductCard[],
 };
 
-/** Which animated mockup a Solutions card shows (see ./solutions). */
-export type SolutionVisualKind = 'dashboard' | 'collaboration' | 'screening' | 'analytics' | 'security' | 'integrations';
-
-export interface SolutionCard {
-  title: string;
-  body: string;
-  visual: SolutionVisualKind;
-  /** Wide cards take 750px of the 1300px row; narrow ones 530px. */
-  wide: boolean;
-}
-
-export const SOLUTIONS = {
-  pill: 'Solutions',
-  title: 'Everything you need to run your hiring',
-  lead: 'All the core tools you need to attract, screen and hire great candidates as a team, without the complexity of an enterprise ATS.',
-  cards: [
-    {
-      title: 'Hiring Dashboard',
-      body: 'See every open role, new applicants and pipeline progress at a glance in one simple view.',
-      visual: 'dashboard',
-      wide: false,
-    },
-    {
-      title: 'Team Collaboration',
-      body: 'Review candidates together, share notes and move people through stages as a team.',
-      visual: 'collaboration',
-      wide: true,
-    },
-    {
-      title: 'AI Screening',
-      body: 'Every resume is parsed and scored against your job, with clear strengths and concerns.',
-      visual: 'screening',
-      wide: true,
-    },
-    {
-      title: 'Hiring Analytics',
-      body: 'Track pipeline conversion, time in each stage and the sources that bring your best hires.',
-      visual: 'analytics',
-      wide: false,
-    },
-    {
-      title: 'Secure by Default',
-      body: 'Role-based access, per-job permissions and GDPR tools keep candidate data private.',
-      visual: 'security',
-      wide: false,
-    },
-    {
-      title: 'Works With Your Tools',
-      body: 'Check availability in Google Calendar, share roles on LinkedIn and email candidates directly.',
-      visual: 'integrations',
-      wide: true,
-    },
-  ] satisfies SolutionCard[],
-};
-
 export const PRICING_COPY = {
   pill: 'Pricing',
   title: 'Built to help teams hire faster',
@@ -206,7 +151,6 @@ export interface NavGroup {
  */
 export const NAV_LINKS: (NavLinkItem | NavGroup)[] = [
   { label: 'Product', href: '/#product' },
-  { label: 'Solutions', href: '/#features' },
   { label: 'Pricing', href: '/pricing' },
   {
     label: 'Resources',

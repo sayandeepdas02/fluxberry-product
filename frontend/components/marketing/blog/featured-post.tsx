@@ -6,7 +6,7 @@ import { TYPE } from '@/components/marketing/landing/primitives';
 import { PostCover } from './covers/cover';
 import { PostMetaRow, postCardClass } from './post-card';
 
-/** The lead post: a wide Solutions-style card, with the cover beside the text on desktop. */
+/** The lead post: a wide Product-style card, with the cover beside the text on desktop. */
 export function FeaturedPost({ post }: { post: PostMeta }) {
   return (
     <Link

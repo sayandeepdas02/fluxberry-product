@@ -11,7 +11,7 @@ import { ProductCover } from './product';
  */
 export function ProductSection() {
   return (
-    <section id="product" className="scroll-mt-5 bg-white px-5 py-[70px] tablet:scroll-mt-0 tablet:px-[50px] tablet:py-[100px] desktop:px-[70px]">
+    <section id="product" className="scroll-mt-5 bg-lp-gray-50 px-5 py-[70px] tablet:scroll-mt-0 tablet:px-[50px] tablet:py-[100px] desktop:px-[70px]">
       <div className="mx-auto flex max-w-[1300px] flex-col items-center">
         <Reveal className="w-full">
           <SectionHeader

@@ -5,7 +5,6 @@ import { PLAN_PRICING } from '@/lib/pricing';
 import { FOUNDER } from '@/lib/founder';
 import { Hero } from '@/components/marketing/landing/hero';
 import { ProductSection } from '@/components/marketing/landing/product-section';
-import { SolutionsSection } from '@/components/marketing/landing/solutions-section';
 import { PricingSection } from '@/components/marketing/landing/pricing-section';
 import { FaqSection } from '@/components/marketing/landing/faq-section';
 import { BRAND, FAQ, PRODUCT } from '@/components/marketing/landing/content';
@@ -51,7 +50,6 @@ export default function LandingPage() {
       />
       <Hero />
       <ProductSection />
-      <SolutionsSection />
       <PricingSection />
       <FaqSection />
     </>

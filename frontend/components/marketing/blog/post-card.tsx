@@ -22,7 +22,7 @@ export function PostMetaRow({ post }: { post: PostMeta }) {
   );
 }
 
-/** A post in the grid, built like the landing's Solutions cards: the cover over the text. */
+/** A post in the grid, built like the landing's Product cards: the cover over the text. */
 export function PostCard({ post }: { post: PostMeta }) {
   return (
     <Link href={`/blog/${post.slug}`} className={cn(postCardClass, 'flex flex-col')}>
