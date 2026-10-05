@@ -93,3 +93,20 @@ export function publicPageMetadata({
     },
   };
 }
+
+/** FAQPage structured data for a Q&A list that the page also shows as visible text. */
+export function faqJsonLd(items: readonly { q: string; a: string }[]) {
+  return {
+    '@type': 'FAQPage',
+    mainEntity: items.map(({ q, a }) => ({
+      '@type': 'Question',
+      name: q,
+      acceptedAnswer: { '@type': 'Answer', text: a },
+    })),
+  };
+}
+
+/** Serializes JSON-LD for a script tag; `<` is escaped so page text can't close the tag. */
+export function jsonLdScript(data: object): string {
+  return JSON.stringify({ '@context': 'https://schema.org', ...data }).replace(/</g, '\\u003c');
+}

@@ -5,6 +5,8 @@ const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
   '/sign-up(.*)',
   '/blog(.*)',
+  '/pricing',
+  '/about',
   // Legal pages, linked from the footer and the auth pages.
   '/privacy',
   '/terms',

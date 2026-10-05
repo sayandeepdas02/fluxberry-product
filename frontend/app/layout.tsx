@@ -5,6 +5,7 @@ import { GeistMono } from 'geist/font/mono';
 import './globals.css';
 import { Providers } from './providers';
 import { publicConfig } from '@/lib/config';
+import { COMPANY_PROFILES } from '@/lib/founder';
 
 const description =
   'Fluxberry AI is the AI-native hiring platform for small teams — screen, interview, and hire faster without the bloat of a legacy ATS.';
@@ -17,6 +18,7 @@ const organizationJsonLd = {
   url: publicConfig.appUrl,
   logo: `${publicConfig.appUrl}/logo-mark.png`,
   description: 'AI Native Hiring Platform',
+  sameAs: [COMPANY_PROFILES.xUrl, COMPANY_PROFILES.linkedinUrl],
 };
 
 export const metadata: Metadata = {

@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
-import { FOUNDER } from '@/lib/founder';
+import { COMPANY_PROFILES } from '@/lib/founder';
 import {
   Blocks,
   BookOpen,
@@ -211,7 +211,7 @@ export interface NavGroup {
 export const NAV_LINKS: (NavLinkItem | NavGroup)[] = [
   { label: 'Products', href: '/#why-us' },
   { label: 'Solutions', href: '/#features' },
-  { label: 'Pricing', href: '/#pricing' },
+  { label: 'Pricing', href: '/pricing' },
   {
     label: 'Resources',
     items: [
@@ -290,7 +290,7 @@ export const FOOTER = {
       title: 'Resources',
       links: [
         navResource('Blog'),
-        { label: 'Pricing', href: '/#pricing' },
+        { label: 'Pricing', href: '/pricing' },
         { label: 'FAQ', href: '/#faq' },
         navResource('Knowledge Base'),
         navResource('Comparisons'),
@@ -300,10 +300,11 @@ export const FOOTER = {
     {
       title: 'Company',
       links: [
+        { label: 'About', href: '/about' },
         navResource('Careers'),
         { label: 'Contact', href: `mailto:${CONTACT_EMAIL}` },
-        { label: 'LinkedIn', href: FOUNDER.linkedinUrl },
-        { label: 'X (Twitter)', href: FOUNDER.xUrl },
+        { label: 'LinkedIn', href: COMPANY_PROFILES.linkedinUrl },
+        { label: 'X (Twitter)', href: COMPANY_PROFILES.xUrl },
         { label: 'Log in', href: '/sign-in' },
         { label: 'Get started', href: '/sign-up' },
       ],

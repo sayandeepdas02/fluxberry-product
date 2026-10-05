@@ -13,6 +13,12 @@ export const FOUNDER = {
   linkedinUrl: 'https://www.linkedin.com/in/sayandeep02/',
 } as const;
 
+/** Fluxberry's own profiles: the footer's social links and the Organization's `sameAs`. */
+export const COMPANY_PROFILES = {
+  xUrl: FOUNDER.xUrl,
+  linkedinUrl: 'https://www.linkedin.com/company/fluxberry',
+} as const;
+
 /** The founder as a schema.org Person, for structured data. */
 export const FOUNDER_PERSON = {
   '@type': 'Person',
