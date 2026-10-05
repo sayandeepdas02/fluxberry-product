@@ -30,6 +30,9 @@ const nextConfig = {
   // computed paths, so without this they're missing from the serverless function and the
   // image 500s. The static share images are rendered at build time and don't need it.
   outputFileTracingIncludes: {
+    // The sitemap is rendered per request (it fetches careers pages and jobs), and reads the
+    // blog's markdown from disk. Without this the files aren't in the function and it lists no posts.
+    '/sitemap.xml': ['./content/blog/**/*'],
     '/[careersSlug]/careers/opengraph-image': OG_ASSETS,
     '/apply/[workspaceSlug]/[jobSlug]/opengraph-image': OG_ASSETS,
   },
