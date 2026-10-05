@@ -5,7 +5,7 @@ import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
 import { HERO } from '@/components/marketing/landing/content';
 import { EASE_OUT, Stage, enter, useVisual } from '@/components/marketing/landing/stage';
-import { COVERS, fallbackCover, type Sky } from './registry';
+import { COVERS, fallbackCover, type CoverSpec, type Sky } from './registry';
 import { H, W } from './kit';
 
 /*
@@ -21,12 +21,23 @@ import { H, W } from './kit';
  */
 
 export function PostCover({ slug, title, sizes, className }: { slug: string; title: string; sizes: string; className?: string }) {
-  const cover = COVERS[slug] ?? fallbackCover(title);
+  return <CoverFrame cover={COVERS[slug] ?? fallbackCover(title)} sizes={sizes} className={className} />;
+}
+
+/**
+ * The painted frame around any cover spec (a post's, or a landing Product card's).
+ * Decorative by default; pass `label` when the scene is the card's only picture, and
+ * it becomes an image with that text alternative.
+ */
+export function CoverFrame({ cover, sizes, className, label }: { cover: CoverSpec; sizes: string; className?: string; label?: string }) {
   const { Scene } = cover;
   const v = useVisual();
 
   return (
-    <div aria-hidden className={cn('relative isolate overflow-hidden bg-[#1084e5]', className)}>
+    <div
+      {...(label ? { role: 'img', 'aria-label': label } : { 'aria-hidden': true })}
+      className={cn('relative isolate overflow-hidden bg-[#1084e5]', className)}
+    >
       <SkyLayer sky={cover.sky} sizes={sizes} />
       {/* Deepens the top of the sky behind the cover line (blue, not black, so it stays saturated). */}
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(3,37,99,0.22),transparent_48%)]" />

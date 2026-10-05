@@ -1,18 +1,6 @@
 import type { LucideIcon } from 'lucide-react';
 import { COMPANY_PROFILES } from '@/lib/founder';
-import {
-  Blocks,
-  BookOpen,
-  BriefcaseBusiness,
-  ChartNoAxesCombined,
-  Lock,
-  Newspaper,
-  Scale,
-  Settings,
-  Timer,
-  Users,
-  Zap,
-} from 'lucide-react';
+import { Blocks, BookOpen, BriefcaseBusiness, Newspaper, Scale } from 'lucide-react';
 
 /*
  * Landing page copy. The layout (card counts, line lengths) is the Framer
@@ -47,46 +35,54 @@ export const HERO = {
   backdrop: '/landing/hero-landscape.webp',
 };
 
+/** Which animated scene a Product card shows (see ./product). */
+export type ProductVisualKind = 'tracking' | 'analytics' | 'video-forms' | 'sourcing' | 'careers' | 'referrals';
+
 export interface ProductCard {
-  icon: LucideIcon;
   title: string;
   body: string;
+  visual: ProductVisualKind;
+  /** The plan that unlocks it, when it isn't on every plan. */
+  plan?: 'Max';
 }
 
+/** What Fluxberry is made of: six products, each with its own animated scene. Claims match lib/pricing's plan features. */
 export const PRODUCT = {
   pill: 'Product',
-  title: 'Great hires without the busywork',
-  lead: 'Fluxberry takes care of the repetitive parts of hiring, so your whole team can focus on the right people.',
+  title: 'Everything you need to hire, in one place',
+  lead: 'An applicant tracking system with a job board, analytics, video application forms, talent sourcing, a careers site and referrals.',
   cards: [
     {
-      icon: Zap,
-      title: 'Live in Minutes',
-      body: 'Create a job, publish it to your careers page and start collecting applications the same day.',
+      title: 'Applicant tracking and job board',
+      body: 'Publish a job to your own board, then move every applicant through one pipeline of your own stages, with team notes and an AI match score on each.',
+      visual: 'tracking',
     },
     {
-      icon: Users,
-      title: 'Built for Teams',
-      body: 'Invite your whole team at no extra cost. Share candidates, leave notes and decide together.',
+      title: 'Analytics',
+      body: 'See pipeline conversion, time in each stage and which sources bring your best hires, so you know where hiring slows down.',
+      visual: 'analytics',
     },
     {
-      icon: ChartNoAxesCombined,
-      title: 'Scales With You',
-      body: 'From your first hire to your fiftieth, unlimited jobs and candidates grow with your company.',
+      title: 'Video application forms',
+      body: 'Ask for a recorded video answer, a file upload or a link in your application form, and see the person before the first call.',
+      visual: 'video-forms',
     },
     {
-      icon: Lock,
-      title: 'Private & Secure',
-      body: 'Candidate data stays in your workspace, with role-based access for every member of the team.',
+      title: 'Talent sourcing (TalentGPT)',
+      body: 'Describe who you want in plain English, get matching candidates with a transparent match score, and reach out from the same screen.',
+      visual: 'sourcing',
+      plan: 'Max',
     },
     {
-      icon: Settings,
-      title: 'Made to Fit',
-      body: 'Custom pipeline stages, application forms and a careers page that matches your brand.',
+      title: 'Careers website',
+      body: 'A careers page in your brand color, with your own headline and every open role, live without a developer.',
+      visual: 'careers',
     },
     {
-      icon: Timer,
-      title: 'Fast Decisions',
-      body: 'AI scores applicants against your job the moment they apply, so the strongest rise to the top.',
+      title: 'Candidate referrals',
+      body: 'Share a referral link for any open role, see who applied through it and track each referrer’s reward.',
+      visual: 'referrals',
+      plan: 'Max',
     },
   ] satisfies ProductCard[],
 };
@@ -209,7 +205,7 @@ export interface NavGroup {
  * pill and expands in place in the phone menu.
  */
 export const NAV_LINKS: (NavLinkItem | NavGroup)[] = [
-  { label: 'Products', href: '/#why-us' },
+  { label: 'Product', href: '/#product' },
   { label: 'Solutions', href: '/#features' },
   { label: 'Pricing', href: '/pricing' },
   {
@@ -277,13 +273,14 @@ export const FOOTER = {
   columns: [
     {
       title: 'Product',
-      // No product has its own page yet, so each points at the landing's Solutions section until one ships.
+      // The six cards of the landing's Product section; none has its own page yet.
       links: [
-        { label: 'Job Board', href: '/#features' },
-        { label: 'ATS (Applicant Tracking System)', href: '/#features' },
-        { label: 'Talent Sourcing (TalentGPT)', href: '/#features' },
-        { label: 'Analytics', href: '/#features' },
-        { label: 'Referrals', href: '/#features' },
+        { label: 'Applicant Tracking & Job Board', href: '/#product' },
+        { label: 'Analytics', href: '/#product' },
+        { label: 'Video Application Forms', href: '/#product' },
+        { label: 'Talent Sourcing (TalentGPT)', href: '/#product' },
+        { label: 'Careers Website', href: '/#product' },
+        { label: 'Referrals', href: '/#product' },
       ],
     },
     {
