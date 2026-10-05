@@ -162,17 +162,22 @@ export function BillingSwitch({
 }
 
 /** Pricing: Monthly/Yearly switch over the Pro and Max cards. Prices come from lib/pricing. */
-export function PricingSection() {
+export function PricingSection({ titleAs = 'h2', className }: { titleAs?: 'h1' | 'h2'; className?: string } = {}) {
   const [yearly, setYearly] = useState(false);
 
   return (
-    <section id="pricing" className="scroll-mt-5 bg-white px-5 py-[70px] tablet:scroll-mt-0 tablet:px-[50px] tablet:py-[100px] desktop:px-[70px]">
+    <section id="pricing" className={cn(
+        'scroll-mt-5 bg-white px-5 py-[70px] tablet:scroll-mt-0 tablet:px-[50px] tablet:py-[100px] desktop:px-[70px]',
+        className,
+      )}
+    >
       <div className="mx-auto flex max-w-[1300px] flex-col items-center">
         <Reveal className="w-full">
           {/* Framer fixes this heading group at 106px; the two-line H2 on
               tablet and phone overflows it rather than pushing the lead down. */}
           <SectionHeader
             pill={PRICING_COPY.pill}
+            titleAs={titleAs}
             title={PRICING_COPY.title}
             headingClassName="h-[106px]"
             titleClassName="max-w-[65%]"

@@ -17,6 +17,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
       lastModified: blogUpdated ? new Date(blogUpdated) : undefined,
     },
+    { url: `${publicConfig.appUrl}/pricing`, changeFrequency: 'monthly', priority: 0.9 },
+    { url: `${publicConfig.appUrl}/about`, changeFrequency: 'yearly', priority: 0.5 },
     ...LEGAL_LINKS.map((link) => ({
       url: `${publicConfig.appUrl}${link.href}`,
       changeFrequency: 'yearly' as const,

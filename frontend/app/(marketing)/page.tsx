@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { publicConfig } from '@/lib/config';
-import { DEFAULT_SHARE_IMAGE } from '@/lib/seo';
+import { DEFAULT_SHARE_IMAGE, faqJsonLd, jsonLdScript } from '@/lib/seo';
 import { PLAN_PRICING } from '@/lib/pricing';
 import { FOUNDER } from '@/lib/founder';
 import { Hero } from '@/components/marketing/landing/hero';
@@ -8,7 +8,7 @@ import { ProductSection } from '@/components/marketing/landing/product-section';
 import { SolutionsSection } from '@/components/marketing/landing/solutions-section';
 import { PricingSection } from '@/components/marketing/landing/pricing-section';
 import { FaqSection } from '@/components/marketing/landing/faq-section';
-import { BRAND } from '@/components/marketing/landing/content';
+import { BRAND, FAQ } from '@/components/marketing/landing/content';
 
 const title = `${BRAND} - AI Native Hiring Platform`;
 const description =
@@ -22,8 +22,7 @@ export const metadata: Metadata = {
   twitter: { card: 'summary_large_image', site: FOUNDER.xHandle, creator: FOUNDER.xHandle, title, description },
 };
 
-const jsonLd = {
-  '@context': 'https://schema.org',
+const softwareJsonLd = {
   '@type': 'SoftwareApplication',
   name: BRAND,
   applicationCategory: 'BusinessApplication',
@@ -35,9 +34,11 @@ const jsonLd = {
     lowPrice: PLAN_PRICING.PRO.monthly,
     highPrice: PLAN_PRICING.MAX.monthly,
     offerCount: 2,
-    url: `${publicConfig.appUrl}/#pricing`,
+    url: `${publicConfig.appUrl}/pricing`,
   },
 };
+
+const jsonLd = { '@graph': [softwareJsonLd, faqJsonLd(FAQ.items)] };
 
 /** The public landing page, converted from the Framer design (sections top to bottom). */
 export default function LandingPage() {
@@ -45,7 +46,7 @@ export default function LandingPage() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLd) }}
       />
       <Hero />
       <ProductSection />
