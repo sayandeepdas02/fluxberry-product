@@ -22,7 +22,7 @@ export const metadata: Metadata = publicPageMetadata({
 /**
  * Blog index in the landing page's language: a hero-style header (the page
  * content starts where the landing hero's does, under the floating nav), then
- * the posts on the grey section background the landing uses for Solutions.
+ * the posts on the grey section background the landing's Product section uses.
  */
 export default function BlogIndexPage() {
   const posts = getAllPosts();

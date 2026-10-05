@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type HTMLAttributes } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type HTMLAttributes } from 'react';
 import {
   animate,
   motion,
@@ -16,8 +16,7 @@ import { cn } from '@/lib/utils';
 
 /*
  * Shared pieces for the landing page's animated mockups (the hero dashboard
- * and the Solutions card visuals): live rebuilds of what used to be flat
- * screenshots, animated with Motion.
+ * and the Product cards' and blog covers' scenes), animated with Motion.
  *
  * Each visual is drawn on a fixed design canvas, the screenshot's own pixel
  * grid (e.g. 866×660, or 1960×1208 for the hero), and scaled to fit its frame
@@ -48,7 +47,7 @@ export interface VisualState {
 /**
  * Scroll, visibility and motion-preference state for one visual. Attach `ref` via <Stage>.
  * By default the entrance waits until the visual is half in view (the same trigger as the
- * Solutions cards' Reveal); `onMount` starts it as soon as the page is interactive, for
+ * landing cards' Reveal); `onMount` starts it as soon as the page is interactive, for
  * content that's already on screen when the page loads.
  */
 export function useVisual({ onMount = false }: { onMount?: boolean } = {}): VisualState {
@@ -130,26 +129,6 @@ export function Stage({ visual, width, height, fill = false, className, children
         </div>
       ) : null}
     </div>
-  );
-}
-
-const SHADOW = '0 18px 40px -18px rgba(8, 38, 99, 0.45)';
-const SHADOW_LIFTED = '0 34px 64px -24px rgba(8, 38, 99, 0.55)';
-
-/**
- * The white mockup card. Lifts when its Solutions card is hovered: the card's
- * Reveal sets `whileHover="hover"`, which reaches this variant.
- */
-export function Surface({ className, style, children }: { className?: string; style: CSSProperties; children: React.ReactNode }) {
-  return (
-    <motion.div
-      className={cn('absolute bg-white', className)}
-      style={{ boxShadow: SHADOW, ...style }}
-      variants={{ hover: { y: -8, scale: 1.015, boxShadow: SHADOW_LIFTED } }}
-      transition={GLIDE}
-    >
-      {children}
-    </motion.div>
   );
 }
 
