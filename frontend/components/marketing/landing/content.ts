@@ -18,8 +18,8 @@ export const BRAND = 'Fluxberry';
 
 export const HERO = {
   badge: 'Built for fast moving teams',
-  title: 'The #1 AI Native Hiring Platform',
-  lead: ['Fluxberry is an AI Native hiring tool that is fast, simple.', 'Built for founders & hiring managers.'],
+  title: 'The AI Native Hiring Platform',
+  lead: ['Fluxberry is an AI native hiring tool that is fast and simple.', 'Built for founders & hiring managers.'],
   cta: { label: 'Get Started', href: '/sign-up' },
   /**
    * The product shot: the Fluxberry dashboard alone, edge to edge. The hero draws it live
