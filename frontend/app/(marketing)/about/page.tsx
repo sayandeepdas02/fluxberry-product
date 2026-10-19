@@ -10,10 +10,10 @@ import { BRAND } from '@/components/marketing/landing/content';
 import { articleInter } from '@/components/marketing/blog/article-font';
 
 const description =
-  'Fluxberry is the simplest ATS for lean teams, built by indie hacker Sayandeep Das and live since 1 October 2026. Post jobs, run a careers page and source candidates.';
+  'Fluxberry is the simplest ATS for lean teams, built by indie hacker Sayandeep Das. Post jobs, run a careers page and source candidates.';
 
 export const metadata: Metadata = publicPageMetadata({
-  title: 'About',
+  title: 'About: an indie-built ATS for lean teams',
   description,
   path: '/about',
   ownImage: true,
