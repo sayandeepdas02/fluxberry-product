@@ -11,7 +11,7 @@ import { BRAND, FAQ, PRODUCT } from '@/components/marketing/landing/content';
 
 const title = `${BRAND} - AI Native Hiring Platform`;
 const description =
-  'Fluxberry scores every applicant against your job, runs your pipeline and careers page, and helps you source candidates. The AI native hiring platform for founders and hiring managers.';
+  'Fluxberry is the AI native hiring platform for founders: it scores every applicant against your job, runs your pipeline and careers page, and sources candidates.';
 
 export const metadata: Metadata = {
   title: { absolute: title },
