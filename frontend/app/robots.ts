@@ -4,7 +4,9 @@ import { publicConfig } from '@/lib/config';
 const AI_CRAWLERS = ['GPTBot', 'OAI-SearchBot', 'ChatGPT-User', 'ClaudeBot', 'Claude-SearchBot', 'PerplexityBot', 'Google-Extended'];
 
 export default function robots(): MetadataRoute.Robots {
-  const disallow = ['/app', '/onboarding'];
+  // A bare '/app' would also match /apply/... (public job pages) and /apple-icon.png, so the
+  // dashboard is matched as '/app/' plus the exact '/app' path.
+  const disallow = ['/app/', '/app$', '/onboarding'];
   return {
     rules: [
       {
