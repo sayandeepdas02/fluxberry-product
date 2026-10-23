@@ -48,3 +48,12 @@ chanhdai.com-main/
 
 # Local MCP server config (contains secrets)
 .mcp.json
+
+# Internal planning notes, specs and tooling config (not part of the public repo)
+/IMPLEMENTATION.md
+/design.md
+/pending.md
+/docs/blog-content-plan.md
+/docs/blog-seo-playbook.md
+/docs/talent-sourcing.md
+/.claude/

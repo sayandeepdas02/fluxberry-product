@@ -70,8 +70,8 @@ export type RecruiterLeaderboardDto = {
   /**
    * v1 approximation: there's no per-application ownership model yet, so
    * activity is attributed to whoever created the job (`Job.createdBy`), not
-   * necessarily whoever is actually working each application. See
-   * IMPLEMENTATION.md Phase 3.3 — revisit once Phase 2's `restrictedTo`
+   * necessarily whoever is actually working each application.
+   * Revisit once `restrictedTo`
    * naturally evolves into real per-application assignment.
    */
   isApproximate: true;
