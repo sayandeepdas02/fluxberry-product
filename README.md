@@ -140,4 +140,12 @@ No Kubernetes, no microservices split beyond the one unavoidable exception (the 
 
 ## License
 
-Prototype / internal.
+Released under the [MIT License](LICENSE). Copyright (c) 2026 Sayandeep Das.
+
+## Author
+
+Built and maintained by **Sayandeep Das**.
+
+- X: [@deepmaxxing](https://x.com/deepmaxxing)
+- LinkedIn: [sayandeep02](https://www.linkedin.com/in/sayandeep02/)
+- Portfolio: [deepmaxxing.fun](https://www.deepmaxxing.fun/)

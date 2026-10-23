@@ -1,6 +1,11 @@
 {
   "name": "fluxberry",
   "private": true,
+  "license": "MIT",
+  "author": {
+    "name": "Sayandeep Das",
+    "url": "https://www.deepmaxxing.fun/"
+  },
   "version": "0.1.0",
   "description": "Fluxberry — a simple, AI-native applicant tracking system",
   "workspaces": [
