@@ -2,6 +2,11 @@
   "name": "@fluxberry/backend",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
+  "author": {
+    "name": "Sayandeep Das",
+    "url": "https://www.deepmaxxing.fun/"
+  },
   "type": "commonjs",
   "main": "dist/server.js",
   "scripts": {

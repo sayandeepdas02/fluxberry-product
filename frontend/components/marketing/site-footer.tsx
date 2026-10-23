@@ -90,7 +90,7 @@ export function SiteFooter() {
               )}
             >
               <p>
-                © {new Date().getFullYear()} {BRAND}. All rights reserved.
+                © {new Date().getFullYear()} {BRAND}, built by Sayandeep Das. MIT licensed.
               </p>
               <a
                 href={`mailto:${CONTACT_EMAIL}`}

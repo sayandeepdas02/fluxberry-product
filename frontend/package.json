@@ -2,6 +2,11 @@
   "name": "@fluxberry/frontend",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
+  "author": {
+    "name": "Sayandeep Das",
+    "url": "https://www.deepmaxxing.fun/"
+  },
   "scripts": {
     "dev": "next dev -p 3000",
     "build": "next build",
