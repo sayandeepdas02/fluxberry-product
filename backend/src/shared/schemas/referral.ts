@@ -3,7 +3,7 @@ import { REFERRAL_REWARD_STATUSES } from '../enums';
 import type { ReferralRewardStatus } from '../enums';
 
 /**
- * v1 scope decisions (see IMPLEMENTATION.md Phase 3.1): referral links are
+ * v1 scope decisions: referral links are
  * members-only (no external/alumni referrer auth surface) and always target a
  * specific open job — a workspace-wide "refer anyone, to anything" link would
  * need a public destination (careers page) that not every workspace has

@@ -69,7 +69,7 @@ export const STAGE_LABELS = SYSTEM_STAGE_LABELS;
  * customized) stage list; falls back to the system default labels, then the
  * raw id itself for a custom stage seen without its job's list loaded (e.g.
  * the cross-job "All candidates" view, which intentionally stays on system
- * stages only — see IMPLEMENTATION.md).
+ * stages only).
  */
 export function stageLabel(stages: PipelineStage[] | undefined, stageId: string): string {
   const match = stages?.find((s) => s.id === stageId);

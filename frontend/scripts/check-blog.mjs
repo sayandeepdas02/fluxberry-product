@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /**
  * Checks every post in content/blog against the blog's SEO rules
- * (docs/blog-seo-playbook.md): `npm run blog:check`, or pass slugs to check
+ * (title, description, takeaways, links, images): `npm run blog:check`, or pass slugs to check
  * only those. Errors break the page or the markup and exit 1; warnings are
- * the playbook's targets, worth fixing before a post ships.
+ * the SEO targets, worth fixing before a post ships.
  */
 import fs from 'node:fs';
 import path from 'node:path';
