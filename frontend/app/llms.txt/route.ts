@@ -1,5 +1,6 @@
 import { publicConfig } from '@/lib/config';
 import { getAllPosts } from '@/lib/blog';
+import { COMPETITORS, comparePath } from '@/components/marketing/compare/data';
 import { PLAN_PRICING } from '@/lib/pricing';
 import { CONTACT_EMAIL } from '@/components/marketing/landing/content';
 
@@ -21,6 +22,11 @@ Plans: Pro at $${PLAN_PRICING.PRO.monthly}/month and Max at $${PLAN_PRICING.MAX.
 - [Home](${site}/): what Zliptal does
 - [Pricing](${site}/pricing): Pro and Max plans, billing and FAQ
 - [About](${site}/about): who builds Zliptal and what it does, feature by feature
+
+## Comparisons
+
+- [All comparisons](${site}/comparisons): how Zliptal compares with other ATS and recruiting tools
+${COMPETITORS.map((c) => `- [Zliptal vs ${c.name}](${site}${comparePath(c.slug)})`).join('\n')}
 
 ## Blog
 

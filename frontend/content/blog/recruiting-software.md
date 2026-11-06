@@ -49,10 +49,10 @@ Recruiting software is any tool that helps a company find, screen, interview or 
 Sourcing software searches large databases of professional profiles for people who match a role, finds their contact details and helps you reach out. It matters most for hard-to-fill roles where the best people aren't applying.
 
 **Tools to consider:**
-- **[Juicebox](https://juicebox.ai/pricing)** searches 800M+ profiles across 30+ sources with plain-language prompts. It has a limited plan at no cost, and paid plans from $99 per seat a month. Best for solo recruiters who want AI search without Boolean strings.
-- **[SeekOut](https://www.seekout.com/pricing)** searches 1B+ profiles, with contact credits and multi-step campaigns. Recruit Core is $149 a month billed annually ($179 monthly), with a 14-day trial.
-- **[hireEZ](https://hireez.com/pricing/)** covers sourcing across 45+ platforms, a talent CRM and AI screening on top of your ATS. The solo plan starts at $494 a month, with a 7-day trial.
-- **[LinkedIn Recruiter](https://business.linkedin.com/hire/recruiter)** reaches LinkedIn's 1B+ members with advanced filters and InMail. Pricing is quote-only, and Recruiter Lite is the lighter option.
+- **Juicebox** searches 800M+ profiles across 30+ sources with plain-language prompts. It has a limited plan at no cost, and paid plans from $99 per seat a month. Best for solo recruiters who want AI search without Boolean strings.
+- **SeekOut** searches 1B+ profiles, with contact credits and multi-step campaigns. Recruit Core is $149 a month billed annually ($179 monthly), with a 14-day trial.
+- **hireEZ** covers sourcing across 45+ platforms, a talent CRM and AI screening on top of your ATS. The solo plan starts at $494 a month, with a 7-day trial.
+- **LinkedIn Recruiter** reaches LinkedIn's 1B+ members with advanced filters and InMail. Pricing is quote-only, and Recruiter Lite is the lighter option.
 - **Zliptal** (Max plan) lets you describe the person you want in one line, turns it into search filters you can edit before spending credits, then ranks matching contacts with a transparent match score. Contacts go into lists and email campaigns, and convert into candidates in the ATS.
 
 **When you need it:** once inbound applications stop producing the people you want, usually for senior, technical or niche roles.
@@ -62,9 +62,9 @@ Sourcing software searches large databases of professional profiles for people w
 A recruiting CRM keeps a relationship with people who aren't ready to apply yet: past finalists, sourced prospects, event contacts. You tag them into pools and send them sequences until the right role opens.
 
 **Tools to consider:**
-- **[Gem](https://www.gem.com/pricing)** combines CRM, sourcing and outreach sequences, either on top of your ATS or with its own. Pricing is based on company headcount, and companies under 30 employees get six months at no cost, then 50% off the first paid year.
-- **[Lever](https://www.lever.co/)** builds the CRM into the ATS, so nurture and hiring live in one record. Pricing is on request.
-- **[Beamery](https://beamery.com/)** is an enterprise talent CRM for skills-based hiring and workforce planning, sold by quote.
+- **Gem** combines CRM, sourcing and outreach sequences, either on top of your ATS or with its own. Pricing is based on company headcount, and companies under 30 employees get six months at no cost, then 50% off the first paid year.
+- **Lever** builds the CRM into the ATS, so nurture and hiring live in one record. Pricing is on request.
+- **Beamery** is an enterprise talent CRM for skills-based hiring and workforce planning, sold by quote.
 
 **When you need it:** when you hire for the same kinds of roles repeatedly and want to stop starting every search from zero.
 
@@ -76,9 +76,9 @@ The ATS is the system of record for hiring. It publishes jobs to your careers pa
 
 **Tools to consider:**
 - **Zliptal** scores every applicant 0–10 with a written summary, strengths and concerns, for a flat {{price:pro:monthly}}/month with unlimited team members. It doesn't have interview kits or scorecards yet.
-- **[Greenhouse](https://www.greenhouse.com/)** is the benchmark for structured interviews, with 400+ integrations and quote-only pricing.
-- **[Ashby](https://www.ashbyhq.com/pricing)** bundles CRM, scheduling and deep analytics, from $300 a month for companies with 1–10 employees.
-- **[Workable](https://www.workable.com/pricing)** posts to 200+ job boards and has a 15-day trial, from $299 a month billed annually.
+- **Greenhouse** is the benchmark for structured interviews, with 400+ integrations and quote-only pricing.
+- **Ashby** bundles CRM, scheduling and deep analytics, from $300 a month for companies with 1–10 employees.
+- **Workable** posts to 200+ job boards and has a 15-day trial, from $299 a month billed annually.
 
 We compare ten of them in detail in our guide to the [best applicant tracking systems for small businesses](/blog/best-applicant-tracking-systems).
 
@@ -91,19 +91,19 @@ AI screening reads applications and helps you decide who to look at first. Some 
 **Built into the ATS:** Zliptal, Lever, Workable, Pinpoint, Breezy HR and Manatal score applicants; Greenhouse prioritises them with Talent Matching; Ashby and Recruitee check your criteria without scoring.
 
 **Layers on top of an existing ATS:**
-- **[hireEZ](https://hireez.com/)** adds applicant review and AI screening to the ATS you already run.
-- **[Metaview](https://www.metaview.ai/pricing)** has an application-review agent alongside its note-taker and sourcing agent.
-- **[Gem](https://www.gem.com/product/ai-app-review)** scores and ranks every inbound application with an explanation.
+- **hireEZ** adds applicant review and AI screening to the ATS you already run.
+- **Metaview** has an application-review agent alongside its note-taker and sourcing agent.
+- **Gem** scores and ranks every inbound application with an explanation.
 
-**What to check:** whether you can see the reasoning behind every score, what personal data is removed first, and whether the tool has been independently audited for bias. New York City requires a [bias audit and candidate notice](https://www.nyc.gov/site/dca/about/automated-employment-decision-tools.page) for automated screening tools, and the EU AI Act's rules for high-risk hiring AI, which include candidate screening, apply from December 2027. Our [ATS guide](/blog/best-applicant-tracking-systems) covers the questions to ask vendors.
+**What to check:** whether you can see the reasoning behind every score, what personal data is removed first, and whether the tool has been independently audited for bias. New York City requires a bias audit and candidate notice for automated screening tools, and the EU AI Act's rules for high-risk hiring AI, which include candidate screening, apply from December 2027. Our [ATS guide](/blog/best-applicant-tracking-systems) covers the questions to ask vendors.
 
 ## 5. Interview scheduling
 
 Scheduling tools let candidates pick a slot from interviewers' real availability, send reminders and handle reschedules, so no one spends days on email back-and-forth.
 
 **Tools to consider:**
-- **[Calendly](https://calendly.com/pricing)** handles one-on-one screens, panels and group interviews, and connects to many ATSs. Standard is $10 per seat a month billed annually ($12 monthly), Teams $16 ($20 monthly), and there is a 14-day trial.
-- **[GoodTime](https://goodtime.io/)** automates complex loops: multi-day onsites, panels, interviewer load-balancing and automatic replacement. It is priced on the number of candidates a year, not per user, and syncs both ways with Greenhouse, Lever, Ashby, Workday and iCIMS.
+- **Calendly** handles one-on-one screens, panels and group interviews, and connects to many ATSs. Standard is $10 per seat a month billed annually ($12 monthly), Teams $16 ($20 monthly), and there is a 14-day trial.
+- **GoodTime** automates complex loops: multi-day onsites, panels, interviewer load-balancing and automatic replacement. It is priced on the number of candidates a year, not per user, and syncs both ways with Greenhouse, Lever, Ashby, Workday and iCIMS.
 - **Built into your ATS:** Ashby, Workable, Breezy HR and BambooHR include self-scheduling, and Zliptal books interviews straight onto Google Calendar.
 
 **When you need it:** a calendar link is enough for most small teams; add a dedicated tool when panels and multi-round loops add days to every hire.
@@ -113,9 +113,9 @@ Scheduling tools let candidates pick a slot from interviewers' real availability
 Assessment software tests skills before or instead of an early interview, with coding challenges, cognitive and personality tests, or job simulations.
 
 **Tools to consider:**
-- **[TestGorilla](https://www.testgorilla.com/pricing/)** has a library of 350+ tests for roles of all kinds. A limited plan costs nothing, and Core is $142 a month billed annually.
-- **[HackerRank](https://www.hackerrank.com/work/free-trial)** runs coding screens and live technical interviews with plagiarism detection. The [Starter plan](https://www.hackerrank.com/writing/evaluation-software-for-ai-skills-under-200-month-hackerrank-starter) is $199 a month, or $1,990 a year.
-- **[Criteria](https://www.criteriacorp.com/plans-and-pricing)** offers cognitive, personality and skills tests plus video interviewing, sold by quote with a 14-day trial.
+- **TestGorilla** has a library of 350+ tests for roles of all kinds. A limited plan costs nothing, and Core is $142 a month billed annually.
+- **HackerRank** runs coding screens and live technical interviews with plagiarism detection. The Starter plan is $199 a month, or $1,990 a year.
+- **Criteria** offers cognitive, personality and skills tests plus video interviewing, sold by quote with a 14-day trial.
 
 **When you need it:** when resumes are a weak signal for the role, such as engineering, sales or roles open to career changers.
 
@@ -124,8 +124,8 @@ Assessment software tests skills before or instead of an early interview, with c
 Interview intelligence tools join the interview, record and transcribe it, and write up notes and highlights against your scorecard, so interviewers can listen instead of typing.
 
 **Tools to consider:**
-- **[Metaview](https://www.metaview.ai/pricing?product=notes)** writes interview notes automatically. Its note-taker has a limited plan (25 calls a month) and Pro at $60 per user a month.
-- **[BrightHire](https://brighthire.com/)** records interviews and builds structured highlights tied to scorecards. It has been part of [Zoom since December 2025](https://www.zoom.com/en/blog/zoom-acquires-brighthire/), and pricing is by demo.
+- **Metaview** writes interview notes automatically. Its note-taker has a limited plan (25 calls a month) and Pro at $60 per user a month.
+- **BrightHire** records interviews and builds structured highlights tied to scorecards. It has been part of Zoom since December 2025, and pricing is by demo.
 - **Built into your ATS:** Lever includes AI interview transcripts and summaries, and Greenhouse and Ashby offer note-takers.
 
 For more options, see our comparison of [Metaview alternatives](/blog/metaview-alternatives).
@@ -137,10 +137,10 @@ For more options, see our comparison of [Metaview alternatives](/blog/metaview-a
 The last step verifies the candidate and gets the offer signed. Background check providers run identity, criminal, employment and education checks; e-signature tools handle the offer letter.
 
 **Tools to consider:**
-- **[Checkr](https://checkr.com/pricing)** runs fast, API-driven US checks, pay-as-you-go from $29.99 (Basic) to $94.99 (Complete) per report, plus pass-through fees.
-- **[GoodHire](https://www.goodhire.com/pricing/)**, owned by Checkr, is aimed at small businesses running occasional checks, at the same per-check prices.
-- **[First Advantage](https://fadv.com/solutions/small-business-background-checks/)**, which [completed its acquisition of Sterling](https://www.globenewswire.com/news-release/2024/10/31/2972659/0/en/First-Advantage-Completes-Acquisition-of-Sterling-Check-for-2-2-Billion.html) in October 2024, covers global, multi-country screening.
-- **[DocuSign](https://ecom.docusign.com/en-US/plans-and-pricing/esignature)** signs offer letters and onboarding documents, from $30 per user a month on the Standard plan (billed annually).
+- **Checkr** runs fast, API-driven US checks, pay-as-you-go from $29.99 (Basic) to $94.99 (Complete) per report, plus pass-through fees.
+- **GoodHire**, owned by Checkr, is aimed at small businesses running occasional checks, at the same per-check prices.
+- **First Advantage**, which completed its acquisition of Sterling in October 2024, covers global, multi-country screening.
+- **DocuSign** signs offer letters and onboarding documents, from $30 per user a month on the Standard plan (billed annually).
 
 Many ATSs include offers with e-signature (Ashby, Workable, BambooHR, Pinpoint), and Zliptal sends offers as a link the candidate accepts online. Our integration guides for [Greenhouse](/blog/tools-that-integrate-with-greenhouse), [Lever](/blog/tools-that-integrate-with-lever), [Ashby](/blog/tools-that-integrate-with-ashby), [BambooHR](/blog/tools-that-integrate-with-bamboohr) and [SAP SuccessFactors](/blog/tools-that-integrate-with-sap-successfactors) show which checks connect to each.
 

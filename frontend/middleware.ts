@@ -63,6 +63,7 @@ const authMiddleware = clerkMiddleware(async (auth, req) => {
 const isSearchableRoute = createRouteMatcher([
   '/',
   '/blog(.*)',
+  '/comparisons(.*)',
   '/pricing',
   '/about',
   '/privacy',

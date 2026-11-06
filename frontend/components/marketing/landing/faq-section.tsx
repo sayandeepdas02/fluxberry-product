@@ -60,7 +60,17 @@ function FaqRow({ item }: { item: FaqItem }) {
  * 1200px). On desktop Framer lays these out in a grid whose empty second row
  * adds its 60px gap under the questions, hence the 160px bottom padding.
  */
-export function FaqSection() {
+export function FaqSection({
+  items = FAQ.items,
+  pill = FAQ.pill,
+  title = FAQ.title,
+  lead = FAQ.lead,
+}: {
+  items?: readonly FaqItem[];
+  pill?: string;
+  title?: string;
+  lead?: string;
+} = {}) {
   return (
     <section
       id="faq"
@@ -71,15 +81,15 @@ export function FaqSection() {
           {/* Centred (tablet/phone) keeps the 500px measure; left-aligned in its 620px desktop column, the
               title takes the full width so it sits on one line instead of breaking early. */}
           <SectionHeader
-            pill={FAQ.pill}
-            title={FAQ.title}
-            lead={FAQ.lead}
+            pill={pill}
+            title={title}
+            lead={lead}
             align="left"
             titleClassName="max-w-[500px] desktop:max-w-none"
           />
         </Reveal>
         <Reveal className="flex w-full flex-col gap-2.5 pt-2.5 tablet:max-w-[560px] desktop:w-[620px] desktop:max-w-none desktop:shrink-0">
-          {FAQ.items.map((item) => (
+          {items.map((item) => (
             <FaqRow key={item.q} item={item} />
           ))}
         </Reveal>

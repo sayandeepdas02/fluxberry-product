@@ -20,7 +20,7 @@ takeaways:
   - 'Zliptal connects to Ashby through signed webhooks and an automation tool, not a native app.'
 ---
 
-Ashby is a modern ATS built with an API-first architecture and unusually strong native analytics. It appeals to high-growth tech companies that want structured hiring without the enterprise bloat of legacy platforms. Its [integration directory](https://www.ashbyhq.com/integrations) of 250+ integrations is smaller than Greenhouse's or Lever's, and its [public API](https://developers.ashbyhq.com/) covers what the directory doesn't.
+Ashby is a modern ATS built with an API-first architecture and unusually strong native analytics. It appeals to high-growth tech companies that want structured hiring without the enterprise bloat of legacy platforms. Its integration directory of 250+ integrations is smaller than Greenhouse's or Lever's, and its public API covers what the directory doesn't.
 
 This guide covers 10 Ashby integrations across five categories, chosen for integration quality and the specific gap they fill. Running Greenhouse or Lever instead? See our [Greenhouse integrations](/blog/tools-that-integrate-with-greenhouse) and [Lever integrations](/blog/tools-that-integrate-with-lever) guides.
 
@@ -53,7 +53,7 @@ Three areas where integrations add the most value:
 
 ### 1. Zliptal
 
-Zliptal is an AI-native hiring platform that scores every applicant against your job requirements on arrival. Ashby has AI screening of its own, [AI-Assisted Application Review](https://www.ashbyhq.com/product-updates/ai-assisted-application-review), which marks each resume as meeting or not meeting criteria you define. Ashby says its AI never gives applicants a numerical rating; you can sort by the share of criteria met, but there is no overall score. Zliptal gives one: every applicant gets a score, a written summary, strengths and concerns, so you start from a ranked shortlist.
+Zliptal is an AI-native hiring platform that scores every applicant against your job requirements on arrival. Ashby has AI screening of its own, AI-Assisted Application Review, which marks each resume as meeting or not meeting criteria you define. Ashby says its AI never gives applicants a numerical rating; you can sort by the share of criteria met, but there is no overall score. Zliptal gives one: every applicant gets a score, a written summary, strengths and concerns, so you start from a ranked shortlist.
 
 **How it connects:** There is no native Ashby integration yet. Zliptal runs its own pipeline and careers page, and sends a signed webhook when a candidate is shortlisted, changes stage or is hired. Route those events into Ashby with an automation tool such as Zapier or Make, or a short script against Ashby's API, and your shortlist reaches Ashby without anyone rereading resumes. Ashby takes over from pipeline management onward, while Zliptal handles the screening that happens before.
 
@@ -137,7 +137,7 @@ Ashby gives you a modern ATS with strong analytics and structured workflows. Zli
 
 ### Does Ashby have built-in AI screening?
 
-Yes. Ashby's [AI-Assisted Application Review](https://docs.ashbyhq.com/ai-assisted-application-review) checks each resume against criteria you set and marks it "Meets" or "Does not meet" for each one. Ashby says the AI never gives applicants a numerical rating, and a person makes every decision, though you can sort applicants by the percentage of criteria they meet. If you want a ranked shortlist with a score and written reasoning for every applicant, that is where a tool like Zliptal fits.
+Yes. Ashby's AI-Assisted Application Review checks each resume against criteria you set and marks it "Meets" or "Does not meet" for each one. Ashby says the AI never gives applicants a numerical rating, and a person makes every decision, though you can sort applicants by the percentage of criteria they meet. If you want a ranked shortlist with a score and written reasoning for every applicant, that is where a tool like Zliptal fits.
 
 ### Is Ashby's integration ecosystem large enough?
 

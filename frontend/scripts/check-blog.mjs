@@ -106,8 +106,9 @@ function check(slug) {
   }
   const otherPosts = new Set(blogLinks.map((href) => href.split(/[#?]/)[0]).filter((href) => href !== `/blog/${slug}`));
   if (otherPosts.size < 2) warnings.push(`links to ${otherPosts.size} other post(s) (aim ≥ 2)`);
-  if (!links.some((href) => /^https?:\/\//.test(href))) {
-    warnings.push('no external links: cite sources (pricing pages, docs, research)');
+  // House rule: never link to another company's site (it would give them a backlink). Name the source in text.
+  for (const href of links.filter((href) => /^https?:\/\//.test(href))) {
+    errors.push(`external link ${href}: remove it, we do not link to other sites`);
   }
 
   // Images.

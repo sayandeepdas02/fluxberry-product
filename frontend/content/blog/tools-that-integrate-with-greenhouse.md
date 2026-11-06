@@ -20,7 +20,7 @@ takeaways:
   - 'Zliptal connects through signed webhooks and an automation tool such as Zapier, not a native Greenhouse app.'
 ---
 
-Greenhouse is one of the most widely adopted applicant tracking systems for scaling companies. Its structured hiring framework — interview kits, scorecards, approval chains — gives teams a repeatable process. Its [integration marketplace](https://integrations.greenhouse.com/) lists over 400 pre-built integrations, so teams can extend that process with specialised tools at every stage.
+Greenhouse is one of the most widely adopted applicant tracking systems for scaling companies. Its structured hiring framework — interview kits, scorecards, approval chains — gives teams a repeatable process. Its integration marketplace lists over 400 pre-built integrations, so teams can extend that process with specialised tools at every stage.
 
 This guide covers 11 Greenhouse integrations across five categories, chosen for integration depth and the specific problem they solve. If your team runs Lever or Ashby instead, see our guides to [Lever integrations](/blog/tools-that-integrate-with-lever) and [Ashby integrations](/blog/tools-that-integrate-with-ashby).
 
@@ -54,7 +54,7 @@ Three characteristics of a strong Greenhouse integration:
 
 ### 1. Zliptal
 
-Zliptal is an AI-native hiring platform that scores every applicant against your job requirements the moment they apply. Greenhouse now has AI matching of its own: [Talent Matching, part of Greenhouse Real Talent](https://www.greenhouse.com/real-talent-candidate-matching), prioritises applicants against calibrations a recruiter sets. Zliptal works before Greenhouse instead, on its own careers page and pipeline, so by the time a recruiter opens Greenhouse every candidate has a score, a written summary, and the reasoning behind it.
+Zliptal is an AI-native hiring platform that scores every applicant against your job requirements the moment they apply. Greenhouse now has AI matching of its own: Talent Matching, part of Greenhouse Real Talent, prioritises applicants against calibrations a recruiter sets. Zliptal works before Greenhouse instead, on its own careers page and pipeline, so by the time a recruiter opens Greenhouse every candidate has a score, a written summary, and the reasoning behind it.
 
 **How it connects:** There is no native Greenhouse integration yet. Zliptal runs its own pipeline and careers page, and sends a signed webhook when a candidate is shortlisted, changes stage or is hired. Route those events into Greenhouse with an automation tool such as Zapier or Make, or a short script against Greenhouse's API, and your shortlist reaches Greenhouse without anyone rereading resumes.
 
@@ -143,7 +143,7 @@ Greenhouse gives you structured hiring. Zliptal gives you AI-powered screening s
 
 ### Does Greenhouse have built-in AI screening?
 
-Yes. Since June 2025, [Greenhouse Real Talent](https://www.greenhouse.com/product-features/greenhouse-real-talent) has included Talent Matching, which matches resumes against recruiter-defined, weighted calibrations and explains each recommendation, alongside spam and fraud detection. A separate tool such as Zliptal makes sense when you want screening to happen before candidates reach Greenhouse, with a score, summary, strengths and concerns for every applicant.
+Yes. Since June 2025, Greenhouse Real Talent has included Talent Matching, which matches resumes against recruiter-defined, weighted calibrations and explains each recommendation, alongside spam and fraud detection. A separate tool such as Zliptal makes sense when you want screening to happen before candidates reach Greenhouse, with a score, summary, strengths and concerns for every applicant.
 
 ### How do I choose between Greenhouse integrations in the same category?
 

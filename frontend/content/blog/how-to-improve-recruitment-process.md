@@ -97,7 +97,7 @@ Screening is where most time is wasted. A two-person team should not be reading 
 
 **Better interviews:**
 
-- **Standardise questions per role.** Every candidate for the same role should get the same core questions. This makes comparison possible and reduces bias. Google's [guide to structured interviewing](https://rework.withgoogle.com/guides/hiring-use-structured-interviewing/steps/introduction/) is a good place to start.
+- **Standardise questions per role.** Every candidate for the same role should get the same core questions. This makes comparison possible and reduces bias. Google's guide to structured interviewing is a good place to start.
 - **Collect feedback independently.** Interviewers should submit their scores before seeing anyone else's evaluation. Group discussions should synthesise independent assessments, not replace them. If writing up notes is the bottleneck, compare [interview note-taking tools](/blog/metaview-alternatives).
 - **Respect the candidate's time.** Four rounds over six weeks is not thorough — it is slow. Most roles can be evaluated in two to three well-designed rounds within two weeks.
 

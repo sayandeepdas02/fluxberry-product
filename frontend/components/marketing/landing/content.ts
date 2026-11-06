@@ -157,7 +157,7 @@ export const NAV_LINKS: (NavLinkItem | NavGroup)[] = [
     items: [
       { label: 'Blog', href: '/blog', icon: Newspaper },
       { label: 'Careers', href: '/careers', icon: BriefcaseBusiness, comingSoon: true },
-      { label: 'Comparisons', href: '/comparisons', icon: Scale, comingSoon: true },
+      { label: 'Comparisons', href: '/comparisons', icon: Scale },
       { label: 'Knowledge Base', href: '/knowledge-base', icon: BookOpen, comingSoon: true },
       { label: 'Integrations', href: '/integrations', icon: Blocks, comingSoon: true },
     ],
