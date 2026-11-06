@@ -8,7 +8,7 @@ import { publicConfig } from '@/lib/config';
 import { COMPANY_PROFILES } from '@/lib/founder';
 
 const description =
-  'Zliptal is the AI-native hiring platform for small teams — screen, interview, and hire faster without the bloat of a legacy ATS.';
+  'Zliptal AI is the AI-native hiring platform for small teams — screen, interview, and hire faster without the bloat of a legacy ATS.';
 
 const organizationJsonLd = {
   '@context': 'https://schema.org',

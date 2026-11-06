@@ -17,9 +17,9 @@ import { Blocks, BookOpen, BriefcaseBusiness, Newspaper, Scale } from 'lucide-re
 export const BRAND = 'Zliptal';
 
 export const HERO = {
-  badge: 'For growing teams',
-  title: 'Hiring, made simpler.',
-  lead: 'Find, screen, and hire in one place.',
+  badge: 'Built for fast moving teams',
+  title: 'The #1 AI Native Hiring Platform',
+  lead: ['Zliptal is an AI native hiring tool that is fast and simple.', 'Built for founders & hiring managers.'],
   cta: { label: 'Get Started', href: '/sign-up' },
   /**
    * The product shot: the Zliptal dashboard alone, edge to edge. The hero draws it live
@@ -27,7 +27,7 @@ export const HERO = {
    */
   image: {
     src: '/landing/dashboard.jpg',
-    alt: 'Zliptal hiring pipeline with a candidate match preview',
+    alt: 'Zliptal dashboard with open jobs, the hiring pipeline and top candidates',
     width: 1960,
     height: 1208,
   },

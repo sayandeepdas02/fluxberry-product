@@ -6,7 +6,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: publicConfig.appName,
     short_name: 'Zliptal',
     description:
-      'Zliptal is the AI-native hiring platform for small teams — screen, interview, and hire faster without the bloat of a legacy ATS.',
+      'Zliptal AI is the AI-native hiring platform for small teams — screen, interview, and hire faster without the bloat of a legacy ATS.',
     start_url: '/',
     display: 'standalone',
     background_color: '#ffffff',
