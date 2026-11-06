@@ -2,6 +2,7 @@ import type { MetadataRoute } from 'next';
 import { publicConfig } from '@/lib/config';
 import { getAllPosts } from '@/lib/blog';
 import { fetchSitemapEntries } from '@/lib/public-api';
+import { COMPETITORS, comparePath } from '@/components/marketing/compare/data';
 import { LEGAL_LINKS } from '@/components/marketing/landing/content';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -18,6 +19,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     { url: `${publicConfig.appUrl}/pricing` },
     { url: `${publicConfig.appUrl}/about` },
+    { url: `${publicConfig.appUrl}/comparisons` },
+    ...COMPETITORS.map((c) => ({ url: `${publicConfig.appUrl}${comparePath(c.slug)}` })),
     ...LEGAL_LINKS.map((link) => ({ url: `${publicConfig.appUrl}${link.href}` })),
     ...posts.map((post) => ({
       url: `${publicConfig.appUrl}/blog/${post.slug}`,

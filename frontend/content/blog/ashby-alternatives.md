@@ -20,7 +20,7 @@ takeaways:
   - 'Zliptal suits small teams that want every applicant scored with written reasoning, at a flat price with unlimited team members. It has no native integrations or interview recording yet.'
 ---
 
-Ashby is one of the strongest applicant tracking systems a scaling company can buy. It puts the ATS, a recruiting CRM, scheduling and unusually deep analytics in one product, and growth has followed: Ashby reported more than 2,700 customers when it raised a [$50M Series D](https://www.ashbyhq.com/blog/engineering/series-d) in July 2025.
+Ashby is one of the strongest applicant tracking systems a scaling company can buy. It puts the ATS, a recruiting CRM, scheduling and unusually deep analytics in one product, and growth has followed: Ashby reported more than 2,700 customers when it raised a $50M Series D in July 2025.
 
 But depth has a price, in money and in setup time, and not every team needs it. If you are a startup or small team weighing Ashby alternatives, this guide compares nine of them on what they cost, what their AI actually does, and who each one suits. We make Zliptal, which is on this list; every other tool is described from its own pricing and product pages, checked in September 2026.
 
@@ -42,9 +42,9 @@ But depth has a price, in money and in setup time, and not every team needs it. 
 
 Ashby's strengths are real, so it is worth being precise about why teams still look elsewhere. Four reasons come up most:
 
-1. **Price for a small team.** Ashby's [Foundations plan](https://www.ashbyhq.com/pricing) is priced by company headcount rather than seats: $300 a month for 1–10 employees, rising to $900 a month at 76–100 employees, with 10% off for paying annually. SSO is $100 a month on Foundations, and the AI Notetaker is an add-on on every plan. For a ten-person startup hiring two people a year, that is a lot of software.
-2. **Features you have to grow into.** Custom fields, custom saved reports and dashboards, approval workflows and a sandbox are not on Foundations; they start at Plus, which is quote-only and seat-based. On seat-based plans, [hiring managers with open roles need paid seats](https://docs.ashbyhq.com/seat-based-pricing); interviewers who only leave feedback do not.
-3. **AI that checks criteria rather than scoring people.** Ashby's [AI-Assisted Application Review](https://docs.ashbyhq.com/ai-assisted-application-review) marks each resume as meeting or not meeting criteria you write, with citations. Ashby says it never gives applicants a numerical rating; you can sort by the share of criteria met. That is a defensible design choice, but some teams want an overall score and a written summary for every applicant.
+1. **Price for a small team.** Ashby's Foundations plan is priced by company headcount rather than seats: $300 a month for 1–10 employees, rising to $900 a month at 76–100 employees, with 10% off for paying annually. SSO is $100 a month on Foundations, and the AI Notetaker is an add-on on every plan. For a ten-person startup hiring two people a year, that is a lot of software.
+2. **Features you have to grow into.** Custom fields, custom saved reports and dashboards, approval workflows and a sandbox are not on Foundations; they start at Plus, which is quote-only and seat-based. On seat-based plans, hiring managers with open roles need paid seats; interviewers who only leave feedback do not.
+3. **AI that checks criteria rather than scoring people.** Ashby's AI-Assisted Application Review marks each resume as meeting or not meeting criteria you write, with citations. Ashby says it never gives applicants a numerical rating; you can sort by the share of criteria met. That is a defensible design choice, but some teams want an overall score and a written summary for every applicant.
 4. **A demo before anything else.** There is no free trial of the ATS, so you can't try it on a live role before talking to sales.
 
 None of these make Ashby a bad choice. They make it a choice for a particular kind of team, which is why the alternatives below are sorted by who they suit.
@@ -92,7 +92,7 @@ Compared with Ashby, Zliptal is far narrower: there is no recruiting CRM with mu
 
 ### 2. Greenhouse
 
-[Greenhouse](https://www.greenhouse.com/) is the standard for structured hiring: interview kits, scorecards, approvals and a marketplace of [over 400 pre-built integrations](https://integrations.greenhouse.com/). Its [Talent Matching](https://www.greenhouse.com/real-talent-candidate-matching), part of Real Talent, prioritises applicants against weighted criteria that recruiters set, and it is included on all three plans.
+Greenhouse is the standard for structured hiring: interview kits, scorecards, approvals and a marketplace of over 400 pre-built integrations. Its Talent Matching, part of Real Talent, prioritises applicants against weighted criteria that recruiters set, and it is included on all three plans.
 
 **Best for:** Mid-size companies that want a rigorous, repeatable interview process and a large integration ecosystem.
 
@@ -100,7 +100,7 @@ Compared with Ashby, Greenhouse has the bigger marketplace and a longer track re
 
 **Pros:** Mature structured-hiring tools; Talent Matching included on every plan; fraud detection and ID verification on Plus and Pro.
 
-**Cons:** [Quote-only pricing](https://www.greenhouse.com/pricing) across Core, Plus and Pro; demo only, no trial; auto-reject, email automation and texting start at Plus.
+**Cons:** Quote-only pricing across Core, Plus and Pro; demo only, no trial; auto-reject, email automation and texting start at Plus.
 
 **Pricing:** Quote only.
 
@@ -108,15 +108,15 @@ Compared with Ashby, Greenhouse has the bigger marketplace and a longer track re
 
 ### 3. Lever
 
-[Lever](https://www.lever.co/) combines an ATS with a recruiting CRM, so passive candidates and past applicants can be nurtured over months. Its core platform includes [AI-powered screening](https://www.lever.co/solutions/ai-powered-screening) that gives applicants a fit score with a written justification, plus AI interview transcripts and summaries. Lever is owned by Employ, which also owns JazzHR and Jobvite.
+Lever combines an ATS with a recruiting CRM, so passive candidates and past applicants can be nurtured over months. Its core platform includes AI-powered screening that gives applicants a fit score with a written justification, plus AI interview transcripts and summaries. Lever is owned by Employ, which also owns JazzHR and Jobvite.
 
 **Best for:** Teams that recruit from a long-term talent pipeline as much as from inbound applications.
 
 Compared with Ashby, Lever's CRM is the centre of the product rather than one module; Ashby's analytics are deeper out of the box.
 
-**Pros:** Strong candidate relationship tools; AI fit scores and interview summaries in the core platform; 300+ integrations in its [marketplace](https://marketplace.lever.co/).
+**Pros:** Strong candidate relationship tools; AI fit scores and interview summaries in the core platform; 300+ integrations in its marketplace.
 
-**Cons:** [Pricing on request](https://www.lever.co/pricing) and no trial; several add-ons, including onboarding, are quoted separately.
+**Cons:** Pricing on request and no trial; several add-ons, including onboarding, are quoted separately.
 
 **Pricing:** Quote only.
 
@@ -124,7 +124,7 @@ Compared with Ashby, Lever's CRM is the centre of the product rather than one mo
 
 ### 4. Gem
 
-[Gem](https://www.gem.com/) started as a sourcing and CRM layer and now sells an all-in-one platform with its own ATS. Its AI Application Review Agent [scores and ranks every inbound application](https://www.gem.com/product/ai-app-review) with an explanation, and its sourcing agent searches 800M+ profiles.
+Gem started as a sourcing and CRM layer and now sells an all-in-one platform with its own ATS. Its AI Application Review Agent scores and ranks every inbound application with an explanation, and its sourcing agent searches 800M+ profiles.
 
 **Best for:** Teams whose hiring depends on outbound sourcing as much as inbound applications.
 
@@ -134,13 +134,13 @@ Compared with Ashby, Gem is stronger on sourcing and outreach; Ashby is the more
 
 **Cons:** Custom pricing above the startup bands; AI agents need the pricier AI-powered seat.
 
-**Pricing:** Its [startup calculator](https://www.gem.com/pricing) shows $300/month for 1–10 employees billed monthly, and less on annual terms; larger companies get a quote.
+**Pricing:** Its startup calculator shows $300/month for 1–10 employees billed monthly, and less on annual terms; larger companies get a quote.
 
 **Switching from Ashby:** Gem offers migration help for teams moving from Greenhouse or Lever; ask about Ashby specifically.
 
 ### 5. Workable
 
-[Workable](https://www.workable.com/) is an all-round ATS for growing companies, with posting to 200+ job boards, a careers page builder and an HR suite you can bundle in. Its Workable Agent, generally available since September 2026, [scores candidates on up to 14 criteria](https://www.workable.com/workable-ai) and produces a ranked shortlist with reasoning.
+Workable is an all-round ATS for growing companies, with posting to 200+ job boards, a careers page builder and an HR suite you can bundle in. Its Workable Agent, generally available since September 2026, scores candidates on up to 14 criteria and produces a ranked shortlist with reasoning.
 
 **Best for:** Growing companies that want broad job-board reach and AI sourcing and screening in one tool.
 
@@ -150,13 +150,13 @@ Compared with Ashby, Workable is simpler to run and has a real trial; Ashby is d
 
 **Cons:** Priced by company size, so even a small team pays at least $299 a month; texting, video interviews and assessments are add-ons on Standard; the AI agent is billed in credits.
 
-**Pricing:** [Standard](https://www.workable.com/pricing) is $299/month billed annually ($360 monthly) for 1–20 employees, and $419/month billed annually for 21–50.
+**Pricing:** Standard is $299/month billed annually ($360 monthly) for 1–20 employees, and $419/month billed annually for 21–50.
 
 **Switching from Ashby:** Use the trial to rebuild one live role before you commit.
 
 ### 6. Teamtailor
 
-[Teamtailor](https://www.teamtailor.com/en/) is built around employer branding: a career site builder in 50+ languages, content that shows off your team, and a talent CRM for people who aren't ready to apply. Its AI features, including the Co-pilot add-on, summarise resumes and flag promising applicants as they arrive.
+Teamtailor is built around employer branding: a career site builder in 50+ languages, content that shows off your team, and a talent CRM for people who aren't ready to apply. Its AI features, including the Co-pilot add-on, summarise resumes and flag promising applicants as they arrive.
 
 **Best for:** Companies whose hiring depends on standing out to candidates, especially in Europe.
 
@@ -164,13 +164,13 @@ Compared with Ashby, Teamtailor is weaker on analytics and stronger on the candi
 
 **Pros:** Unlimited users and job postings on every plan; 450+ integrations; a strong career site out of the box.
 
-**Cons:** [Quote-only pricing](https://www.teamtailor.com/en/pricing/) and no advertised trial; Co-pilot is a separately activated add-on.
+**Cons:** Quote-only pricing and no advertised trial; Co-pilot is a separately activated add-on.
 
 **Pricing:** Quote only.
 
 ### 7. Pinpoint
 
-[Pinpoint](https://www.pinpointhq.com/) is an ATS for in-house talent teams hiring across several locations, brands or role types. Its [AI Match Score](https://www.pinpointhq.com/features/ai-match-score) gives each applicant a 1–10 score with strengths, concerns and areas to probe in interview.
+Pinpoint is an ATS for in-house talent teams hiring across several locations, brands or role types. Its AI Match Score gives each applicant a 1–10 score with strengths, concerns and areas to probe in interview.
 
 **Best for:** In-house teams of one to five recruiters at companies with 50 to 5,000 employees, by Pinpoint's own description.
 
@@ -184,7 +184,7 @@ Compared with Ashby, Pinpoint covers similar ground for a similar buyer, with pr
 
 ### 8. Breezy HR
 
-[Breezy HR](https://breezy.hr/) is a straightforward ATS with flat monthly plans, posting to 50+ job boards and a drag-and-drop pipeline. Its Applicant Insights feature gives each candidate a [0–10 score](https://breezy.hr/p/breezy-intelligence) against the job, with a written explanation.
+Breezy HR is a straightforward ATS with flat monthly plans, posting to 50+ job boards and a drag-and-drop pipeline. Its Applicant Insights feature gives each candidate a 0–10 score against the job, with a written explanation.
 
 **Best for:** Budget-conscious small teams that want flat pricing and AI scoring.
 
@@ -194,11 +194,11 @@ Compared with Ashby, Breezy is much simpler and much cheaper, with far less in t
 
 **Cons:** Scorecards and interview guides need the Growth plan; API access and bulk data export/import sit on Custom Pro; AI runs on credits.
 
-**Pricing:** [Startup](https://breezy.hr/pricing) is $157/month billed annually ($189 monthly); Growth $273; Business $439.
+**Pricing:** Startup is $157/month billed annually ($189 monthly); Growth $273; Business $439.
 
 ### 9. Zoho Recruit
 
-[Zoho Recruit](https://www.zoho.com/recruit/) is a configurable ATS and recruitment CRM that fits naturally into the wider Zoho suite. Its Zia AI matches candidates to jobs; candidate ranking is still listed as coming soon on its [AI roadmap](https://www.zoho.com/recruit/ai-feature-roadmap.html).
+Zoho Recruit is a configurable ATS and recruitment CRM that fits naturally into the wider Zoho suite. Its Zia AI matches candidates to jobs; candidate ranking is still listed as coming soon on its AI roadmap.
 
 **Best for:** Companies already using Zoho, and teams that want deep customisation at a low price.
 
@@ -208,7 +208,7 @@ Compared with Ashby, Zoho Recruit is cheaper and more configurable, but less pol
 
 **Cons:** Priced per recruiter with active-job caps per licence; many features, including custom reports and webhooks, are Enterprise-only.
 
-**Pricing:** [Standard](https://www.zoho.com/recruit/pricing.html) is $25 per recruiter per month billed annually ($30 monthly), with 10 active jobs per licence; Enterprise is $50.
+**Pricing:** Standard is $25 per recruiter per month billed annually ($30 monthly), with 10 active jobs per licence; Enterprise is $50.
 
 ## Ashby alternatives by use case
 
@@ -240,7 +240,7 @@ If the honest answer is "all of them", Ashby may still be the right tool, and th
 
 ![Four-week plan for switching from Ashby: export and set up, run both tools side by side, then close out](/blog/ashby-alternatives/switch-from-ashby-four-week-plan.webp "Run both tools side by side, so no candidate falls through the gap.")
 
-1. **Export first.** Ashby exports candidate lists to CSV through Custom List reports, which [aren't available on Foundations](https://docs.ashbyhq.com/how-do-i-export-candidate-data); per-candidate exports come as PDFs, and a bulk resume export goes through Ashby's support team. Ask for it early.
+1. **Export first.** Ashby exports candidate lists to CSV through Custom List reports, which aren't available on Foundations; per-candidate exports come as PDFs, and a bulk resume export goes through Ashby's support team. Ask for it early.
 2. **Rebuild, don't copy.** Recreate your pipeline stages, application forms and scorecards in the new tool. It is a good moment to cut stages nobody uses.
 3. **Run both for two to three weeks.** Open every new role in the new ATS and let roles already in Ashby finish there. That way no candidate is left mid-process.
 4. **Close out before renewal.** Move anyone still in play, keep the export for your records, and cancel before the renewal date.
@@ -253,7 +253,7 @@ Stay if your company is past 100 people with a recruiting team that lives in Ash
 
 ## Try Zliptal as your Ashby alternative
 
-If your team is small and your real problem is reading every application, Zliptal scores each one with the reasoning written out, for one flat price. [Create your Zliptal workspace](/sign-up) and run it on your next role. For more options beyond Ashby's direct rivals, see our guide to the [best applicant tracking systems for small businesses](/blog/best-applicant-tracking-systems), and if you are also weighing Greenhouse, our [Greenhouse alternatives](/blog/greenhouse-alternatives) guide covers that side.
+If your team is small and your real problem is reading every application, Zliptal scores each one with the reasoning written out, for one flat price. [Create your Zliptal workspace](/sign-up) and run it on your next role. For more options beyond Ashby's direct rivals, see our guide to the [best applicant tracking systems for small businesses](/blog/best-applicant-tracking-systems), and if you are also weighing Greenhouse, our [Greenhouse alternatives](/blog/greenhouse-alternatives) guide covers that side. See the full [Zliptal vs Ashby comparison](/comparisons/zliptal-vs-ashby), or browse [all comparisons](/comparisons).
 
 ## Frequently asked questions
 

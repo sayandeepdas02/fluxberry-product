@@ -112,14 +112,13 @@ export function Prose({ content }: { content: string }) {
             const isInternal = target.startsWith('/') || target.startsWith('#');
             const className =
               'text-lp-blue-500 underline decoration-lp-blue-500/30 underline-offset-[3px] transition-colors hover:text-lp-blue-600 hover:decoration-lp-blue-600';
+            // Never link out to another company's site: that would hand them a backlink. Outside links render as text.
             return isInternal ? (
               <Link href={target} className={className}>
                 {children}
               </Link>
             ) : (
-              <a href={target} className={className} target="_blank" rel="noreferrer">
-                {children}
-              </a>
+              <>{children}</>
             );
           },
           strong: ({ children }) => <strong className="font-semibold text-black">{children}</strong>,

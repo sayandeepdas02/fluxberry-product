@@ -43,7 +43,7 @@ This guide covers 12 SuccessFactors integrations across six categories, starting
 
 ## How SuccessFactors integrations extend recruiting
 
-SuccessFactors is built as a platform. Its strength is managing the end-to-end employee lifecycle — requisitions, approvals, onboarding, learning, compensation. Its recruiting module has added AI of its own: [AI-assisted skills matching](https://help.sap.com/docs/successfactors-recruiting/setting-up-and-maintaining-sap-successfactors-recruiting/ai-assisted-skills-matching-for-assisted-applicant-screening) compares the skills on a resume with those in the job. But outbound sourcing, technical assessment and background checks are still better served by tools designed for those problems.
+SuccessFactors is built as a platform. Its strength is managing the end-to-end employee lifecycle — requisitions, approvals, onboarding, learning, compensation. Its recruiting module has added AI of its own: AI-assisted skills matching compares the skills on a resume with those in the job. But outbound sourcing, technical assessment and background checks are still better served by tools designed for those problems.
 
 A strong SuccessFactors integration should:
 
@@ -150,7 +150,7 @@ If your SuccessFactors recruiting pipeline starts with unscreened applications a
 
 ### Does SAP SuccessFactors have built-in sourcing?
 
-Partly. SuccessFactors Recruiting distributes job postings, runs internal job boards and, with AI-assisted skills matching, compares applicants' skills with the job's. It does not search for people who have not applied, which is what tools such as Zliptal (on the Max plan), LinkedIn Recruiter or Eightfold add. SAP also [acquired SmartRecruiters in September 2025](https://news.sap.com/2025/09/sap-completes-smartrecruiters-acquisition/) and now offers it alongside SuccessFactors, so check what your SAP contract already includes.
+Partly. SuccessFactors Recruiting distributes job postings, runs internal job boards and, with AI-assisted skills matching, compares applicants' skills with the job's. It does not search for people who have not applied, which is what tools such as Zliptal (on the Max plan), LinkedIn Recruiter or Eightfold add. SAP also acquired SmartRecruiters in September 2025 and now offers it alongside SuccessFactors, so check what your SAP contract already includes.
 
 ### How do SuccessFactors integrations handle data privacy?
 

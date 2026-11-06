@@ -19,7 +19,7 @@ takeaways:
   - 'Zliptal connects to Lever through signed webhooks and an automation tool, not a native app.'
 ---
 
-Lever is a recruiting-focused ATS and CRM that handles pipeline management, scheduling, and candidate nurturing. Its strength is the candidate relationship layer — tracking touchpoints across time, not just managing a single application. But no ATS does everything, and Lever's [integration marketplace](https://marketplace.lever.co/) of 300+ integrations exists because teams need specialised tools at every stage of the funnel.
+Lever is a recruiting-focused ATS and CRM that handles pipeline management, scheduling, and candidate nurturing. Its strength is the candidate relationship layer — tracking touchpoints across time, not just managing a single application. But no ATS does everything, and Lever's integration marketplace of 300+ integrations exists because teams need specialised tools at every stage of the funnel.
 
 This guide covers nine Lever integrations across five categories, chosen for the depth of their integration and the problem they solve. On Greenhouse or Ashby instead? See our [Greenhouse integrations](/blog/tools-that-integrate-with-greenhouse) and [Ashby integrations](/blog/tools-that-integrate-with-ashby) guides.
 
@@ -51,7 +51,7 @@ The best Lever integrations reduce tab-switching without creating data silos. Le
 
 ### 1. Zliptal
 
-Zliptal is an AI-native hiring platform that scores every applicant against your job requirements on arrival. Lever has AI screening of its own: its [AI-powered screening](https://www.lever.co/solutions/ai-powered-screening) gives applicants a fit score with a written justification. Zliptal works before Lever instead: candidates apply on Zliptal's careers page and are scored, summarised and ranked there, and only the shortlist moves on to Lever.
+Zliptal is an AI-native hiring platform that scores every applicant against your job requirements on arrival. Lever has AI screening of its own: its AI-powered screening gives applicants a fit score with a written justification. Zliptal works before Lever instead: candidates apply on Zliptal's careers page and are scored, summarised and ranked there, and only the shortlist moves on to Lever.
 
 **How it connects:** There is no native Lever integration yet. Zliptal runs its own pipeline and careers page, and sends a signed webhook when a candidate is shortlisted, changes stage or is hired. Route those events into Lever with an automation tool such as Zapier or Make, or a short script against Lever's API, and your shortlist reaches Lever without anyone rereading resumes. Lever stays the pipeline owner; Zliptal handles the screening work.
 
@@ -80,7 +80,7 @@ Sense provides candidate engagement automation — drip sequences, event invitat
 
 ### 4. GoodTime
 
-[GoodTime](https://goodtime.io/) automates complex interview scheduling — panel interviews, multi-day onsites, interviewer load balancing and automatic replacement when an interviewer drops out. It syncs both ways with Lever, so interview plans come from Lever and booked slots go back to the candidate record. It is priced on the number of candidates a year rather than per user. If you are looking for Prelude, Calendly [acquired it in 2022](https://calendly.com/newsroom/press-release/calendly-acquires-prelude).
+GoodTime automates complex interview scheduling — panel interviews, multi-day onsites, interviewer load balancing and automatic replacement when an interviewer drops out. It syncs both ways with Lever, so interview plans come from Lever and booked slots go back to the candidate record. It is priced on the number of candidates a year rather than per user. If you are looking for Prelude, Calendly acquired it in 2022.
 
 **Best for:** Teams with multi-round interview processes and panel interviews where scheduling coordination is a bottleneck.
 
@@ -138,7 +138,7 @@ Most Lever teams have good pipeline management and scheduling. If the pressure i
 
 ### How many integrations does Lever support?
 
-Lever's [marketplace](https://marketplace.lever.co/) lists 300+ integrations across sourcing, assessment, scheduling, HRIS, background checks, and automation. The depth varies — some are full bidirectional syncs, others are lightweight one-way data transfers.
+Lever's marketplace lists 300+ integrations across sourcing, assessment, scheduling, HRIS, background checks, and automation. The depth varies — some are full bidirectional syncs, others are lightweight one-way data transfers.
 
 ### Can I use Zliptal as my ATS and replace Lever?
 

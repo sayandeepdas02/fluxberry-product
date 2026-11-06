@@ -41,7 +41,7 @@ This guide covers 10 BambooHR integrations across five categories that extend it
 
 ## How BambooHR integrations expand its hiring tools
 
-BambooHR's [applicant tracking](https://www.bamboohr.com/platform/applicant-tracking-system/) handles job postings, application collection, and basic pipeline management. Where it stops short (as of September 2026):
+BambooHR's applicant tracking handles job postings, application collection, and basic pipeline management. Where it stops short (as of September 2026):
 
 - **No AI screening.** Applications arrive and sit until someone reads them.
 - **No built-in assessments.** Skills tests and take-homes require a separate tool.
@@ -105,7 +105,7 @@ GoodHire offers background checks with built-in compliance guidance — state-sp
 
 DocuSign integrates with BambooHR to handle offer letters and employment agreements electronically. Templates pull candidate data from BambooHR, send for e-signature, and file the signed document back to the employee record.
 
-**Best for:** Companies that already run contracts through DocuSign across the business. BambooHR's own [offer templates include e-signatures](https://www.bamboohr.com/platform/applicant-tracking-system/), so for offer letters alone you may not need it.
+**Best for:** Companies that already run contracts through DocuSign across the business. BambooHR's own offer templates include e-signatures, so for offer letters alone you may not need it.
 
 ### 8. Slack
 
@@ -145,4 +145,4 @@ Yes. Zliptal covers the full hiring workflow: sourcing on the Max plan, AI scree
 
 ### How many integrations does BambooHR support?
 
-BambooHR's [marketplace](https://www.bamboohr.com/integrations/) lists over 150 integrations across recruiting, payroll, benefits, time tracking, and performance management. The quality and depth of each integration varies — some are bidirectional syncs, others are one-way data pushes.
+BambooHR's marketplace lists over 150 integrations across recruiting, payroll, benefits, time tracking, and performance management. The quality and depth of each integration varies — some are bidirectional syncs, others are one-way data pushes.

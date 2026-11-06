@@ -20,7 +20,7 @@ takeaways:
   - 'Zliptal replaces the ATS and the screening layer together, with a flat price and unlimited team members. It does not record interviews.'
 ---
 
-Metaview started as an AI note-taker for interviews and has grown into what it calls an agentic recruiting platform, with separate agents for [sourcing, application review and interview notes](https://www.metaview.ai/pricing). It works on top of your ATS rather than replacing it, and for teams that run a lot of interviews it solves a real problem.
+Metaview started as an AI note-taker for interviews and has grown into what it calls an agentic recruiting platform, with separate agents for sourcing, application review and interview notes. It works on top of your ATS rather than replacing it, and for teams that run a lot of interviews it solves a real problem.
 
 But it is not the only way to get AI into your hiring. If you are evaluating Metaview and wondering whether the money is better spent elsewhere, or you use it and need tools that cover what it does not, this guide breaks down nine Metaview alternatives by what they actually replace.
 
@@ -30,7 +30,7 @@ Three patterns come up repeatedly:
 
 1. **They would rather have one system than two.** Metaview adds AI to an ATS; it is not one. If you would rather screen, track and hire in the same place, an ATS with AI built in removes a tool, a login and an integration to maintain.
 
-2. **Per-seat pricing adds up.** Metaview prices its paid plans per user. Its AI sourcing plans, for example, start at $100 per user per month on its [pricing page](https://www.metaview.ai/pricing) (as of September 2026). A small team hiring for a few roles a year pays for seats it rarely uses.
+2. **Per-seat pricing adds up.** Metaview prices its paid plans per user. Its AI sourcing plans, for example, start at $100 per user per month on its pricing page (as of September 2026). A small team hiring for a few roles a year pays for seats it rarely uses.
 
 3. **They only need one piece of it.** If the real gap is interview documentation, a dedicated interview intelligence tool, or the AI already in your video platform, may cover it for less. Our map of [recruiting software by type](/blog/recruiting-software) shows where each kind of tool fits.
 
@@ -72,7 +72,7 @@ Zliptal is an AI-native applicant tracking system that scores every application 
 
 ### 2. BrightHire
 
-BrightHire records interviews, generates transcripts, and creates structured highlights tied to your scorecard. Of everything on this list it is the closest to Metaview's note-taking: same category, different execution. [Zoom acquired BrightHire](https://www.zoom.com/en/blog/zoom-acquires-brighthire/) in December 2025 and runs it as a standalone brand.
+BrightHire records interviews, generates transcripts, and creates structured highlights tied to your scorecard. Of everything on this list it is the closest to Metaview's note-taking: same category, different execution. Zoom acquired BrightHire in December 2025 and runs it as a standalone brand.
 
 **What it adds over Metaview:** Interviewer coaching features, compliance-focused recording consent flows, and a path into Zoom Workplace if your interviews already happen there.
 
@@ -80,7 +80,7 @@ BrightHire records interviews, generates transcripts, and creates structured hig
 
 ### 3. Employ AI Interview Companion (formerly Pillar)
 
-Pillar's interview intelligence now lives on as the [AI Interview Companion](https://www.employinc.com/ai-interview-companion/) from Employ, the company behind Lever, Jobvite and JazzHR. It records and summarises interviews, and flags inconsistent scoring and potentially biased language for coaching.
+Pillar's interview intelligence now lives on as the AI Interview Companion from Employ, the company behind Lever, Jobvite and JazzHR. It records and summarises interviews, and flags inconsistent scoring and potentially biased language for coaching.
 
 **Best for:** Teams already on an Employ ATS who want interview intelligence from the same vendor.
 
@@ -94,7 +94,7 @@ Fireflies is a general-purpose meeting assistant that records, transcribes, and 
 
 ### 5. Zoom AI Companion
 
-If your interviews happen on Zoom, the built-in [AI Companion](https://www.zoom.com/en/products/ai-assistant/) generates summaries and action items without an additional tool. It is included with paid Zoom plans.
+If your interviews happen on Zoom, the built-in AI Companion generates summaries and action items without an additional tool. It is included with paid Zoom plans.
 
 **What it replaces:** The basic note-taking function of Metaview — no third-party integration required.
 
@@ -110,7 +110,7 @@ Otter provides real-time transcription and searchable meeting archives. It sits 
 
 ### 7. Hireflix
 
-[Hireflix](https://hireflix.com/) replaces live first-round interviews with one-way video questions. Candidates record answers on their own time, and you review them asynchronously. This eliminates the scheduling problem entirely for early-stage screening.
+Hireflix replaces live first-round interviews with one-way video questions. Candidates record answers on their own time, and you review them asynchronously. This eliminates the scheduling problem entirely for early-stage screening.
 
 **What it replaces:** The interviews Metaview would have recorded. If the conversation does not need to be live, it does not need real-time note-taking either.
 

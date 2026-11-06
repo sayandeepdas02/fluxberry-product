@@ -89,11 +89,11 @@ Zliptal is an AI-native applicant tracking system built for small teams. Each ap
 
 ### 2. Greenhouse
 
-[Greenhouse](https://www.greenhouse.com/) is the benchmark for structured hiring: a defined interview plan, question kit and scorecard for every role, with feedback collected before the debrief. It has [over 400 integrations](https://integrations.greenhouse.com/), and its Talent Matching, which prioritises applicants against weighted criteria you set, is included on every plan.
+Greenhouse is the benchmark for structured hiring: a defined interview plan, question kit and scorecard for every role, with feedback collected before the debrief. It has over 400 integrations, and its Talent Matching, which prioritises applicants against weighted criteria you set, is included on every plan.
 
 **Pros:** The most mature structured-interview tools here; a huge integration marketplace; fraud detection on Plus and Pro.
 
-**Cons:** [Quote-only pricing](https://www.greenhouse.com/pricing); demo only; automation such as auto-reject starts at Plus.
+**Cons:** Quote-only pricing; demo only; automation such as auto-reject starts at Plus.
 
 **Pricing:** Quote only. For a deeper comparison, see our [Greenhouse alternatives](/blog/greenhouse-alternatives).
 
@@ -101,23 +101,23 @@ Zliptal is an AI-native applicant tracking system built for small teams. Each ap
 
 ### 3. Ashby
 
-[Ashby](https://www.ashbyhq.com/) bundles the ATS, a CRM, scheduling and analytics that other tools sell separately. Its AI-Assisted Application Review checks each resume against criteria you write and marks them met or not met, without giving an overall score.
+Ashby bundles the ATS, a CRM, scheduling and analytics that other tools sell separately. Its AI-Assisted Application Review checks each resume against criteria you write and marks them met or not met, without giving an overall score.
 
 **Pros:** Reporting that answers most hiring questions without a BI tool; published pricing up to 100 employees; 250+ integrations.
 
 **Cons:** Custom fields, custom reports and approvals need the quote-only Plus plan; demo only; SSO costs extra on Foundations.
 
-**Pricing:** [Foundations](https://www.ashbyhq.com/pricing) costs $300 to $900 a month by headcount, up to 100 employees. More in our [Ashby alternatives](/blog/ashby-alternatives) guide.
+**Pricing:** Foundations costs $300 to $900 a month by headcount, up to 100 employees. More in our [Ashby alternatives](/blog/ashby-alternatives) guide.
 
 ## Best ATS with a built-in CRM
 
 ### 4. Lever
 
-[Lever](https://www.lever.co/) treats every candidate as a long-term relationship, so past applicants and sourced prospects can be nurtured until the right role opens. Its core platform includes AI fit scores with written justifications and AI interview summaries.
+Lever treats every candidate as a long-term relationship, so past applicants and sourced prospects can be nurtured until the right role opens. Its core platform includes AI fit scores with written justifications and AI interview summaries.
 
 **Pros:** ATS and CRM in one product; AI screening and interview notes included; 300+ integrations.
 
-**Cons:** [Pricing on request](https://www.lever.co/pricing); no trial; some add-ons quoted separately.
+**Cons:** Pricing on request; no trial; some add-ons quoted separately.
 
 **Pricing:** Quote only.
 
@@ -125,23 +125,23 @@ Zliptal is an AI-native applicant tracking system built for small teams. Each ap
 
 ### 5. Workable
 
-[Workable](https://www.workable.com/) covers the whole hiring flow with little setup: posting to 200+ job boards, a careers page builder, interview kits, offers with e-signatures and an optional HR suite. Its Workable Agent scores candidates on up to 14 criteria and returns a ranked shortlist with reasoning.
+Workable covers the whole hiring flow with little setup: posting to 200+ job boards, a careers page builder, interview kits, offers with e-signatures and an optional HR suite. Its Workable Agent scores candidates on up to 14 criteria and returns a ranked shortlist with reasoning.
 
 **Pros:** A 15-day trial without a card; unlimited active jobs; 270+ integrations.
 
 **Cons:** Priced by company size, from $299/month; texting, video and assessments are add-ons on Standard; the AI agent runs on credits.
 
-**Pricing:** [Standard](https://www.workable.com/pricing) is $299/month billed annually ($360 monthly) for 1–20 employees.
+**Pricing:** Standard is $299/month billed annually ($360 monthly) for 1–20 employees.
 
 ## Best ATS for employer branding
 
 ### 6. Teamtailor
 
-[Teamtailor](https://www.teamtailor.com/en/) is built around the career site: a builder in 50+ languages, content that shows off your team, and a talent CRM for people who aren't ready to apply yet. AI features, including the Co-pilot add-on, summarise resumes and flag promising applicants.
+Teamtailor is built around the career site: a builder in 50+ languages, content that shows off your team, and a talent CRM for people who aren't ready to apply yet. AI features, including the Co-pilot add-on, summarise resumes and flag promising applicants.
 
 **Pros:** Unlimited users and job postings on every plan; 450+ integrations; a strong career site with little effort.
 
-**Cons:** [Quote-only pricing](https://www.teamtailor.com/en/pricing/); no advertised trial; Co-pilot is a separate add-on.
+**Cons:** Quote-only pricing; no advertised trial; Co-pilot is a separate add-on.
 
 **Pricing:** Quote only.
 
@@ -149,51 +149,51 @@ Zliptal is an AI-native applicant tracking system built for small teams. Each ap
 
 ### 7. BambooHR
 
-[BambooHR](https://www.bamboohr.com/platform/applicant-tracking-system/) is an HR system for small and mid-size businesses with applicant tracking built in. Job posting, candidate ratings, interview self-scheduling and offer templates with e-signatures are included, and new hires flow straight into employee records.
+BambooHR is an HR system for small and mid-size businesses with applicant tracking built in. Job posting, candidate ratings, interview self-scheduling and offer templates with e-signatures are included, and new hires flow straight into employee records.
 
 **Pros:** One system for hiring and HR; hires need no re-entry; offer letters with e-signature included.
 
 **Cons:** No AI screening of applicants; job openings capped at 5, 25 or 50 by plan; you pay for the whole HR suite to get the ATS.
 
-**Pricing:** [Core, Pro and Elite](https://www.bamboohr.com/pricing/) are $10, $17 and $25 per employee per month above 25 employees; smaller companies pay a flat rate from $250/month. Our guide to [BambooHR integrations](/blog/tools-that-integrate-with-bamboohr) covers how to fill its hiring gaps.
+**Pricing:** Core, Pro and Elite are $10, $17 and $25 per employee per month above 25 employees; smaller companies pay a flat rate from $250/month. Our guide to [BambooHR integrations](/blog/tools-that-integrate-with-bamboohr) covers how to fill its hiring gaps.
 
 ## Best ATS for sourcing-heavy teams
 
 ### 8. Gem
 
-[Gem](https://www.gem.com/) began as a sourcing and CRM tool and now sells an all-in-one platform with its own ATS. Its AI agents search 800M+ profiles and score and rank every inbound application with an explanation.
+Gem began as a sourcing and CRM tool and now sells an all-in-one platform with its own ATS. Its AI agents search 800M+ profiles and score and rank every inbound application with an explanation.
 
 **Pros:** Sourcing, outreach and the ATS in one; hiring managers don't use a licence; a startup program for companies under 30 employees (six months at no cost, then 50% off the first paid year).
 
 **Cons:** Custom pricing beyond the startup bands; AI agents need the pricier AI-powered seat.
 
-**Pricing:** Its [startup calculator](https://www.gem.com/pricing) shows $300/month for 1–10 employees billed monthly, with lower annual rates.
+**Pricing:** Its startup calculator shows $300/month for 1–10 employees billed monthly, with lower annual rates.
 
 ## Best ATS on a tight budget
 
 ### 9. Breezy HR
 
-[Breezy HR](https://breezy.hr/) keeps things simple: flat monthly plans, one-click posting to 50+ job boards, a drag-and-drop pipeline and self-scheduling. Applicant Insights gives each candidate a 0–10 score with an explanation, paid for with credits.
+Breezy HR keeps things simple: flat monthly plans, one-click posting to 50+ job boards, a drag-and-drop pipeline and self-scheduling. Applicant Insights gives each candidate a 0–10 score with an explanation, paid for with credits.
 
 **Pros:** Flat pricing, not per user; a 14-day trial; a single-job plan at no cost.
 
 **Cons:** Scorecards need the Growth plan; API and bulk export/import are on Custom Pro.
 
-**Pricing:** [Startup](https://breezy.hr/pricing) is $157/month billed annually ($189 monthly); Growth $273; Business $439.
+**Pricing:** Startup is $157/month billed annually ($189 monthly); Growth $273; Business $439.
 
 ## Best ATS for Zoho users
 
 ### 10. Zoho Recruit
 
-[Zoho Recruit](https://www.zoho.com/recruit/) is a highly configurable ATS and recruitment CRM that fits naturally into the Zoho suite, with workflow automation, portals and posting to 75+ job boards. Its Zia AI matches candidates to jobs; candidate ranking is still on its roadmap.
+Zoho Recruit is a highly configurable ATS and recruitment CRM that fits naturally into the Zoho suite, with workflow automation, portals and posting to 75+ job boards. Its Zia AI matches candidates to jobs; candidate ranking is still on its roadmap.
 
 **Pros:** Low per-recruiter pricing; a 15-day trial; deep customisation.
 
 **Cons:** Active jobs are capped per licence; custom reports, webhooks and two-way email sync are Enterprise-only.
 
-**Pricing:** [Standard](https://www.zoho.com/recruit/pricing.html) is $25 per recruiter/month billed annually ($30 monthly).
+**Pricing:** Standard is $25 per recruiter/month billed annually ($30 monthly).
 
-**Also worth a look:** [Manatal](https://www.manatal.com/pricing) (AI candidate scoring from $15 per user/month, billed annually), [JazzHR](https://www.jazzhr.com/pricing) (flat plans from $1,000/year for US small businesses) and [Pinpoint](https://www.pinpointhq.com/) (explained 1–10 AI match scores for in-house teams at 50+ employee companies).
+**Also worth a look:** Manatal (AI candidate scoring from $15 per user/month, billed annually), JazzHR (flat plans from $1,000/year for US small businesses) and Pinpoint (explained 1–10 AI match scores for in-house teams at 50+ employee companies).
 
 ## What is an applicant tracking system?
 
@@ -227,7 +227,7 @@ None of these should make the hiring decision, and several vendors, including Gr
 4. **Is our data used to train models?** Ashby and Pinpoint, for example, say they don't.
 5. **How do we tell candidates?** Some laws require it.
 
-Two laws matter most today. In New York City, [Local Law 144](https://www.nyc.gov/site/dca/about/automated-employment-decision-tools.page) requires a bias audit within a year before an automated tool is used to screen candidates, a published summary of that audit, and notice to candidates at least ten business days before use; fines run from $500 to $1,500 per violation. In the EU, the AI Act treats AI used to filter applications or evaluate candidates as [high-risk](https://ai-act-service-desk.ec.europa.eu/en/ai-act/annex-3), with duties for employers such as human oversight, monitoring and informing candidates; after a 2026 amendment those rules [apply from 2 December 2027](https://ai-act-service-desk.ec.europa.eu/en/ai-act/timeline/timeline-implementation-eu-ai-act). This isn't legal advice, so check your own obligations with a lawyer.
+Two laws matter most today. In New York City, Local Law 144 requires a bias audit within a year before an automated tool is used to screen candidates, a published summary of that audit, and notice to candidates at least ten business days before use; fines run from $500 to $1,500 per violation. In the EU, the AI Act treats AI used to filter applications or evaluate candidates as high-risk, with duties for employers such as human oversight, monitoring and informing candidates; after a 2026 amendment those rules apply from 2 December 2027. This isn't legal advice, so check your own obligations with a lawyer.
 
 ## How much does an ATS cost?
 
