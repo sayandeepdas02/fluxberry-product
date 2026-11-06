@@ -1,7 +1,7 @@
 ---
 title: 'The 9 best Ashby alternatives for startups and small teams'
 metaTitle: '9 best Ashby alternatives (2026)'
-description: 'Ashby is powerful but priced and built for scaling teams. Compare 9 Ashby alternatives, including Fluxberry, Greenhouse, Lever and Workable, by price and fit.'
+description: 'Ashby is powerful but priced and built for scaling teams. Compare 9 Ashby alternatives, including Zliptal, Greenhouse, Lever and Workable, by price and fit.'
 date: '2026-09-17'
 author: 'Sayandeep Das'
 category: 'Hiring Tools'
@@ -17,18 +17,18 @@ takeaways:
   - "Ashby is one of the strongest all-in-one ATS platforms, with its CRM, scheduling and analytics built in. Most teams that leave it do so over price, admin depth or AI that doesn't score applicants."
   - "Ashby's Foundations plan costs $300 to $900 a month depending on headcount (up to 100 employees), and custom fields, custom reports and approvals need the Plus plan."
   - 'Greenhouse and Lever are the closest like-for-like alternatives; Workable, Breezy HR and Zoho Recruit publish lower prices; Gem is strongest for sourcing.'
-  - 'Fluxberry suits small teams that want every applicant scored with written reasoning, at a flat price with unlimited team members. It has no native integrations or interview recording yet.'
+  - 'Zliptal suits small teams that want every applicant scored with written reasoning, at a flat price with unlimited team members. It has no native integrations or interview recording yet.'
 ---
 
 Ashby is one of the strongest applicant tracking systems a scaling company can buy. It puts the ATS, a recruiting CRM, scheduling and unusually deep analytics in one product, and growth has followed: Ashby reported more than 2,700 customers when it raised a [$50M Series D](https://www.ashbyhq.com/blog/engineering/series-d) in July 2025.
 
-But depth has a price, in money and in setup time, and not every team needs it. If you are a startup or small team weighing Ashby alternatives, this guide compares nine of them on what they cost, what their AI actually does, and who each one suits. We make Fluxberry, which is on this list; every other tool is described from its own pricing and product pages, checked in September 2026.
+But depth has a price, in money and in setup time, and not every team needs it. If you are a startup or small team weighing Ashby alternatives, this guide compares nine of them on what they cost, what their AI actually does, and who each one suits. We make Zliptal, which is on this list; every other tool is described from its own pricing and product pages, checked in September 2026.
 
 ## The 9 best Ashby alternatives at a glance
 
 | Tool | Best for | Starting price | Pricing basis |
 |---|---|---|---|
-| Fluxberry | Small teams that want AI scoring at a flat price | {{price:pro:monthly}}/month | Flat, unlimited team members |
+| Zliptal | Small teams that want AI scoring at a flat price | {{price:pro:monthly}}/month | Flat, unlimited team members |
 | Greenhouse | Structured hiring at mid-size companies | Quote only | Plan and hiring volume |
 | Lever | ATS and recruiting CRM in one | Quote only | Team size and needs |
 | Gem | Sourcing-heavy teams | $300/month (1–10 employees) | Company headcount |
@@ -53,19 +53,19 @@ None of these make Ashby a bad choice. They make it a choice for a particular ki
 
 We looked for applicant tracking systems that a startup or small team could realistically move to from Ashby, and scored them on five things: core ATS depth, how AI screening works, price at 10 and 50 employees, how quickly you can get started, and how easily your data comes with you. Prices, trials and AI features come from each vendor's own website, checked in September 2026, and are linked in each entry. We have not used the demo-only products ourselves, and we say so where it matters. Check anything you rely on with the vendor before you buy, because pricing in this category changes often.
 
-![Bar chart of monthly ATS prices for a 10-person company with 3 recruiters, from Fluxberry at {{price:pro:monthly}} to Workable at $360](/blog/ashby-alternatives/ats-monthly-cost-comparison.webp "Lowest published monthly price for a 10-person company with 3 recruiters, billed monthly, September 2026. Entry plans differ in features.")
+![Bar chart of monthly ATS prices for a 10-person company with 3 recruiters, from Zliptal at {{price:pro:monthly}} to Workable at $360](/blog/ashby-alternatives/ats-monthly-cost-comparison.webp "Lowest published monthly price for a 10-person company with 3 recruiters, billed monthly, September 2026. Entry plans differ in features.")
 
 ## The best Ashby alternatives
 
-### 1. Fluxberry
+### 1. Zliptal
 
-Fluxberry is an AI-native applicant tracking system for small teams. Every applicant is parsed and scored against your job the moment they apply, with a 0–10 score built from fixed weights (skills, experience, relevance, location, compensation and education), a written summary, strengths and concerns. You open a ranked shortlist instead of a pile.
+Zliptal is an AI-native applicant tracking system for small teams. Every applicant is parsed and scored against your job the moment they apply, with a 0–10 score built from fixed weights (skills, experience, relevance, location, compensation and education), a written summary, strengths and concerns. You open a ranked shortlist instead of a pile.
 
 **Best for:** Startups and small teams that want applicants scored, with the reasoning written out, at a flat monthly price.
 
-Compared with Ashby, Fluxberry is far narrower: there is no recruiting CRM with multi-step sequences, no interview scorecards, no advanced scheduling and much lighter analytics. What it does differently is score every applicant with a visible breakdown, and charge one flat price however many people join the hiring team.
+Compared with Ashby, Zliptal is far narrower: there is no recruiting CRM with multi-step sequences, no interview scorecards, no advanced scheduling and much lighter analytics. What it does differently is score every applicant with a visible breakdown, and charge one flat price however many people join the hiring team.
 
-![Fluxberry hiring pipeline beside a list of top candidates ranked by AI match score, shown with sample data](/blog/ashby-alternatives/fluxberry-pipeline-and-top-candidates.webp "Fluxberry's hiring pipeline and AI-ranked top candidates (sample data)")
+![Zliptal hiring pipeline beside a list of top candidates ranked by AI match score, shown with sample data](/blog/ashby-alternatives/zliptal-pipeline-and-top-candidates.webp "Zliptal's hiring pipeline and AI-ranked top candidates (sample data)")
 
 **Key features:**
 - AI scoring with a weighted breakdown, summary, strengths and concerns for every applicant
@@ -88,7 +88,7 @@ Compared with Ashby, Fluxberry is far narrower: there is no recruiting CRM with 
 
 **Pricing:** Pro is {{price:pro:monthly}}/month or {{price:pro:annual}}/year. Max, which adds talent sourcing and referrals, is {{price:max:monthly}}/month or {{price:max:annual}}/year.
 
-**Switching from Ashby:** Run new roles in Fluxberry while existing ones finish in Ashby (see the plan below).
+**Switching from Ashby:** Run new roles in Zliptal while existing ones finish in Ashby (see the plan below).
 
 ### 2. Greenhouse
 
@@ -214,13 +214,13 @@ Compared with Ashby, Zoho Recruit is cheaper and more configurable, but less pol
 
 | If you want… | Consider | Why |
 |---|---|---|
-| Every applicant scored, at a flat price | **Fluxberry** | 0–10 scores with written reasoning, unlimited team members |
+| Every applicant scored, at a flat price | **Zliptal** | 0–10 scores with written reasoning, unlimited team members |
 | The most rigorous structured interviews | **Greenhouse** | Interview kits, scorecards and 400+ integrations |
 | A talent pipeline you nurture for months | **Lever** | ATS and CRM in one product |
 | Outbound sourcing at the core | **Gem** | Sourcing, CRM and ATS together |
 | Wide job-board reach with a trial | **Workable** | 200+ boards and a 15-day trial |
 | A standout career site | **Teamtailor** | Employer branding is the product's centre |
-| The lowest published flat price after Fluxberry | **Breezy HR** | Flat plans from $157/month billed annually |
+| The lowest published flat price after Zliptal | **Breezy HR** | Flat plans from $157/month billed annually |
 | A tool that fits your Zoho stack | **Zoho Recruit** | Per-recruiter pricing inside Zoho |
 
 ## What to match before you leave Ashby
@@ -245,21 +245,21 @@ If the honest answer is "all of them", Ashby may still be the right tool, and th
 3. **Run both for two to three weeks.** Open every new role in the new ATS and let roles already in Ashby finish there. That way no candidate is left mid-process.
 4. **Close out before renewal.** Move anyone still in play, keep the export for your records, and cancel before the renewal date.
 
-With Fluxberry specifically, there is no self-serve import screen yet, so the side-by-side run above is the simplest path: new roles start in Fluxberry the day you sign up.
+With Zliptal specifically, there is no self-serve import screen yet, so the side-by-side run above is the simplest path: new roles start in Zliptal the day you sign up.
 
 ## When to stay on Ashby
 
 Stay if your company is past 100 people with a recruiting team that lives in Ashby's analytics, if you run CRM sequences at volume, or if you have built custom reports and approval workflows on Plus. Moving would cost more than it saves. The alternatives above make the most sense for smaller teams that are paying for depth they don't use.
 
-## Try Fluxberry as your Ashby alternative
+## Try Zliptal as your Ashby alternative
 
-If your team is small and your real problem is reading every application, Fluxberry scores each one with the reasoning written out, for one flat price. [Create your Fluxberry workspace](/sign-up) and run it on your next role. For more options beyond Ashby's direct rivals, see our guide to the [best applicant tracking systems for small businesses](/blog/best-applicant-tracking-systems), and if you are also weighing Greenhouse, our [Greenhouse alternatives](/blog/greenhouse-alternatives) guide covers that side.
+If your team is small and your real problem is reading every application, Zliptal scores each one with the reasoning written out, for one flat price. [Create your Zliptal workspace](/sign-up) and run it on your next role. For more options beyond Ashby's direct rivals, see our guide to the [best applicant tracking systems for small businesses](/blog/best-applicant-tracking-systems), and if you are also weighing Greenhouse, our [Greenhouse alternatives](/blog/greenhouse-alternatives) guide covers that side.
 
 ## Frequently asked questions
 
 ### What is the best alternative to Ashby?
 
-It depends on why you are leaving. For rigorous structured hiring, Greenhouse is the closest match; for a CRM-led process, Lever; for sourcing, Gem. For a small team that wants every applicant scored at a flat price, Fluxberry is built for exactly that, from {{price:pro:monthly}}/month.
+It depends on why you are leaving. For rigorous structured hiring, Greenhouse is the closest match; for a CRM-led process, Lever; for sourcing, Gem. For a small team that wants every applicant scored at a flat price, Zliptal is built for exactly that, from {{price:pro:monthly}}/month.
 
 ### Is Ashby an ATS?
 

@@ -21,14 +21,14 @@ export function Logo({ className }: { className?: string }) {
   return (
     <Link
       href="/"
-      aria-label="Fluxberry home"
+      aria-label="Zliptal home"
       className={cn(
         'inline-flex h-[23px] items-center font-manrope text-[18px] font-bold leading-none tracking-[-0.03em] text-black',
         'rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-lp-blue-400',
         className,
       )}
     >
-      Fluxberry
+      Zliptal
     </Link>
   );
 }

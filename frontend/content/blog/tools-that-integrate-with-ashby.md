@@ -16,8 +16,8 @@ keywords:
 takeaways:
   - 'Ashby lists 250+ integrations, fewer than Greenhouse or Lever, and a public API for anything missing.'
   - 'Ashby already covers scheduling, scorecards, analytics and AI-assisted application review, so add tools only where it stops: sourcing, skills tests, background checks and HRIS.'
-  - "Ashby's AI marks each resume as meeting or not meeting your criteria and gives no overall score. Fluxberry scores every applicant, with a summary, strengths and concerns."
-  - 'Fluxberry connects to Ashby through signed webhooks and an automation tool, not a native app.'
+  - "Ashby's AI marks each resume as meeting or not meeting your criteria and gives no overall score. Zliptal scores every applicant, with a summary, strengths and concerns."
+  - 'Zliptal connects to Ashby through signed webhooks and an automation tool, not a native app.'
 ---
 
 Ashby is a modern ATS built with an API-first architecture and unusually strong native analytics. It appeals to high-growth tech companies that want structured hiring without the enterprise bloat of legacy platforms. Its [integration directory](https://www.ashbyhq.com/integrations) of 250+ integrations is smaller than Greenhouse's or Lever's, and its [public API](https://developers.ashbyhq.com/) covers what the directory doesn't.
@@ -28,7 +28,7 @@ This guide covers 10 Ashby integrations across five categories, chosen for integ
 
 | Tool | Category | Best for |
 |---|---|---|
-| Fluxberry | Sourcing and AI screening | A ranked, scored shortlist before candidates reach Ashby |
+| Zliptal | Sourcing and AI screening | A ranked, scored shortlist before candidates reach Ashby |
 | hireEZ | Sourcing | Outbound sourcing for hard-to-fill technical roles |
 | HackerRank | Assessment | Verifying coding ability before interviews |
 | CodeSignal | Assessment | A standardised technical benchmark |
@@ -51,19 +51,19 @@ Three areas where integrations add the most value:
 
 ## Sourcing integrations
 
-### 1. Fluxberry
+### 1. Zliptal
 
-Fluxberry is an AI-native hiring platform that scores every applicant against your job requirements on arrival. Ashby has AI screening of its own, [AI-Assisted Application Review](https://www.ashbyhq.com/product-updates/ai-assisted-application-review), which marks each resume as meeting or not meeting criteria you define. Ashby says its AI never gives applicants a numerical rating; you can sort by the share of criteria met, but there is no overall score. Fluxberry gives one: every applicant gets a score, a written summary, strengths and concerns, so you start from a ranked shortlist.
+Zliptal is an AI-native hiring platform that scores every applicant against your job requirements on arrival. Ashby has AI screening of its own, [AI-Assisted Application Review](https://www.ashbyhq.com/product-updates/ai-assisted-application-review), which marks each resume as meeting or not meeting criteria you define. Ashby says its AI never gives applicants a numerical rating; you can sort by the share of criteria met, but there is no overall score. Zliptal gives one: every applicant gets a score, a written summary, strengths and concerns, so you start from a ranked shortlist.
 
-**How it connects:** There is no native Ashby integration yet. Fluxberry runs its own pipeline and careers page, and sends a signed webhook when a candidate is shortlisted, changes stage or is hired. Route those events into Ashby with an automation tool such as Zapier or Make, or a short script against Ashby's API, and your shortlist reaches Ashby without anyone rereading resumes. Ashby takes over from pipeline management onward, while Fluxberry handles the screening that happens before.
+**How it connects:** There is no native Ashby integration yet. Zliptal runs its own pipeline and careers page, and sends a signed webhook when a candidate is shortlisted, changes stage or is hired. Route those events into Ashby with an automation tool such as Zapier or Make, or a short script against Ashby's API, and your shortlist reaches Ashby without anyone rereading resumes. Ashby takes over from pipeline management onward, while Zliptal handles the screening that happens before.
 
 **Why it fits Ashby teams:**
-- Ashby users tend to be opinionated about tooling — Fluxberry's focused, no-bloat approach matches that mindset
+- Ashby users tend to be opinionated about tooling — Zliptal's focused, no-bloat approach matches that mindset
 - AI scoring eliminates manual resume triage without adding another enterprise platform
 - Custom application forms and a careers page are included, so there is one fewer tool to manage
 - Analytics on sources, funnel drop-off and time to hire complement Ashby's native reporting
 
-**Pricing:** Starts at {{price:pro:monthly}}/month. [Get started with Fluxberry →](/sign-up)
+**Pricing:** Starts at {{price:pro:monthly}}/month. [Get started with Zliptal →](/sign-up)
 
 ### 2. hireEZ
 
@@ -127,22 +127,22 @@ Zoom's Ashby integration generates unique meeting links for every scheduled inte
 
 **Best for:** Teams conducting video interviews who want automatic link generation and recording attached to the Ashby candidate profile.
 
-## Add Fluxberry to your Ashby stack
+## Add Zliptal to your Ashby stack
 
-Ashby gives you a modern ATS with strong analytics and structured workflows. Fluxberry gives you AI screening that scores every applicant before they enter that workflow. Together, you start from a ranked shortlist instead of an unfiltered applicant pool.
+Ashby gives you a modern ATS with strong analytics and structured workflows. Zliptal gives you AI screening that scores every applicant before they enter that workflow. Together, you start from a ranked shortlist instead of an unfiltered applicant pool.
 
-[Create your Fluxberry workspace](/sign-up) and run it alongside Ashby.
+[Create your Zliptal workspace](/sign-up) and run it alongside Ashby.
 
 ## Frequently asked questions
 
 ### Does Ashby have built-in AI screening?
 
-Yes. Ashby's [AI-Assisted Application Review](https://docs.ashbyhq.com/ai-assisted-application-review) checks each resume against criteria you set and marks it "Meets" or "Does not meet" for each one. Ashby says the AI never gives applicants a numerical rating, and a person makes every decision, though you can sort applicants by the percentage of criteria they meet. If you want a ranked shortlist with a score and written reasoning for every applicant, that is where a tool like Fluxberry fits.
+Yes. Ashby's [AI-Assisted Application Review](https://docs.ashbyhq.com/ai-assisted-application-review) checks each resume against criteria you set and marks it "Meets" or "Does not meet" for each one. Ashby says the AI never gives applicants a numerical rating, and a person makes every decision, though you can sort applicants by the percentage of criteria they meet. If you want a ranked shortlist with a score and written reasoning for every applicant, that is where a tool like Zliptal fits.
 
 ### Is Ashby's integration ecosystem large enough?
 
 Ashby lists 250+ integrations, fewer than Greenhouse or Lever, and its API-first design lets you build what is missing. For most teams, the key categories — sourcing, assessment, background checks, HRIS, and communication — are well covered. If you need a niche tool, check whether it supports Ashby's API or can connect through Zapier.
 
-### Can I use Fluxberry instead of Ashby?
+### Can I use Zliptal instead of Ashby?
 
-Yes. Fluxberry is a standalone AI-native ATS with pipeline management, a careers page, team collaboration, and analytics. If you want AI screening built into the ATS rather than bolted on, Fluxberry can be your primary hiring tool. Our [Ashby alternatives](/blog/ashby-alternatives) guide compares it with eight other options. [Get started →](/sign-up)
+Yes. Zliptal is a standalone AI-native ATS with pipeline management, a careers page, team collaboration, and analytics. If you want AI screening built into the ATS rather than bolted on, Zliptal can be your primary hiring tool. Our [Ashby alternatives](/blog/ashby-alternatives) guide compares it with eight other options. [Get started →](/sign-up)

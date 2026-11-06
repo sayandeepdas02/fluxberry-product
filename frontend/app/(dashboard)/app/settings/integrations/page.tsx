@@ -48,7 +48,7 @@ export default function IntegrationsSettingsPage() {
                       Connected{status.connectedEmail ? ` as ${status.connectedEmail}` : ''}
                     </span>
                   ) : (
-                    'Sync calendar events from Fluxberry to Google Calendar with an auto-generated Meet link.'
+                    'Sync calendar events from Zliptal to Google Calendar with an auto-generated Meet link.'
                   )}
                 </p>
               </div>

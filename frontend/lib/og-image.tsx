@@ -4,7 +4,7 @@ import type { ReactElement, ReactNode } from 'react';
 /*
  * Social share images (1200×630), in the landing hero's look: its painted sky
  * (public/og/sky.jpg, the upper sky of hero-landscape.webp), a deep-blue wash
- * behind white text, and the F-mark with the "Fluxberry" wordmark. Set in the
+ * behind white text, and the F-mark with the "Zliptal" wordmark. Set in the
  * marketing fonts, Manrope and Inter, loaded from assets/og-fonts (the image
  * renderer can't use next/font). Node.js runtime only: everything is read from disk.
  */
@@ -42,7 +42,7 @@ export function ogImage(element: ReactElement): ImageResponse {
 }
 
 /** The sky, the wash and the brand lockup; the content sits centred under the lockup. */
-function Frame({ wordmark = 'Fluxberry', top = 58, children }: { wordmark?: string; top?: number; children: ReactNode }) {
+function Frame({ wordmark = 'Zliptal', top = 58, children }: { wordmark?: string; top?: number; children: ReactNode }) {
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex', position: 'relative', fontFamily: 'Manrope' }}>
       <img src={publicAssetDataUri('og/sky.jpg')} width={OG_SIZE.width} height={OG_SIZE.height} alt="" style={{ position: 'absolute', top: 0, left: 0 }} />
@@ -157,7 +157,7 @@ const SHOT_WIDTH = 960;
 
 /**
  * The homepage's share image: the hero in miniature. The headline and a line
- * under it, then the Fluxberry dashboard in the hero's frosted-glass frame,
+ * under it, then the Zliptal dashboard in the hero's frosted-glass frame,
  * running off the card's foot.
  */
 export function OGHeroLayout({ headline, subtitle }: { headline: string; subtitle: string }) {

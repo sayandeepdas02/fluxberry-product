@@ -4,12 +4,12 @@ import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { ArrowRight, ClipboardCheck, MessageSquare, ShieldCheck, Users, Video, Webhook, Zap, type LucideIcon } from 'lucide-react';
 import { EASE_OUT, POP, enter, type VisualState } from '@/components/marketing/landing/stage';
-import { Card, Count, CUE, FMark, GREEN, GREEN_BG, Glass, IconTile, type Hue } from './kit';
+import { Card, Count, CUE, ZMark, GREEN, GREEN_BG, Glass, IconTile, type Hue } from './kit';
 
 /*
  * "10 tools that integrate with Ashby": the article's angle is Ashby's
  * API-first design, so the cover is its event stream. Webhooks arrive at the
- * top of a live feed, each routed to a tool in the stack (Fluxberry for new
+ * top of a live feed, each routed to a tool in the stack (Zliptal for new
  * candidates), and the synced count ticks up with every one. The event names
  * are illustrative, not Ashby's exact API.
  */
@@ -18,7 +18,7 @@ const GLASS = { left: 250, top: 262, width: 700, height: 620 };
 const HEAD = 74;
 const ROW = 72;
 const EVENTS: { name: string; to: string; icon: LucideIcon | 'brand'; hue: Hue; ms: number }[] = [
-  { name: 'candidate.created', to: 'Fluxberry', icon: 'brand', hue: 'blue', ms: 84 },
+  { name: 'candidate.created', to: 'Zliptal', icon: 'brand', hue: 'blue', ms: 84 },
   { name: 'stage.changed', to: 'Assessment', icon: ClipboardCheck, hue: 'violet', ms: 62 },
   { name: 'interview.booked', to: 'Video call', icon: Video, hue: 'teal', ms: 91 },
   { name: 'check.completed', to: 'Background', icon: ShieldCheck, hue: 'orange', ms: 77 },
@@ -132,7 +132,7 @@ function FeedRow({ v, row, index }: { v: VisualState; row: Row; index: number })
       <span className="w-[210px] font-mono text-[18px] text-[#0b0d17]">{event.name}</span>
       <ArrowRight size={18} strokeWidth={2.4} className="text-[#aab1c2]" />
       <span className="ml-[16px] flex items-center gap-[10px]">
-        {event.icon === 'brand' ? <FMark size={32} radius={9} /> : <IconTile icon={event.icon} hue={event.hue} size={32} />}
+        {event.icon === 'brand' ? <ZMark size={32} radius={9} /> : <IconTile icon={event.icon} hue={event.hue} size={32} />}
         <span className="font-manrope text-[17px] font-semibold text-[#0b0d17]">{event.to}</span>
       </span>
       <span className="ml-auto flex items-center gap-[12px]">

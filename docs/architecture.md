@@ -1,6 +1,6 @@
 # Architecture
 
-Fluxberry is a **modular monolith**: one Next.js frontend, one Express backend, one worker (sharing the backend codebase), one MongoDB, one object store.
+Zliptal is a **modular monolith**: one Next.js frontend, one Express backend, one worker (sharing the backend codebase), one MongoDB, one object store.
 
 ## Request path
 

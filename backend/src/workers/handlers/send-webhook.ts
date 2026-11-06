@@ -37,9 +37,9 @@ export const sendWebhookHandler: JobHandler = async (payload, ctx) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Fluxberry-Signature': `sha256=${signature}`,
-        'X-Fluxberry-Event': eventType,
-        'X-Fluxberry-Delivery': deliveryId,
+        'X-Zliptal-Signature': `sha256=${signature}`,
+        'X-Zliptal-Event': eventType,
+        'X-Zliptal-Delivery': deliveryId,
       },
       body,
       redirect: 'manual',

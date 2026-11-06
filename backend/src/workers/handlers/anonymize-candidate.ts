@@ -50,7 +50,7 @@ export const anonymizeCandidateHandler: JobHandler = async (payload, ctx) => {
     // is the critical path for V1.
     await candidateRepository.update(candidateId, {
       name: 'Anonymized',
-      email: `deleted-${candidateId}@anonymized.fluxberry.invalid`,
+      email: `deleted-${candidateId}@anonymized.zliptal.invalid`,
       phone: null,
       location: null,
       currentSalary: null,

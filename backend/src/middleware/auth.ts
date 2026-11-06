@@ -163,7 +163,7 @@ export function requirePlanFeature(flag: FeatureFlag): RequestHandler {
 
 /**
  * Hard paywall gate: reject unless the workspace's owning ACCOUNT has an active
- * (or dunning-grace-period) subscription. Fluxberry has no free tier — this is
+ * (or dunning-grace-period) subscription. Zliptal has no free tier — this is
  * the single gate almost every product route sits behind. Distinct 403 code
  * (SUBSCRIPTION_REQUIRED) so the frontend shows a "subscribe to continue"
  * prompt instead of a generic "forbidden" error.

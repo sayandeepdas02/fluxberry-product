@@ -18,7 +18,7 @@ async function tokenFor(email: string, name?: string) {
 }
 
 beforeAll(async () => {
-  await connectDatabase('mongodb://127.0.0.1:27017/fluxberry_test_messages');
+  await connectDatabase('mongodb://127.0.0.1:27017/zliptal_test_messages');
   await mongoose.connection.dropDatabase();
 });
 
@@ -84,13 +84,13 @@ describe('candidate messaging (integration)', () => {
     // same mock outbox, so match on subject to find ours specifically).
     const outboxEntry = mockOutbox.find((m) => m.to === 'msgcand@test.com' && m.subject === 'Quick question');
     expect(outboxEntry).toBeTruthy();
-    expect(outboxEntry!.replyTo).toBe(`application+${applicationId}@reply.test.fluxberry.dev`);
+    expect(outboxEntry!.replyTo).toBe(`application+${applicationId}@reply.test.zliptal.dev`);
 
     // Candidate replies — simulated inbound webhook.
     const inbound = await request(app)
       .post('/api/v1/webhooks/inbound-email/test-inbound-secret')
       .send({
-        to: `application+${applicationId}@reply.test.fluxberry.dev`,
+        to: `application+${applicationId}@reply.test.zliptal.dev`,
         from: 'msgcand@test.com',
         subject: 'Re: Quick question',
         text: 'Yes, Thursday afternoon works!',
@@ -108,7 +108,7 @@ describe('candidate messaging (integration)', () => {
     await request(app)
       .post('/api/v1/webhooks/inbound-email/test-inbound-secret')
       .send({
-        to: `application+${applicationId}@reply.test.fluxberry.dev`,
+        to: `application+${applicationId}@reply.test.zliptal.dev`,
         from: 'msgcand@test.com',
         subject: 'Re: Quick question',
         text: 'Yes, Thursday afternoon works!',
@@ -120,7 +120,7 @@ describe('candidate messaging (integration)', () => {
     // Wrong webhook secret is rejected.
     const badSecret = await request(app)
       .post('/api/v1/webhooks/inbound-email/wrong-secret')
-      .send({ to: `application+${applicationId}@reply.test.fluxberry.dev`, from: 'x@test.com', text: 'hi' });
+      .send({ to: `application+${applicationId}@reply.test.zliptal.dev`, from: 'x@test.com', text: 'hi' });
     expect(badSecret.status).toBe(403);
   });
 });

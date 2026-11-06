@@ -68,7 +68,7 @@ export default async function BlogPostPage({ params }: Params) {
   const jsonLd = articleJsonLd(post);
   const related = getRelatedPosts(post.slug);
   const revised = post.updated > post.date;
-  const listsFluxberry = numberedItems(post).some(({ name }) => name === BRAND);
+  const listsZliptal = numberedItems(post).some(({ name }) => name === BRAND);
 
   return (
     <>
@@ -120,9 +120,9 @@ export default async function BlogPostPage({ params }: Params) {
               <span aria-hidden>·</span>
               <span>{post.readingTime} min read</span>
             </p>
-            {listsFluxberry && (
+            {listsZliptal && (
               <p className="mt-3 max-w-[560px] text-balance font-inter text-[14px] leading-5 text-lp-gray-500">
-                Fluxberry is our product and is on this list. Check each vendor&rsquo;s pricing and features before you
+                Zliptal is our product and is on this list. Check each vendor&rsquo;s pricing and features before you
                 buy.
               </p>
             )}
@@ -174,9 +174,9 @@ export default async function BlogPostPage({ params }: Params) {
 }
 
 /**
- * The numbered H3s ("1. Fluxberry", "2. Gem"): the tools in a list post, or the
+ * The numbered H3s ("1. Zliptal", "2. Gem"): the tools in a list post, or the
  * steps in a guide. They become the page's ItemList, and tell the header
- * whether the post ranks Fluxberry and so needs the disclosure.
+ * whether the post ranks Zliptal and so needs the disclosure.
  */
 function numberedItems(post: Post) {
   return post.headings

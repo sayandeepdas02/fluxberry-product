@@ -1,6 +1,6 @@
-# Fluxberry — a simple, AI-native ATS
+# Zliptal — a simple, AI-native ATS
 
-Fluxberry is a deliberately simple applicant tracking system for startups, founders, and recruiters. The surface is calm and minimal; underneath is a robust, event-driven architecture with AI screening, MCQ assessments, and a durable hiring-workflow engine.
+Zliptal is a deliberately simple applicant tracking system for startups, founders, and recruiters. The surface is calm and minimal; underneath is a robust, event-driven architecture with AI screening, MCQ assessments, and a durable hiring-workflow engine.
 
 The core object is the **Application** — a candidate can apply to many jobs.
 
@@ -34,7 +34,7 @@ shared/    Zod schemas, enums, DTO types (imported by both)
 ```
 
 `frontend/` and `backend/` are the two deployable applications. `shared/` is an internal
-TypeScript library — built at install time (`npm run build --workspace @fluxberry/shared`) and
+TypeScript library — built at install time (`npm run build --workspace @zliptal/shared`) and
 consumed by both — not a third service; it never runs on its own.
 
 - **Database:** MongoDB + Mongoose
@@ -60,7 +60,7 @@ npm run db:seed             # seed workspace "Acme": 3 jobs, 12 candidates, 32 q
 npm run dev                 # starts shared(watch) + API(:4000) + worker + web(:3000)
 ```
 
-Open http://localhost:3000, click **Log in**, and enter `demo@fluxberry.dev` (no password — the dev auth path issues a signed test token when Supabase isn't configured).
+Open http://localhost:3000, click **Log in**, and enter `demo@zliptal.dev` (no password — the dev auth path issues a signed test token when Supabase isn't configured).
 
 ### Individual processes
 
@@ -95,7 +95,7 @@ npm run db:migrate     # sync all MongoDB indexes
 ## Testing
 
 - **Unit** (`backend/test/unit`): scoring engine, workflow condition engine
-- **Integration** (`backend/test/integration`): full auth → workspace → job → public application → candidate flow, plus RBAC, against a real local MongoDB (`fluxberry_test`) with mock providers
+- **Integration** (`backend/test/integration`): full auth → workspace → job → public application → candidate flow, plus RBAC, against a real local MongoDB (`zliptal_test`) with mock providers
 - **E2E** (`frontend/e2e`): Playwright — signup → onboarding → create job (needs the dev servers running)
 
 ```bash
@@ -103,7 +103,7 @@ npm run test                 # unit + integration
 npm run test:e2e             # Playwright (start `npm run dev` first)
 ```
 
-## Deployment (fluxberry.in)
+## Deployment (zliptal.in)
 
 - **Frontend + Backend API →** Vercel — one project, defined in [`vercel.json`](vercel.json)
   using [Vercel Services](https://vercel.com/docs/services): the Next.js app and the Express API
@@ -132,7 +132,7 @@ No Kubernetes, no microservices split beyond the one unavoidable exception (the 
 4. **Resend** — verify your sending domain, copy `RESEND_API_KEY`.
 5. **Vercel** — import this repo. It auto-detects `vercel.json`. Set every env var from
    [`.env.production.example`](.env.production.example) (backend vars and `NEXT_PUBLIC_*` vars both
-   go in the same Vercel project's Environment Variables). Point `fluxberry.in` at it.
+   go in the same Vercel project's Environment Variables). Point `zliptal.in` at it.
 6. **Railway** — create a new project from the same repo (root directory: repo root). It picks up
    `railway.toml` automatically. Set the same backend env vars as step 5 (`MONGODB_URI`,
    `SUPABASE_JWT_SECRET`, `RESEND_API_KEY`, `STORAGE_*`, `AI_API_KEY`, etc. — the worker needs

@@ -17,7 +17,7 @@ takeaways:
   - 'Greenhouse lists over 400 pre-built integrations. The ones worth adding fill real gaps in sourcing, scheduling, assessments, background checks and HRIS.'
   - 'Greenhouse now ranks applicants itself with Talent Matching (part of Real Talent), so an outside screening tool has to work differently to earn its place.'
   - 'Within a category, choose on integration depth (two-way sync beats one-way), price at your volume and the bottleneck it removes.'
-  - 'Fluxberry connects through signed webhooks and an automation tool such as Zapier, not a native Greenhouse app.'
+  - 'Zliptal connects through signed webhooks and an automation tool such as Zapier, not a native Greenhouse app.'
 ---
 
 Greenhouse is one of the most widely adopted applicant tracking systems for scaling companies. Its structured hiring framework — interview kits, scorecards, approval chains — gives teams a repeatable process. Its [integration marketplace](https://integrations.greenhouse.com/) lists over 400 pre-built integrations, so teams can extend that process with specialised tools at every stage.
@@ -28,7 +28,7 @@ This guide covers 11 Greenhouse integrations across five categories, chosen for 
 
 | Tool | Category | Best for |
 |---|---|---|
-| Fluxberry | Sourcing and AI screening | Scoring applicants before they reach Greenhouse |
+| Zliptal | Sourcing and AI screening | Scoring applicants before they reach Greenhouse |
 | LinkedIn Recruiter System Connect | Sourcing | Teams with LinkedIn Recruiter seats |
 | Gem | Sourcing and outreach | Multi-step outreach with full attribution |
 | GoodTime | Scheduling | Complex, multi-round interview loops |
@@ -52,18 +52,18 @@ Three characteristics of a strong Greenhouse integration:
 
 ## Sourcing integrations
 
-### 1. Fluxberry
+### 1. Zliptal
 
-Fluxberry is an AI-native hiring platform that scores every applicant against your job requirements the moment they apply. Greenhouse now has AI matching of its own: [Talent Matching, part of Greenhouse Real Talent](https://www.greenhouse.com/real-talent-candidate-matching), prioritises applicants against calibrations a recruiter sets. Fluxberry works before Greenhouse instead, on its own careers page and pipeline, so by the time a recruiter opens Greenhouse every candidate has a score, a written summary, and the reasoning behind it.
+Zliptal is an AI-native hiring platform that scores every applicant against your job requirements the moment they apply. Greenhouse now has AI matching of its own: [Talent Matching, part of Greenhouse Real Talent](https://www.greenhouse.com/real-talent-candidate-matching), prioritises applicants against calibrations a recruiter sets. Zliptal works before Greenhouse instead, on its own careers page and pipeline, so by the time a recruiter opens Greenhouse every candidate has a score, a written summary, and the reasoning behind it.
 
-**How it connects:** There is no native Greenhouse integration yet. Fluxberry runs its own pipeline and careers page, and sends a signed webhook when a candidate is shortlisted, changes stage or is hired. Route those events into Greenhouse with an automation tool such as Zapier or Make, or a short script against Greenhouse's API, and your shortlist reaches Greenhouse without anyone rereading resumes.
+**How it connects:** There is no native Greenhouse integration yet. Zliptal runs its own pipeline and careers page, and sends a signed webhook when a candidate is shortlisted, changes stage or is hired. Route those events into Greenhouse with an automation tool such as Zapier or Make, or a short script against Greenhouse's API, and your shortlist reaches Greenhouse without anyone rereading resumes.
 
 **Why it fits Greenhouse teams:**
 - Screening happens before Greenhouse, so your Greenhouse setup, interview kits and scorecards stay exactly as they are
 - Every score comes with a summary, strengths and concerns, so reviewers can see why a candidate ranked where they did
 - Analytics complement Greenhouse's reporting with channel attribution and drop-off analysis
 
-**Pricing:** Starts at {{price:pro:monthly}}/month. [Get started with Fluxberry →](/sign-up)
+**Pricing:** Starts at {{price:pro:monthly}}/month. [Get started with Zliptal →](/sign-up)
 
 ### 2. LinkedIn Recruiter System Connect
 
@@ -133,22 +133,22 @@ BambooHR's Greenhouse integration syncs new hires from Greenhouse into BambooHR'
 
 **Best for:** Small-to-mid-size companies using Greenhouse for recruiting and BambooHR for HR that want to eliminate manual data entry at the point of hire.
 
-## Add Fluxberry to your Greenhouse stack
+## Add Zliptal to your Greenhouse stack
 
-Greenhouse gives you structured hiring. Fluxberry gives you AI-powered screening so the candidates entering that structure are already the right ones. Together, your team spends its review time on a ranked shortlist instead of the whole pile, without changing how it uses Greenhouse.
+Greenhouse gives you structured hiring. Zliptal gives you AI-powered screening so the candidates entering that structure are already the right ones. Together, your team spends its review time on a ranked shortlist instead of the whole pile, without changing how it uses Greenhouse.
 
-[Create your Fluxberry workspace](/sign-up) and run it alongside your Greenhouse instance.
+[Create your Zliptal workspace](/sign-up) and run it alongside your Greenhouse instance.
 
 ## Frequently asked questions
 
 ### Does Greenhouse have built-in AI screening?
 
-Yes. Since June 2025, [Greenhouse Real Talent](https://www.greenhouse.com/product-features/greenhouse-real-talent) has included Talent Matching, which matches resumes against recruiter-defined, weighted calibrations and explains each recommendation, alongside spam and fraud detection. A separate tool such as Fluxberry makes sense when you want screening to happen before candidates reach Greenhouse, with a score, summary, strengths and concerns for every applicant.
+Yes. Since June 2025, [Greenhouse Real Talent](https://www.greenhouse.com/product-features/greenhouse-real-talent) has included Talent Matching, which matches resumes against recruiter-defined, weighted calibrations and explains each recommendation, alongside spam and fraud detection. A separate tool such as Zliptal makes sense when you want screening to happen before candidates reach Greenhouse, with a score, summary, strengths and concerns for every applicant.
 
 ### How do I choose between Greenhouse integrations in the same category?
 
 Evaluate three things: integration depth (bidirectional vs. one-way), pricing at your scale, and whether the tool solves your specific bottleneck. Two scheduling tools may look similar on paper, but one handles panel coordination while the other only does one-on-one booking.
 
-### Can I use Fluxberry without Greenhouse?
+### Can I use Zliptal without Greenhouse?
 
-Yes. Fluxberry is a standalone AI-native ATS with its own pipeline, careers page, and analytics. If Greenhouse's pricing is too high for your team, or you do not need its enterprise features, Fluxberry can be your primary hiring tool. Our [Greenhouse alternatives](/blog/greenhouse-alternatives) guide compares it with nine other options. [Get started →](/sign-up)
+Yes. Zliptal is a standalone AI-native ATS with its own pipeline, careers page, and analytics. If Greenhouse's pricing is too high for your team, or you do not need its enterprise features, Zliptal can be your primary hiring tool. Our [Greenhouse alternatives](/blog/greenhouse-alternatives) guide compares it with nine other options. [Get started →](/sign-up)

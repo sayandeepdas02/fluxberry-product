@@ -8,13 +8,13 @@ HTML page in the brand's type and colours, which render.js screenshots.
     # then convert each PNG to WebP, 1600px wide, into public/blog/<slug>/
 
 chart.py holds the published competitor prices behind ats-monthly-cost-comparison.webp.
-Re-check them and re-render the chart whenever a price changes, including Fluxberry's.
+Re-check them and re-render the chart whenever a price changes, including Zliptal's.
 """
-FMARK = '<svg viewBox="0 0 2000 2000"><rect width="2000" height="2000" fill="#2d81ff"/><path fill="#fff" d="M616.3 335.5H1452.5V526H853V888.9H1337.6V1075.2H853V1630.5H616.3Z"/></svg>'
+ZMARK = '<svg viewBox="0 0 2000 2000"><rect width="2000" height="2000" fill="#2d81ff"/><path fill="#fff" d="M475 335H1525V565L830 1435H1525V1665H475V1435L1170 565H475Z"/></svg>'
 def page(body, title, sub, note=''):
     return f'''<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="base.css"></head>
 <body><div class="frame"><h1>{title}</h1><p class="sub">{sub}</p>{body}</div>
-{f'<p class="note">{note}</p>' if note else ''}<div class="brand">{FMARK}Fluxberry</div></body></html>'''
+{f'<p class="note">{note}</p>' if note else ''}<div class="brand">{ZMARK}Zliptal</div></body></html>'''
 
 # 1. How an ATS works (post 3)
 steps = [

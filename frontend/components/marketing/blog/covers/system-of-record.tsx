@@ -3,7 +3,7 @@
 import { motion } from 'motion/react';
 import { Blocks, ClipboardCheck, Database, FileText, Search, ShieldCheck, type LucideIcon } from 'lucide-react';
 import { EASE_OUT, POP, enter, type VisualState } from '@/components/marketing/landing/stage';
-import { Bar, Card, CheckDot, Count, CUE, FMark, GREEN, GREEN_BG, Glass, IconTile, SHADOW_SOFT, type Hue } from './kit';
+import { Bar, Card, CheckDot, Count, CUE, ZMark, GREEN, GREEN_BG, Glass, IconTile, SHADOW_SOFT, type Hue } from './kit';
 
 /*
  * "12 top tools that integrate with SAP SuccessFactors": the enterprise
@@ -86,7 +86,7 @@ export function SystemOfRecordScene({ v }: { v: VisualState }) {
               }
             />
             <span className="absolute left-[14px] top-[14px]">
-              {i === 0 ? <FMark size={40} radius={11} /> : <IconTile icon={COLUMNS[col].icon} hue={COLUMNS[col].hue} size={40} />}
+              {i === 0 ? <ZMark size={40} radius={11} /> : <IconTile icon={COLUMNS[col].icon} hue={COLUMNS[col].hue} size={40} />}
             </span>
             <span className="absolute bottom-[16px] left-[14px] flex flex-col gap-[7px]">
               <Bar width={64 + ((i * 7) % 3) * 8} height={9} />

@@ -37,7 +37,7 @@ export function CareersScene({ v }: { v: VisualState }) {
                 <span key={c} className="size-[12px] rounded-full" style={{ backgroundColor: c }} />
               ))}
               <span className="mx-auto rounded-full bg-white px-[22px] py-[5px] font-inter text-[15px] ring-1 ring-[#e3e7ef]" style={{ color: MUTED }}>
-                fluxberry.in/acme/careers
+                zliptal.in/acme/careers
               </span>
               <span className="w-[52px]" />
             </div>

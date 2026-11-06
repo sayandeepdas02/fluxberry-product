@@ -3,13 +3,13 @@
 import { motion } from 'motion/react';
 import { Briefcase, type LucideIcon } from 'lucide-react';
 import { EASE_OUT, POP, enter, type VisualState } from '@/components/marketing/landing/stage';
-import { BLUE, Card, CheckDot, CUE, FMark, Glass, HUES, IconTile, MUTED, SHADOW_SOFT, Tag, alongCurve, curvePath, type Hue } from './kit';
+import { BLUE, Card, CheckDot, CUE, ZMark, Glass, HUES, IconTile, MUTED, SHADOW_SOFT, Tag, alongCurve, curvePath, type Hue } from './kit';
 
 /*
  * The "X alternatives" posts: the ATS you're leaving on the left, faded, and
  * the article's shortlist on the right, each pick with its "best for" tag.
  * A wire runs from one to the other and candidates keep moving across it
- * while the cover is on screen. Fluxberry heads the list, checked.
+ * while the cover is on screen. Zliptal heads the list, checked.
  */
 
 export interface SwitchPick {
@@ -120,7 +120,7 @@ export function SwitchScene({ v, from, note, picks }: { v: VisualState; from: st
                 }}
                 {...enter(v, { opacity: 0, x: 28 }, { opacity: 1, x: 0 }, { ...POP, delay: CUE + 0.55 + i * 0.1 })}
               >
-                {i === 0 ? <FMark size={46} radius={13} /> : <IconTile icon={pick.icon} hue={pick.hue} size={46} />}
+                {i === 0 ? <ZMark size={46} radius={13} /> : <IconTile icon={pick.icon} hue={pick.hue} size={46} />}
                 <span className="font-manrope text-[22px] font-semibold text-[#0b0d17]">{pick.name}</span>
                 <span
                   className="ml-auto whitespace-nowrap rounded-full px-[12px] py-[5px] font-manrope text-[15px] font-semibold"

@@ -1,5 +1,5 @@
 envVarGroups:
-  - name: fluxberry-backend-shared
+  - name: zliptal-backend-shared
     envVars:
       - key: NODE_ENV
         value: production
@@ -20,9 +20,9 @@ envVarGroups:
       - key: PUBLIC_API_URL
         sync: false
       - key: PUBLIC_APP_URL
-        value: https://fluxberry.in
+        value: https://zliptal.in
       - key: CORS_ORIGINS
-        value: https://fluxberry.in,https://www.fluxberry.in
+        value: https://zliptal.in,https://www.zliptal.in
       - key: STORAGE_ENDPOINT
         sync: false
       - key: STORAGE_REGION
@@ -72,20 +72,20 @@ envVarGroups:
 
 services:
   - type: web
-    name: fluxberry-api
+    name: zliptal-api
     env: node
     plan: starter
-    buildCommand: npm install && npm run build --workspace @fluxberry/backend
-    startCommand: npm run start --workspace @fluxberry/backend
+    buildCommand: npm install && npm run build --workspace @zliptal/backend
+    startCommand: npm run start --workspace @zliptal/backend
     healthCheckPath: /health
     envVars:
-      - fromGroup: fluxberry-backend-shared
+      - fromGroup: zliptal-backend-shared
 
   - type: worker
-    name: fluxberry-worker
+    name: zliptal-worker
     env: node
     plan: starter
-    buildCommand: npm install && npm run build --workspace @fluxberry/backend
-    startCommand: npm run start:worker --workspace @fluxberry/backend
+    buildCommand: npm install && npm run build --workspace @zliptal/backend
+    startCommand: npm run start:worker --workspace @zliptal/backend
     envVars:
-      - fromGroup: fluxberry-backend-shared
+      - fromGroup: zliptal-backend-shared

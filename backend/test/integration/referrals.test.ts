@@ -35,7 +35,7 @@ async function inviteAndAccept(
 }
 
 beforeAll(async () => {
-  await connectDatabase('mongodb://127.0.0.1:27017/fluxberry_test_referrals');
+  await connectDatabase('mongodb://127.0.0.1:27017/zliptal_test_referrals');
   await mongoose.connection.dropDatabase();
 });
 

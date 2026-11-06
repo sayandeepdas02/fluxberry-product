@@ -5,7 +5,7 @@ import { PRODUCT } from './content';
 import { ProductCover } from './product';
 
 /**
- * "Product": the six things Fluxberry is made of, two cards per row. Each card has the blog's
+ * "Product": the six things Zliptal is made of, two cards per row. Each card has the blog's
  * cover treatment (painted sky, cover line, a live scene), bigger than the old icon tiles, with
  * the title and description under it. The section's id is the nav's "Product" anchor (/#product).
  */

@@ -3,8 +3,8 @@ import { TYPE } from './landing/primitives';
 import { SUMMARIZE_WITH_AI } from './landing/content';
 
 /*
- * "Summarize what Fluxberry does with AI": one button per assistant, each
- * opening it in a new tab with a prompt about Fluxberry already filled in.
+ * "Summarize what Zliptal does with AI": one button per assistant, each
+ * opening it in a new tab with a prompt about Zliptal already filled in.
  * The marks are monochrome brand glyphs from Simple Icons (CC0), drawn in the
  * text colour.
  */
@@ -34,7 +34,7 @@ export function SummarizeWithAI({ className }: { className?: string }) {
               href={url + prompt}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label={`Summarize Fluxberry with ${name} (opens in a new tab)`}
+              aria-label={`Summarize Zliptal with ${name} (opens in a new tab)`}
               className={cn(
                 // Outline pills: transparent over the footer's blue, tinting white on hover.
                 'inline-flex items-center gap-2 rounded-[40px] border border-black/15 bg-transparent px-4 py-2.5 text-black outline-none',

@@ -6,7 +6,7 @@ import type { AuthContext } from '../../types/auth-context';
 // analytics.service.compute), so it must compute the full/owner view —
 // never a per-user-restricted one.
 const SYSTEM_AUTH: AuthContext = {
-  user: { id: 'system', supabaseId: 'system', email: 'system@fluxberry.internal', name: 'System' },
+  user: { id: 'system', supabaseId: 'system', email: 'system@zliptal.internal', name: 'System' },
   role: 'owner',
 };
 

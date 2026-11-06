@@ -1,6 +1,6 @@
 from build import page
 rows = [
-  ('Fluxberry', 'Pro, flat price, unlimited users', 39, True),
+  ('Zliptal', 'Pro, flat price, unlimited users', 39, True),
   ('Manatal', 'Professional, $19 per recruiter', 57, False),
   ('Zoho Recruit', 'Standard, $30 per recruiter', 90, False),
   ('JazzHR', 'Hero, flat price', 110, False),

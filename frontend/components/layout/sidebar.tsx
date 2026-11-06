@@ -136,16 +136,16 @@ function HelpPopover() {
         <div>
           <p className="text-sm font-semibold text-foreground">We&apos;re here to help</p>
           <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-            We&apos;re a lean team building Fluxberry AI. For any questions or issues, reach out directly.
+            We&apos;re a lean team building Zliptal. For any questions or issues, reach out directly.
           </p>
         </div>
         <div className="space-y-2">
           <a
-            href="mailto:sayandeep@fluxberry.in"
+            href="mailto:sayandeep@zliptal.in"
             className="flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
           >
             <Mail className="size-4 shrink-0" />
-            sayandeep@fluxberry.in
+            sayandeep@zliptal.in
           </a>
           <a
             href="https://x.com/deepmaxxing"

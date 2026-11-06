@@ -198,12 +198,12 @@ export function EmbedJobBoard({ company, openings, appUrl, accentColor, intro, j
       >
         Powered by{' '}
         <a
-          href="https://fluxberry.in"
+          href="https://zliptal.in"
           target="_blank"
           rel="noreferrer"
           style={{ color: '#111827', fontWeight: 500, textDecoration: 'none' }}
         >
-          Fluxberry AI
+          Zliptal
         </a>
       </div>
     </div>

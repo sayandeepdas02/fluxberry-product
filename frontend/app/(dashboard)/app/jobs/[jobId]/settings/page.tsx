@@ -294,7 +294,7 @@ function LinkedInShareCard({ job }: { job: JobDto }) {
       </CardHeader>
       <CardContent className="space-y-3">
         <p className="text-sm text-muted-foreground">
-          Fluxberry doesn&apos;t auto-post to LinkedIn — share the role with LinkedIn&apos;s pre-filled dialog, then mark it here so your team knows it&apos;s out there.
+          Zliptal doesn&apos;t auto-post to LinkedIn — share the role with LinkedIn&apos;s pre-filled dialog, then mark it here so your team knows it&apos;s out there.
         </p>
         <div className="flex flex-wrap items-center gap-2">
           <Button variant="outline" asChild>

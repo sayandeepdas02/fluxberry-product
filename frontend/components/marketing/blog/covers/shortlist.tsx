@@ -4,19 +4,19 @@ import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { ChevronDown, Filter, MessagesSquare, Palette, Rocket, SquareKanban, type LucideIcon } from 'lucide-react';
 import { EASE_OUT, enter, type VisualState } from '@/components/marketing/landing/stage';
-import { BLUE, Bar, Card, CUE, FMark, Glass, IconTile, SHADOW_SOFT, Tag, type Hue } from './kit';
+import { BLUE, Bar, Card, CUE, ZMark, Glass, IconTile, SHADOW_SOFT, Tag, type Hue } from './kit';
 
 /*
  * "The best applicant tracking systems for small businesses": a comparison
  * board filtered to small teams. Five ATS rows arrive out of order, then rank
- * themselves by fit; Fluxberry rises to the top. They shuffle and rank again
+ * themselves by fit; Zliptal rises to the top. They shuffle and rank again
  * while the cover is on screen. The other rows stay unnamed, so the cover
  * makes no claim about any real product.
  */
 
 const GLASS = { left: 170, top: 262, width: 860, height: 560 };
 const ROW = { top: 84, height: 80, gap: 14 };
-/** Each row's fit, as a share of the bar; row 0 is Fluxberry. */
+/** Each row's fit, as a share of the bar; row 0 is Zliptal. */
 const ROWS: { fit: number; icon: LucideIcon | 'brand'; hue: Hue }[] = [
   { fit: 0.92, icon: 'brand', hue: 'blue' },
   { fit: 0.78, icon: SquareKanban, hue: 'violet' },
@@ -91,10 +91,10 @@ export function ShortlistScene({ v }: { v: VisualState }) {
                   }}
                 >
                   <span className="w-[26px] font-manrope text-[20px] font-semibold tabular-nums text-[#6b7390]">{slot + 1}</span>
-                  {row.icon === 'brand' ? <FMark size={46} radius={13} /> : <IconTile icon={row.icon} hue={row.hue} size={46} />}
+                  {row.icon === 'brand' ? <ZMark size={46} radius={13} /> : <IconTile icon={row.icon} hue={row.hue} size={46} />}
                   <span className="flex w-[190px] flex-col gap-[9px]">
                     {row.icon === 'brand' ? (
-                      <span className="font-manrope text-[21px] font-semibold leading-[22px] text-[#0b0d17]">Fluxberry</span>
+                      <span className="font-manrope text-[21px] font-semibold leading-[22px] text-[#0b0d17]">Zliptal</span>
                     ) : (
                       <Bar width={120 - (i % 3) * 18} height={12} />
                     )}

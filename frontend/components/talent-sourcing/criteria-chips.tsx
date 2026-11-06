@@ -34,7 +34,7 @@ function titleCase(s: string) {
 }
 
 /**
- * The "Fluxberry set your filters — check them" moment. Renders the parsed
+ * The "Zliptal set your filters — check them" moment. Renders the parsed
  * criteria as editable chips; every edit round-trips the same `SourcingCriteria`
  * shape, so re-running never re-calls the AI.
  */

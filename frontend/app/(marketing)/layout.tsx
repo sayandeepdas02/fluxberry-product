@@ -6,7 +6,7 @@ import { MotionProvider } from '@/components/marketing/landing/motion-provider';
 import { landingFonts } from '@/components/marketing/landing/fonts';
 import { BRAND } from '@/components/marketing/landing/content';
 
-/** Marketing pages are titled with the brand ("Blog · Fluxberry"); the app's own pages keep the configured name. */
+/** Marketing pages are titled with the brand ("Blog · Zliptal"); the app's own pages keep the configured name. */
 export const metadata: Metadata = {
   applicationName: BRAND,
   title: { template: `%s · ${BRAND}`, default: `${BRAND} - AI Native Hiring Platform` },

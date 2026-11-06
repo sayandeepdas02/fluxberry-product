@@ -15,7 +15,7 @@ export default async function OpengraphImage({ params }: { params: Params }) {
   const subtitle =
     data?.job.title && data.job.workspace?.name
       ? `${data.job.title} · ${data.job.workspace.name}`
-      : data?.job.title ?? 'Apply now — powered by Fluxberry AI.';
+      : data?.job.title ?? 'Apply now — powered by Zliptal.';
 
   return ogImage(<OGLayout wordmark={publicConfig.appName} headline="AI Native Hiring Platform" subtitle={subtitle} />);
 }

@@ -39,7 +39,7 @@ function FooterEntry({ item }: { item: FooterItem }) {
 }
 
 /**
- * Width of the wordmark's box in em: "Fluxberry" set in Manrope 600 at
+ * Width of the wordmark's box in em: "Zliptal" set in Manrope 600 at
  * −0.04em measures 4.0937em in the browser, and Framer's fitted text box adds
  * 0.0409em to the word (its trailing tracking) and centres the word in it.
  * The font size is the container width divided by this, so the word spans the
@@ -106,7 +106,7 @@ export function SiteFooter() {
               className="whitespace-nowrap pb-[0.1427em] text-center font-manrope font-semibold leading-[0.9] tracking-[-0.04em] text-lp-blue-600"
               style={{ fontSize: `calc(100cqw / ${WORDMARK_EM_WIDTH})` }}
             >
-              Fluxberry
+              Zliptal
             </p>
           </div>
         </Reveal>

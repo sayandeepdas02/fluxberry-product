@@ -3,13 +3,13 @@
 import { motion } from 'motion/react';
 import { Building2, ClipboardCheck, PenLine, Plus, ShieldCheck, Wallet, type LucideIcon } from 'lucide-react';
 import { POP, enter, type VisualState } from '@/components/marketing/landing/stage';
-import { Card, CheckDot, CUE, FMark, GREEN, Glass, IconTile, SHADOW_SOFT, type Hue } from './kit';
+import { Card, CheckDot, CUE, ZMark, GREEN, Glass, IconTile, SHADOW_SOFT, type Hue } from './kit';
 
 /*
  * "10 useful tools that integrate with BambooHR": BambooHR is the base (core
  * HR), and the article's five categories drop onto it one by one until the
  * hiring stack is complete. While on screen, a sync pulse runs up the stack
- * from the base to sourcing, Fluxberry, on top.
+ * from the base to sourcing, Zliptal, on top.
  */
 
 const BASE = { left: 280, top: 632, width: 640, height: 128 };
@@ -50,12 +50,12 @@ export function StackScene({ v }: { v: VisualState }) {
               }
             />
             <span className="relative flex items-center gap-[14px]">
-              {layer.icon === 'brand' ? <FMark size={38} radius={11} /> : <IconTile icon={layer.icon} hue={layer.hue} size={38} />}
+              {layer.icon === 'brand' ? <ZMark size={38} radius={11} /> : <IconTile icon={layer.icon} hue={layer.hue} size={38} />}
               <span className="font-manrope text-[20px] font-semibold text-[#0b0d17]">{layer.label}</span>
             </span>
             <span className="relative ml-auto flex items-center gap-[8px] font-manrope text-[15px] font-semibold" style={{ color: GREEN }}>
               <motion.span {...enter(v, { opacity: 0, x: 6 }, { opacity: 1, x: 0 }, { duration: 0.3, delay: landAt(i) + 0.35 })}>
-                {i === LAYERS.length - 1 ? 'Fluxberry' : 'Connected'}
+                {i === LAYERS.length - 1 ? 'Zliptal' : 'Connected'}
               </motion.span>
               <CheckOnLand v={v} delay={landAt(i) + 0.3} />
             </span>

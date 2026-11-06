@@ -102,7 +102,7 @@ export const webhookEndpointService = {
       type: 'webhook.test',
       apiVersion: 'v1',
       createdAt: new Date().toISOString(),
-      data: { message: 'This is a test event from Fluxberry' },
+      data: { message: 'This is a test event from Zliptal' },
     };
     const body = JSON.stringify(envelope);
     const signature = signPayload(endpoint.secret, body);
@@ -112,9 +112,9 @@ export const webhookEndpointService = {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Fluxberry-Signature': `sha256=${signature}`,
-          'X-Fluxberry-Event': 'webhook.test',
-          'X-Fluxberry-Delivery': envelope.id,
+          'X-Zliptal-Signature': `sha256=${signature}`,
+          'X-Zliptal-Event': 'webhook.test',
+          'X-Zliptal-Delivery': envelope.id,
         },
         body,
         redirect: 'manual',

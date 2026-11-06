@@ -8,7 +8,7 @@ import { BRAND, FAQ } from '@/components/marketing/landing/content';
 
 export const metadata: Metadata = publicPageMetadata({
   title: 'Pricing: Pro and Max plans',
-  description: `Fluxberry pricing: Pro at $${PLAN_PRICING.PRO.monthly}/month and Max at $${PLAN_PRICING.MAX.monthly}/month, with unlimited jobs, candidates and team members.`,
+  description: `Zliptal pricing: Pro at $${PLAN_PRICING.PRO.monthly}/month and Max at $${PLAN_PRICING.MAX.monthly}/month, with unlimited jobs, candidates and team members.`,
   path: '/pricing',
   ownImage: true,
   siteName: BRAND,

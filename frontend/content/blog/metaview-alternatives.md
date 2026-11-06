@@ -17,7 +17,7 @@ takeaways:
   - 'Metaview is an AI layer that sits on top of your ATS, with agents for sourcing, application review and interview notes, and paid plans priced per user.'
   - 'Pick the alternative by the job you need done: screening and the ATS in one tool, interview notes only, or async first rounds.'
   - 'For notes only, BrightHire (now part of Zoom) is the closest match, and the AI built into your video tool may be enough.'
-  - 'Fluxberry replaces the ATS and the screening layer together, with a flat price and unlimited team members. It does not record interviews.'
+  - 'Zliptal replaces the ATS and the screening layer together, with a flat price and unlimited team members. It does not record interviews.'
 ---
 
 Metaview started as an AI note-taker for interviews and has grown into what it calls an agentic recruiting platform, with separate agents for [sourcing, application review and interview notes](https://www.metaview.ai/pricing). It works on top of your ATS rather than replacing it, and for teams that run a lot of interviews it solves a real problem.
@@ -38,7 +38,7 @@ Three patterns come up repeatedly:
 
 | Tool | Type | Best for |
 |---|---|---|
-| Fluxberry | ATS with AI screening | Screening, pipeline and hiring in one tool |
+| Zliptal | ATS with AI screening | Screening, pipeline and hiring in one tool |
 | BrightHire | Interview intelligence | Structured interview notes tied to scorecards |
 | Employ AI Interview Companion | Interview intelligence | Teams on Lever, Jobvite or JazzHR |
 | Fireflies.ai | Meeting assistant | Transcribing every kind of meeting |
@@ -50,9 +50,9 @@ Three patterns come up repeatedly:
 
 ## ATS with AI screening
 
-### 1. Fluxberry
+### 1. Zliptal
 
-Fluxberry is an AI-native applicant tracking system that scores every application the moment it arrives. Instead of reading 200 resumes to find the eight worth a call, you open a ranked shortlist with scores, summaries, and the reasoning behind each.
+Zliptal is an AI-native applicant tracking system that scores every application the moment it arrives. Instead of reading 200 resumes to find the eight worth a call, you open a ranked shortlist with scores, summaries, and the reasoning behind each.
 
 **What it replaces:** Metaview's application review and the ATS it sits on top of. Screening, the pipeline, interviews on your Google Calendar and offers all live in one place. It does not record or transcribe interviews, so pair it with one of the note-takers below if you need that.
 
@@ -66,7 +66,7 @@ Fluxberry is an AI-native applicant tracking system that scores every applicatio
 
 **Best for:** Founders, hiring managers, and small teams who want one tool for the whole pipeline rather than an ATS plus an AI layer.
 
-[Get started with Fluxberry →](/sign-up)
+[Get started with Zliptal →](/sign-up)
 
 ## Interview intelligence and meeting tools
 
@@ -134,7 +134,7 @@ Greenhouse supports structured hiring out of the box — interview kits, scoreca
 
 | Use case | Best alternative | Why |
 |---|---|---|
-| Screening and pipeline in one tool | **Fluxberry** | An ATS with AI scoring built in, so there is no separate AI layer |
+| Screening and pipeline in one tool | **Zliptal** | An ATS with AI scoring built in, so there is no separate AI layer |
 | Interview recording and notes | **BrightHire** | The closest match for interview notes, now part of Zoom |
 | General meeting transcription | **Fireflies.ai** | Works across all meetings, not just interviews |
 | Async first-round screening | **Hireflix** | Eliminates the live interview entirely for early stages |
@@ -145,7 +145,7 @@ Greenhouse supports structured hiring out of the box — interview kits, scoreca
 
 ### Is Metaview worth it for a small team?
 
-It depends on whether you already have an ATS you like. Metaview adds AI sourcing, application review and interview notes on top of an ATS, priced per user. If you would rather have screening inside the ATS, Fluxberry covers screening, the pipeline and, on Max, sourcing from {{price:pro:monthly}}/month for the whole team.
+It depends on whether you already have an ATS you like. Metaview adds AI sourcing, application review and interview notes on top of an ATS, priced per user. If you would rather have screening inside the ATS, Zliptal covers screening, the pipeline and, on Max, sourcing from {{price:pro:monthly}}/month for the whole team.
 
 ### Can I use Metaview with any ATS?
 
@@ -153,8 +153,8 @@ Metaview integrates with most major ATS platforms including Greenhouse, Lever, a
 
 ### What is the cheapest Metaview alternative?
 
-For interview notes, Zoom AI Companion costs nothing extra on paid Zoom plans and covers basic meeting summaries. For screening and the ATS together, Fluxberry starts at {{price:pro:monthly}}/month and [covers](/sign-up) AI scoring, pipeline management, and a careers page in one tool.
+For interview notes, Zoom AI Companion costs nothing extra on paid Zoom plans and covers basic meeting summaries. For screening and the ATS together, Zliptal starts at {{price:pro:monthly}}/month and [covers](/sign-up) AI scoring, pipeline management, and a careers page in one tool.
 
 ### Do I need interview recording if I have AI screening?
 
-Not necessarily. AI screening (like Fluxberry's applicant scoring) reduces the number of interviews you conduct by surfacing the best candidates earlier. Fewer interviews means less note-taking to manage. Many small teams find that better screening is enough, and add a note-taker only when interview volume grows.
+Not necessarily. AI screening (like Zliptal's applicant scoring) reduces the number of interviews you conduct by surfacing the best candidates earlier. Fewer interviews means less note-taking to manage. Many small teams find that better screening is enough, and add a note-taker only when interview volume grows.

@@ -21,7 +21,7 @@ const OG_ASSETS = ['./assets/og-fonts/*.woff', './public/og/sky.jpg', './public/
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // @fluxberry/shared ships compiled CommonJS in dist/. Keep webpack from following the
+  // @zliptal/shared ships compiled CommonJS in dist/. Keep webpack from following the
   // workspace symlink to its real path (outside node_modules), which would otherwise
   // apply the React-Refresh loader and inject import.meta into a CJS module.
   eslint: { ignoreDuringBuilds: true },
@@ -36,7 +36,7 @@ const nextConfig = {
     '/[careersSlug]/careers/opengraph-image': OG_ASSETS,
     '/apply/[workspaceSlug]/[jobSlug]/opengraph-image': OG_ASSETS,
   },
-  // fluxberry.in (apex) is canonical — both hosts resolve at the DNS/CORS layer today,
+  // zliptal.in (apex) is canonical — both hosts resolve at the DNS/CORS layer today,
   // which risks duplicate-content indexing. Redirect www to apex at the app level so it
   // works regardless of hosting provider.
   async headers() {
@@ -57,8 +57,8 @@ const nextConfig = {
     return [
       {
         source: '/:path*',
-        has: [{ type: 'host', value: 'www.fluxberry.in' }],
-        destination: 'https://fluxberry.in/:path*',
+        has: [{ type: 'host', value: 'www.zliptal.in' }],
+        destination: 'https://zliptal.in/:path*',
         permanent: true,
       },
       // Billing moved onto the pricing page. Keeps old links, bookmarks and in-flight
@@ -68,7 +68,7 @@ const nextConfig = {
   },
   webpack: (config, { dev }) => {
     // Dev only: keep webpack from following the workspace symlink so React-Refresh
-    // isn't applied to @fluxberry/shared's CJS dist. In prod there's no Refresh, and
+    // isn't applied to @zliptal/shared's CJS dist. In prod there's no Refresh, and
     // symlinks:false would break server vendor-chunk resolution.
     if (dev) config.resolve.symlinks = false;
     return config;

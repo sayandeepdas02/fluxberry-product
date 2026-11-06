@@ -3,7 +3,7 @@ import { AccountModel } from '../../../src/models/account.model';
 import { PLAN_CREDIT_ALLOWANCE, type WorkspacePlan } from '../../../src/shared';
 
 /**
- * Test-only shortcut: Fluxberry is paid-only, so every product route is gated
+ * Test-only shortcut: Zliptal is paid-only, so every product route is gated
  * behind requireActiveSubscription (see auth.ts), and plan/subscription/credits
  * now live on the workspace's owning Account. Rather than driving the full mock
  * checkout/webhook flow in every unrelated integration test (that flow is
