@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
+import { Appear } from './motion';
 import { HeroDashboard } from './hero-dashboard';
 import { GradientButton, Pill, TYPE } from './primitives';
 import { HERO } from './content';
@@ -60,7 +61,7 @@ export function Hero() {
           />
         </div>
 
-        <div className="relative flex flex-col items-center gap-[30px] pb-11 pt-[132px] tablet:pb-14 tablet:pt-[188px] desktop:pb-16">
+        <Appear className="relative flex flex-col items-center gap-[30px] pb-11 pt-[132px] tablet:pb-14 tablet:pt-[188px] desktop:pb-16">
           <div className="flex w-full flex-col items-center gap-5 [text-shadow:0_1px_16px_rgba(3,37,99,0.28)]">
             <div className="flex w-full flex-col items-center gap-2.5">
               <Pill className="bg-white/5 text-white ring-1 ring-inset ring-white/30 backdrop-blur-md">
@@ -70,18 +71,21 @@ export function Hero() {
               <h1 className={cn('max-w-[600px] text-balance text-center text-white desktop:max-w-[850px]', TYPE.h1)}>{HERO.title}</h1>
             </div>
             <p className={cn('max-w-[340px] text-pretty text-center text-white tablet:max-w-[360px] desktop:max-w-[540px]', TYPE.body)}>
-              {HERO.lead}
+              {HERO.lead[0]}
+              <br />
+              {HERO.lead[1]}
             </p>
           </div>
           <GradientButton href={HERO.cta.href} tone="light">
             {HERO.cta.label}
           </GradientButton>
-        </div>
+        </Appear>
 
         {/* The shot's column: SHOT_CUT's percentage resolves against its width. */}
         <div className="relative mx-auto max-w-[1160px]">
           {/* A frosted-glass frame; its radii are the shot's plus the padding, so the corners stay concentric. */}
-          <div
+          <Appear
+            delay={0.2}
             className={cn(
               'rounded-[16px] bg-white/25 p-[var(--frame)] ring-1 ring-inset ring-white/50 backdrop-blur-md [--frame:6px]',
               'shadow-[0_24px_60px_-20px_rgba(3,37,99,0.35)] tablet:rounded-[20px] tablet:[--frame:8px] desktop:rounded-[24px] desktop:[--frame:10px]',
@@ -97,7 +101,7 @@ export function Hero() {
             >
               <HeroDashboard />
             </div>
-          </div>
+          </Appear>
         </div>
       </div>
     </section>
