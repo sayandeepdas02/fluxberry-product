@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { BarChart3, CalendarDays, ClipboardCheck, Search, Send, type LucideIcon } from 'lucide-react';
 import { EASE_OUT, POP, enter, type VisualState } from '@/components/marketing/landing/stage';
-import { Avatar, BLUE, Bar, Card, CheckDot, CUE, FMark, GREEN, Glass, HUES, IconTile, type Hue } from './kit';
+import { Avatar, BLUE, Bar, Card, CheckDot, CUE, ZMark, GREEN, Glass, HUES, IconTile, type Hue } from './kit';
 
 /*
  * "9 Lever integrations across the hiring stack": the funnel as a rail, one
@@ -130,9 +130,9 @@ export function FunnelScene({ v }: { v: VisualState }) {
             >
               <span className="font-inter text-[16px] text-[#6b7390]">{stop.label}</span>
               <span className="mt-[12px] flex items-center gap-[10px]">
-                {stop.brand ? <FMark size={38} radius={11} /> : <IconTile icon={stop.icon} hue={stop.hue} size={38} />}
+                {stop.brand ? <ZMark size={38} radius={11} /> : <IconTile icon={stop.icon} hue={stop.hue} size={38} />}
                 {stop.brand ? (
-                  <span className="font-manrope text-[17px] font-semibold text-[#0b0d17]">Fluxberry</span>
+                  <span className="font-manrope text-[17px] font-semibold text-[#0b0d17]">Zliptal</span>
                 ) : (
                   <span className="flex flex-col gap-[7px]">
                     <Bar width={78 - (i % 2) * 14} height={10} />

@@ -39,13 +39,13 @@ export interface CoverSpec {
 
 /** The shortlists on the two "alternatives" covers, with each pick's "best for" tag from the article. */
 const ASHBY_PICKS: readonly SwitchPick[] = [
-  { name: 'Fluxberry', tag: 'Flat price', hue: 'blue', icon: Sparkles },
+  { name: 'Zliptal', tag: 'Flat price', hue: 'blue', icon: Sparkles },
   { name: 'Greenhouse', tag: 'Structured hiring', hue: 'violet', icon: ClipboardList },
   { name: 'Lever', tag: 'ATS plus CRM', hue: 'teal', icon: HeartHandshake },
   { name: 'Workable', tag: 'Job-board reach', hue: 'orange', icon: Megaphone },
 ];
 const GREENHOUSE_PICKS: readonly SwitchPick[] = [
-  { name: 'Fluxberry', tag: 'AI scoring', hue: 'blue', icon: Sparkles },
+  { name: 'Zliptal', tag: 'AI scoring', hue: 'blue', icon: Sparkles },
   { name: 'Ashby', tag: 'Analytics-led', hue: 'violet', icon: ChartNoAxesColumn },
   { name: 'Lever', tag: 'ATS plus CRM', hue: 'teal', icon: HeartHandshake },
   { name: 'Workable', tag: 'Job-board reach', hue: 'orange', icon: Megaphone },

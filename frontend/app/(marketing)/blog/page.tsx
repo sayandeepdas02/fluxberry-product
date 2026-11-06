@@ -7,7 +7,7 @@ import { GridBackdrop, SectionHeader } from '@/components/marketing/landing/prim
 import { FeaturedPost } from '@/components/marketing/blog/featured-post';
 import { PostBrowser } from '@/components/marketing/blog/post-browser';
 
-const description = 'Case Studies, discussions, blogs, notes on hiring the best AI talent with Fluxberry';
+const description = 'Case Studies, discussions, blogs, notes on hiring the best AI talent with Zliptal';
 const metaDescription =
   'ATS guides, comparisons and alternatives for hiring teams: the best applicant tracking and recruiting software, what each costs, and how to hire faster.';
 

@@ -137,7 +137,7 @@ function RewardManagement() {
       </CardHeader>
       <CardContent>
         <p className="mb-4 text-sm text-muted-foreground">
-          Rewards are tracked manually — mark a referral as paid once you&apos;ve settled it outside Fluxberry.
+          Rewards are tracked manually — mark a referral as paid once you&apos;ve settled it outside Zliptal.
         </p>
         {isLoading ? (
           <Skeleton className="h-32 w-full" />

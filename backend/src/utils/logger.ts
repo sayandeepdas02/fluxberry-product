@@ -7,7 +7,7 @@ import { config } from '../config/env';
  */
 export const logger = pino({
   level: config.isTest ? 'silent' : config.isProd ? 'info' : 'debug',
-  base: { service: 'fluxberry' },
+  base: { service: 'zliptal' },
   redact: {
     paths: [
       'req.headers.authorization',

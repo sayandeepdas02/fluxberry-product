@@ -55,7 +55,7 @@ export function ReferralsScene({ v }: { v: VisualState }) {
               <ChevronDown size={20} strokeWidth={2.4} style={{ color: MUTED }} />
             </div>
             <div className="absolute inset-x-[26px] top-[154px] flex h-[64px] items-center gap-[12px] rounded-[14px] bg-[#f4f6fa] pl-[18px] pr-[8px]">
-              <span className="font-inter text-[17px] text-[#3b4366]">fluxberry.in/r/a7m2q</span>
+              <span className="font-inter text-[17px] text-[#3b4366]">zliptal.in/r/a7m2q</span>
               <motion.span
                 className="ml-auto flex h-[46px] items-center gap-[8px] rounded-[11px] px-[16px] font-manrope text-[16px] font-semibold text-white"
                 initial={false}

@@ -1,23 +1,23 @@
 ---
 title: Terms of Service
-description: The terms that apply when you create a Fluxberry account or use Fluxberry to hire.
+description: The terms that apply when you create a Zliptal account or use Zliptal to hire.
 updated: '2026-09-28'
 ---
 
-These Terms of Service ("Terms") are an agreement between you and Fluxberry ("we", "us") and apply when you create an account on fluxberry.in or use Fluxberry. If you use Fluxberry for a company, you accept these Terms on its behalf and confirm that you are allowed to do so. In these Terms, "you" means you and that company.
+These Terms of Service ("Terms") are an agreement between you and Zliptal ("we", "us") and apply when you create an account on zliptal.in or use Zliptal. If you use Zliptal for a company, you accept these Terms on its behalf and confirm that you are allowed to do so. In these Terms, "you" means you and that company.
 
-If you do not agree to these Terms, do not use Fluxberry.
+If you do not agree to these Terms, do not use Zliptal.
 
 ## 1. The service
 
-Fluxberry is hiring software. It lets you publish jobs and a careers page, collect applications, screen applicants with AI, manage your pipeline with your team, message candidates and, on some plans, find and contact potential candidates through Talent Sourcing. We may improve, change or remove features over time. If we remove a core feature you pay for, we will tell you in advance.
+Zliptal is hiring software. It lets you publish jobs and a careers page, collect applications, screen applicants with AI, manage your pipeline with your team, message candidates and, on some plans, find and contact potential candidates through Talent Sourcing. We may improve, change or remove features over time. If we remove a core feature you pay for, we will tell you in advance.
 
 ## 2. Accounts
 
 - You must be at least 18 and able to enter into a binding contract.
 - Give us accurate information and keep it up to date.
 - Keep your sign-in details secure. You are responsible for everything that happens under your account and for the members you invite to your workspace.
-- Tell us straight away at [sayandeep@fluxberry.in](mailto:sayandeep@fluxberry.in) if you think your account has been accessed without permission.
+- Tell us straight away at [sayandeep@zliptal.in](mailto:sayandeep@zliptal.in) if you think your account has been accessed without permission.
 
 ## 3. Plans, credits and payment
 
@@ -32,15 +32,15 @@ Fluxberry is hiring software. It lets you publish jobs and a careers page, colle
 
 ## 4. Your data and your candidates' data
 
-- **You own your content.** Jobs, forms, notes, and the candidate data you collect or import ("Customer Data") belong to you. You give us permission to host, process and display it only as needed to provide Fluxberry to you.
+- **You own your content.** Jobs, forms, notes, and the candidate data you collect or import ("Customer Data") belong to you. You give us permission to host, process and display it only as needed to provide Zliptal to you.
 - **You are responsible for your candidates' data.** You decide what to collect from candidates and how to use it. You must have a lawful basis to collect and use it, give candidates any notices the law requires (including telling them that AI is used to screen applications, where the law requires), and respond to their requests. We process Customer Data on your behalf as described in our [Privacy Policy](/privacy).
-- **AI results support your decisions.** AI scores, summaries and drafts can be wrong or incomplete. Review them before you rely on them. You, not Fluxberry, make hiring decisions, and you are responsible for complying with employment, anti-discrimination and AI laws that apply to your hiring.
+- **AI results support your decisions.** AI scores, summaries and drafts can be wrong or incomplete. Review them before you rely on them. You, not Zliptal, make hiring decisions, and you are responsible for complying with employment, anti-discrimination and AI laws that apply to your hiring.
 - **Sourcing and outreach.** If you use Talent Sourcing, you are responsible for the emails you send. Only contact people for genuine recruiting purposes, follow anti-spam and data protection laws, and honour unsubscribe requests. Do not remove the unsubscribe link we add to outreach emails.
 - **Security.** We protect Customer Data with reasonable technical and organisational measures, described in our Privacy Policy.
 
 ## 5. Acceptable use
 
-Do not use Fluxberry to:
+Do not use Zliptal to:
 
 - break any law, including employment, anti-discrimination, data protection and anti-spam laws;
 - post fake jobs, collect data for anything other than genuine hiring, or scam or mislead candidates;
@@ -48,21 +48,21 @@ Do not use Fluxberry to:
 - send unsolicited bulk email that is not genuine recruiting outreach;
 - upload malware or content you do not have the right to use;
 - try to access other workspaces, get around usage limits or security, or disrupt the service;
-- copy, resell or reverse engineer Fluxberry, or scrape it, except where the law allows.
+- copy, resell or reverse engineer Zliptal, or scrape it, except where the law allows.
 
 We may suspend or remove content or accounts that break these rules. Where we reasonably can, we will tell you first and give you a chance to fix the problem.
 
 ## 6. Our intellectual property
 
-Fluxberry, its software, design and brand belong to us and our licensors. These Terms give you a limited, non-exclusive, non-transferable right to use Fluxberry while your account is active. If you send us feedback, we may use it without owing you anything.
+Zliptal, its software, design and brand belong to us and our licensors. These Terms give you a limited, non-exclusive, non-transferable right to use Zliptal while your account is active. If you send us feedback, we may use it without owing you anything.
 
 ## 7. Third-party services
 
-Fluxberry works with services run by others, such as Google Calendar, LinkedIn sharing, email providers and data providers. Your use of those services is governed by their terms, and we are not responsible for them.
+Zliptal works with services run by others, such as Google Calendar, LinkedIn sharing, email providers and data providers. Your use of those services is governed by their terms, and we are not responsible for them.
 
 ## 8. Availability and changes
 
-We work to keep Fluxberry available and secure, but we provide it "as is" and "as available". To the extent the law allows, we do not promise that it will be uninterrupted or error-free, or that AI results will be accurate.
+We work to keep Zliptal available and secure, but we provide it "as is" and "as available". To the extent the law allows, we do not promise that it will be uninterrupted or error-free, or that AI results will be accurate.
 
 ## 9. Limitation of liability
 
@@ -79,13 +79,13 @@ You will defend and compensate us for claims by third parties, including candida
 
 ## 11. Ending the agreement
 
-- You can stop using Fluxberry and cancel your subscription at any time. To close your account and have your data deleted, email us.
-- We may suspend or end your access if you seriously or repeatedly break these Terms, fail to pay, or if we have to by law. If we stop offering Fluxberry altogether, we will give you reasonable notice.
+- You can stop using Zliptal and cancel your subscription at any time. To close your account and have your data deleted, email us.
+- We may suspend or end your access if you seriously or repeatedly break these Terms, fail to pay, or if we have to by law. If we stop offering Zliptal altogether, we will give you reasonable notice.
 - Before your account is closed you can ask us for a copy of your Customer Data. After closure we delete or anonymise it as described in our Privacy Policy.
 
 ## 12. Changes to these Terms
 
-We may update these Terms. We will change the "last updated" date above, and for significant changes we will tell you by email or in the product before they take effect. If you keep using Fluxberry after that, the new Terms apply.
+We may update these Terms. We will change the "last updated" date above, and for significant changes we will tell you by email or in the product before they take effect. If you keep using Zliptal after that, the new Terms apply.
 
 ## 13. Governing law and disputes
 
@@ -93,8 +93,8 @@ These Terms are governed by the laws of India. The courts at Bengaluru, Karnatak
 
 ## 14. General
 
-These Terms, together with the Privacy Policy, Cookie Policy and Refund Policy, are the whole agreement between us about Fluxberry. If part of them cannot be enforced, the rest still applies. You may not transfer these Terms without our consent. We may transfer them as part of a merger, acquisition or sale of our business. Not enforcing a right straight away does not mean we give it up.
+These Terms, together with the Privacy Policy, Cookie Policy and Refund Policy, are the whole agreement between us about Zliptal. If part of them cannot be enforced, the rest still applies. You may not transfer these Terms without our consent. We may transfer them as part of a merger, acquisition or sale of our business. Not enforcing a right straight away does not mean we give it up.
 
 ## 15. Contact
 
-Questions about these Terms? Email [sayandeep@fluxberry.in](mailto:sayandeep@fluxberry.in).
+Questions about these Terms? Email [sayandeep@zliptal.in](mailto:sayandeep@zliptal.in).

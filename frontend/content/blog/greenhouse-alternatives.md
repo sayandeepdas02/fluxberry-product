@@ -16,19 +16,19 @@ keywords:
 takeaways:
   - 'Greenhouse is the benchmark for structured hiring, with interview kits, scorecards, 400+ integrations and AI Talent Matching on every plan. Its pricing is quote-only and it has no trial.'
   - 'The closest like-for-like Greenhouse competitors are Ashby, Lever and Workable; Pinpoint and Teamtailor suit in-house and brand-led teams.'
-  - 'Breezy HR, JazzHR, Manatal and Fluxberry publish much lower prices, but check which structured-hiring features you would give up.'
-  - "Fluxberry fits small teams that want every applicant scored with written reasoning at a flat price. It doesn't have interview kits or scorecards yet, so it isn't a replacement for Greenhouse's structured interviews."
+  - 'Breezy HR, JazzHR, Manatal and Zliptal publish much lower prices, but check which structured-hiring features you would give up.'
+  - "Zliptal fits small teams that want every applicant scored with written reasoning at a flat price. It doesn't have interview kits or scorecards yet, so it isn't a replacement for Greenhouse's structured interviews."
 ---
 
 Greenhouse is the applicant tracking system most growing companies measure the others against. It turned structured hiring (the same interview plan, questions and scorecard for every candidate in a role) into software, and more than 7,500 companies use it, [according to Greenhouse](https://www.greenhouse.com/newsroom).
 
-That rigour comes with a sales-led buying process and pricing that isn't published, and for a 20- or 50-person company it can be more system than the team needs. This guide compares ten Greenhouse alternatives on price, AI screening and how much of Greenhouse's structured-hiring toolkit each one covers. We make Fluxberry, which is on this list; every other tool is described from its own website, checked in September 2026.
+That rigour comes with a sales-led buying process and pricing that isn't published, and for a 20- or 50-person company it can be more system than the team needs. This guide compares ten Greenhouse alternatives on price, AI screening and how much of Greenhouse's structured-hiring toolkit each one covers. We make Zliptal, which is on this list; every other tool is described from its own website, checked in September 2026.
 
 ## The 10 best Greenhouse alternatives at a glance
 
 | Tool | Best for | Starting price | Trial |
 |---|---|---|---|
-| Fluxberry | Small teams that want AI scoring at a flat price | {{price:pro:monthly}}/month | No |
+| Zliptal | Small teams that want AI scoring at a flat price | {{price:pro:monthly}}/month | No |
 | Ashby | Analytics-led scaling companies | $300/month (1–10 employees) | Demo only |
 | Lever | ATS and recruiting CRM in one | Quote only | Demo only |
 | Workable | Growing companies that want wide job-board reach | $299/month, billed annually | 15 days |
@@ -58,19 +58,19 @@ If your team runs a genuinely structured process at volume, those reasons may no
 
 Every tool here is an applicant tracking system a small or growing company could realistically move to from Greenhouse. We compared them on structured-hiring features (interview plans, scorecards, approvals, offers), how their AI screening works, published pricing, trial availability and how data gets in and out. Facts come from each vendor's own pricing and product pages, checked in September 2026 and linked in each entry. Several of these tools are demo-only, and we haven't used those ourselves. Confirm anything you depend on with the vendor, since pricing changes often.
 
-![Bar chart of monthly ATS prices for a 10-person company with 3 recruiters, from Fluxberry at {{price:pro:monthly}} to Workable at $360](/blog/greenhouse-alternatives/ats-monthly-cost-comparison.webp "Published monthly prices, billed monthly, September 2026. Greenhouse, Lever, Teamtailor, Pinpoint and Recruitee publish no prices.")
+![Bar chart of monthly ATS prices for a 10-person company with 3 recruiters, from Zliptal at {{price:pro:monthly}} to Workable at $360](/blog/greenhouse-alternatives/ats-monthly-cost-comparison.webp "Published monthly prices, billed monthly, September 2026. Greenhouse, Lever, Teamtailor, Pinpoint and Recruitee publish no prices.")
 
 ## The best Greenhouse alternatives
 
-### 1. Fluxberry
+### 1. Zliptal
 
-Fluxberry is an AI-native applicant tracking system for small teams. Each applicant is scored against the job the moment they apply, on a 0–10 scale built from fixed weights for skills, experience, relevance, location, compensation and education, with a written summary, strengths and concerns. Jobs, a branded careers page, the pipeline, Google Calendar interviews, offers and analytics all sit in one workspace, with unlimited team members.
+Zliptal is an AI-native applicant tracking system for small teams. Each applicant is scored against the job the moment they apply, on a 0–10 scale built from fixed weights for skills, experience, relevance, location, compensation and education, with a written summary, strengths and concerns. Jobs, a branded careers page, the pipeline, Google Calendar interviews, offers and analytics all sit in one workspace, with unlimited team members.
 
 **Best for:** Small teams that want applicants triaged for them and don't need Greenhouse's structured-interview depth.
 
-Compared with Greenhouse, Fluxberry is much lighter: it has no interview kits, scorecards or approval chains yet, and no integration marketplace. What it adds is a scored, explained shortlist for every role at a published, flat price.
+Compared with Greenhouse, Zliptal is much lighter: it has no interview kits, scorecards or approval chains yet, and no integration marketplace. What it adds is a scored, explained shortlist for every role at a published, flat price.
 
-![Fluxberry hiring dashboard with open jobs, the hiring pipeline, AI-ranked top candidates and interviews (sample data)](/blog/greenhouse-alternatives/fluxberry-hiring-dashboard.webp "The Fluxberry dashboard (sample data)")
+![Zliptal hiring dashboard with open jobs, the hiring pipeline, AI-ranked top candidates and interviews (sample data)](/blog/greenhouse-alternatives/zliptal-hiring-dashboard.webp "The Zliptal dashboard (sample data)")
 
 **Pros:**
 - Flat price with unlimited jobs, candidates and team members
@@ -217,12 +217,12 @@ Greenhouse users tend to rely on a specific set of features. Here is where each 
 
 | Greenhouse feature | Alternatives that offer it | Not in |
 |---|---|---|
-| Interview kits and scorecards | Ashby, Workable, Teamtailor, Pinpoint, JazzHR (Plus), Breezy HR (Growth) | Fluxberry |
-| AI applicant scoring or matching | Fluxberry, Lever, Workable, Pinpoint, Breezy HR, Manatal, JazzHR (Plus) | Ashby and Recruitee check criteria without an overall score |
-| Offers with e-signature | Ashby, Workable, Teamtailor, Pinpoint, JazzHR (Pro) | Fluxberry (online acceptance only) |
-| Approval workflows | Ashby (Plus), Breezy HR (Business) | Fluxberry |
-| 250+ integrations | Teamtailor, Lever, Workable, Ashby | Fluxberry |
-| Fraud and fake-resume detection | Ashby, Lever, Breezy HR | Fluxberry |
+| Interview kits and scorecards | Ashby, Workable, Teamtailor, Pinpoint, JazzHR (Plus), Breezy HR (Growth) | Zliptal |
+| AI applicant scoring or matching | Zliptal, Lever, Workable, Pinpoint, Breezy HR, Manatal, JazzHR (Plus) | Ashby and Recruitee check criteria without an overall score |
+| Offers with e-signature | Ashby, Workable, Teamtailor, Pinpoint, JazzHR (Pro) | Zliptal (online acceptance only) |
+| Approval workflows | Ashby (Plus), Breezy HR (Business) | Zliptal |
+| 250+ integrations | Teamtailor, Lever, Workable, Ashby | Zliptal |
+| Fraud and fake-resume detection | Ashby, Lever, Breezy HR | Zliptal |
 
 If interview kits, scorecards and approvals are the reason you bought Greenhouse, shortlist from the first column and test those features in a trial or demo before anything else.
 
@@ -235,21 +235,21 @@ If interview kits, scorecards and approvals are the reason you bought Greenhouse
 3. **Run both for two to three weeks.** Open new roles in the new ATS and let roles already in Greenhouse finish there.
 4. **Close out before renewal.** Move anyone still active, archive the export, and give notice in line with your contract.
 
-With Fluxberry there is no self-serve import yet, so start new roles in Fluxberry and let Greenhouse finish the rest.
+With Zliptal there is no self-serve import yet, so start new roles in Zliptal and let Greenhouse finish the rest.
 
 ## When Greenhouse is still the right choice
 
 Stay on Greenhouse if many interviewers run structured loops every week, if hiring managers depend on its scorecards and approval chains, or if it sits at the centre of a large integration stack. In those cases the alternatives above save money by removing the things that make your process work. For extending Greenhouse instead, see the [tools that integrate with Greenhouse](/blog/tools-that-integrate-with-greenhouse).
 
-## Try Fluxberry if Greenhouse is more than you need
+## Try Zliptal if Greenhouse is more than you need
 
-If you are a small team whose real bottleneck is reading applications rather than running interview loops, Fluxberry scores every applicant with the reasoning written out, for a flat price. [Create your Fluxberry workspace](/sign-up) and run it on your next role. For a wider comparison, see our guide to the [best applicant tracking systems for small businesses](/blog/best-applicant-tracking-systems) or the full map of [recruiting software by type](/blog/recruiting-software).
+If you are a small team whose real bottleneck is reading applications rather than running interview loops, Zliptal scores every applicant with the reasoning written out, for a flat price. [Create your Zliptal workspace](/sign-up) and run it on your next role. For a wider comparison, see our guide to the [best applicant tracking systems for small businesses](/blog/best-applicant-tracking-systems) or the full map of [recruiting software by type](/blog/recruiting-software).
 
 ## Frequently asked questions
 
 ### What is the best Greenhouse alternative?
 
-For structured hiring at a similar depth, Ashby, Workable and Pinpoint are the closest; for a CRM-led process, Lever. For small teams on a budget, Breezy HR, JazzHR and Manatal publish much lower prices, and Fluxberry scores every applicant with written reasoning from {{price:pro:monthly}}/month.
+For structured hiring at a similar depth, Ashby, Workable and Pinpoint are the closest; for a CRM-led process, Lever. For small teams on a budget, Breezy HR, JazzHR and Manatal publish much lower prices, and Zliptal scores every applicant with written reasoning from {{price:pro:monthly}}/month.
 
 ### How much does Greenhouse cost?
 
@@ -265,7 +265,7 @@ Yes. Talent Matching, part of Greenhouse Real Talent, prioritises applicants aga
 
 ### What is cheaper than Greenhouse?
 
-Tools with published prices include Fluxberry (from {{price:pro:monthly}}/month flat), Manatal (from $15 per user/month billed annually), JazzHR (from $1,000/year), Breezy HR (from $157/month billed annually) and Workable (from $299/month billed annually).
+Tools with published prices include Zliptal (from {{price:pro:monthly}}/month flat), Manatal (from $15 per user/month billed annually), JazzHR (from $1,000/year), Breezy HR (from $157/month billed annually) and Workable (from $299/month billed annually).
 
 ### How do I migrate from Greenhouse?
 

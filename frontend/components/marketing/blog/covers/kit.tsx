@@ -76,12 +76,12 @@ export function Card({ style, className, children }: { style?: CSSProperties; cl
   );
 }
 
-/** The Fluxberry mark: a white F on the brand-blue square (the path from public/logo-mark.svg). */
-export function FMark({ size, radius = size * 0.26, className }: { size: number; radius?: number; className?: string }) {
+/** The Zliptal mark: a white Z on the brand-blue square (the path from public/logo-mark.svg). */
+export function ZMark({ size, radius = size * 0.26, className }: { size: number; radius?: number; className?: string }) {
   return (
     <svg viewBox="0 0 2000 2000" width={size} height={size} className={cn('shrink-0', className)} style={{ borderRadius: radius }}>
       <rect width="2000" height="2000" fill={BLUE} />
-      <path fill="#fff" d="M616.3 335.5H1452.5V526H853V888.9H1337.6V1075.2H853V1630.5H616.3Z" />
+      <path fill="#fff" d="M475 335H1525V565L830 1435H1525V1665H475V1435L1170 565H475Z" />
     </svg>
   );
 }

@@ -32,7 +32,7 @@ export const DEFAULT_SHARE_IMAGE = {
   url: '/opengraph-image?v=3',
   width: 1200,
   height: 630,
-  alt: 'Fluxberry, the AI native hiring platform: its hiring dashboard on the landing page sky',
+  alt: 'Zliptal, the AI native hiring platform: its hiring dashboard on the landing page sky',
 };
 
 /**
@@ -68,7 +68,7 @@ export function publicPageMetadata({
   description: string;
   path: string;
   ownImage?: boolean;
-  /** Marketing pages pass the brand: previews then carry it ("Blog · Fluxberry") and the X handle. */
+  /** Marketing pages pass the brand: previews then carry it ("Blog · Zliptal") and the X handle. */
   siteName?: string;
 }): Metadata {
   const shareTitle = siteName ? `${title} · ${siteName}` : title;

@@ -10,7 +10,7 @@ import { BRAND } from '@/components/marketing/landing/content';
 import { articleInter } from '@/components/marketing/blog/article-font';
 
 const description =
-  'Fluxberry is the simplest ATS for lean teams, built by indie hacker Sayandeep Das. Post jobs, run a careers page and source candidates.';
+  'Zliptal is the simplest ATS for lean teams, built by indie hacker Sayandeep Das. Post jobs, run a careers page and source candidates.';
 
 export const metadata: Metadata = publicPageMetadata({
   title: 'About: an indie-built ATS for lean teams',
@@ -32,7 +32,7 @@ const FEATURES = [
   { name: 'Unlimited team members', line: 'Invite everyone who hires, at no extra cost.' },
 ];
 
-const shareText = 'Just tried Fluxberry, the simplest ATS for lean teams and founders hiring their first people, built by @deepmaxxing.';
+const shareText = 'Just tried Zliptal, the simplest ATS for lean teams and founders hiring their first people, built by @deepmaxxing.';
 const shareUrl = `https://x.com/intent/post?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(publicConfig.appUrl)}`;
 
 const jsonLd = {
@@ -62,7 +62,7 @@ const jsonLd = {
 const linkClass =
   'rounded-sm text-lp-blue-500 underline decoration-lp-blue-500/30 underline-offset-[3px] outline-none transition-colors hover:text-lp-blue-600 hover:decoration-lp-blue-600 focus-visible:ring-2 focus-visible:ring-lp-blue-400';
 
-/** About page: who builds Fluxberry, why, what it does, and how to try it. */
+/** About page: who builds Zliptal, why, what it does, and how to try it. */
 export default function AboutPage() {
   return (
     <article className={articleInter.variable}>
@@ -73,7 +73,7 @@ export default function AboutPage() {
           <Pill>About</Pill>
           <h1 className={cn('mt-2.5 text-balance text-black', TYPE.h2)}>Built by an indie hacker, for lean teams</h1>
           <p className={cn('mt-6 max-w-[560px] text-pretty text-lp-gray-700', TYPE.body)}>
-            Fluxberry is the simplest ATS you’ll come across, made for founders hiring their early teams.
+            Zliptal is the simplest ATS you’ll come across, made for founders hiring their early teams.
           </p>
         </Appear>
       </header>
@@ -85,24 +85,24 @@ export default function AboutPage() {
               The story
             </h2>
             <p>
-              Fluxberry is built by an indie hacker, <a href={FOUNDER.xUrl} target="_blank" rel="noopener noreferrer" className={linkClass}>Sayandeep</a>.
+              Zliptal is built by an indie hacker, <a href={FOUNDER.xUrl} target="_blank" rel="noopener noreferrer" className={linkClass}>Sayandeep</a>.
             </p>
             <p>
               I had zero idea about coding. In May 2025 I started exploring web development at random, and I taught myself to code from there. Once
-              AI agents made building software much simpler, I decided in February 2026 to work on Fluxberry.
+              AI agents made building software much simpler, I decided in February 2026 to work on Zliptal.
             </p>
             <p>
-              It took six months of monthly iteration: talking to recruiters and testing multiple products. Fluxberry went live on 1 October 2026.
+              It took six months of monthly iteration: talking to recruiters and testing multiple products. Zliptal went live on 1 October 2026.
               It’s my first SaaS. I hope everyone likes it, and I’ll keep pushing updates and improving the platform.
             </p>
           </section>
 
           <section className="flex flex-col gap-4" aria-labelledby="what-it-does">
             <h2 id="what-it-does" className="font-manrope text-[24px] font-semibold leading-8 tracking-[-0.02em] text-black">
-              What Fluxberry does
+              What Zliptal does
             </h2>
             <p>
-              Fluxberry is built for lean teams and for founders hiring their early teams. Here is what it does, in a line each:
+              Zliptal is built for lean teams and for founders hiring their early teams. Here is what it does, in a line each:
             </p>
             <ul className="flex flex-col gap-3">
               {FEATURES.map(({ name, line }) => (

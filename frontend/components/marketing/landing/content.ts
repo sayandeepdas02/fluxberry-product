@@ -4,7 +4,7 @@ import { Blocks, BookOpen, BriefcaseBusiness, Newspaper, Scale } from 'lucide-re
 
 /*
  * Landing page copy. The layout (card counts, line lengths) is the Framer
- * design's; the words are Fluxberry's. Each heading and lead wraps to the
+ * design's; the words are Zliptal's. Each heading and lead wraps to the
  * same number of lines as the Framer text it replaces, at all three
  * breakpoints, so re-check the wrapping when editing one. Keep every claim
  * true to the product. House style: no em dashes in user-facing copy.
@@ -14,20 +14,20 @@ import { Blocks, BookOpen, BriefcaseBusiness, Newspaper, Scale } from 'lucide-re
  * The product's name on the marketing site. Marketing pages spell it out rather than
  * reading publicConfig.appName, which stays as configured for the app and auth pages.
  */
-export const BRAND = 'Fluxberry';
+export const BRAND = 'Zliptal';
 
 export const HERO = {
-  badge: 'Built for fast moving teams',
-  title: 'The AI Native Hiring Platform',
-  lead: ['Fluxberry is an AI native hiring tool that is fast and simple.', 'Built for founders & hiring managers.'],
+  badge: 'For growing teams',
+  title: 'Hiring, made simpler.',
+  lead: 'Find, screen, and hire in one place.',
   cta: { label: 'Get Started', href: '/sign-up' },
   /**
-   * The product shot: the Fluxberry dashboard alone, edge to edge. The hero draws it live
+   * The product shot: the Zliptal dashboard alone, edge to edge. The hero draws it live
    * (HeroDashboard, on this image's pixel grid); the sign-in and sign-up pages show the image.
    */
   image: {
     src: '/landing/dashboard.jpg',
-    alt: 'Fluxberry dashboard with open jobs, the hiring pipeline, top candidates and the interview schedule',
+    alt: 'Zliptal hiring pipeline with a candidate match preview',
     width: 1960,
     height: 1208,
   },
@@ -46,7 +46,7 @@ export interface ProductCard {
   plan?: 'Max';
 }
 
-/** What Fluxberry is made of: six products, each with its own animated scene. Claims match lib/pricing's plan features. */
+/** What Zliptal is made of: six products, each with its own animated scene. Claims match lib/pricing's plan features. */
 export const PRODUCT = {
   pill: 'Product',
   title: 'Everything you need to hire, in one place',
@@ -165,7 +165,7 @@ export const NAV_LINKS: (NavLinkItem | NavGroup)[] = [
 ];
 
 /** The address for support, privacy and refund requests (also listed on the legal pages). */
-export const CONTACT_EMAIL = 'sayandeep@fluxberry.in';
+export const CONTACT_EMAIL = 'sayandeep@zliptal.in';
 
 /** Legal pages, each backed by a markdown file in `content/legal`. */
 export const LEGAL_LINKS: NavLinkItem[] = [
@@ -176,16 +176,16 @@ export const LEGAL_LINKS: NavLinkItem[] = [
 ];
 
 /**
- * The footer's "Summarize what Fluxberry does with AI" buttons: each opens the
+ * The footer's "Summarize what Zliptal does with AI" buttons: each opens the
  * assistant with this prompt filled in (the URL ends in its query parameter,
  * the encoded prompt is appended). The prompt names the live site, which the
  * assistants can read; keep its claims true to the product. Gemini's own app
  * can't be prefilled, so its button opens Google's Gemini-powered AI Mode.
  */
 export const SUMMARIZE_WITH_AI = {
-  label: 'Summarize what Fluxberry does with AI:',
+  label: 'Summarize what Zliptal does with AI:',
   prompt:
-    "I'm a founder or hiring manager building my team. I want to understand how Fluxberry, the AI native hiring platform, helps me post jobs, screen and rank applicants with AI, source candidates with TalentGPT, and run my whole hiring pipeline in one place. Summarize the highlights from Fluxberry's website: https://fluxberry.in/",
+    "I'm a founder or hiring manager building my team. I want to understand how Zliptal, the AI native hiring platform, helps me post jobs, screen and rank applicants with AI, source candidates with TalentGPT, and run my whole hiring pipeline in one place. Summarize the highlights from Zliptal's website: https://zliptal.in/",
   assistants: [
     { name: 'ChatGPT', url: 'https://chatgpt.com/?hints=search&q=' },
     { name: 'Claude', url: 'https://claude.ai/new?q=' },

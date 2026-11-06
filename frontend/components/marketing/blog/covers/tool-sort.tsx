@@ -4,13 +4,13 @@ import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { AudioLines, ChevronDown, Layers, ScanSearch, SquareKanban, Video, type LucideIcon } from 'lucide-react';
 import { EASE_OUT, enter, type VisualState } from '@/components/marketing/landing/stage';
-import { Bar, Card, CUE, FMark, Glass, HUES, IconTile, SHADOW, SHADOW_SOFT, Tag, type Hue } from './kit';
+import { Bar, Card, CUE, ZMark, Glass, HUES, IconTile, SHADOW, SHADOW_SOFT, Tag, type Hue } from './kit';
 
 /*
  * "The 9 best Metaview alternatives by tool type": nine tools arrive as a
  * jumbled pile, then sort themselves into the four lanes the article uses
  * (screening, interview AI, async video, ATS-native). They hold, shuffle
- * back into a pile, and sort again. Fluxberry is the first screening tile.
+ * back into a pile, and sort again. Zliptal is the first screening tile.
  */
 
 const GLASS = { left: 120, top: 262, width: 960, height: 600 };
@@ -119,10 +119,10 @@ export function ToolSortScene({ v }: { v: VisualState }) {
                   scale: { type: 'spring', stiffness: 420, damping: 24, delay: CUE + 0.3 + PILE[i] * 0.04 },
                 }}
               >
-                {i === 0 ? <FMark size={42} radius={12} /> : <IconTile icon={LANES[lane].icon} hue={LANES[lane].hue} size={42} />}
+                {i === 0 ? <ZMark size={42} radius={12} /> : <IconTile icon={LANES[lane].icon} hue={LANES[lane].hue} size={42} />}
                 <span className="flex flex-col gap-[8px]">
                   {i === 0 ? (
-                    <span className="font-manrope text-[17px] font-semibold leading-[18px] text-[#0b0d17]">Fluxberry</span>
+                    <span className="font-manrope text-[17px] font-semibold leading-[18px] text-[#0b0d17]">Zliptal</span>
                   ) : (
                     <Bar width={88 - (i % 3) * 12} height={11} />
                   )}

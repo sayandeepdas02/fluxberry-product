@@ -10,7 +10,7 @@ import { PageSpinner } from '@/components/ui/spinner';
 import { Button } from '@/components/ui/button';
 
 /**
- * Fluxberry is paid-only — no free tier. This wraps every product route
+ * Zliptal is paid-only — no free tier. This wraps every product route
  * (not /app/settings/* or /app/pricing, since an unpaid owner must still
  * be able to reach billing to subscribe) and shows a translucent overlay
  * over the real content until the workspace has an active subscription.
@@ -54,7 +54,7 @@ export function SubscriptionGate({ children }: { children: React.ReactNode }) {
           </div>
           <h2 className="mt-4 text-base font-semibold text-foreground">Subscribe to get access</h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            Unlock jobs, candidates, and everything else in Fluxberry.
+            Unlock jobs, candidates, and everything else in Zliptal.
           </p>
           <div className="mt-6">
             {isOwner ? (

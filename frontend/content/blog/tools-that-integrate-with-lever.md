@@ -16,7 +16,7 @@ takeaways:
   - 'Lever lists 300+ integrations. The useful ones cover sourcing, outreach, scheduling, assessments and reporting.'
   - 'Prefer integrations that write back to the Lever record; a tool you have to check in a separate dashboard defeats the purpose.'
   - 'Lever now screens applicants itself, with AI fit scores and a written justification, so add outside screening only if it works differently.'
-  - 'Fluxberry connects to Lever through signed webhooks and an automation tool, not a native app.'
+  - 'Zliptal connects to Lever through signed webhooks and an automation tool, not a native app.'
 ---
 
 Lever is a recruiting-focused ATS and CRM that handles pipeline management, scheduling, and candidate nurturing. Its strength is the candidate relationship layer — tracking touchpoints across time, not just managing a single application. But no ATS does everything, and Lever's [integration marketplace](https://marketplace.lever.co/) of 300+ integrations exists because teams need specialised tools at every stage of the funnel.
@@ -27,7 +27,7 @@ This guide covers nine Lever integrations across five categories, chosen for the
 
 | Tool | Category | Best for |
 |---|---|---|
-| Fluxberry | Sourcing and AI screening | Scoring applicants on your own careers page before Lever |
+| Zliptal | Sourcing and AI screening | Scoring applicants on your own careers page before Lever |
 | Gem | Sourcing | High-volume outbound sourcing on LinkedIn |
 | Sense | Outreach and engagement | Automated candidate nurturing at scale |
 | GoodTime | Scheduling | Multi-round and panel interviews |
@@ -49,18 +49,18 @@ The best Lever integrations reduce tab-switching without creating data silos. Le
 
 ## Sourcing and candidate discovery
 
-### 1. Fluxberry
+### 1. Zliptal
 
-Fluxberry is an AI-native hiring platform that scores every applicant against your job requirements on arrival. Lever has AI screening of its own: its [AI-powered screening](https://www.lever.co/solutions/ai-powered-screening) gives applicants a fit score with a written justification. Fluxberry works before Lever instead: candidates apply on Fluxberry's careers page and are scored, summarised and ranked there, and only the shortlist moves on to Lever.
+Zliptal is an AI-native hiring platform that scores every applicant against your job requirements on arrival. Lever has AI screening of its own: its [AI-powered screening](https://www.lever.co/solutions/ai-powered-screening) gives applicants a fit score with a written justification. Zliptal works before Lever instead: candidates apply on Zliptal's careers page and are scored, summarised and ranked there, and only the shortlist moves on to Lever.
 
-**How it connects:** There is no native Lever integration yet. Fluxberry runs its own pipeline and careers page, and sends a signed webhook when a candidate is shortlisted, changes stage or is hired. Route those events into Lever with an automation tool such as Zapier or Make, or a short script against Lever's API, and your shortlist reaches Lever without anyone rereading resumes. Lever stays the pipeline owner; Fluxberry handles the screening work.
+**How it connects:** There is no native Lever integration yet. Zliptal runs its own pipeline and careers page, and sends a signed webhook when a candidate is shortlisted, changes stage or is hired. Route those events into Lever with an automation tool such as Zapier or Make, or a short script against Lever's API, and your shortlist reaches Lever without anyone rereading resumes. Lever stays the pipeline owner; Zliptal handles the screening work.
 
 **Why it fits Lever teams:**
-- Lever's strength is nurturing relationships over time; Fluxberry keeps the first-pass triage out of it, with strengths and concerns written up for every applicant
+- Lever's strength is nurturing relationships over time; Zliptal keeps the first-pass triage out of it, with strengths and concerns written up for every applicant
 - Custom application questions and a careers page are included, so there is one fewer tool to run
 - Every plan includes unlimited team members, so small teams can add screening without paying per seat
 
-**Pricing:** Starts at {{price:pro:monthly}}/month. [Get started with Fluxberry →](/sign-up)
+**Pricing:** Starts at {{price:pro:monthly}}/month. [Get started with Zliptal →](/sign-up)
 
 ### 2. Gem
 
@@ -128,11 +128,11 @@ Three questions to guide your stack:
 
 3. **Does it overlap with something Lever already does?** Lever has native scheduling, email sequences, reporting, and AI fit scores for applicants. Only add external tools when they are meaningfully better than the native feature.
 
-## Start with sourcing: add Fluxberry
+## Start with sourcing: add Zliptal
 
-Most Lever teams have good pipeline management and scheduling. If the pressure is at the top, too many applicants and not enough signal on who to talk to first, Fluxberry takes the first pass: every candidate is scored, with the reasoning written up, before they enter your Lever pipeline.
+Most Lever teams have good pipeline management and scheduling. If the pressure is at the top, too many applicants and not enough signal on who to talk to first, Zliptal takes the first pass: every candidate is scored, with the reasoning written up, before they enter your Lever pipeline.
 
-[Create your Fluxberry workspace](/sign-up) and run it alongside Lever.
+[Create your Zliptal workspace](/sign-up) and run it alongside Lever.
 
 ## Frequently asked questions
 
@@ -140,10 +140,10 @@ Most Lever teams have good pipeline management and scheduling. If the pressure i
 
 Lever's [marketplace](https://marketplace.lever.co/) lists 300+ integrations across sourcing, assessment, scheduling, HRIS, background checks, and automation. The depth varies — some are full bidirectional syncs, others are lightweight one-way data transfers.
 
-### Can I use Fluxberry as my ATS and replace Lever?
+### Can I use Zliptal as my ATS and replace Lever?
 
-Yes. Fluxberry includes full pipeline management, a careers page, team collaboration, and analytics. If Lever's pricing is too high for your team's size, Fluxberry covers the full workflow from {{price:pro:monthly}}/month. For more options, see the [best applicant tracking systems for small businesses](/blog/best-applicant-tracking-systems).
+Yes. Zliptal includes full pipeline management, a careers page, team collaboration, and analytics. If Lever's pricing is too high for your team's size, Zliptal covers the full workflow from {{price:pro:monthly}}/month. For more options, see the [best applicant tracking systems for small businesses](/blog/best-applicant-tracking-systems).
 
 ### What is the best free Lever integration?
 
-Zoom (for interview links), Google Sheets (for custom reporting), and Zapier's free tier (for basic automations) are all available at no additional cost. AI-powered screening is a paid add-on: [Fluxberry](/sign-up) starts at {{price:pro:monthly}}/month.
+Zoom (for interview links), Google Sheets (for custom reporting), and Zapier's free tier (for basic automations) are all available at no additional cost. AI-powered screening is a paid add-on: [Zliptal](/sign-up) starts at {{price:pro:monthly}}/month.

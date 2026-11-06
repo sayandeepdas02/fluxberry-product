@@ -34,7 +34,7 @@ export function SearchHero({
       </div>
       <h2 className="mt-4 text-section-title text-foreground">Find people who haven&apos;t applied yet</h2>
       <p className="mt-1.5 max-w-md text-sm text-muted-foreground">
-        Describe your ideal candidate in plain language. Fluxberry turns it into filters you can review before you search.
+        Describe your ideal candidate in plain language. Zliptal turns it into filters you can review before you search.
       </p>
 
       <div className="mt-6 w-full">

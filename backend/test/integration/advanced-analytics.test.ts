@@ -14,7 +14,7 @@ async function tokenFor(email: string, name?: string) {
 }
 
 beforeAll(async () => {
-  await connectDatabase('mongodb://127.0.0.1:27017/fluxberry_test_advanced_analytics');
+  await connectDatabase('mongodb://127.0.0.1:27017/zliptal_test_advanced_analytics');
   await mongoose.connection.dropDatabase();
 });
 

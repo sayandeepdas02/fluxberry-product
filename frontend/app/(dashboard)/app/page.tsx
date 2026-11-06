@@ -35,7 +35,7 @@ export default function HomePage() {
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
-        <h1 className="text-page-title">Welcome to Fluxberry</h1>
+        <h1 className="text-page-title">Welcome to Zliptal</h1>
         <Button asChild>
           <Link href="/app/jobs/new"><Plus className="size-4" /> Create job</Link>
         </Button>

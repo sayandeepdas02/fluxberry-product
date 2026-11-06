@@ -28,7 +28,7 @@ const bool = (def: boolean) =>
     .transform((v) => (v == null || v === '' ? def : v === 'true' || v === '1'));
 
 const envSchema = z.object({
-  APP_NAME: z.string().default('Fluxberry AI'),
+  APP_NAME: z.string().default('Zliptal'),
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().int().default(4000),
   CORS_ORIGINS: z.string().default('http://localhost:3000'),
@@ -37,7 +37,7 @@ const envSchema = z.object({
   /** Public base URL of the web app (for building candidate-facing links in emails). */
   PUBLIC_APP_URL: z.string().default('http://localhost:3000'),
 
-  MONGODB_URI: z.string().default('mongodb://127.0.0.1:27017/fluxberry'),
+  MONGODB_URI: z.string().default('mongodb://127.0.0.1:27017/zliptal'),
 
   SUPABASE_URL: z.string().optional().default(''),
   SUPABASE_JWT_SECRET: z.string().optional().default(''),
@@ -59,7 +59,7 @@ const envSchema = z.object({
   AI_MODEL_FAST: z.string().optional().default(''),
 
   RESEND_API_KEY: z.string().optional().default(''),
-  EMAIL_FROM: z.string().default('Fluxberry <noreply@example.com>'),
+  EMAIL_FROM: z.string().default('Zliptal <noreply@example.com>'),
   /**
    * Domain used for the Reply-To convention on ad-hoc candidate messages
    * (application+<id>@this-domain). Inbound parsing itself is provider-agnostic
@@ -88,7 +88,7 @@ const envSchema = z.object({
 
   STORAGE_ENDPOINT: z.string().optional().default(''),
   STORAGE_REGION: z.string().default('auto'),
-  STORAGE_BUCKET: z.string().default('fluxberry-uploads'),
+  STORAGE_BUCKET: z.string().default('zliptal-uploads'),
   STORAGE_ACCESS_KEY: z.string().optional().default(''),
   STORAGE_SECRET_KEY: z.string().optional().default(''),
   STORAGE_PUBLIC_URL: z.string().optional().default(''),

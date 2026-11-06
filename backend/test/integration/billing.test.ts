@@ -22,7 +22,7 @@ async function accountIdForWorkspace(workspaceId: string): Promise<string> {
 }
 
 beforeAll(async () => {
-  await connectDatabase('mongodb://127.0.0.1:27017/fluxberry_test_billing');
+  await connectDatabase('mongodb://127.0.0.1:27017/zliptal_test_billing');
   await mongoose.connection.dropDatabase();
 });
 

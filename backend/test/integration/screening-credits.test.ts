@@ -43,7 +43,7 @@ async function apply() {
 const balance = async () => (await ws(request(app).get(`/api/v1/workspaces/${workspaceId}/credits`) as any)).body.data;
 
 beforeAll(async () => {
-  await connectDatabase('mongodb://127.0.0.1:27017/fluxberry_test_screening_credits');
+  await connectDatabase('mongodb://127.0.0.1:27017/zliptal_test_screening_credits');
   await mongoose.connection.dropDatabase();
   token = await tokenFor('screening-owner@test.com', 'Screening Owner');
   const onboard = await request(app)

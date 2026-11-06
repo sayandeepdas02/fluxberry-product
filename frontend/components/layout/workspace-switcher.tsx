@@ -28,8 +28,8 @@ export function WorkspaceSwitcher() {
 
   const logout = async () => {
     queryClient.clear();
-    window.localStorage.removeItem('fluxberry_test_token');
-    window.localStorage.removeItem('fluxberry_workspace_id');
+    window.localStorage.removeItem('zliptal_test_token');
+    window.localStorage.removeItem('zliptal_workspace_id');
     await signOut({ redirectUrl: '/' });
   };
 

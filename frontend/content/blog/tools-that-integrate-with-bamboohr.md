@@ -17,7 +17,7 @@ takeaways:
   - "BambooHR's recruiting module is deliberately light: job posts, applications and a basic pipeline, with no AI screening, assessments or outbound sourcing."
   - 'Its marketplace lists over 150 integrations. For hiring, the gaps worth filling are screening, sourcing, skills tests and background checks.'
   - 'Keep BambooHR as the HR system of record and let hired candidates flow into it automatically.'
-  - 'Fluxberry can run the whole hiring workflow and hand hires to BambooHR through a webhook and an automation tool.'
+  - 'Zliptal can run the whole hiring workflow and hand hires to BambooHR through a webhook and an automation tool.'
 ---
 
 BambooHR is built for small-to-mid-market companies that want HR, time tracking, and basic recruiting in one platform. It does the core job well — employee records, PTO, onboarding — but its recruiting module is intentionally lightweight. That is a feature, not a bug, as long as you connect the right tools to fill the gaps.
@@ -28,7 +28,7 @@ This guide covers 10 BambooHR integrations across five categories that extend it
 
 | Tool | Category | Best for |
 |---|---|---|
-| Fluxberry | Sourcing and AI screening | A ranked shortlist instead of an unread pile |
+| Zliptal | Sourcing and AI screening | A ranked shortlist instead of an unread pile |
 | Indeed | Job board | Applicant volume landing straight in BambooHR |
 | Criteria Corp | Assessment | Aptitude and personality testing |
 | eSkill | Assessment | Measurable skills for high-volume roles |
@@ -52,18 +52,18 @@ Integrations solve these gaps without replacing BambooHR as the HR system of rec
 
 ## Sourcing integrations
 
-### 1. Fluxberry
+### 1. Zliptal
 
-Fluxberry is an AI-native hiring platform that scores every applicant against your job requirements the moment they apply. For BambooHR users, it replaces the manual resume-reading step — you open a ranked shortlist with scores, summaries, and reasoning instead of an unfiltered pile.
+Zliptal is an AI-native hiring platform that scores every applicant against your job requirements the moment they apply. For BambooHR users, it replaces the manual resume-reading step — you open a ranked shortlist with scores, summaries, and reasoning instead of an unfiltered pile.
 
-**How it connects:** There is no native BambooHR integration yet. Fluxberry runs its own pipeline and careers page, and sends a signed webhook when a candidate is shortlisted, changes stage or is hired. Route those events into BambooHR with an automation tool such as Zapier or Make, or a short script against BambooHR's API, and your shortlist reaches BambooHR without anyone rereading resumes.
+**How it connects:** There is no native BambooHR integration yet. Zliptal runs its own pipeline and careers page, and sends a signed webhook when a candidate is shortlisted, changes stage or is hired. Route those events into BambooHR with an automation tool such as Zapier or Make, or a short script against BambooHR's API, and your shortlist reaches BambooHR without anyone rereading resumes.
 
 **Why it fits BambooHR teams:**
 - Small teams using BambooHR often have no dedicated recruiter, and AI scoring takes the first pass through every application so nobody has to read the whole pile
 - A built-in careers page, custom application forms, and shared notes for your team reduce the number of additional tools needed
 - Pipeline stages are customisable to mirror your BambooHR workflow
 
-**Pricing:** Starts at {{price:pro:monthly}}/month. [Get started with Fluxberry →](/sign-up)
+**Pricing:** Starts at {{price:pro:monthly}}/month. [Get started with Zliptal →](/sign-up)
 
 ### 2. Indeed
 
@@ -127,21 +127,21 @@ TriNet is a professional employer organisation (PEO) that bundles payroll, benef
 
 **Best for:** Companies using a PEO model who want BambooHR as their HR system of record while TriNet handles payroll and benefits administration.
 
-## Add Fluxberry to your BambooHR stack
+## Add Zliptal to your BambooHR stack
 
-BambooHR collects applications. Fluxberry tells you which ones are worth reading. Together, they give small teams a full hiring workflow: AI screening, pipeline management, and offers in Fluxberry, then BambooHR's HR module once the hire is made.
+BambooHR collects applications. Zliptal tells you which ones are worth reading. Together, they give small teams a full hiring workflow: AI screening, pipeline management, and offers in Zliptal, then BambooHR's HR module once the hire is made.
 
-[Get started with Fluxberry](/sign-up) and try it on your next open role.
+[Get started with Zliptal](/sign-up) and try it on your next open role.
 
 ## Frequently asked questions
 
 ### Does BambooHR have built-in AI screening?
 
-Not as of September 2026. BambooHR's applicant tracking collects and organises applications, but it does not score, rank, or summarise them. Tools like Fluxberry add an AI screening layer that works alongside BambooHR's pipeline.
+Not as of September 2026. BambooHR's applicant tracking collects and organises applications, but it does not score, rank, or summarise them. Tools like Zliptal add an AI screening layer that works alongside BambooHR's pipeline.
 
-### Can I use Fluxberry as my main ATS instead of BambooHR's recruiting module?
+### Can I use Zliptal as my main ATS instead of BambooHR's recruiting module?
 
-Yes. Fluxberry covers the full hiring workflow: sourcing on the Max plan, AI screening, interviews on your Google Calendar, and offers. When someone is hired, its `candidate.hired` webhook can hand them to BambooHR for onboarding through an automation tool. You get a purpose-built ATS while BambooHR stays your HR system. See how it compares in our guide to the [best applicant tracking systems for small businesses](/blog/best-applicant-tracking-systems).
+Yes. Zliptal covers the full hiring workflow: sourcing on the Max plan, AI screening, interviews on your Google Calendar, and offers. When someone is hired, its `candidate.hired` webhook can hand them to BambooHR for onboarding through an automation tool. You get a purpose-built ATS while BambooHR stays your HR system. See how it compares in our guide to the [best applicant tracking systems for small businesses](/blog/best-applicant-tracking-systems).
 
 ### How many integrations does BambooHR support?
 

@@ -13,13 +13,13 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { EASE_OUT, POP, enter, type VisualState } from '@/components/marketing/landing/stage';
-import { BLUE, Bar, Card, CUE, FMark, Glass, IconTile, type Hue } from './kit';
+import { BLUE, Bar, Card, CUE, ZMark, Glass, IconTile, type Hue } from './kit';
 
 /*
  * "Recruiting software by type": the article's eight types of tool, laid out
  * in hiring order on one board. A highlight walks through them stage by
  * stage, from sourcing to background checks, and starts again, the way a
- * candidate moves through a hiring stack. The ATS tile carries the Fluxberry
+ * candidate moves through a hiring stack. The ATS tile carries the Zliptal
  * mark.
  */
 
@@ -76,7 +76,7 @@ export function StackTypesScene({ v }: { v: VisualState }) {
                 transition={{ ...POP, opacity: { duration: 0.4, delay: CUE + 0.35 + i * 0.06 }, scale: { ...POP, delay: v.started && active < 0 ? CUE + 0.35 + i * 0.06 : 0 } }}
               >
                 <div className="flex items-center justify-between">
-                  {type.icon === 'brand' ? <FMark size={48} radius={14} /> : <IconTile icon={type.icon} hue={type.hue} size={48} />}
+                  {type.icon === 'brand' ? <ZMark size={48} radius={14} /> : <IconTile icon={type.icon} hue={type.hue} size={48} />}
                   <span className="font-manrope text-[17px] font-semibold tabular-nums text-[#6b7390]">{i + 1}</span>
                 </div>
                 <div className="flex flex-col gap-[10px]">

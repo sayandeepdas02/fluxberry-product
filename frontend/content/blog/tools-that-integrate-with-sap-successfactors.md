@@ -17,7 +17,7 @@ takeaways:
   - 'SuccessFactors is the system of record for requisitions, approvals and hires. Integrations should write to it, not compete with it.'
   - 'SuccessFactors Recruiting now includes AI-assisted skills matching, and SAP bought SmartRecruiters in 2025, so check what your licence already covers first.'
   - 'Outbound sourcing, technical assessments, background checks and e-signature are still best served by specialised tools.'
-  - 'Fluxberry connects to SuccessFactors through signed webhooks and an automation tool, not a certified SAP integration.'
+  - 'Zliptal connects to SuccessFactors through signed webhooks and an automation tool, not a certified SAP integration.'
 ---
 
 SAP SuccessFactors handles core HR and talent management for large organisations, but its recruiting module works best when connected to specialised tools that extend its reach. The right integrations fill gaps in sourcing, assessment, compliance, and document management — without replacing the system of record.
@@ -28,7 +28,7 @@ This guide covers 12 SuccessFactors integrations across six categories, starting
 
 | Tool | Category | Best for |
 |---|---|---|
-| Fluxberry | Sourcing and AI screening | Scored shortlists before candidates reach SuccessFactors |
+| Zliptal | Sourcing and AI screening | Scored shortlists before candidates reach SuccessFactors |
 | LinkedIn Recruiter | Sourcing | Enterprise teams with Recruiter licences |
 | Skima AI | Sourcing | AI matching over existing talent databases |
 | Eightfold AI | Talent intelligence | Internal mobility and workforce planning |
@@ -53,18 +53,18 @@ A strong SuccessFactors integration should:
 
 ## Sourcing integrations
 
-### 1. Fluxberry
+### 1. Zliptal
 
-Fluxberry is an AI-native hiring platform that scores every applicant against your role requirements the moment they apply. For SuccessFactors users, it covers the stretch between "requisition approved" and "candidates in the pipeline": finding people who have not applied (on the Max plan) and giving every applicant a score, a written summary, strengths and concerns before they reach SuccessFactors.
+Zliptal is an AI-native hiring platform that scores every applicant against your role requirements the moment they apply. For SuccessFactors users, it covers the stretch between "requisition approved" and "candidates in the pipeline": finding people who have not applied (on the Max plan) and giving every applicant a score, a written summary, strengths and concerns before they reach SuccessFactors.
 
-**How it connects:** There is no native SuccessFactors integration yet. Fluxberry runs its own pipeline and careers page, and sends a signed webhook when a candidate is shortlisted, changes stage or is hired. Route those events into SuccessFactors with an automation tool such as Zapier or Make, or a short script against the SuccessFactors API, and your shortlist reaches SuccessFactors without anyone rereading resumes.
+**How it connects:** There is no native SuccessFactors integration yet. Zliptal runs its own pipeline and careers page, and sends a signed webhook when a candidate is shortlisted, changes stage or is hired. Route those events into SuccessFactors with an automation tool such as Zapier or Make, or a short script against the SuccessFactors API, and your shortlist reaches SuccessFactors without anyone rereading resumes.
 
 **Why it fits:**
 - AI scoring means no manual resume triage, even at enterprise volume
-- Custom pipeline stages let recruiters work in Fluxberry while SuccessFactors stays the system of record
+- Custom pipeline stages let recruiters work in Zliptal while SuccessFactors stays the system of record
 - A built-in careers page and custom application forms reduce tool sprawl
 
-**Pricing:** Starts at {{price:pro:monthly}}/month. [Get started with Fluxberry →](/sign-up)
+**Pricing:** Starts at {{price:pro:monthly}}/month. [Get started with Zliptal →](/sign-up)
 
 ### 2. LinkedIn Recruiter
 
@@ -140,22 +140,22 @@ Adobe Sign (now Adobe Acrobat Sign) provides similar e-signature functionality w
 
 **Best for:** Organisations already invested in the Adobe ecosystem that want native document signing in their HR workflow.
 
-## Add Fluxberry to your SAP SuccessFactors stack
+## Add Zliptal to your SAP SuccessFactors stack
 
-If your SuccessFactors recruiting pipeline starts with unscreened applications and ends with manual triage, Fluxberry fills the gap. Every applicant gets scored on arrival, and your shortlist is ready before a recruiter opens the queue.
+If your SuccessFactors recruiting pipeline starts with unscreened applications and ends with manual triage, Zliptal fills the gap. Every applicant gets scored on arrival, and your shortlist is ready before a recruiter opens the queue.
 
-[Get started with Fluxberry](/sign-up) and see what your pipeline looks like when screening is already done.
+[Get started with Zliptal](/sign-up) and see what your pipeline looks like when screening is already done.
 
 ## Frequently asked questions
 
 ### Does SAP SuccessFactors have built-in sourcing?
 
-Partly. SuccessFactors Recruiting distributes job postings, runs internal job boards and, with AI-assisted skills matching, compares applicants' skills with the job's. It does not search for people who have not applied, which is what tools such as Fluxberry (on the Max plan), LinkedIn Recruiter or Eightfold add. SAP also [acquired SmartRecruiters in September 2025](https://news.sap.com/2025/09/sap-completes-smartrecruiters-acquisition/) and now offers it alongside SuccessFactors, so check what your SAP contract already includes.
+Partly. SuccessFactors Recruiting distributes job postings, runs internal job boards and, with AI-assisted skills matching, compares applicants' skills with the job's. It does not search for people who have not applied, which is what tools such as Zliptal (on the Max plan), LinkedIn Recruiter or Eightfold add. SAP also [acquired SmartRecruiters in September 2025](https://news.sap.com/2025/09/sap-completes-smartrecruiters-acquisition/) and now offers it alongside SuccessFactors, so check what your SAP contract already includes.
 
 ### How do SuccessFactors integrations handle data privacy?
 
 SAP provides a data integration framework with role-based access, audit logging, and data residency controls. Third-party integrations that are SAP-certified must comply with these standards. Always verify that a tool meets your specific regional requirements (GDPR, CCPA, etc.) before connecting it.
 
-### Can I use Fluxberry without replacing SuccessFactors?
+### Can I use Zliptal without replacing SuccessFactors?
 
-Yes. Fluxberry works alongside SuccessFactors: it handles sourcing and screening, and its webhooks, for example when a candidate is shortlisted or hired, let your team pass qualified candidates on to SuccessFactors through your own integration or an automation tool. SuccessFactors stays the system of record for requisitions, approvals, and hire records. For the wider landscape of hiring tools, see our map of [recruiting software by type](/blog/recruiting-software).
+Yes. Zliptal works alongside SuccessFactors: it handles sourcing and screening, and its webhooks, for example when a candidate is shortlisted or hired, let your team pass qualified candidates on to SuccessFactors through your own integration or an automation tool. SuccessFactors stays the system of record for requisitions, approvals, and hire records. For the wider landscape of hiring tools, see our map of [recruiting software by type](/blog/recruiting-software).

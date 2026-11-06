@@ -2,7 +2,7 @@
 
 import { motion } from 'motion/react';
 import { POP, enter, type VisualState } from '@/components/marketing/landing/stage';
-import { CUE, FMark, Glass } from './kit';
+import { CUE, ZMark, Glass } from './kit';
 
 /*
  * The cover for a post that doesn't have its own yet: the brand mark in the
@@ -22,7 +22,7 @@ export function FallbackScene({ v }: { v: VisualState }) {
         transition={v.looping ? { duration: 4, ease: 'easeInOut', repeat: Infinity } : { duration: 0.4 }}
       >
         <Glass style={{ position: 'relative', width: 240, height: 240 }} radius={60} pad={16}>
-          <FMark size={208} radius={44} className="shadow-[0_24px_48px_-20px_rgba(8,38,99,0.6)]" />
+          <ZMark size={208} radius={44} className="shadow-[0_24px_48px_-20px_rgba(8,38,99,0.6)]" />
         </Glass>
       </motion.div>
     </motion.div>

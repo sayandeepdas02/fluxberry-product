@@ -3,13 +3,13 @@
 import { motion } from 'motion/react';
 import { Briefcase, CalendarDays, ClipboardCheck, ShieldCheck, Users, type LucideIcon } from 'lucide-react';
 import { EASE_OUT, POP, enter, type VisualState } from '@/components/marketing/landing/stage';
-import { BLUE, Card, CUE, FMark, Glass, IconTile, SHADOW, alongCurve, curvePath, type Hue } from './kit';
+import { BLUE, Card, CUE, ZMark, Glass, IconTile, SHADOW, alongCurve, curvePath, type Hue } from './kit';
 
 /*
  * "Top tools that integrate with Greenhouse": Greenhouse as the hub, with the
  * article's five categories on an arc above it. Each is wired in, and data
  * keeps arriving along the wires while the cover is on screen. Sourcing
- * carries the Fluxberry mark (the article's first sourcing pick).
+ * carries the Zliptal mark (the article's first sourcing pick).
  */
 
 type Pt = readonly [number, number];
@@ -86,7 +86,7 @@ export function HubScene({ v }: { v: VisualState }) {
             className="relative flex h-[72px] items-center gap-[14px] whitespace-nowrap rounded-full pl-[14px] pr-[26px]"
             style={{ boxShadow: SHADOW }}
           >
-            {node.icon === 'brand' ? <FMark size={44} radius={13} /> : <IconTile icon={node.icon} hue={node.hue} size={44} />}
+            {node.icon === 'brand' ? <ZMark size={44} radius={13} /> : <IconTile icon={node.icon} hue={node.hue} size={44} />}
             <span className="font-manrope text-[21px] font-semibold text-[#0b0d17]">{node.label}</span>
           </Card>
         </motion.div>

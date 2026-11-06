@@ -1,8 +1,8 @@
 import { publicConfig } from './config';
 
 export const STORAGE_KEYS = {
-  testToken: 'fluxberry_test_token',
-  workspaceId: 'fluxberry_workspace_id',
+  testToken: 'zliptal_test_token',
+  workspaceId: 'zliptal_workspace_id',
 } as const;
 
 export class ApiError extends Error {

@@ -1,7 +1,7 @@
 [build]
 builder = "NIXPACKS"
-buildCommand = "npm install && npm run build --workspace @fluxberry/backend"
+buildCommand = "npm install && npm run build --workspace @zliptal/backend"
 
 [deploy]
-startCommand = "npm run start:worker --workspace @fluxberry/backend"
+startCommand = "npm run start:worker --workspace @zliptal/backend"
 restartPolicyType = "ON_FAILURE"

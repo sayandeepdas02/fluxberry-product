@@ -45,7 +45,7 @@ const PROMPT = 'Senior Software Engineer with 4+ years of experience in Rust bas
 let token: string;
 
 beforeAll(async () => {
-  await connectDatabase('mongodb://127.0.0.1:27017/fluxberry_test_sourcing');
+  await connectDatabase('mongodb://127.0.0.1:27017/zliptal_test_sourcing');
   await mongoose.connection.dropDatabase();
   token = await tokenFor('sourcing-suite@test.com', 'Sourcing Suite');
 });
@@ -329,7 +329,7 @@ describe('Talent Sourcing (integration)', () => {
     // Reply threading: an inbound reply to campaign+<recipientId>@ marks REPLIED.
     const reply = await request(app)
       .post(`/api/v1/webhooks/inbound-email/${process.env.INBOUND_EMAIL_SECRET}`)
-      .send({ to: `campaign+${firstRec!._id}@reply.test.fluxberry.dev`, from: 'candidate@example.com', text: 'Interested!' });
+      .send({ to: `campaign+${firstRec!._id}@reply.test.zliptal.dev`, from: 'candidate@example.com', text: 'Interested!' });
     expect(reply.status).toBe(200);
 
     const tracked = await ws(request(app).get(`/api/v1/sourcing/campaigns/${campaignId}`) as any);

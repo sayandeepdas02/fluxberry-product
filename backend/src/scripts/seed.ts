@@ -51,7 +51,7 @@ async function main() {
 
   // Demo user + account + workspace. The account carries an active MAX
   // subscription so the seeded demo has full feature access + a credit pool.
-  const user = await UserModel.create({ email: 'demo@fluxberry.dev', name: 'Demo Recruiter' });
+  const user = await UserModel.create({ email: 'demo@zliptal.dev', name: 'Demo Recruiter' });
   const periodEnd = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
   const account = await AccountModel.create({
     name: 'Acme',
@@ -165,7 +165,7 @@ async function main() {
   }
 
   logger.info({ workspace: 'Acme', jobs: jobs.length, candidates: count }, 'Seed complete');
-  logger.info('Log in locally with email: demo@fluxberry.dev (dev test-token path, no password needed)');
+  logger.info('Log in locally with email: demo@zliptal.dev (dev test-token path, no password needed)');
   await disconnectDatabase();
 }
 

@@ -92,7 +92,7 @@ Screening is where most time is wasted. A two-person team should not be reading 
 **Better screening:**
 
 - **Use structured criteria, not gut feel.** Define 4-5 things you are evaluating before you read the first application. Score every candidate against the same rubric.
-- **Automate what can be automated.** AI-powered screening tools like [Fluxberry](/sign-up) score every application against your job requirements the moment it arrives. You open a ranked shortlist instead of a pile.
+- **Automate what can be automated.** AI-powered screening tools like [Zliptal](/sign-up) score every application against your job requirements the moment it arrives. You open a ranked shortlist instead of a pile.
 - **Add a short assessment early.** A 20-minute take-home or skills test after the application stage filters more effectively than a 30-minute phone screen. It also lets candidates demonstrate ability, not just describe it.
 
 **Better interviews:**
@@ -121,7 +121,7 @@ The right tool saves hours. The wrong tool adds complexity without reducing work
 
 **Where tools genuinely help:**
 
-- **Application screening.** AI scoring turns a six-hour reading session into a ten-minute review of a ranked shortlist. [Fluxberry does this automatically](/sign-up) for every applicant.
+- **Application screening.** AI scoring turns a six-hour reading session into a ten-minute review of a ranked shortlist. [Zliptal does this automatically](/sign-up) for every applicant.
 - **Scheduling.** Calendar links eliminate the three-email scheduling dance. Calendly, Cal.com, or your ATS's native scheduling all work.
 - **Assessments.** Auto-graded skills tests give you signal before the interview, not after.
 - **Pipeline management.** A shared view of where every candidate stands, with history. This is table stakes — if you are tracking candidates in a spreadsheet, [move to a proper ATS](/blog/best-applicant-tracking-systems). If you already have one, the right integrations fill its gaps: see our guides for [Greenhouse](/blog/tools-that-integrate-with-greenhouse), [Lever](/blog/tools-that-integrate-with-lever) and [BambooHR](/blog/tools-that-integrate-with-bamboohr).
@@ -147,11 +147,11 @@ Review these monthly. A single month's data is noise; three months of trend is s
 
 **One metric most teams skip:** Ask candidates who decline your offer why they said no. The reasons are almost always actionable — too slow, compensation gap, better offer, poor interview experience.
 
-## Design a better hiring process with Fluxberry
+## Design a better hiring process with Zliptal
 
-Fluxberry is built for the workflow described above. Every applicant gets scored on arrival, interviews go straight onto your Google Calendar, offers go out from the same place, and analytics show you where candidates drop out.
+Zliptal is built for the workflow described above. Every applicant gets scored on arrival, interviews go straight onto your Google Calendar, offers go out from the same place, and analytics show you where candidates drop out.
 
-If your current process involves reading every application by hand and tracking candidates across tabs, [set up Fluxberry](/sign-up) and try it on your next role.
+If your current process involves reading every application by hand and tracking candidates across tabs, [set up Zliptal](/sign-up) and try it on your next role.
 
 ## Frequently asked questions
 

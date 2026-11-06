@@ -12,7 +12,7 @@ import matter from 'gray-matter';
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const POSTS_DIR = path.join(ROOT, 'content/blog');
 const PUBLIC_DIR = path.join(ROOT, 'public');
-const TITLE_SUFFIX = ' · Fluxberry';
+const TITLE_SUFFIX = ' · Zliptal';
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 const slugs = fs
@@ -137,15 +137,15 @@ function check(slug) {
     if (!opening.includes(primary)) warnings.push(`primary keyword "${primary}" is not in the first 120 words`);
     if (!h2s.some((h) => h.toLowerCase().includes(primary))) warnings.push(`primary keyword "${primary}" is in no H2`);
   }
-  // Price and "free" checks only fire on lines about Fluxberry: other vendors' prices and free plans are facts.
+  // Price and "free" checks only fire on lines about Zliptal: other vendors' prices and free plans are facts.
   lines.forEach((line, index) => {
-    if (!/Fluxberry|\b(Pro|Max) (plan|is|costs|starts)\b/.test(line)) return;
+    if (!/Zliptal|\b(Pro|Max) (plan|is|costs|starts)\b/.test(line)) return;
     for (const price of planPrices) {
       if (new RegExp(`\\$${price}\\b`).test(line)) {
-        warnings.push(`line ${index + 1 + offset}: "$${price}" looks like a Fluxberry price; write it as a {{price:…}} token`);
+        warnings.push(`line ${index + 1 + offset}: "$${price}" looks like a Zliptal price; write it as a {{price:…}} token`);
       }
     }
-    if (/\bfree\b/i.test(line)) warnings.push(`line ${index + 1 + offset}: says "free" next to Fluxberry, which has no free plan; check the context`);
+    if (/\bfree\b/i.test(line)) warnings.push(`line ${index + 1 + offset}: says "free" next to Zliptal, which has no free plan; check the context`);
   });
 
   return { errors, warnings };

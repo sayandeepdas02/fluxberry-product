@@ -1,10 +1,10 @@
 ---
 title: Refund Policy
-description: How cancellations, refunds and AI credits work for Fluxberry subscriptions and top-up packs.
+description: How cancellations, refunds and AI credits work for Zliptal subscriptions and top-up packs.
 updated: '2026-09-28'
 ---
 
-This Refund Policy explains how cancellations and refunds work for purchases from Fluxberry ("we", "us"). It is part of our [Terms of Service](/terms).
+This Refund Policy explains how cancellations and refunds work for purchases from Zliptal ("we", "us"). It is part of our [Terms of Service](/terms).
 
 Payments are processed by Dodo Payments, our merchant of record, so your receipt and any refund come from Dodo Payments.
 
@@ -28,11 +28,11 @@ We will refund you in full if:
 - you were charged twice for the same purchase;
 - you were charged after cancelling, for a period you did not use;
 - a billing error on our side charged you the wrong amount;
-- we end your access to Fluxberry without cause before the end of a period you paid for, in which case we refund the unused part of that period.
+- we end your access to Zliptal without cause before the end of a period you paid for, in which case we refund the unused part of that period.
 
 ## How to ask for a refund
 
-Email [sayandeep@fluxberry.in](mailto:sayandeep@fluxberry.in) within 30 days of the charge, with the email address on your account and the date and amount of the charge. We will reply within 5 business days. Approved refunds are returned to the original payment method through Dodo Payments and usually arrive within 5 to 10 business days, depending on your bank.
+Email [sayandeep@zliptal.in](mailto:sayandeep@zliptal.in) within 30 days of the charge, with the email address on your account and the date and amount of the charge. We will reply within 5 business days. Approved refunds are returned to the original payment method through Dodo Payments and usually arrive within 5 to 10 business days, depending on your bank.
 
 ## Your legal rights
 

@@ -17,7 +17,7 @@ export type PostMeta = {
   title: string;
   /**
    * The <title> tag when it should differ from the H1, e.g. to lead with the
-   * search term or fit Google's ~60 characters once " · Fluxberry" is added.
+   * search term or fit Google's ~60 characters once " · Zliptal" is added.
    */
   metaTitle?: string;
   description: string;

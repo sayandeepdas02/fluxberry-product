@@ -10,17 +10,17 @@ export const dynamic = 'force-static';
 export function GET() {
   const site = publicConfig.appUrl;
   const posts = getAllPosts();
-  const body = `# Fluxberry
+  const body = `# Zliptal
 
-> Fluxberry is an AI native hiring platform, and the simplest ATS for lean teams and founders hiring their early teams. It scores every applicant against your job, runs your pipeline and careers page, and helps you source candidates.
+> Zliptal is an AI native hiring platform, and the simplest ATS for lean teams and founders hiring their early teams. It scores every applicant against your job, runs your pipeline and careers page, and helps you source candidates.
 
 Plans: Pro at $${PLAN_PRICING.PRO.monthly}/month and Max at $${PLAN_PRICING.MAX.monthly}/month, with unlimited jobs, candidates and team members. Built by Sayandeep Das, an indie hacker. Contact: ${CONTACT_EMAIL}
 
 ## Product
 
-- [Home](${site}/): what Fluxberry does
+- [Home](${site}/): what Zliptal does
 - [Pricing](${site}/pricing): Pro and Max plans, billing and FAQ
-- [About](${site}/about): who builds Fluxberry and what it does, feature by feature
+- [About](${site}/about): who builds Zliptal and what it does, feature by feature
 
 ## Blog
 

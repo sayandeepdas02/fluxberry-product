@@ -29,7 +29,7 @@ export class MockCalendarProvider implements CalendarProvider {
       accessToken: `mock-access-${crypto.randomBytes(8).toString('hex')}`,
       refreshToken: `mock-refresh-${crypto.randomBytes(8).toString('hex')}`,
       expiresAt: new Date(Date.now() + 60 * 60 * 1000),
-      email: 'mock-calendar@fluxberry.dev',
+      email: 'mock-calendar@zliptal.dev',
     };
   }
 
@@ -38,7 +38,7 @@ export class MockCalendarProvider implements CalendarProvider {
       accessToken: `mock-access-${crypto.randomBytes(8).toString('hex')}`,
       refreshToken: _refreshToken,
       expiresAt: new Date(Date.now() + 60 * 60 * 1000),
-      email: 'mock-calendar@fluxberry.dev',
+      email: 'mock-calendar@zliptal.dev',
     };
   }
 

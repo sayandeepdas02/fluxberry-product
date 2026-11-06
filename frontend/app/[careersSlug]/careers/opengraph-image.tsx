@@ -14,7 +14,7 @@ export default async function OpengraphImage({ params }: { params: Params }) {
 
   const subtitle = data?.company.name
     ? `${data.company.name} is hiring — explore open roles.`
-    : 'Explore open roles powered by Fluxberry AI.';
+    : 'Explore open roles powered by Zliptal.';
 
   return ogImage(<OGLayout wordmark={publicConfig.appName} headline="AI Native Hiring Platform" subtitle={subtitle} />);
 }

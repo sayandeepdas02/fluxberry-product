@@ -10,7 +10,7 @@ import { FaqSection } from '@/components/marketing/landing/faq-section';
 import { BRAND, FAQ, PRODUCT } from '@/components/marketing/landing/content';
 
 const title = `${BRAND}: AI Native ATS for Founders and Lean Teams`;
-const description = `Fluxberry is an AI native ATS: it scores every applicant against your job, runs your pipeline and careers page, and sources candidates. From $${PLAN_PRICING.PRO.monthly}/month.`;
+const description = `Zliptal is an AI native ATS: it scores every applicant against your job, runs your pipeline and careers page, and sources candidates. From $${PLAN_PRICING.PRO.monthly}/month.`;
 
 export const metadata: Metadata = {
   title: { absolute: title },

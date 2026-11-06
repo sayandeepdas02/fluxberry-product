@@ -18,15 +18,15 @@ takeaways:
   - 'An applicant tracking system (ATS) collects every application in one place, moves candidates through your stages and keeps the team’s feedback and decisions together.'
   - 'For small businesses, price model matters as much as price: flat plans, company-size bands, per-recruiter and per-employee pricing all scale differently.'
   - 'Most ATSs now use AI on applications, but differently: some score and rank, some check criteria without scoring, and some only match. Ask to see the reasoning.'
-  - 'Our picks: Fluxberry for explained AI scoring at a flat price, Greenhouse for structured hiring, Ashby for analytics, Lever for CRM, Workable for job-board reach and Breezy HR on a budget.'
+  - 'Our picks: Zliptal for explained AI scoring at a flat price, Greenhouse for structured hiring, Ashby for analytics, Lever for CRM, Workable for job-board reach and Breezy HR on a budget.'
 ---
 
 Most small businesses start hiring in an inbox and a spreadsheet, and it works until the second or third open role. Then applications go unread, candidates wait a week for a reply, and nobody can say where anyone stands. That is the point where an applicant tracking system pays for itself.
 
-This guide covers the ten best applicant tracking systems for small businesses and startups in 2026, what each costs, how their AI actually works, and how to choose. We make Fluxberry, which is one of the ten; everything about the others comes from their own websites, checked in September 2026, and is linked so you can verify it.
+This guide covers the ten best applicant tracking systems for small businesses and startups in 2026, what each costs, how their AI actually works, and how to choose. We make Zliptal, which is one of the ten; everything about the others comes from their own websites, checked in September 2026, and is linked so you can verify it.
 
 **Quick picks:**
-- [Fluxberry](#1-fluxberry) for explained AI screening at a flat price
+- [Zliptal](#1-zliptal) for explained AI screening at a flat price
 - [Greenhouse](#2-greenhouse) for structured hiring
 - [Ashby](#3-ashby) for analytics-led startups
 - [Lever](#4-lever) for an ATS with a built-in CRM
@@ -41,7 +41,7 @@ This guide covers the ten best applicant tracking systems for small businesses a
 
 | Tool | Best for | Standout feature | Starting price | Pricing model |
 |---|---|---|---|---|
-| Fluxberry | Explained AI screening | 0–10 score with written reasoning for every applicant | {{price:pro:monthly}}/month | Flat, unlimited users |
+| Zliptal | Explained AI screening | 0–10 score with written reasoning for every applicant | {{price:pro:monthly}}/month | Flat, unlimited users |
 | Greenhouse | Structured hiring | Interview kits and scorecards | Quote only | Plan and volume |
 | Ashby | Analytics-led startups | Built-in analytics and CRM | $300/month | Company headcount |
 | Lever | ATS plus CRM | Candidate nurture over time | Quote only | Team size |
@@ -67,11 +67,11 @@ Prices and features come from each vendor's own pages, checked in September 2026
 
 ## Best ATS with explainable AI screening
 
-### 1. Fluxberry
+### 1. Zliptal
 
-Fluxberry is an AI-native applicant tracking system built for small teams. Each applicant is parsed and scored against the job as soon as they apply. The 0–10 score comes from fixed weights (skills 35%, experience 20%, relevance 20%, location 10%, compensation 10%, education 5%), with a written summary, strengths and concerns, so you can see exactly why someone ranks where they do.
+Zliptal is an AI-native applicant tracking system built for small teams. Each applicant is parsed and scored against the job as soon as they apply. The 0–10 score comes from fixed weights (skills 35%, experience 20%, relevance 20%, location 10%, compensation 10%, education 5%), with a written summary, strengths and concerns, so you can see exactly why someone ranks where they do.
 
-![Fluxberry hiring pipeline and a list of top candidates ranked by AI match score, with sample data](/blog/best-applicant-tracking-systems/fluxberry-ai-ranked-candidates.webp "Fluxberry's pipeline and AI-ranked candidates (sample data)")
+![Zliptal hiring pipeline and a list of top candidates ranked by AI match score, with sample data](/blog/best-applicant-tracking-systems/zliptal-ranked-candidates.webp "Zliptal's pipeline and AI-ranked candidates (sample data)")
 
 **Pros:**
 - Flat price with unlimited jobs, candidates and team members
@@ -215,7 +215,7 @@ An applicant tracking system (ATS) is software that manages hiring from job post
 
 "AI screening" now describes three quite different things:
 
-- **Scoring and ranking.** The tool gives each applicant a score against the job and sorts the list. Fluxberry, Lever, Workable, Pinpoint, Breezy HR, Manatal and Gem all do this, and the better ones show the reasoning behind every score.
+- **Scoring and ranking.** The tool gives each applicant a score against the job and sorts the list. Zliptal, Lever, Workable, Pinpoint, Breezy HR, Manatal and Gem all do this, and the better ones show the reasoning behind every score.
 - **Criteria checks.** The tool marks each of your criteria as met or not met, without an overall score. Ashby and Recruitee work this way on purpose, to keep the ranking decision with a person.
 - **Matching.** The tool prioritises applicants against weighted criteria or suggests candidates from your database, as Greenhouse's Talent Matching and Zoho's Zia Matches do.
 
@@ -233,11 +233,11 @@ Two laws matter most today. In New York City, [Local Law 144](https://www.nyc.go
 
 For a 10-person company, the published prices we found run from about $40 to $400 a month, but the pricing model decides how that changes as you grow.
 
-![Bar chart of monthly ATS prices for a 10-person company with 3 recruiters, from Fluxberry at {{price:pro:monthly}} to Workable at $360](/blog/best-applicant-tracking-systems/ats-monthly-cost-comparison.webp "Published monthly prices for a 10-person company with 3 recruiters, billed monthly, September 2026. Entry plans differ in features.")
+![Bar chart of monthly ATS prices for a 10-person company with 3 recruiters, from Zliptal at {{price:pro:monthly}} to Workable at $360](/blog/best-applicant-tracking-systems/ats-monthly-cost-comparison.webp "Published monthly prices for a 10-person company with 3 recruiters, billed monthly, September 2026. Entry plans differ in features.")
 
 | Pricing model | How it scales | Examples |
 |---|---|---|
-| Flat per plan | Same price whoever joins the team | Fluxberry ({{price:pro:monthly}}/month), JazzHR (from $1,000/year), Breezy HR (from $157/month) |
+| Flat per plan | Same price whoever joins the team | Zliptal ({{price:pro:monthly}}/month), JazzHR (from $1,000/year), Breezy HR (from $157/month) |
 | Company headcount | Rises as your company grows, not your hiring team | Ashby ($300–$900/month up to 100 employees), Workable (from $299/month), Gem (startup bands) |
 | Per recruiter or user | Rises with every recruiter licence | Zoho Recruit ($25/recruiter), Manatal ($15/user), both billed annually |
 | Per employee, inside an HR suite | Rises with total headcount | BambooHR ($10–$25 per employee above 25 employees) |
@@ -270,19 +270,19 @@ Also budget for add-ons (texting, video interviews, assessments, SSO, AI credits
 
 Our guide to [improving your hiring process](/blog/how-to-improve-recruitment-process) covers what to change once the tool is running, and our map of [recruiting software by type](/blog/recruiting-software) covers the tools you might add around your ATS.
 
-## Try Fluxberry as your first ATS
+## Try Zliptal as your first ATS
 
-If you're a small team hiring without a recruiter, Fluxberry scores every applicant with the reasoning written out and gives the whole team one flat price. [Create your Fluxberry workspace](/sign-up) and have your first job live today.
+If you're a small team hiring without a recruiter, Zliptal scores every applicant with the reasoning written out and gives the whole team one flat price. [Create your Zliptal workspace](/sign-up) and have your first job live today.
 
 ## Frequently asked questions
 
 ### What is the best ATS for a small business?
 
-It depends on how you hire. For a small team that wants applications scored and explained at a flat price, Fluxberry. For structured interviews, Greenhouse. For analytics, Ashby. For job-board reach with a trial, Workable. For the lowest flat price among established tools, Breezy HR.
+It depends on how you hire. For a small team that wants applications scored and explained at a flat price, Zliptal. For structured interviews, Greenhouse. For analytics, Ashby. For job-board reach with a trial, Workable. For the lowest flat price among established tools, Breezy HR.
 
 ### How much does an applicant tracking system cost?
 
-For a small business, published prices run from about $40 to $400 a month at 10 employees. Flat-priced tools like Fluxberry start at {{price:pro:monthly}}/month; Breezy HR from $157/month and Workable from $299/month billed annually; Ashby from $300/month; Greenhouse and Lever are quote-only.
+For a small business, published prices run from about $40 to $400 a month at 10 employees. Flat-priced tools like Zliptal start at {{price:pro:monthly}}/month; Breezy HR from $157/month and Workable from $299/month billed annually; Ashby from $300/month; Greenhouse and Lever are quote-only.
 
 ### Do small companies need an ATS?
 
@@ -298,4 +298,4 @@ It can be, if it's used as decision support. Look for tools that show the reason
 
 ### What is the easiest ATS to set up?
 
-Tools with self-serve sign-up and published pricing are quickest: Fluxberry, Breezy HR, Workable, Zoho Recruit and Manatal can all be running the same day. Demo-led products such as Greenhouse, Lever and Pinpoint typically need an implementation period.
+Tools with self-serve sign-up and published pricing are quickest: Zliptal, Breezy HR, Workable, Zoho Recruit and Manatal can all be running the same day. Demo-led products such as Greenhouse, Lever and Pinpoint typically need an implementation period.

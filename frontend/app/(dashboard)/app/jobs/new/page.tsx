@@ -33,7 +33,7 @@ import { cn } from '@/lib/utils';
 type Step = 'details' | 'form';
 
 const numOrUndef = (v: string) => (v.trim() === '' ? undefined : Number(v));
-const DRAFT_ID_KEY = 'fluxberry:new-job-draft-id';
+const DRAFT_ID_KEY = 'zliptal:new-job-draft-id';
 
 type SaveState = 'idle' | 'saving' | 'saved' | 'error';
 
