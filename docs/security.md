@@ -2,7 +2,7 @@
 
 ## AuthN / AuthZ
 - Bearer token verified on every authenticated request via `AuthTokenVerifier` (Supabase HS256, or a dev test token). Users are mirrored into Mongo.
-- Middleware chain: `authenticate → resolveWorkspace → requireWorkspace → requireRole`. Resource ownership is checked in services. The frontend never decides authorization.
+- Middleware chain: `authenticate → resolveWorkspace → requireWorkspace → requireRole`. Resource ownership is checked in services. The web client never decides authorization.
 - Workspace isolation: every org-owned query is scoped by `workspaceId`; non-members get 403.
 
 ## Public surface

@@ -32,11 +32,11 @@ npm run typecheck   # all workspaces
 npm run test:e2e    # Playwright — run against a production build
 ```
 
-Run E2E against a production frontend build (dev-mode on-demand compilation races hydration):
+Run E2E against a production web build (dev-mode on-demand compilation races hydration):
 
 ```bash
-npm run build --workspace @zliptal/frontend
-(cd frontend && npm run start &)   # prod web on :3000
+npm run build --workspace @zliptal/web
+(cd web && npm run start &)   # prod web on :3000
 npm run dev:api & npm run dev:worker &   # API + worker
 npm run test:e2e
 ```

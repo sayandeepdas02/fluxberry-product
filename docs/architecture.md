@@ -1,6 +1,6 @@
 # Architecture
 
-Zliptal is a **modular monolith**: one Next.js frontend, one Express backend, one worker (sharing the backend codebase), one MongoDB, one object store.
+Zliptal is a **modular monolith**: one Next.js web app, one Express backend, one worker (sharing the backend codebase), one MongoDB, one object store.
 
 ## Request path
 
@@ -37,7 +37,7 @@ Each getter returns the real adapter when keys are present, otherwise a realisti
 
 ## Multi-tenancy
 
-`workspaceId` scopes every org-owned record. The auth middleware verifies: authenticated user → workspace membership → role → resource ownership. The frontend never decides authorization.
+`workspaceId` scopes every org-owned record. The auth middleware verifies: authenticated user → workspace membership → role → resource ownership. The web client never decides authorization.
 
 ## Layout
 

@@ -10,18 +10,18 @@
   "description": "Zliptal — a simple, AI-native applicant tracking system",
   "workspaces": [
     "backend",
-    "frontend"
+    "web"
   ],
   "scripts": {
     "dev": "concurrently -n api,worker,web -c blue,magenta,green \"npm:dev:api\" \"npm:dev:worker\" \"npm:dev:web\"",
     "dev:api": "npm run dev --workspace @zliptal/backend",
     "dev:worker": "npm run dev:worker --workspace @zliptal/backend",
-    "dev:web": "npm run dev --workspace @zliptal/frontend",
-    "build": "npm run build --workspace @zliptal/backend && npm run build --workspace @zliptal/frontend",
+    "dev:web": "npm run dev --workspace @zliptal/web",
+    "build": "npm run build --workspace @zliptal/backend && npm run build --workspace @zliptal/web",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
     "test": "npm run test --workspace @zliptal/backend",
-    "test:e2e": "npm run test:e2e --workspace @zliptal/frontend",
+    "test:e2e": "npm run test:e2e --workspace @zliptal/web",
     "db:seed": "npm run seed --workspace @zliptal/backend",
     "db:migrate": "npm run migrate --workspace @zliptal/backend"
   },
