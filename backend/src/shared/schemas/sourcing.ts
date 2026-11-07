@@ -15,7 +15,7 @@ import {
  * provider turns that into a search; matched people are cached as
  * `SourcedContact`s, scored transparently against the criteria, grouped into
  * lists, and emailed via campaigns. Every shape below is shared by the API and
- * the web app (mirror kept in `frontend/lib/shared`).
+ * the web app (mirror kept in `web/lib/shared`).
  */
 
 // ---------------------------------------------------------------------------

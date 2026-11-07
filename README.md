@@ -28,12 +28,12 @@ Both external features run on realistic mocks with zero keys; set provider keys 
 ## Architecture
 
 ```
-frontend/  Next.js (App Router) + TS + Tailwind + shadcn-style UI + TanStack Query
+web/       Next.js (App Router) + TS + Tailwind + shadcn-style UI + TanStack Query
 backend/   Node + Express + TS  (API + worker share one codebase)
 shared/    Zod schemas, enums, DTO types (imported by both)
 ```
 
-`frontend/` and `backend/` are the two deployable applications. `shared/` is an internal
+`web/` and `backend/` are the two deployable applications. `shared/` is an internal
 TypeScript library — built at install time (`npm run build --workspace @zliptal/shared`) and
 consumed by both — not a third service; it never runs on its own.
 
@@ -85,7 +85,7 @@ All variables are documented in [`.env.example`](.env.example). A single root `.
 
 ```bash
 npm run dev            # everything, hot-reloading
-npm run build          # build shared → backend → frontend
+npm run build          # build backend → web
 npm run typecheck      # typecheck all workspaces
 npm run test           # backend unit + integration (Vitest)
 npm run db:seed        # seed dev data
@@ -96,7 +96,7 @@ npm run db:migrate     # sync all MongoDB indexes
 
 - **Unit** (`backend/test/unit`): scoring engine, workflow condition engine
 - **Integration** (`backend/test/integration`): full auth → workspace → job → public application → candidate flow, plus RBAC, against a real local MongoDB (`zliptal_test`) with mock providers
-- **E2E** (`frontend/e2e`): Playwright — signup → onboarding → create job (needs the dev servers running)
+- **E2E** (`web/e2e`): Playwright — signup → onboarding → create job (needs the dev servers running)
 
 ```bash
 npm run test                 # unit + integration
@@ -108,7 +108,7 @@ npm run test:e2e             # Playwright (start `npm run dev` first)
 - **Frontend + Backend API →** Vercel — one project, defined in [`vercel.json`](vercel.json)
   using [Vercel Services](https://vercel.com/docs/services): the Next.js app and the Express API
   deploy together on one domain, with `/api/backend/*` routed to the API and everything else to
-  the frontend.
+  the web app.
 - **Worker →** Railway (or Render) — the async job worker (resume parsing, AI screening, email,
   workflow engine) is a long-running process that polls MongoDB, which Vercel Functions
   can't run. It deploys separately from the *same* `backend/` codebase using
@@ -126,7 +126,7 @@ No Kubernetes, no microservices split beyond the one unavoidable exception (the 
 
 1. **MongoDB Atlas** — create a free (M0) cluster, copy the connection string into `MONGODB_URI`.
 2. **Supabase** — create a project, copy `SUPABASE_URL` / `SUPABASE_JWT_SECRET` (and the anon key
-   for the frontend).
+   for the web app).
 3. **Cloudflare R2** (or S3) — create a bucket, set up a public domain/CDN for it, copy the
    endpoint + keys into `STORAGE_*`.
 4. **Resend** — verify your sending domain, copy `RESEND_API_KEY`.

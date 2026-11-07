@@ -2,7 +2,7 @@
 Sources for the blog's diagrams (public/blog/<slug>/*.webp): each writes an
 HTML page in the brand's type and colours, which render.js screenshots.
 
-    cd frontend/scripts/blog-images
+    cd web/scripts/blog-images
     python3 build.py && python3 chart.py
     NODE_PATH=../../../node_modules node render.js *.html
     # then convert each PNG to WebP, 1600px wide, into public/blog/<slug>/
